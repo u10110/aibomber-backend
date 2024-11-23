@@ -1,0 +1,328 @@
+
+{% extends 'layouts/base-fullscreen.html' %}
+
+{% block title %} Auth Sign UP Illustration {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+  <style>
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 1; /* Sit on top */
+      /* padding-top: 100px;  */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgb(0,0,0); /* Fallback color */
+      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+    
+    /* Modal Content */
+    .modal-content {
+      background-color: #fefefe;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 50%;
+    }
+
+    .modal-content input {
+      max-width: 40%
+    }
+    
+    /* The Close Button */
+    .close {
+      color: #aaaaaa;
+      display: flex;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    
+    .close:hover,
+    .close:focus {
+      color: #000;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+{% endblock stylesheets %}
+
+<link rel="stylesheet" href="/static/assets/css/intlTelInput.scss">
+
+
+{% block content %}
+
+  {% comment %} <div class="container position-sticky z-index-sticky top-0">
+    <div class="row">
+      <div class="col-12">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg blur blur-rounded top-0 z-index-3 shadow position-absolute my-3 py-2 start-0 end-0 mx-4">
+          {% include "includes/navigation-auth.html" %}
+        </nav>
+        <!-- End Navbar -->
+      </div>
+    </div>
+  </div> {% endcomment %}
+
+  <main class="main-content  mt-0">
+    <section>
+      <div class="page-header min-vh-100">
+        <div class="container">
+          <div class="row">
+            <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
+              <div class="card card-plain">
+                <div class="card-header pb-0 text-left">
+                  <h4 class="font-weight-bolder">Регистрация</h4>
+                  {% comment %} <p class="mb-0">Введите свой логин, почту и пароль для регистрации</p> {% endcomment %}
+                  {% if msg %}
+                  {{ msg | safe }}
+                {% else %}
+                Добавьте свои учетные данные
+                {% endif %}
+                </div>
+                <div class="card-body pb-3">
+                  {% if not success %} 
+                  <form role="form" method="post" id="signup_form" action="">
+                    {% csrf_token %}
+                    <!-- <label>Логин</label>
+                    <div class="mb-3">
+                      {{ form.username }}
+                    </div>
+                    <span class="text-danger">{{ form.username.errors }}</span> -->
+                    <!-- <label>Почта</label>
+                    <div class="mb-3">
+                      {{ form.email }}
+                    </div>
+                    <span class="text-danger">{{ form.email.errors }}</span> -->
+                    <label>Номер телефона</label>
+                    <div class="mb-3">
+                      {{ form.phone }}
+                    </div>
+                    <span class="text-danger">{{ form.phone.errors }}</span>
+                    <label>Пароль</label>
+                    <div class="mb-3">
+                      {{ form.password1 }}
+                    </div>
+                    <span class="text-danger">{{ form.password1.errors }}</span>
+                    <label>Повторите пароль</label>
+                    <div class="mb-3">
+                      {{ form.password2 }}
+                    </div>
+                    <span class="text-danger">{{ form.password2.errors }}</span>
+                    <div class="form-check form-check-info text-left">
+                      <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked>
+                      <label class="form-check-label" for="flexCheckDefault">
+                        Я согласен с <a href="{% url 'privacy' %}" class="text-dark font-weight-bolder">правилами и конфидициальностью</a>
+                      </label>
+                    </div>
+                    <div class="text-center">
+                      <button type="submit" class="btn bg-gradient-primary w-100 mt-4 mb-0">Зарегистрироваться</button>
+                    </div>
+                  </form>
+                  {% endif %}
+                </div>
+                <div class="card-footer text-center pt-0 px-sm-4 px-1">
+                  <p class="mb-4 mx-auto">
+                    Уже есть аккаунт?
+                    <a href="{% url 'login' %}" class="text-primary text-gradient font-weight-bold">Войти</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 d-lg-flex d-none h-100 my-auto pe-0 position-absolute top-0 end-0 text-center justify-content-center flex-column">
+              <div class="position-relative bg-gradient-primary h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center">
+                <img src="/static/assets/img/shapes/pattern-lines.svg" alt="pattern-lines" class="position-absolute opacity-4 start-0">
+                <div class="position-relative">
+                  <img class="max-width-500 w-100 position-relative z-index-2" src="/static/assets/img/illustrations/rocket-white.png" alt="rocket">
+                </div>
+                <h4 class="mt-5 text-white font-weight-bolder">Поднимите свой товар в топ Wb с помощью самых эффективных инструментов работы с репутацией!</h4>
+                <p class="text-white">Автовыкуп по ключевому запросу, оставление отзывов с фото, лайк на бренд и на SKU.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div id="myModal" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content d-block">
+      <span class="close justify-content-end">&times;</span>
+      <h3>Введите код, отправленный в смс</h3>
+      <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+        </symbol>
+      </svg>
+      <div class='col-12 mt-4'>
+        <input id='code' autocapitalize="off" class="form-control d-block" placeholder="" type="text" >
+      </div>
+      
+      <div id="send-again-timer"><p>Для повторного получения СМС кода подождите 60 секунд</p></div>
+      <button class='btn btn-info col-auto mt-4' style='display:none;' id="sms_repeat">Выслать код повторно</button>
+      <div class="justify-content-end d-flex">
+        <button class='btn btn-success col-auto justify-content-end d-flex' id="activate">Подтвердить</button>
+      </div>
+      
+    </div>
+  
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+<script src="/static/assets/js/jquery.js"></script>
+<script src="/static/assets/js/plugins/phone_valid.js"></script>
+
+<script>
+  var phone;
+  var modal = document.getElementById("myModal");
+
+  
+  // Get the <span> element that closes the modal
+  var span = document.getElementsByClassName("close")[0];
+  
+  // When the user clicks the button, open the modal 
+  
+  // When the user clicks on <span> (x), close the modal
+  span.onclick = function() {
+    modal.style.display = "none";
+  }
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+  const timerVal = document.querySelector('#send-again-timer');
+
+
+// Позже можно остановить наблюдение
+function initTimer() {
+  let seconds = parseInt(timerVal.textContent.match(/(\d+)/)[0]);
+  const timer = setInterval(() => {
+    if(seconds < 1) {
+      console.log(timerVal.textContent)
+      timerVal.style.display = 'none';
+      $('#sms_repeat').css("display", "block");
+      clearInterval(timer);
+      
+    }
+    timerVal.textContent = `Для повторного получения СМС кода подождите ${seconds} секунд`;
+    seconds -= 1;
+  }, 1000);
+}
+
+
+$('#sms_repeat').click(function(){
+  $.get( `{% url 'send-sms-again' %}`, { 'phone': phone.slice(1) } );
+  timerVal.style.display = 'block';
+  document.querySelector('#send-again-timer').textContent = 'Для повторного получения СМС кода подождите 60 секунд';
+  $('#sms_repeat').css("display", "none");
+  initTimer();
+
+
+})
+
+$('#activate').click(function(){
+  var sms_code = document.querySelector('#code').value;
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  var referrer = urlParams.get('referrer');
+  $.ajax({
+    type: "POST",
+    // contentType: "application/json; charset=UTF-8",
+    data: {
+      'phone': phone,
+      'referrer': referrer
+    },
+    url: '/activate/'+sms_code+'/',
+    // dataType: 'json', // in ,my case the absence of this was the cause of failure
+  })
+  // in case of successfully understood ajax response
+    .done(function (myAjaxJsonResponse) {
+      // console.log(myAjaxJsonResponse);
+      modal.style.display = "none";
+      Swal.fire({
+        icon: "success",
+        title: 'Готово!',
+        text: "Регистрация завершена",
+        showConfirmButton: false,
+      }).then(function() {
+        setTimeout(() => {
+          window.location = "{% url 'login' %}"; // here to need change location on 'home', if registration working is normal
+        }, 1500)
+        });
+      })
+    .fail(function (erordata) {
+      // console.log(erordata);
+      modal.style.display = "none";
+      Swal.fire('Ошибка', 'Неверный код - до следующей попытки 2 мин', 'error');
+    })
+})
+
+
+
+  var win = navigator.platform.indexOf('Win') > -1;
+  if (win && document.querySelector('#sidenav-scrollbar')) {
+    var options = {
+      damping: '0.5'
+    }
+    Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+  }
+
+
+
+
+  $("#signup_form").submit(function (e) {
+        // preventing from page reload and default actions
+        e.preventDefault();
+        // serialize the data for sending the form data.
+        var serializedData = $(this).serialize();
+        // make POST ajax call
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'register' %}",
+            data: serializedData,
+            success: function (response) {
+                // on successfull creating object
+                // 1. clear the form.
+                $("#signup_form").trigger('reset');
+                // 2. focus to nickname input 
+                // $("#id_nick_name").focus();
+                var instance = JSON.parse(response["instance"]);
+                var fields = instance[0]["fields"];
+                serializedData['code'] = fields['code'];
+                modal.style.display = "flex";
+                phone = fields['phone'];
+                initTimer();
+
+                          
+          },
+          error: function (response) {
+            var errors = JSON.parse(response.responseText)['error'];
+            var error_message;
+            if (errors == 'phone'){
+              error_message = 'Неверный формат телефона';
+            }
+            else if (errors == 'password2'){
+              error_message = 'Пароли не совпадают';
+            }
+            else if (errors == 'exist'){
+              error_message = 'Пользователь с данным номером телефона уже зарегистрирован';
+            }
+            else{
+              error_message = 'СМС можно отправлять раз в 2 минуты';
+            }
+            Swal.fire('Ошибка', error_message, 'error');
+            
+          },
+  })})
+</script>
+{% endblock javascripts %}

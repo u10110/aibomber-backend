@@ -1,0 +1,244 @@
+.customSwal {
+    position: fixed;
+    box-shadow: 0 0 25px -11px #0006;
+    top: 30px;
+    width: 25vw;
+    right: 0;
+    transform: translateX(100%);
+    transition: transform 1s ease;
+    background: #ffa7a7;
+    z-index: 9998;
+    padding: 15px;
+    border-bottom-left-radius: 15px;
+    border-top-left-radius: 15px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+.customSwal.active {
+    right: -10px;
+    transform: translateX(0%);
+}
+.customSwal__icon svg{
+    height: 40px;
+}
+.customSwal__icon path {
+    fill: #e36767;
+}
+.customSwal__text {
+    margin-left: 15px;
+    font-size: 1.2em;
+    padding-right: 5vw;
+    color: #fff;
+}
+html {
+    overflow-x: hidden;
+}
+@media (max-width: 1100px) {
+    .customSwal {
+        width: 40vw;
+    }
+}
+@media (max-width: 700px) {
+    .customSwal {
+        width: 65vw;
+    }
+}
+
+
+.ag-svg-add {
+    width: 30px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+.ag-svg-add rect {
+    fill: none;
+    stroke: none;
+}
+.addToName circle {
+    fill: #fff;
+    stroke: #7c27c8;
+} 
+.addToName line {
+    fill: none;
+    stroke: #7c27c8;
+} 
+.addToName:hover circle {
+    fill: #7c27c8;
+    stroke: #7c27c8;
+}
+.added .addToName circle{
+    fill: #7c27c8 !important;
+    stroke: #7c27c8 !important;
+}
+.addToDesc circle {
+    fill: none;
+    stroke: #fd0181;
+} 
+.addToDesc line {
+    fill: none;
+    stroke: #fd0181;
+} 
+.addToDesc:hover circle {
+    fill: #fd0181 !important;
+    stroke: #fd0181 !important;
+}
+.added .addToDesc circle{
+    fill: #fd0181;
+    stroke: #fd0181;
+}
+.ag-svg-add:hover line {
+    fill: #fff;
+    stroke: #fff;
+}
+.added .ag-svg-add line {
+    fill: #fff !important;
+    stroke: #fff !important;
+}
+.ag-svg-add * {
+    transition: all 0.4s ease;
+}
+.deletePhrase {
+    transform: rotate(45deg);
+}
+.deletePhrase circle {
+    fill: none;
+    stroke: #e14545;
+} 
+.deletePhrase line {
+    fill: none;
+    stroke: #e14545;
+} 
+.deletePhrase:hover circle {
+    fill: #e14545;
+    stroke: #e14545;
+}
+
+
+    /* СТИЛИ ПОДСКАЗОК*/
+.bs-tooltip-top .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="top"] .tooltip-arrow::before {
+    border-top-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+}
+.bs-tooltip-end .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="right"] .tooltip-arrow::before {
+    border-right-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+}
+.bs-tooltip-bottom .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="bottom"] .tooltip-arrow::before {
+    border-bottom-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+}
+.bs-tooltip-start .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="left"] .tooltip-arrow::before {
+    border-left-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+}
+.tooltip-inner {
+    max-width: 25vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+    color: #666; /* цвет шрифта */
+    background: #fff; /* цвет фона (по умолчанию #000) */
+    border: 1px solid #d7d7d7;
+    box-shadow: 0 0px 15px -7px rgb(0 0 0); 
+    border-radius: 15px; /* радиус скругдения углов */
+    
+}
+.tooltip.show{
+    opacity: 1 !important;
+}
+@media (max-width: 600px) {
+    .tooltip-inner {
+        max-width: 45vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+    }
+}
+
+
+
+.table-flex {
+    display: flex;
+    gap: 5%;
+}
+.table-flex > div {
+    flex: 0 0 47.5%;
+}
+
+
+
+.result__content-flex {
+    display: flex;
+    gap: 5%;
+}
+.result__content-flex > div {
+    flex: 0 0 47.5%;
+}
+@media (max-width:  1050px) {
+    .result__content-flex {
+        display: block;
+    }
+    .table-flex {
+        display: block
+    }
+    .table-flex > div {
+        border-bottom: 1px solid #e2e2e2;
+    }
+    .table-flex > div:nth-child(1) {
+        margin-bottom: 20px
+    }
+}
+.edit-fields .d-flex {
+    gap: 10px;
+    align-items: center;
+}
+.text-input-flex {
+    flex: 1 1 85%;
+}
+.tooMuchSymbols {
+    color: rgb(255, 171, 171);
+}
+
+
+.textareaDesc::before, .textareaName::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+.textareaName::before {
+    background: #7c27c8;
+}
+.textareaDesc::before {
+    background: #fd0181;
+}
+.textareaName, .textareaDesc {
+    position: relative;
+    padding-left: 35px;
+}
+.copyText {
+    margin-top: 20px;
+    width: 100%;
+}
+.copyText button {
+    width: 85%;
+}
+
+
+@keyframes loading {
+    form {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+.loader-svg {
+    animation: loading 1.5s linear 0ms infinite normal backwards;
+    width: 20px;
+    margin-left: 3px;
+    fill: #fff;
+
+}
+
+
+.counterPhraseName {
+    color: #ab4dff;
+}
+.counterPhraseDesc {
+    color: #ff5eb0;
+}

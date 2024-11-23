@@ -1,0 +1,117 @@
+@media (min-width: 1200px){
+    .g-sidenav-hidden .navbar-vertical.fixed-start + .main-content {
+        margin-left: 0 !important;
+    }
+    .g-sidenav-hidden:not(.rtl) .sidenav {
+        transform: translateX(-17.125rem) !important;
+    }
+}
+
+#iconSidenav{
+    margin-right: 10%;
+}
+
+@media (max-width: 1199.98px) and (min-width: 768px){
+    .g-sidenav-pinned .sidenav.fixed-start + .main-content {
+        margin-left: 17.125rem !important;
+    }
+
+}
+@media (max-width: 767px) {
+    .g-sidenav-pinned .navbar-vertical.navbar-expand-xs{
+        max-width: none !important;
+    }
+    /* .g-sidenav-pinned *{
+
+        box-sizing: border-box !important;
+} */
+    /* #logo{
+        margin-top: -35px !important;
+    } */
+    #sidenav-main{
+        background-color: #fff !important;
+    }
+
+}
+.limitsbox{
+	background: #67748e;
+    /* --bs-bg-opacity: .5; */
+    color: white;
+    padding: 8%;
+    opacity: 0.8;
+    text-align: center;
+    /* margin-bottom: 2%; */
+}
+.limitsbox > *{
+    color: #E0E0E0;
+}
+p.limit-str{
+    width: 85%;
+    /* margin-bottom: 2%; */
+    margin-right: 0;
+    font-size: 0.95rem;
+    float: left;
+    
+}
+.limitsbox > h3{
+    font-size: 1rem;
+}
+p.limit-str > label{
+    color: #E0E0E0;
+    font-size: 0.95rem;
+    margin-left: 5%;
+    float: right;
+}
+p.limit-date > label{
+    color: #E0E0E0;
+    font-size: 0.85rem;
+    margin-left: 5%;
+}
+p.limit-date{
+    margin-bottom: 0;
+    font-size: 0.95rem;
+    float: none;
+    display: inline;
+    width: 90%;
+}
+
+.bi:before{
+    content: '\F50C';
+}
+.dbs_icon{
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #344767;
+}
+
+.sidenav {
+    padding-bottom: 10px !important;
+}
+.exit-sidenav-mobile {
+    display: none;
+}
+@media (max-width: 767px) {
+    #sidenav-main {
+        margin-left: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+    #logo {
+        margin-left: 12px;
+    }
+    .g-sidenav-pinned .exit-sidenav-mobile {
+        display: block;
+        position: fixed;
+        right: 0;
+        top: 0;
+        padding: 5px 10px;
+        z-index: 10000;
+        cursor: pointer;
+        background: rgb(0 0 0 / 41%);
+        border-bottom-left-radius: 15px;
+    }
+    .g-sidenav-pinned {
+        overflow: hidden;
+    }
+}
+

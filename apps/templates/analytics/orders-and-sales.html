@@ -1,0 +1,413 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Главная страница аналитики {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<style>
+	.table {
+		height: 400px;
+	}
+	.ag-theme-material .ag-header-cell, 
+	.ag-theme-material .ag-header-group-cell {
+		padding-right: 15px;
+		padding-left: 15px;
+	}
+</style>
+
+	 <link rel="stylesheet"
+		 href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/>
+ <!-- Include the theme CSS, only need to import the theme you are going to use -->
+	 <link rel="stylesheet"
+		 href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"/>
+
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+	<link rel="stylesheet"
+		 href="https://unpkg.com/ag-grid-community/styles/ag-theme-material.css"/>
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+	<link rel="stylesheet" href="{% static 'analytics/css/orders-and-sales-style.css' %}">
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+	<div class="container-fluid py-4">
+		<div class="card mb-4">
+			<div class="card-body">
+				<div class="filters">
+					<div class="filters-item">
+						<div class="d-flex position-relative"><input type="text" class="form-control" id="date-range"><svg xmlns="http://www.w3.org/2000/svg" onclick="$('#date-range').click()" style="width: 20px;position: absolute;right: 7px;top: 9px;cursor: pointer;" viewBox="0 0 448 512"><path fill="#848ea3" d="M160 32V64H288V32C288 14.33 302.3 0 320 0C337.7 0 352 14.33 352 32V64H400C426.5 64 448 85.49 448 112V160H0V112C0 85.49 21.49 64 48 64H96V32C96 14.33 110.3 0 128 0C145.7 0 160 14.33 160 32zM0 192H448V464C448 490.5 426.5 512 400 512H48C21.49 512 0 490.5 0 464V192zM64 304C64 312.8 71.16 320 80 320H112C120.8 320 128 312.8 128 304V272C128 263.2 120.8 256 112 256H80C71.16 256 64 263.2 64 272V304zM192 304C192 312.8 199.2 320 208 320H240C248.8 320 256 312.8 256 304V272C256 263.2 248.8 256 240 256H208C199.2 256 192 263.2 192 272V304zM336 256C327.2 256 320 263.2 320 272V304C320 312.8 327.2 320 336 320H368C376.8 320 384 312.8 384 304V272C384 263.2 376.8 256 368 256H336zM64 432C64 440.8 71.16 448 80 448H112C120.8 448 128 440.8 128 432V400C128 391.2 120.8 384 112 384H80C71.16 384 64 391.2 64 400V432zM208 384C199.2 384 192 391.2 192 400V432C192 440.8 199.2 448 208 448H240C248.8 448 256 440.8 256 432V400C256 391.2 248.8 384 240 384H208zM320 432C320 440.8 327.2 448 336 448H368C376.8 448 384 440.8 384 432V400C384 391.2 376.8 384 368 384H336C327.2 384 320 391.2 320 400V432z"/></svg></div>
+					</div>
+					<div class="filter-item">
+						<div class="checkselect brands">
+							<label><input type="checkbox" name="brands[]" value="all"> Всё</label>
+							<label><input type="checkbox" name="brands[]" value="2"> Apple Inc.</label>
+							<label><input type="checkbox" name="brands[]" value="3"> Microsoft</label>
+							<label><input type="checkbox" name="brands[]" value="4"> Facebook</label>
+							<label><input type="checkbox" name="brands[]" value="5"> Amazon</label>
+							<label><input type="checkbox" name="brands[]" value="6"> Verizon</label>
+						</div>
+					</div>
+					<div class="filter-item">
+						<div class="checkselect api">
+							<label><input type="checkbox" name="api[]" value="all"> Всё</label>
+							<label><input type="checkbox" name="api[]" value="2">api1</label>
+							<label><input type="checkbox" name="api[]" value="3">api2</label>
+							<label><input type="checkbox" name="api[]" value="4">api3</label>
+							<label><input type="checkbox" name="api[]" value="5">api4</label>
+							<label><input type="checkbox" name="api[]" value="6">api5</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card mb-4">
+			<div class="card-body">
+				<div class="selection-requests__content">
+					<!-- <ul class="nav nav-tabs" id="myTab" role="tablist">
+						<li class="nav-item" role="presentation">
+							<button class="nav-link active" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab" aria-controls="orders" aria-selected="true">Заказы</button>
+						</li>
+						<li class="nav-item" role="presentation">
+							<button class="nav-link" id="sales-tab" data-bs-toggle="tab" data-bs-target="#sales" type="button" role="tab" aria-controls="sales" aria-selected="false">Продажи</button>
+						</li>
+					</ul> -->
+					<div class="wrapper">
+						<div class="switcher switcher-1">
+							<div class="switcher-el" onclick="changeSwitsherStatus(1)">
+								Заказы
+							</div>
+							<div class="switcher-el" onclick="changeSwitsherStatus(2)">
+								Продажи
+							</div>
+							<div class="switcher-el" onclick="changeSwitsherStatus(3)">
+								Возвраты
+							</div>
+						</div>
+					</div>
+					<div class="tab-content" id="myTabContent">
+						<div class="tab-pane fade show active" id="orders" role="tabpanel" aria-labelledby="orders-tab">
+							<div class="table-wrapper mt-4" >
+								<div class="table ag-theme-material" id="tableOrders" style="height: 400px;"></div>
+							</div>
+						</div>
+						<div class="tab-pane fade " id="sales" role="tabpanel" aria-labelledby="sales-tab">
+							<div class="table-wrapper mt-4" >
+								<div class="table ag-theme-material" id="tableSales" style="height: 400px;"></div>
+							</div>
+						</div>
+						<div class="tab-pane fade " id="refunds" role="tabpanel" aria-labelledby="sales-tab">
+							<div class="table-wrapper mt-4" >
+								<div class="table ag-theme-material" id="tableRefunds" style="height: 400px;"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+	<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+	<script src="/static/assets/js/plugins/chartjs.min.js"></script>
+	<script src="https://unpkg.com/ag-grid-enterprise/dist/ag-grid-enterprise.min.noStyle.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+	<script src="/static/assets/js/plugins/moment-with-locales.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+	<script src="{% static 'js/select-with-checkbox.js' %}"></script>
+
+	<!-- DatePicker | func getDates | func formatDate -->
+	<script src="{% static 'js/data-range-initialize.js' %}"></script>
+
+	<!-- Fun change tab -->
+	<script>
+		function changeSwitsherStatus(num) {
+			const orders = $('#orders');
+			const sales = $('#sales');
+			const refunds = $('#refunds');
+
+			$('.switcher').attr('class', 'switcher switcher-' + num);
+
+			orders.removeClass('show active');
+			sales.removeClass('show active');
+			refunds.removeClass('show active');
+
+			if (num === 1) {
+				orders.addClass('show active');
+			} else if (num === 2) {
+				sales.addClass('show active');
+			} else if (num === 3) {
+				refunds.addClass('show active');
+			}
+		}
+	</script>
+	<!-- Table Tooltips --> 
+	<script>
+		class CustomTooltip {
+			init(params) {
+				console.log(params);
+				const eGui = (this.eGui = document.createElement('div'));
+				const color = params.color || '#eee';
+				// const data = params.api.getDisplayedRowAtIndex(params.rowIndex).data;
+
+				eGui.classList.add('custom-tooltip');
+				//@ts-ignore
+				eGui.style['background-color'] = color;
+				eGui.style['border-radius'] = '15px'
+				eGui.innerHTML = `
+					<div class='width-custom-tooltip'> <img src="${params.value}" alt="" style='height: 150px'></div>
+				`;
+			}
+
+			getGui() {
+				return this.eGui;
+			}
+		}
+	</script>
+	<!-- Table -->
+	<script>
+		agGrid.LicenseManager.setLicenseKey("CompanyName=MPLAB,LicensedApplication=MPLAB,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=1,LicensedProductionInstancesCount=0,AssetReference=AG-034191,SupportServicesEnd=23_October_2023_[v2]_MTY5ODAxNTYwMDAwMA==3b4ce1e31fc57311e3399877777ff001");
+		function renderDataImg(params) {
+			return params.value ? `<img src="${params.value}" style='height: 100%'>` : '—'
+		}
+		function renderDataNumbers(params) {
+			return params.value == undefined ? '—' : params.value.toLocaleString('ru')
+		}
+		// function cellStyle(params) {
+		// 	let color = ''
+		// 	if (params.value == 1) {
+		// 		color = "rgba(233,249,238,.5)"
+		// 	} else if (params.value == 0) {
+		// 		color = "rgba(229,245,255,.5)"
+		// 	}
+		// 	return {
+		// 		backgroundColor: color,
+		// 	};
+		// }
+		var mainColumn = [{
+				field: 'product',
+				headerName: 'Товар',
+				width: 150,
+				cellRenderer: renderDataImg,
+				// tooltipComponent: CustomTooltip,
+				tooltipField: 'product'
+			},
+			{
+				field: 'date', 
+				width: 120, 
+				headerName: 'Дата', 
+			},
+			{
+				field: 'numberOrders', 
+				width: 120, 
+				headerName: 'Номер заказа', 
+			},
+			{
+				field: 'category',
+				width: 120,
+				headerName: 'Категория',
+			},
+			{
+				field: 'brand',
+				width: 120,
+				headerName: 'Бренд', 
+			},
+			{
+				field: 'skuWB',
+				width: 120,
+				headerName: 'Атрикул WB',
+			},
+			{
+				field: 'barcode', 
+				width: 120, 
+				headerName: 'Штрихкод', 
+			},
+			{
+				field: 'region',
+				width: 120,
+				headerName: 'Область',
+			},
+			{
+				field: 'shippingWarehouse',
+				width: 120,
+				headerName: 'склад отгрузки',
+			},
+			{
+				field: 'price',
+				width: 120,
+				headerName: 'Цена',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'priceWithDiscount',
+				width: 120,
+				headerName: 'Цена с учётом скидки',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'skadka', // ?
+				width: 120,
+				headerName: 'Скадка',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'SKUMy',
+				width: 120,
+				headerName: 'Артикул мой',
+				cellRenderer: renderDataNumbers,
+			},
+		]
+		var columnDefsOrders = [
+			...mainColumn,
+		];
+
+
+		const gridOptionsOrders = {
+			defaultColDef: {
+				resizable: true,
+				sortable: true,
+				tooltipComponent: CustomTooltip,
+			},
+			animateRows: true,
+			columnDefs: columnDefsOrders,
+			getDetailRowData: (params) => {
+				params.successCallback(params.data.callRecords);
+			},
+			// debug: true,
+			tooltipShowDelay: 210,
+			tooltipHideDelay: 2000,
+			rowData: [{product: "{% static 'images/покемон1.png' %}", barcode: 2030.40, brand: 'bla bla', size: 0, position: 4523, skuVn: 2154326, sku: 12532532, orders: 5, ordersSum: 765478, }],
+			// suppressDragLeaveHidesColumns: true,
+			// onFirstDataRendered: onFirstDataRendered,
+		};
+
+		var eGridDivOrders = document.getElementById("tableOrders");
+		var gridPhrasesOrders = new agGrid.Grid(eGridDivOrders, gridOptionsOrders);
+
+
+		// Table sales
+
+		var columnDefsSales = [
+			...mainColumn,
+		];
+
+		const gridOptionsSales = {
+			defaultColDef: {
+				resizable: true,
+				sortable: true,
+				tooltipComponent: CustomTooltip,
+			},
+			animateRows: true,
+			columnDefs: columnDefsSales,
+			getDetailRowData: (params) => {
+				params.successCallback(params.data.callRecords);
+			},
+			// debug: true,
+			tooltipShowDelay: 210,
+			tooltipHideDelay: 2000,
+			rowData: [{product: "{% static 'images/покемон1.png' %}", barcode: 2030.40, brand: 'bla bla', size: 0, position: 4523, skuVn: 2154326, sku: 12532532, orders: 5, ordersSum: 765478, }],
+			// suppressDragLeaveHidesColumns: true,
+			// onFirstDataRendered: onFirstDataRendered,
+		};
+
+		var eGridDivSales = document.getElementById("tableSales");
+		var gridPhrasesSales = new agGrid.Grid(eGridDivSales, gridOptionsSales);
+
+
+		// Table refunds
+
+		var columnDefsRefunds = [
+			...mainColumn,
+		];
+
+		const gridOptionsRefunds = {
+			defaultColDef: {
+				resizable: true,
+				sortable: true,
+				tooltipComponent: CustomTooltip,
+			},
+			animateRows: true,
+			columnDefs: columnDefsRefunds,
+			getDetailRowData: (params) => {
+				params.successCallback(params.data.callRecords);
+			},
+			// debug: true,
+			tooltipShowDelay: 210,
+			tooltipHideDelay: 2000,
+			rowData: [{product: "{% static 'images/покемон1.png' %}", barcode: 2030.40, brand: 'bla bla', size: 0, position: 4523, skuVn: 2154326, sku: 12532532, orders: 5, ordersSum: 765478, }],
+			// suppressDragLeaveHidesColumns: true,
+			// onFirstDataRendered: onFirstDataRendered,
+		};
+
+		var eGridDivRefunds = document.getElementById("tableRefunds");
+		var gridPhrasesRefunds = new agGrid.Grid(eGridDivRefunds, gridOptionsRefunds);
+	</script>
+	<!-- Select with checkbox || filters brands and api -->
+	<script>
+		var selBrands = $('.checkselect.brands').checkselect(['брендов', 'бренды'], {allChecked: true,});
+		var selApi = $('.checkselect.api').checkselect(['API', 'API'], {allChecked: true,});
+
+	</script>
+	<!-- Events for send -->
+	<script>
+		$('#date-range').on("apply.daterangepicker", (ev, picker) => {
+			sendData(collData())
+		})
+		selBrands.on('checkselect:close', event => {
+			console.log(event.detail, event.detail.temporaryData, event.detail.dataChecked);
+			if (JSON.stringify(event.detail.temporaryData) != JSON.stringify(event.detail.dataChecked)) {
+				sendData(collData())
+			}
+			
+		})
+		selApi.on('checkselect:close', event => {
+			if (JSON.stringify(event.detail.temporaryData) != JSON.stringify(event.detail.dataChecked)) {
+				sendData(collData())
+			}
+		})
+		$("#buyouts").on('change', event => {
+			sendData(collData())
+		})
+	</script>
+	<!-- filter data collection  -->
+	<script>
+		function collData() {
+			var dates = $("#date-range").val().split('-')
+			var date_start_raw = dates[0].trim().split('.').reverse().join('-')
+			var date_end_raw = dates[1].trim().split('.').reverse().join('-')
+
+			return {
+				"date-range": {"date-start": date_start_raw, "date-end": date_end_raw},
+				"brands": selBrands.dataChecked,
+				'api': selApi.dataChecked
+			}
+
+		}
+	</script>
+	<!-- Func change all data -->
+	<script>
+		function changeData(data) {
+			
+			// gridOptions.api.setRowData() // this change data on table
+		}
+	</script>
+	<!-- Send data -->
+	<script>
+		function sendData(data) {
+			console.log({data, 'csrfmiddlewaretoken': '{{ csrf_token }}'});
+			// $.ajax({
+			// 	type: "POST",
+			// 	data: {data, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+			// 	url: '',
+			// 	success: data => {
+			// 		console.log(dates)
+			// 	}
+			// })
+		}
+	</script>
+{% endblock javascripts %}

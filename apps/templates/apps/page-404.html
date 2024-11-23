@@ -1,0 +1,33 @@
+{% extends 'layouts/base-fullscreen.html' %}
+
+{% block title %} Error 404 {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block body_class %} error-page {% endblock %}
+
+{% block content %}
+
+
+  <main class="main-content  mt-0">
+    <section class="my-10">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-6 my-auto">
+            <h1 class="display-1 text-bolder text-gradient text-danger">Ошибка 404</h1>
+            <h2>Страница не найдена</h2>
+          </div>
+          <div class="col-lg-6 my-auto position-relative">
+            <img class="w-100 position-relative" src="/static/assets/img/illustrations/error-404.png" alt="404-error">
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} {% endblock javascripts %}

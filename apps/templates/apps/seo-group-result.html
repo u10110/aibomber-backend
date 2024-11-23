@@ -1,0 +1,405 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Ecommerce Products List {% endblock title %}
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+	<style>
+		.export-button{
+			margin: 10px 0;
+			display: flex;
+			justify-content: end;
+		}
+	</style>
+	<script src="https://unpkg.com/ag-grid-enterprise/dist/ag-grid-enterprise.min.noStyle.js"></script> 
+
+	<!-- Include the core CSS, this is needed by the grid --> 
+	<link rel="stylesheet" 
+	href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/> 
+	<!-- Include the theme CSS, only need to import the theme you are going to use -->
+
+  	<link rel="stylesheet" href="{% static 'css/seo-group-result-style.css' %}">
+	<!-- Include the theme CSS, only need to import the theme you are going to use -->
+	<link rel="stylesheet"
+		href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"/>
+{% endblock stylesheets %} 
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+
+	<div class="container-fluid py-4" style="overflow: hidden;">
+		
+		<div class="card">
+			<div class="card-body">
+				<div class="group-diagram">
+					<div class="group-diagram__header">
+						<div class="group-diagram__title">
+							Сравнение групп SKU
+						</div>
+						<div class="group-diagram__again-request">
+							<button class="btn btn-success" id="newRequest">Новый запрос</button>
+						</div>
+					</div>
+					<div class="group-diagram__content row">
+						<div class="group-diagram__diagram col-4">
+							<div id="diagram"></div>
+						</div>
+						<div class="group-diagram__table col-8">
+							<div id="group-diagram__table" style="height: 100%" class="ag-theme-alpine">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card mt-4">
+			<div class="card-body">
+				<div class="table-filters">
+					<div class="table-filter form-check">
+						<input type="radio" id="A" name="filter" class="form-check-input" value="A" checked>
+						<label for="A" class="form-check-label">Только A</label>
+					</div>
+					<div class="table-filter form-check">
+						<input type="radio" id="B" name="filter" class="form-check-input" value="B">
+						<label for="B" class="form-check-label">Только B</label>
+					</div>
+					<div class="table-filter form-check">
+						<input type="radio" id="A_B" name="filter" class="form-check-input" value="A_B">
+						<label for="A_B" class="form-check-label">Общие A и B</label>
+					</div>
+					<div class="table-filter form-check">
+						<input type="radio" id="A-B" name="filter" class="form-check-input" value="A-B">
+						<label for="A-B" class="form-check-label">Разница A минус B</label>
+					</div>
+					<div class="table-filter form-check">
+						<input type="radio" id="B-A" name="filter" class="form-check-input" value="B-A">
+						<label for="B-A" class="form-check-label">Разница B минус A</label>
+					</div>
+				</div>
+				<div class="export-button">
+					<div class="dropdown download" style="margin-right: 5px;">
+						<button class="btn btn-outline-primary btn-sm mb-0 mt-sm-0 mt-1" data-bs-toggle="dropdown" type="button" aria-haspopup="true" aria-expanded="false" id="download">Экспорт</button>
+						<div class="dropdown-menu mt-0" aria-labelledby="download" >
+							<button class="dropdown-item" href="#" onclick="onBtnExportCsv()" data-type="csv">Скачать CSV</button>
+							<button class="dropdown-item" href="#" onclick="onBtnExportExcel()" data-type="csv">Скачать XLSX</button>
+						</div>
+					</div>
+				</div>
+				<div class="main-table">
+					<div id="main-table" class="ag-theme-alpine" style="height: 350px;"></div>
+				</div>
+			</div>
+		</div>
+		<div class="modal modal-again-request">
+			<!-- ПЕРЕНЕСЕНО СО СТРАНИЦЫ seo-group-search -->
+			<div class="modal-content d-block">
+				<span class="close justify-content-end">&times;</span>
+				<div class="seo-group">
+					<form action="" method="POST">
+						{% csrf_token %}
+						<div class="seo-group__fields">
+							<div class="seo-group__groupA">
+								<label for="groupA" class="seo-group__groupA_title">Группа A</label>
+								<div class="seo-group__groupA_field seo-group__field">
+									<textarea name="groupA" id="groupA" class="form-control seo-group__field_textarea"></textarea>
+								</div>
+							</div>
+							<div class="seo-group__groupB">
+								<label for="groupB" class="seo-group__groupB_title">Группа B</label>
+								<div class="seo-group__groupB_field seo-group__field">
+									<textarea name="groupB" id="groupB" class="form-control seo-group__field_textarea"></textarea>
+								</div>
+							</div>
+						</div>
+						<div class="mt-1 mb-2">
+							Введите <span class="example" id="link-example" data-example_a="https://www.wildberries.ru/catalog/6541734/detail.aspx\nhttps://www.wildberries.ru/catalog/48423214/detail.aspx\nhttps://www.wildberries.ru/catalog/27888035/detail.aspx\nhttps://www.wildberries.ru/catalog/17414722/detail.aspx\nhttps://www.wildberries.ru/catalog/47406504/detail.aspx\nhttps://www.wildberries.ru/catalog/12243309/detail.aspx\nhttps://www.wildberries.ru/catalog/45411050/detail.aspx\nhttps://www.wildberries.ru/catalog/32840623/detail.aspx" data-example_b="https://www.wildberries.ru/catalog/50681401/detail.aspx\nhttps://www.wildberries.ru/catalog/15619842/detail.aspx\nhttps://www.wildberries.ru/catalog/14722393/detail.aspx\nhttps://www.wildberries.ru/catalog/42280248/detail.aspx\nhttps://www.wildberries.ru/catalog/17922594/detail.aspx\nhttps://www.wildberries.ru/catalog/10410915/detail.aspx\nhttps://www.wildberries.ru/catalog/21647114/detail.aspx\nhttps://www.wildberries.ru/catalog/4430217/detail.aspx">ссылки на товарные позиции WB</span> или их <span class="example" id="sku-example" data-example_a='6541734\n48423214\n27888035\n17414722\n47406504\n12243309\n45411050\n32840623' data-example_b='50681401\n15619842\n14722393\n42280248\n17922594\n10410915\n21647114\n4430217'>SKU</span>.
+						</div>
+						<div class="seo-group__tip" style="margin-top: -5px;">
+							* поддерживается разделение через запятую, пробел и новую строку.
+						</div>
+						<div class="seo-group__button">
+							<button class="btn btn-primary bg-gradient-primary" id="checkGroups">Проверить</button>
+						</div>
+					</form>>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/venn.js/0.2.16/venn.min.js" integrity="sha512-qBIwnHkwkXUiuMFpZWZ1kBBZxmh62xdcdIhZaCXOGt7F/Rf6ZdZfBTzVRwwFl7CepsjEU7rSFFaFS5F+dBbdMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+	<script src="{% static 'assets/js/ag-grid_locale.ru.js' %}"></script>
+	<!-- Таблица у диаграммы -->
+	<script>
+		agGrid.LicenseManager.setLicenseKey("CompanyName=MPLAB,LicensedApplication=MPLAB,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=1,LicensedProductionInstancesCount=0,AssetReference=AG-034191,SupportServicesEnd=23_October_2023_[v2]_MTY5ODAxNTYwMDAwMA==3b4ce1e31fc57311e3399877777ff001");
+		const columnDefs = [
+			{
+				headerName: 'Группа A',
+				children: [
+				{
+						field: "image1",
+						width: 120,
+						headerName: 'Фото',
+						cellRenderer: renderData,
+						// tooltipField: 'image1',
+						// tooltipComponentParams: { field: 1 },
+					},
+					{
+						field: "name1",
+						headerName: 'Название',
+						cellRenderer: renderDataTooltip
+					}
+				],
+			},
+			{
+				headerName: 'Группа B',
+				children: [
+					{
+						field: "image2",
+						width: 120,
+						headerName: 'Фото',
+						cellRenderer: renderData,
+						// tooltipField: 'image2',
+						// tooltipComponentParams: { field: 2 },
+					},
+					{
+						field: "name2",
+						headerName: 'Название',
+						cellRenderer: renderDataTooltip
+					}
+				],
+			},
+		];
+		function renderData(params) {
+			return  String(params.value) != 'undefined' ?  `<img src="${params.value}" alt="" height="100%" data-bs-toggle="tooltip" data-bs-html="true" title='<img src="${params.value}" class="img-tooltip" alt="">''>`  : '—';
+		}
+		function renderDataTooltip(params) {
+			return  String(params.value) != 'undefined' ? `<span title="${params.value}">${params.value}</span>` : '—';
+		}
+
+		const gridOptions = {
+			defaultColDef: {
+				resizable: true
+			},
+			// debug: true,
+			columnDefs: columnDefs,
+			localeText: AG_GRID_LOCALE_RU,
+			tooltipShowDelay: 400,
+			tooltipHideDelay: 400,
+			rowHeight: 70,
+			rowData: {{HUINYA|safe}},
+		};
+		{% comment %} rowData: [{"image1": "{% static 'images/покемон1.png' %}", "name1": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Magni dolore, quidem maiores ex nobis eius.", "image2": "{% static 'images/покемон1.png' %}", "name2": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Magni dolore, quidem maiores ex nobis eius."}, {"image1": "{% static 'images/покемон1.png' %}", "name1": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Magni dolore, quidem maiores ex nobis eius.", "image2": "{% static 'images/покемон1.png' %}", "name2": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Magni dolore, quidem maiores ex nobis eius."}, {"image1": "{% static 'images/покемон1.png' %}", "name1": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Magni dolore, quidem maiores ex nobis eius.", "image2": "{% static 'images/покемон1.png' %}", "name2": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Magni dolore, quidem maiores ex nobis eius."},], {% endcomment %}
+		const gridDiv = document.querySelector('#group-diagram__table');
+		new agGrid.Grid(gridDiv, gridOptions);
+		gridOptions.api.sizeColumnsToFit();
+		setTimeout(() => {
+			var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+			var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+				return new bootstrap.Tooltip(tooltipTriggerEl)
+			})
+		}, 400)
+	</script>
+	<!-- Основная таблица #main-table-->
+	<script>
+		var allData = {
+			"A": [{% for a in A %}{phrase: "{{a.phrase}}", frequency: {{a.frequency}}},{% endfor %}],
+			"B": [{% for b in B %}{phrase: "{{b.phrase}}", frequency: {{b.frequency}}},{% endfor %}],
+			"A_B": [{% for a_b in A_B %}{phrase: "{{a_b.phrase}}", frequency: {{a_b.frequency}}},{% endfor %}],
+			"A-B": [{% for a_b in AminusB %}{phrase: "{{a_b.phrase}}", frequency: {{a_b.frequency}}},{% endfor %}],
+			"B-A": [{% for a_b in BminusA %}{phrase: "{{a_b.phrase}}", frequency: {{a_b.frequency}}},{% endfor %}],
+		}
+		const columnDefs2 = [
+			{
+				field: "phrase",
+				headerName: "Ключевые фразы",
+				filter: 'agTextColumnFilter',
+				filterParams: {
+					textMatcher: ({filter, value, filterText}) => {
+						const filterTextLowerCase = filterText.toLowerCase();
+						const valueLowerCase = value.toString().toLowerCase();
+						switch (filter) {
+							case 'Содержит':
+								return valueLowerCase.indexOf(filterTextLowerCase) >= 0;
+							case 'Не содержит':
+								return valueLowerCase.indexOf(filterTextLowerCase) === -1;
+							case 'equals':
+								return valueLowerCase === filterTextLowerCase;
+							case 'notEqual':
+								return valueLowerCase != filterTextLowerCase;
+							case 'startsWith':
+								return valueLowerCase.indexOf(filterTextLowerCase) === 0;
+							case 'endsWith':
+								var index = valueLowerCase.lastIndexOf(filterTextLowerCase);
+								return index >= 0 && index === (valueLowerCase.length - filterTextLowerCase.length);
+							default:
+							// should never happen
+							console.warn(filter, filter == 'Содержит')
+							// console.warn('invalid filter type ' + filter);
+							return false;
+						}
+					}
+				},
+				width: 150
+			},
+			{
+				field: "frequency",
+				filter: 'agNumberColumnFilter',
+				headerName: "Частота",
+				width: 90,
+				cellRenderer: renderDataFrequency, 
+				comparator: customSortable
+			},
+		];
+		function renderDataFrequency(params) {
+			return String(params.value) != 'undefined' ? params.value : '-' 
+		}
+		function customSortable(valueA, valueB, nodeA, nodeB, isDescending) {
+			if ( String(valueA) == 'undefined' && String(valueB) != 'undefined') {
+				return -1
+			} else if (String(valueB) == 'undefined' && String(valueA) != 'undefined') {
+				return 1
+			} else if (String(valueA) == 'undefined' && String(valueB) == 'undefined') {
+				return 0
+			}
+			if (valueA == valueB) return 0;
+			return (valueA > valueB) ? 1 : -1;
+		}
+		const gridOptions2 = {
+		defaultColDef: {
+			resizable: true,
+			flex: 1,
+			minWidth: 150,
+			sortable: true,
+		},
+		// debug: true,
+		columnDefs: columnDefs2,
+		localeText: AG_GRID_LOCALE_RU,
+		rowData: {{A|safe}},
+		};
+		const gridDiv2 = document.querySelector('#main-table');
+		new agGrid.Grid(gridDiv2, gridOptions2);
+		function onBtnExportCsv() {
+			gridOptions2.api.exportDataAsCsv();
+		}
+		function onBtnExportExcel() {
+			gridOptions2.api.exportDataAsExcel();
+		}
+	</script>
+	<!-- Радио кнопки(фильтры) -->
+	<script>
+		$('input[name="filter"]').on("change", e => {
+			console.log($(e.target).val())
+			gridOptions2.api.setRowData(allData[$(e.target).val()])
+		})
+	</script>
+	<!--  Формирование массивов с SKU для запроса -->
+	<script>
+		if (!String.prototype.startsWith) { // Если нету метода startsWith, мы его создаём.
+			Object.defineProperty(String.prototype, 'startsWith', {
+				enumerable: false,
+				configurable: false,
+				writable: false,
+				value: function(searchString, position) {
+					position = position || 0;
+					return this.indexOf(searchString, position) === position;
+				}
+			});
+		}
+		$("#link-example, #sku-example").on('click', e => {
+			$('#groupA').val(e.target.dataset.example_a.replace(/\\n/g,"\n"));
+			$('#groupB').val(e.target.dataset.example_b.replace(/\\n/g,"\n"));
+		})
+		$('form').submit( e => {
+			var groupA = $("#groupA").val($("#groupA").val().split(/[\s\n,]+/).filter(el => el != '').map(el => {
+				if (el.startsWith('http') || el.startsWith('www.') || el.startsWith("wildberries")) {
+					return el.match(/catalog\/(\d+)\//)[1]
+				} else {
+					return el
+				} 
+			}).join('\n'))
+			var groupB = $("#groupB").val($("#groupB").val().split(/[\s\n,]+/).filter(el => el != '').map(el => {
+				if (el.startsWith('http') || el.startsWith('www.') || el.startsWith("wildberries")) {
+					return el.match(/catalog\/(\d+)\//)[1]
+				} else {
+					return el
+				} 
+			}).join('\n'))
+		})
+	</script>
+	 <!-- Событие показа попапа при клике на новый запрос. -->
+	<script>
+
+		$(".close").on('click', event => {
+			$(".modal").css("display", "none")
+		}) 
+		$("#newRequest").on("click", event => {
+			event.preventDefault()
+			$(".modal").css("display", "block")
+		})
+		$(window).on('mousedown', event => {
+			if (event.target == document.querySelector(".modal")) {
+				$(".modal").css("display", "none")
+		}
+		})
+	</script>
+	<!-- Диаграмма -->
+	<script>
+		// draw venn diagram
+		document.addEventListener('DOMContentLoaded', function () {
+			setTimeout(function () {
+			var sets = [ {sets: ['A'],label: 'A', size: {{circleA}}, style:'background-color: #333'}, 
+						{sets: ['B'], label: 'B', size: {{circleB}}},
+						{sets: ['A','B'], size: {{circleAB}}}];
+			var div = d3.select("#diagram")
+			div.datum(sets).call(venn.VennDiagram().width($(".group-diagram__diagram").width()).height(250).styled(false));
+			// add a tooltip
+			var tooltip = d3.select("body").append("div")
+				.attr("class", "venntooltip");
+
+			div.selectAll("path")
+				.style("stroke-opacity", 0)
+				.style("stroke", "#fff")
+				.style("stroke-width", 3)
+			// add listeners to all the groups to display tooltip on mouseover
+			div.selectAll("g")
+				.on("mouseover", function(d, i) {
+					// sort all the areas relative to the current item
+					venn.sortAreas(div, d);
+
+					// Display a tooltip with the current size
+					tooltip.transition().duration(400).style("opacity", .9);
+					tooltip.text(d.size + " ключевых слов");
+
+					// highlight the current path
+					var selection = d3.select(this).transition("tooltip").duration(400);
+					selection.select("path")
+					.style("fill-opacity", d.sets.length == 1 ? .4 : .1)
+					.style("stroke-opacity", 1);
+			})
+
+			.on("mousemove", function() {
+				tooltip.style("left", (d3.event.pageX) + "px")
+					.style("top", (d3.event.pageY - 38) + "px");
+				})
+
+			.on("mouseout", function(d, i) {
+				tooltip.transition().duration(400).style("opacity", 0);
+				var selection = d3.select(this).transition("tooltip").duration(400);
+				selection.select("path")
+				.style("fill-opacity", d.sets.length == 1 ? .25 : .0)
+				.style("stroke-opacity", 0);
+			});
+			gridOptions.api.sizeColumnsToFit();
+		}, 600)
+	})
+	</script>
+{% endblock javascripts %}

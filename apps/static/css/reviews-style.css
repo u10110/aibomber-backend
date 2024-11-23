@@ -1,0 +1,151 @@
+.nav-custom .nav-link {
+    color: #344767;
+}
+
+.custom-active {
+    background-color: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0px 1px 5px 1px #ddd;
+}
+.nounderline{
+    text-decoration: none !important;
+}
+.frame_blc{
+    overflow:hidden;
+    position:relative;
+    padding-bottom:56.25%;
+    padding-top:30px;
+    height:0;
+    margin-top: 10%;
+}
+.frame_blc iframe {
+    position:absolute;
+    height:80%;
+    width:100%;
+    left:0;
+    top:0;
+}
+.img-product{
+    width: 50px;
+    margin-right: 20px;
+    border-radius: 10px;
+}
+.p-text{
+    margin-top:10px;
+    overflow: hidden;
+    max-width: 250px;
+    text-overflow: ellipsis;
+}
+
+
+.download .dropdown-menu.show{
+    box-shadow: 0 0px 26px -4px rgb(20 20 20 / 22%), 0 0px 9px -5px rgb(20 20 20 / 16%);
+}
+.download .dropdown-item {
+    width: 90%;
+    margin-left: 5%;
+    display: inline-block;
+    border-radius: 10px;
+}
+.download .dropdown-item:hover {
+    padding-left: 25px;
+    padding-right: 10px;
+}
+
+
+
+.form-control__custom {
+    display: inherit;
+    width: inherit;
+}
+.products-sortable {
+    display: flex;
+}
+.products-table {
+    margin-top: 20px;
+}
+.products-table img {
+    width: 75px;
+}
+.products-sortable__brand {
+    margin-left: 15px;
+}
+.dataTables_paginate svg{
+    width: 20px;
+}
+.dataTables_paginate {
+    padding-top: 1.3em !important;
+}
+.dataTables_info {
+    padding-top: 2em !important;
+}
+.dataTables_paginate .paginate_button {
+    margin-left: 10px !important;
+    transition: all 0.4s ease !important;
+}
+.dataTables_paginate .paginate_button.current {
+    border-radius: 50% !important;
+    background: #d1f0ff !important;
+    box-shadow: 0 0 10px 0px #d1f0ff !important;
+    border: 1px solid #d1f0ff !important;
+}
+
+.dataTables_paginate .paginate_button:hover {
+    border-radius: 50% !important;
+    background: #a9e0fb !important;
+    box-shadow: 0 0 10px 1px #a9e0fb !important;
+    border: 1px solid #a9e0fb !important;
+    margin-left: 10px !important;
+    color: #fff !important;
+}
+.dataTables_paginate .paginate_button path {
+    transition: all 0.4s ease !important;
+}
+.dataTables_paginate .paginate_button:hover path{
+    fill: #fff;
+}
+.dataTables_length > label > .select2 {
+    width: 70px !important;
+    display: inline-block;
+}
+.dataTable thead th {
+    font-weight: bolder !important;
+    color: #8392AB;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    letter-spacing: -0.025rem;
+}
+.dataTables_info {
+    padding-left: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+.dataTables_paginate {
+    padding-right: 1.5rem;
+    padding-bottom: 1.5rem;
+} 
+
+
+.dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody::-webkit-scrollbar {
+    height: 9px;
+    width: 4px;
+    background: #039be50d;
+}
+.dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody::-webkit-scrollbar-thumb:horizontal{
+    background: #bde9ff6b;
+    border-radius: 10px;
+}
+.dataTables_wrapper.no-footer .dataTables_scrollBody {
+    border-bottom: none !important;
+    padding-bottom: 5px;
+}
+div.dataTables_filter {
+    padding: 5px;
+    padding-right: 1.5rem;
+}
+.dataTables_length {
+    padding: 5px;
+    padding-left: 1.5rem;
+}
+table.dataTable thead>tr>th.sorting:before, table.dataTable thead>tr>th.sorting:after, table.dataTable thead>tr>th.sorting_asc:before, table.dataTable thead>tr>th.sorting_asc:after, table.dataTable thead>tr>th.sorting_desc:before, table.dataTable thead>tr>th.sorting_desc:after, table.dataTable thead>tr>th.sorting_asc_disabled:before, table.dataTable thead>tr>th.sorting_asc_disabled:after, table.dataTable thead>tr>th.sorting_desc_disabled:before, table.dataTable thead>tr>th.sorting_desc_disabled:after, table.dataTable thead>tr>td.sorting:before, table.dataTable thead>tr>td.sorting:after, table.dataTable thead>tr>td.sorting_asc:before, table.dataTable thead>tr>td.sorting_asc:after, table.dataTable thead>tr>td.sorting_desc:before, table.dataTable thead>tr>td.sorting_desc:after, table.dataTable thead>tr>td.sorting_asc_disabled:before, table.dataTable thead>tr>td.sorting_asc_disabled:after, table.dataTable thead>tr>td.sorting_desc_disabled:before, table.dataTable thead>tr>td.sorting_desc_disabled:after {
+    font-size: 1.9em !important;
+}

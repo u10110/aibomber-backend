@@ -1,0 +1,381 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Ecommerce Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+	<script src="https://unpkg.com/ag-grid-enterprise/dist/ag-grid-enterprise.min.noStyle.js"></script>
+
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+
+	 <link rel="stylesheet"
+		 href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/>
+	<link rel="stylesheet"
+		 href="https://unpkg.com/ag-grid-community/styles/ag-theme-material.css"/>
+
+	<link rel="stylesheet" href="{% static 'analytics/css/products-style.css' %}">
+{% endblock stylesheets %} 
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+	<div class="container-fluid py-4">
+		<div class="card mb-4">
+			<div class="card-body">
+				<div class="filters">
+					<div class="filter-item">
+						<div class="checkselect brands">
+							<label><input type="checkbox" name="brands[]" value="all"> Всё</label>
+							<label><input type="checkbox" name="brands[]" value="2"> Apple Inc.</label>
+							<label><input type="checkbox" name="brands[]" value="3"> Microsoft</label>
+							<label><input type="checkbox" name="brands[]" value="4"> Facebook</label>
+							<label><input type="checkbox" name="brands[]" value="5"> Amazon</label>
+							<label><input type="checkbox" name="brands[]" value="6"> Verizon</label>
+						</div>
+					</div>
+					<div class="filter-item">
+						<div class="checkselect api">
+							<label><input type="checkbox" name="api[]" value="all"> Всё</label>
+							<label><input type="checkbox" name="api[]" value="2">api1</label>
+							<label><input type="checkbox" name="api[]" value="3">api2</label>
+							<label><input type="checkbox" name="api[]" value="4">api3</label>
+							<label><input type="checkbox" name="api[]" value="5">api4</label>
+							<label><input type="checkbox" name="api[]" value="6">api5</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card mb-4">
+			<div class="card-body">
+				<div class="indicators">
+					<div class="indicator">
+						<div class="indicator-title">Товарный остаток</div>
+						<div class="indicator-flex">
+							<div class="indicator-part">
+								<div class="indicator-content">
+
+									<div class="indicator-value">
+										<div class="indicator-text">На складе</div>
+										<div class="indicator-numbers things-symbol" id="sale1">111111</div>
+										<div class="indicator-subtext"></div>
+									</div>
+									<div class="indicator-value">
+										<div class="indicator-text">По розничным ценам</div>
+										<div class="indicator-numbers rubles-symbol" id="sale2">5423534</div>
+										<div class="indicator-text">По закупочным ценам</div>
+										<div class="indicator-numbers rubles-symbol" id="sale2">1335345342</div>
+									</div>
+								</div>
+							</div>
+							<div class="indicator-line"></div>
+							<div class="indicator-part">
+								<div class="indicator-content">
+
+									<div class="indicator-value">
+										<div class="indicator-text">Едет к клиенту </div>
+										<div class="indicator-numbers things-symbol" id="sale1">111111</div>
+										<div class="indicator-subtext"></div>
+									</div>
+									<div class="indicator-value">
+										<div class="indicator-text">Едет от клиента</div>
+										<div class="indicator-numbers rubles-symbol" id="sale2">5423534</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+					</div>
+				</div>
+				<div class="table-wrapper mt-4" >
+					<div class="table ag-theme-material" id="table" style="height: 400px;"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% include "includes/footer.html" %}
+
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+	<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+	<script src="{% static 'js/select-with-checkbox.js' %}"></script>
+
+	<script src="{% static 'assets/js/ag-grid_locale.ru.js' %}"></script>
+	<!-- Table Tooltips --> 
+	<script>
+		class CustomTooltip {
+			init(params) {
+				console.log(params);
+				const eGui = (this.eGui = document.createElement('div'));
+				const color = params.color || '#eee';
+				// const data = params.api.getDisplayedRowAtIndex(params.rowIndex).data;
+
+				eGui.classList.add('custom-tooltip');
+				//@ts-ignore
+				eGui.style['background-color'] = color;
+				eGui.style['border-radius'] = '15px'
+				eGui.innerHTML = `
+					<div class='width-custom-tooltip'> <img src="${params.value}" alt="" style='height: 150px'></div>
+				`;
+			}
+
+			getGui() {
+				return this.eGui;
+			}
+		}
+	</script>
+	<!-- Table -->
+	<script>
+		agGrid.LicenseManager.setLicenseKey("CompanyName=MPLAB,LicensedApplication=MPLAB,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=1,LicensedProductionInstancesCount=0,AssetReference=AG-034191,SupportServicesEnd=23_October_2023_[v2]_MTY5ODAxNTYwMDAwMA==3b4ce1e31fc57311e3399877777ff001");
+		function renderDataImg(params) {
+			return params.value ? `<img src="${params.value}" style='height: 100%'>` : '—'
+		}
+		function renderDataNumbers(params) {
+			return params.value == undefined ? '—' : params.value.toLocaleString('ru')
+		}
+		function renderDataPercentage(params) {
+			return params.value == undefined ? '—' : params.value + ' %'
+		}
+		// function cellStyle(params) {
+		// 	let color = ''
+		// 	if (params.value == 1) {
+		// 		color = "rgba(233,249,238,.5)"
+		// 	} else if (params.value == 0) {
+		// 		color = "rgba(229,245,255,.5)"
+		// 	}
+		// 	return {
+		// 		backgroundColor: color,
+		// 	};
+		// }
+		var mainColumn = [{
+				field: 'product',
+				headerName: 'Товар',
+				width: 150,
+				cellRenderer: renderDataImg,
+				// tooltipComponent: CustomTooltip,
+				tooltipField: 'product'
+			},
+			{
+				field: 'brand',
+				width: 120,
+				headerName: 'Бренд', 
+			},
+			{
+				field: 'item',
+				width: 120,
+				headerName: 'Артикул',
+			},
+			{
+				field: 'barcode', 
+				width: 120, 
+				headerName: 'Штрихкод', 
+			},
+			{
+				field: 'sku',
+				width: 120,
+				headerName: 'SKU',
+			},
+			{
+				field: 'size',
+				width: 120,
+				headerName: 'Размер',
+			},
+			{
+				field: 'category',
+				width: 120,
+				headerName: 'Категория',
+			},
+			{
+				field: 'cost',
+				width: 120,
+				headerName: 'Собестоимость',
+			},
+			{
+				field: 'ordersSum',
+				width: 120,
+				headerName: 'Заказов на сумму',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'selling',
+				width: 120,
+				headerName: 'Продаж',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'sellingSum',
+				width: 120,
+				headerName: 'Продаж на сумму',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'returns',
+				width: 120,
+				headerName: 'Возвратов',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'cost',
+				width: 120,
+				headerName: 'Собестоимость',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				headerName: 'Логистика',
+				headerClass: 'ag-group__custom-class_logistics',
+				marryChildren: true,
+				children: [
+					{
+						field: 'logisticsToClient',
+						width: 120,
+						headerName: 'К клиенту',
+					},
+					{
+						field: 'logisticsFromClient',
+						width: 120,
+						headerName: 'От клиенту',
+					},
+				]
+			},
+			{
+				headerName: 'Цена',
+				headerClass: 'ag-group__custom-class_price',
+				marryChildren: true,
+				children: [
+					{
+						field: 'priceBase',
+						width: 120,
+						headerName: 'Базовая',
+					},
+					{
+						field: 'priceDiscount',
+						width: 120,
+						headerName: 'Скидка',
+					},
+					{
+						field: 'priceWithDiscount',
+						width: 120,
+						headerName: 'Цена со скидкой',
+					},
+				]
+			},
+			{
+				headerName: 'Остаток',
+				headerClass: 'ag-group__custom-class_remainder',
+				marryChildren: true,
+				children: [
+					{
+						field: 'remainderDataMPLab',
+						width: 120,
+						headerName: 'Данные MP LAB',
+					},
+					{
+						field: 'remainderDataWB',
+						width: 120,
+						headerName: 'Данные WB',
+					},
+					{
+						field: 'remainderToClient',
+						width: 120,
+						headerName: 'К клиенту',
+					},
+					{
+						field: 'remainderFromClient',
+						width: 120,
+						headerName: 'От клиенту',
+					},
+				]
+			},
+			
+		]
+		var columnDefs = [
+			...mainColumn,
+		];
+
+
+
+		function deselect(){
+				gridOptions.api.deselectAll()
+		}
+		const gridOptions = {
+			defaultColDef: {
+				resizable: true,
+				sortable: true,
+				tooltipComponent: CustomTooltip,
+			},
+			animateRows: true,
+			columnDefs: columnDefs,
+			getDetailRowData: params => {
+				params.successCallback(params.data.callRecords);
+			},
+			// debug: true,
+			tooltipShowDelay: 210,
+			tooltipHideDelay: 2000,
+			localeText: AG_GRID_LOCALE_RU,
+			rowData: [{product: "{% static 'images/покемон1.png' %}", barcode: 1254236345, brand: 'bla bla', size: 0, position: 4523, skuVn: 2154326, sku: 12532532, orders: 5, ordersSum: 765478, }],
+			// suppressDragLeaveHidesColumns: true,
+			// onFirstDataRendered: onFirstDataRendered,
+		};
+
+		var eGridDiv = document.getElementById("table");
+		var gridPhrases = new agGrid.Grid(eGridDiv, gridOptions);
+	</script>
+	<!-- filter data collection  -->
+	<script>
+		function collData() {
+			return {
+				"brands": selBrands.dataChecked,
+				'api': selApi.dataChecked
+			}
+		}
+	</script>
+
+	<!-- Send data -->
+	<script>
+		function sendData(data) {
+			console.log({data, 'csrfmiddlewaretoken': '{{ csrf_token }}'});
+			// $.ajax({
+			// 	type: "POST",
+			// 	data: {data, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+			// 	url: '',
+			// 	success: data => {
+			// 		console.log(dates)
+			// 	}
+			// })
+		}
+	</script>
+	<!-- Select with checkbox || filters brands and api -->
+	<script>
+		var selBrands = $('.checkselect.brands').checkselect(['брендов', 'бренды'], {allChecked: true,});
+		var selApi = $('.checkselect.api').checkselect(['API', 'API'], {allChecked: true,});
+
+	</script>
+	<!-- Events for send -->
+	<script>
+		$('#date-range').on("apply.daterangepicker", (ev, picker) => {
+			sendData(collData())
+		})
+		selBrands.on('checkselect:close', event => {
+			if (JSON.stringify(event.detail.temporaryData) != JSON.stringify(event.detail.dataChecked)) {
+				sendData(collData())
+			}
+			
+		})
+		selApi.on('checkselect:close', event => {
+			if (JSON.stringify(event.detail.temporaryData) != JSON.stringify(event.detail.dataChecked)) {
+				sendData(collData())
+			}
+		})
+		$("#buyouts").on('change', event => {
+			sendData(collData())
+		})
+	</script>
+{% endblock javascripts %}
+
+
+
+

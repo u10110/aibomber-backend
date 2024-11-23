@@ -1,0 +1,247 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Панель управления {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+  <style>
+    .raz::-webkit-inner-spin-button { 
+      display: none;
+    }
+  </style>
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid py-4">
+      <div class="col-lg-9 col-12 mx-auto">
+        <div class="card card-body mt-4">
+          <div class="row gx-4">
+            <div class="col-auto">
+            </div>
+            <div class="col-auto my-auto mt-2">
+               <div class="h-100">
+                <h3 class="mb-0">
+                  Панель управления
+                </h6>
+              </div> 
+            </div>
+        </div>
+
+      <form action="/account/" method="post">
+          {% csrf_token %}
+          <hr class="horizontal dark my-3">
+
+
+          <div class="col-12 col-sm-10 col-xl-8">
+            <div class="form-group row">
+                <label class="col-form-label text-left col-4 col-sm-4 col-xl-4">Имя</i></label>
+                <div class="col-7 col-sm-4 col-xl-6">
+                    <!-- <input id="sku" type="number" name="sku" class="multisteps-form__input form-control raz" placeholder="52585886" /> -->
+                    {{ form.first_name }}
+            
+                </div>
+            </div>
+            
+            
+            
+            <div class="form-group row">
+                <label class="col-form-label text-left col-4 col-sm-4 col-xl-4">Фамилия</i></label>
+                <div class="col-7 col-sm-4 col-xl-6">
+                    <!-- <input id="sku" type="number" name="sku" class="multisteps-form__input form-control raz" placeholder="52585886" /> -->
+                    {{ form.last_name }}
+            
+                </div>
+            </div>
+            
+
+            <div class="form-group row">
+                <label class="col-form-label text-left col-4 col-sm-4 col-xl-4">Номер телефона</i></label>
+                <div class="col-7 col-sm-4 col-xl-6">
+                    <!-- <input id="sku" type="number" name="sku" class="multisteps-form__input form-control raz" placeholder="52585886" /> -->
+                    {{ form.phone }}
+            
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-form-label text-left col-4 col-sm-4 col-xl-4">Email</i></label>
+                <div class="col-7 col-sm-4 col-xl-6">
+                    <!-- <input id="sku" type="number" name="sku" class="multisteps-form__input form-control raz" placeholder="52585886" /> -->
+                    {{ form.email }}
+            
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-form-label text-left col-4 col-sm-4 col-xl-4">Пароль</i></label>
+                <div class="col-7 col-sm-4 col-xl-6">
+                    <!-- <input id="sku" type="number" name="sku" class="multisteps-form__input form-control raz" placeholder="52585886" /> -->
+                    {{ form.password1 }}
+            
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-form-label text-left col-4 col-sm-4 col-xl-4">Повторите пароль</i></label>
+                <div class="col-7 col-sm-4 col-xl-6">
+                    <!-- <input id="sku" type="number" name="sku" class="multisteps-form__input form-control raz" placeholder="52585886" /> -->
+                    {{ form.password2 }}
+            
+                </div>
+            </div>
+
+            <div class="form-group row">
+              <label class="col-form-label text-left col-4 col-sm-4 col-xl-4">Telegram API Token: </i></label>
+              <div class="col-7">
+                  <!-- <input id="sku" type="number" name="sku" class="multisteps-form__input form-control raz" placeholder="52585886" /> -->
+                  <label class="col-form-label text-left col-12">{{ tg_token }}</i></label>
+          
+              </div>
+          </div>
+            
+            
+
+        
+          
+            
+          </div>
+          <!-- <div class="row"> -->
+            
+          <div class="d-flex justify-content-end mt-4">
+            <button  type="submit"  class="btn bg-gradient-primary m-0 ms-2" >Сохранить изменения</button>
+          </div>
+        </form>
+        </div>
+      </div>
+      <div class="container-fluid py-4">
+
+      </div>
+      </div>
+    </div>
+    {% include "includes/footer.html" %}
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+  <script>
+    if ("{{error}}" == "False"){
+      Swal.fire('{{ error_message }}');
+      }
+    else if ("{{error}}" == "True"){
+      Swal.fire(
+      'Ошибка',
+      '{{ error_message }}',
+      'error'
+    )
+    }
+  </script>
+  <script src="/static/assets/js/plugins/choices.min.js"></script>
+  <script src="/static/assets/js/plugins/quill.min.js"></script>
+  <script src="/static/assets/js/plugins/flatpickr.min.js"></script>
+  <script src="/static/assets/js/plugins/dropzone.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+  <script>
+    if (document.getElementById('editor')) {
+      var quill = new Quill('#editor', {
+        theme: 'snow' // Specify theme in configuration
+      });
+    }
+
+    if (document.getElementById('choices-multiple-remove-button')) {
+      var element = document.getElementById('choices-multiple-remove-button');
+      const example = new Choices(element, {
+        removeItemButton: true
+      });
+
+      example.setChoices(
+        [{
+            value: 'One',
+            label: 'Label One',
+            disabled: true
+          },
+          {
+            value: 'Two',
+            label: 'Label Two',
+            selected: true
+          },
+          {
+            value: 'Three',
+            label: 'Label Three'
+          },
+        ],
+        'value',
+        'label',
+        false,
+      );
+    }
+
+    if (document.querySelector('.datetimepicker')) {
+      flatpickr('.datetimepicker', {
+        allowInput: true
+      }); // flatpickr
+    }
+
+    Dropzone.autoDiscover = false;
+    var drop = document.getElementById('dropzone')
+    var myDropzone = new Dropzone(drop, {
+      url: "/file/post",
+      addRemoveLinks: true
+
+    });
+  </script>
+  <script src="/static/assets/js/plugins/datatables.js"></script>
+  <script src="/static/assets/js/jquery.js"></script>
+  <script src="/static/assets/js/plugins/phone_valid.js"></script>
+  <script>
+    const dataTableBasic = new simpleDatatables.DataTable("#datatable-basic", {
+      searchable: false,
+      fixedHeight: true
+    });
+
+    const dataTableSearch = new simpleDatatables.DataTable("#datatable-search", {
+      searchable: true,
+      fixedHeight: true
+    });
+  </script>
+
+  <script type="text/javascript">
+		function outputUpdate(vol) {
+			var output = document.querySelector('#volume');
+			output.value = vol;
+			output.style.left = vol - 20 + 'px';
+			if(output.value > 9) {
+				output.style.left = vol - 30 + 'px';
+			}
+			if(output.value > 99) {
+				output.style.left = vol - 40 + 'px';
+			}
+			if(output.value > 240) {
+				output.style.left = vol - 45 + 'px';
+			}
+			if(output.value > 430) {
+				output.style.left = vol - 50 + 'px';
+			}
+			if(output.value > 470) {
+				output.style.left = vol - 55 + 'px';
+			}
+		}
+
+    if ("{{error}}" == "False"){
+          Swal.fire(
+      'Готово!',
+      'Обновления применены',
+      'success'
+    )
+      }
+    else if ("{{error}}" == "True"){
+      Swal.fire(
+      'Ошибка',
+      '{{ error_message }}',
+      'error'
+    )
+    }
+	</script>
+{% endblock javascripts %}

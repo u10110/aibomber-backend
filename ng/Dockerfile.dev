@@ -1,0 +1,5 @@
+FROM nginx
+
+RUN rm -rf /etc/nginx/conf.d/*
+COPY ng/appseed-app-dev.conf /etc/nginx/conf.d/ 
+COPY ng/nginx.conf /etc/nginx/

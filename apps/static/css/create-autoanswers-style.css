@@ -1,0 +1,224 @@
+
+.tags-input-wrapper{
+    background: transparent;
+    padding: 10px;
+    border-radius: 4px;
+    max-width: 100%;
+    /*padding-right: 60px;*/
+    border: 1px solid #ccc
+}
+.tags-input-wrapper input{
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 140px;
+    margin-left: 8px;
+}
+.tags-input-wrapper .tag{
+    display: inline-block;
+    background-color: #039be5;
+    color: white;
+    border-radius: 40px;
+    padding: 0px 3px 0px 7px;
+    margin-right: 5px;
+    margin-bottom:5px;
+    /*box-shadow: 0 5px 15px -2px rgb(3 155 229 / 52%);*/
+    font-size: 0.85em;
+}
+.tags-input-wrapper .tag a {
+    margin: 0 7px 3px;
+    cursor: pointer;
+    background: #0081bf;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+/*.error__input {
+    border: 1px solid red;
+    box-shadow: 0 0 10px -2px #f00;
+}
+.error__input_text {
+    color: #f79696;
+    font-size: 0.8em;
+}*/
+
+.select2-container--bootstrap .select2-selection--multiple .select2-selection__choice__remove {
+    border-radius: 50%;
+    border: none;
+}
+.select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
+    padding: 8px !important;
+}
+.select2-selection.select2-selection--multiple {
+    padding-bottom: 5px !important;
+}
+.select2-search__field {
+    display: none;
+}
+.select2-img {
+    height: 20px;
+}
+.select2-results__option--selected {
+    background-color: #f5f5f5;
+}
+.select2 {
+    width: 100% !important;
+}
+#date[readonly] {
+    background: #fff;
+}
+
+
+    /* СТИЛИ ПОДСКАЗОК*/
+    .bs-tooltip-top .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="top"] .tooltip-arrow::before {
+    border-top-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+}
+.bs-tooltip-end .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="right"] .tooltip-arrow::before {
+    border-right-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+}
+.bs-tooltip-bottom .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="bottom"] .tooltip-arrow::before {
+    border-bottom-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+}
+.bs-tooltip-start .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="left"] .tooltip-arrow::before {
+    border-left-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+}
+.tooltip-inner {
+    max-width: 25vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+    color: #666; /* цвет шрифта */
+    background: #fff; /* цвет фона (по умолчанию #000) */
+    border: 1px solid #d7d7d7;
+    border-radius: 30px;
+    box-shadow: 0 0px 15px -7px rgb(0 0 0); 
+    border-radius: 15px; /* радиус скругдения углов */
+    
+}
+.tooltip.show{
+    opacity: 1 !important;
+}
+@media (max-width: 600px) {
+    .tooltip-inner {
+        max-width: 45vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+    }
+}
+
+.template {
+    border: 2px solid #d1d1d169;
+    border-radius: 10px;
+    width: 95%;
+    margin: 0 auto;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.pencil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 9px;
+    margin-left: 6px;
+    border-radius: 50%;
+}
+.pencil svg {
+    width: 12px;
+}
+.pencil path {
+    fill: #8d8d8d;
+}
+.pencil:hover {
+    box-shadow: 0 0 0 6px rgb(13 71 161 / 9%);
+    background: rgb(13 71 161 / 18%);
+}
+.template__title_input {
+    display: none;
+}
+.divOr {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+.divOr div {
+    border-radius: 15px;
+    border: 1px solid #b9b9b9;
+    color: #a3a3a3;
+    padding: 2px 12px;
+    cursor: default;
+}
+.template__input_field {
+    position: relative;
+}
+.template__input_field textarea {
+    height: 80px;
+    resize: none;
+    width: 100%;
+}
+.template {
+    position: relative;
+}
+.template svg.style-delete {
+    width: 15px;
+    position: absolute;
+    right: -3px;
+    top: 28px;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.4s ease;
+}
+.template svg.style-delete.deleteTemplate {
+    right: -6px;
+    top: -8px;
+} 
+.template svg.style-delete:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 6px rgb(13 71 161 / 9%);
+}
+.template svg.style-delete path {
+    fill: #f44;
+}
+.deleteOption {
+    display: none;
+}
+.template__add {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.template__add .template__add_name {
+    position: relative;
+    flex: 0 0 40%;
+}
+.template__add .template__add_type {
+    position: relative;
+    flex: 0 0 40%;
+}
+.template__add p {
+    position: absolute;
+    top: -11px;
+    left: 9px;
+    z-index: 3;
+    background: #fff;
+    font-size: 0.8em;
+    padding: 0 6px;
+    color: #afafaf;
+}
+.template__add .template__add_button, .template__add .template__add_button button {
+    width: 100%;
+}
+.template__rec-field .template__input_field textarea {
+    margin-bottom: 15px;
+}
+
+.error__input {
+    border: 1px solid red;
+    box-shadow: 0 0 10px -2px #f00;
+}
+.error__input_text {
+    color: #f79696;
+    font-size: 0.8em;
+    position: absolute;
+
+}

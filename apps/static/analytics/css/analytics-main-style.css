@@ -1,0 +1,338 @@
+
+.table {
+	height: 400px;
+}
+.ag-theme-material .ag-header-cell, 
+.ag-theme-material .ag-header-group-cell {
+	padding-right: 15px;
+	padding-left: 15px;
+}
+.ag-menu {
+	background: var(--ag-background-color) !important;
+}
+
+
+/* TOOLTIP STYLE */
+
+
+ .bs-tooltip-top .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="top"] .tooltip-arrow::before {
+	border-top-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+}
+.bs-tooltip-end .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="right"] .tooltip-arrow::before {
+	border-right-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+}
+.bs-tooltip-bottom .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="bottom"] .tooltip-arrow::before {
+	border-bottom-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+}
+.bs-tooltip-start .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="left"] .tooltip-arrow::before {
+	border-left-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+}
+.tooltip-inner {
+	max-width: 25vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+	color: #666; /* цвет шрифта */
+	background: #fff; /* цвет фона (по умолчанию #000) */
+	border: 1px solid #d7d7d7;
+	border-radius: 30px;
+	box-shadow: 0 0px 15px -7px rgb(0 0 0); 
+	border-radius: 15px; /* радиус скругдения углов */
+	
+}
+.tooltip.show{
+	opacity: 1 !important;
+}
+.width-custom-tooltip {
+	max-width: 25vw;
+}
+@media (max-width: 600px) {
+	.tooltip-inner, .width-custom-tooltip {
+		max-width: 45vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+	}
+}
+.tooltip-img img{
+	width: 100%;
+}
+
+
+
+/* INDICATOR STYLE */
+
+.indicators {
+	margin-bottom: 15px;
+}
+.indicators-content {
+	display: grid;
+	grid-template: 1fr 1fr 1fr / 1fr 1fr 1fr 1fr;
+	grid-gap: 10px;
+}
+.indicator {
+	box-shadow: 0 0px 8px 0 rgb(0 0 0 / 15%);
+	border-radius: 15px;
+	padding: 5px;
+	border-top: 3px solid #e7068d;
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0;
+}
+.line-top {
+	height: 3px;
+	width: 90%;
+	/* background: #e7068d; */
+	border-radius: 105px;
+	margin: 0 auto;
+}
+.indicator-content {
+	display: flex;
+	justify-content: space-between;
+	gap: 10px;
+}
+.indicator-value {}
+.indicator-value:nth-child(odd) {
+	flex: 1 1 auto;
+}
+.indicator-numbers {
+	font-size: 1.1em;
+	color: #e7068d;
+	font-weight: 700;
+}
+.indicator.indicator_two {
+	border-top: 3px solid #039be5;
+}
+.indicator_two .indicator-numbers {
+	color: #039be5;
+}
+.indicator_three {
+	border-top: 3px solid #9b17a4;
+}
+.indicator_three .indicator-numbers {
+	color: #9b17a4;
+}
+.indicator-title {
+	font-size: 1.2em;
+	font-weight: 700;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.indicator-title a{
+	text-decoration: underline;
+}
+.indicator-text {
+	font-size: 0.9em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: #a1a1a1;
+}
+.indicator-value:nth-child(odd) .indicator-text {
+	width: 80%;
+}
+@media (max-width: 1100px) {
+	.indicators-content {
+		grid-template: 1fr 1fr 1fr 1fr 1fr 1fr/  1fr 1fr;
+	}
+}
+@media (max-width: 520px) {
+	.indicators-content {
+		display: block;
+	}
+	.indicator {
+		margin-bottom: 10px
+	}
+}
+.diffrence-up {
+	color: #5BC06B;
+}
+.diffrence-down {
+	color: #E26452;
+}
+.indicator-diffrence {
+	font-size: 0.9em;
+}
+.indicator-diffrence:before {
+	padding-right: 3px;
+	font-size: 0.8em;
+}
+.diffrence-up:before {
+	content: '▶';
+	color: #5BC06B;
+	display: inline-block;
+	transform: rotate(-90deg) translate(7px);
+}
+.diffrence-down:before {
+	content: '▶';
+	color: #E26452;
+	display: inline-block;
+	transform: rotate(90deg) translate(-2px);
+}
+.rubles-symbol:after {
+	content: "₽";
+	display: inline-block;
+	margin-left: 5px;
+	font-size: 0.9em;
+	/*color: black;*/
+}
+.percentage-symbol:after {
+	content: "%";
+	display: inline-block;
+	margin-left: 5px;
+	font-size: 0.8em;
+}
+
+
+/* CHART STYLE */
+
+.chart-title {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.title-switch {
+	position: relative;
+	display: flex;
+	border-radius: 15px;
+	width: 200px;
+	height: 30px;
+	border: 2px solid #e7068d;
+	overflow: hidden;
+	transition: 500ms all ease;
+}
+.title-switch.checked {
+	border: 2px solid #039be5;
+}
+.title-switch > input {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	opacity: 0;
+	cursor: pointer;
+}
+.checkbox {
+	flex: 1 0 50%;
+	height: 100%;
+	color: #e7068d;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: 500ms all ease;
+}
+.title-switch.checked > .checkbox {
+	color: #039be5;
+}
+.rub.checked {
+	background: #e7068d;
+	color: #fff;
+}
+.count.checked {
+	background: #039be5;
+	color: #fff !important;
+}
+#mixed-chart-1 {
+	height: 300px !important;
+}
+
+
+/* FILTERS STYLE */
+
+	.filters {
+		display: flex;
+		justify-content: end;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+	#date-range {
+		padding-right: 25px !important;
+	}
+	.daterangepicker {
+		z-index: 9999;
+	}
+
+
+/* Select with checkbox */
+
+	.checkselect {
+		position: relative;
+		display: inline-block;
+		min-width: 200px;
+		text-align: left;
+	}
+	.checkselect-control {
+		position: relative;
+		padding: 0 !important;
+	}		
+	.checkselect-control select {
+		position: relative;
+		display: inline-block;
+		width: 100%;
+		margin: 0;
+		padding-left: 5px;
+		height: 50px;
+	}
+	.checkselect-over {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0; 			
+		cursor: pointer;
+	}
+	.checkselect-popup {
+		display: none;
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		height: auto;
+		max-height: 200px;
+		position: absolute;
+		top: 100%;
+		left: 0px; 
+		border: 1px solid #dadada;
+		border-top: none;
+		background: #fff;
+		z-index: 9999;
+		overflow: auto;
+		user-select: none;
+	}	
+	.checkselect label {
+		position: relative;
+		display: block;
+		margin: 0;
+		padding: 4px 6px 4px 25px;
+		font-weight: normal;
+		font-size: 1em;
+		line-height: 1.1;
+		cursor: pointer;
+	}			
+	.checkselect-popup input {
+		position: absolute;
+		top: 5px; 
+		left: 8px;
+		margin: 0 !important;
+		padding: 0;
+	}
+	.checkselect-popup label:hover {
+		background: #03a2ff;
+		color: #fff;
+	}
+	.checkselect-popup fieldset {
+		display: block;
+		margin:  0;
+		padding: 0;
+		border: none;
+	}
+	.checkselect-popup fieldset input {
+		left: 15px;
+	}		
+	.checkselect-popup fieldset label {
+		padding-left: 32px;
+	}		
+	.checkselect-popup legend {
+		display: block;
+		margin: 0;
+		padding: 5px 8px;
+		font-weight: 700;
+		font-size: 1em;
+		line-height: 1.1;
+	}

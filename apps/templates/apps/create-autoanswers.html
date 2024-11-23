@@ -1,0 +1,1204 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Новый отзыв {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+	<style>
+		@keyframes animateOpen {
+			0% {
+				opacity: 0;
+				top: -100%;
+				transform: rotateX(90deg);
+				background-color: rgba(0,0,0,0);
+			}
+			50% {
+				opacity: 0.4;
+				background-color: rgba(0,0,0,0.2);
+			}
+			100% {
+				top: 0;
+				opacity: 1;
+				transform: rotateX(0);
+				background-color: rgba(0,0,0,0.4);
+			}
+		}
+		.modal {
+			display: none; /* Hidden by default */
+			position: fixed; /* Stay in place */
+			z-index: 10000; /* Sit on top */
+			padding-top: 10vh; /* Location of the box */
+			left: 0;
+			top: 0;
+			width: 100%; /* Full width */
+			height: 100%; /* Full height */
+			overflow: auto; /* Enable scroll if needed */
+			background-color: rgb(0,0,0); /* Fallback color */
+			background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+			perspective: 600px;
+		}
+		/* Modal Content */
+		.modal-content {
+			background-color: #fefefe;
+			margin: auto;
+			padding: 20px;
+			border: 1px solid #888;
+			width: 40%;
+			
+		}
+
+		.modal.active {
+			transform-style: preserve-3d;
+			animation: animateOpen 0.5s ease-out 0ms 1;
+		}
+
+		/* The Close Button */
+		.close {
+			color: #aaaaaa;
+			display: flex;
+			font-size: 28px;
+			font-weight: bold;
+		}
+
+		.close:hover,
+		.close:focus {
+			color: #000;
+			text-decoration: none;
+			cursor: pointer;
+		}
+		  @media (max-width: 1000px) {
+		.modal-content {
+		  width: 60%;
+		}
+	  }
+	  @media (max-width: 800px) {
+		.modal-content h3{
+			font-size: 1.3em;
+		}
+	  }
+	  @media (max-width: 480px) {
+		.modal-content {
+		  width: 80%;
+		}
+	  }
+	  @media (max-width: 350px) {
+		.modal-content {
+		  width: 90%
+		}
+	  }
+	  .example {
+			border-bottom: 1px dashed #344767;
+			cursor: pointer;
+		}
+		.example:hover {
+			border-bottom: none;
+		}
+	</style>
+	<style>
+		.tags-input-wrapper{
+		    background: transparent;
+		    padding: 10px;
+		    border-radius: 4px;
+		    max-width: 100%;
+		    /*padding-right: 60px;*/
+		    border: 1px solid #ccc
+		}
+		.tags-input-wrapper input{
+		    border: none;
+		    background: transparent;
+		    outline: none;
+		    width: 140px;
+		    margin-left: 8px;
+		}
+		.tags-input-wrapper .tag{
+		    display: inline-block;
+		    background-color: #039be5;
+		    color: white;
+		    border-radius: 40px;
+		    padding: 0px 3px 0px 7px;
+		    margin-right: 5px;
+		    margin-bottom:5px;
+		    /*box-shadow: 0 5px 15px -2px rgb(3 155 229 / 52%);*/
+		    font-size: 0.85em;
+		}
+		.tags-input-wrapper .tag a {
+		    margin: 0 7px 3px;
+		    cursor: pointer;
+		    background: #0081bf;
+		    width: 20px;
+		    height: 20px;
+		    border-radius: 50%;
+		    display: inline-flex;
+		    flex-direction: column;
+		    align-items: center;
+		    justify-content: center;
+		}
+		/*.error__input {
+		  border: 1px solid red;
+		  box-shadow: 0 0 10px -2px #f00;
+		}
+		.error__input_text {
+		  color: #f79696;
+		  font-size: 0.8em;
+		}*/
+	</style>
+	<style>
+		.select2-container--bootstrap .select2-selection--multiple .select2-selection__choice__remove {
+			border-radius: 50%;
+			border: none;
+		}
+		.select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
+			padding: 8px !important;
+		}
+		.select2-selection.select2-selection--multiple {
+			padding-bottom: 5px !important;
+		}
+		.select2-search__field {
+			display: none;
+		}
+		.select2-img {
+			height: 20px;
+		}
+		.select2-results__option--selected {
+			background-color: #f5f5f5;
+		}
+		.select2 {
+			width: 100% !important;
+		}
+		#date[readonly] {
+			background: #fff;
+		}
+		.btn-outline-success {
+			transition: all 200ms ease;
+		}
+		.btn-outline-success:hover {
+			background: #82d616 !important;
+			color: #fff !important;
+		}
+	</style>
+	<style>
+			/* СТИЛИ ПОДСКАЗОК*/
+		 .bs-tooltip-top .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="top"] .tooltip-arrow::before {
+			border-top-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+		}
+		.bs-tooltip-end .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="right"] .tooltip-arrow::before {
+			border-right-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+		}
+		.bs-tooltip-bottom .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="bottom"] .tooltip-arrow::before {
+			border-bottom-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+		}
+		.bs-tooltip-start .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="left"] .tooltip-arrow::before {
+			border-left-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+		}
+		.tooltip-inner {
+			max-width: 25vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+			color: #666; /* цвет шрифта */
+			background: #fff; /* цвет фона (по умолчанию #000) */
+			border: 1px solid #d7d7d7;
+			border-radius: 30px;
+			box-shadow: 0 0px 15px -7px rgb(0 0 0); 
+			border-radius: 15px; /* радиус скругдения углов */
+		}
+		.tooltip.show{
+			opacity: 1 !important;
+		}
+		@media (max-width: 600px) {
+			.tooltip-inner {
+				max-width: 45vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+			}
+		}
+	</style>
+	<style>
+		.template {
+			border: 2px solid #d1d1d169;
+			border-radius: 10px;
+			width: 95%;
+			margin: 0 auto;
+			padding: 10px;
+			margin-bottom: 10px;
+		}
+		.pencil {
+			display: inline-flex;
+		    align-items: center;
+		    justify-content: center;
+		    height: 100%;
+		    padding: 9px;
+		    margin-left: 6px;
+		    border-radius: 50%;
+		}
+		.pencil svg {
+			width: 12px;
+		}
+		.pencil path {
+			fill: #8d8d8d;
+		}
+		.pencil:hover {
+			box-shadow: 0 0 0 6px rgb(13 71 161 / 9%);
+			background: rgb(13 71 161 / 18%);
+		}
+		.template__title_input {
+			display: none;
+		}
+		.divOr {
+			display: flex;
+			justify-content: center;
+			margin-top: 15px;
+		}
+		.divOr div {
+			border-radius: 15px;
+			border: 1px solid #b9b9b9;
+			color: #a3a3a3;
+			padding: 2px 12px;
+			cursor: default;
+		}
+		.template__input_field {
+			position: relative;
+		}
+		.template__input_field textarea {
+			height: 80px;
+			resize: none;
+			width: 100%;
+		}
+		.template {
+			position: relative;
+		}
+		.template svg.style-delete {
+			width: 15px;
+			position: absolute;
+			right: -3px;
+			top: 28px;
+			background: #fff;
+			cursor: pointer;
+			border-radius: 50%;
+			transition: all 0.4s ease;
+		}
+		.template svg.style-delete.deleteTemplate {
+			right: -6px;
+			top: -8px;
+		} 
+		.template svg.style-delete:hover {
+			transform: scale(1.1);
+			box-shadow: 0 0 0 6px rgb(13 71 161 / 9%);
+		}
+		.template svg.style-delete path {
+			fill: #f44;
+		}
+		.deleteOption {
+			display: none;
+		}
+		.template__add {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+		.template__add .template__add_name {
+			position: relative;
+			flex: 0 0 40%;
+		}
+		.template__add .template__add_type {
+			position: relative;
+			flex: 0 0 40%;
+		}
+		.template__add p {
+			position: absolute;
+			top: -11px;
+			left: 9px;
+			z-index: 3;
+			background: #fff;
+			font-size: 0.8em;
+			padding: 0 6px;
+			color: #afafaf;
+		}
+		.template__add .template__add_button, .template__add .template__add_button button {
+			width: 100%;
+		}
+		.template__rec-field .template__input_field textarea {
+			margin-bottom: 15px;
+		}
+	</style>
+	<style>
+		.error__input {
+			border: 1px solid red;
+			box-shadow: 0 0 10px -2px #f00;
+		}
+		.error__input_text {
+			color: #f79696;
+			font-size: 0.8em;
+			position: absolute;
+		}
+	</style>
+	<style>
+		.options-and-variables {
+			display: flex;
+			gap: 15px;
+		}
+		@media (max-width: 850px) {
+			.options-and-variables {
+				flex-direction: column;
+			}
+		}
+		.options {
+			flex: 0 0 50%;
+		}
+		.variables {
+			width: 100%;
+		}
+
+
+		.options__content > div > div {
+			margin-bottom: 10px;
+		}
+
+		.generate-text__result {
+			height: 50vh;
+			overflow: auto;
+		}
+
+		.gen-save-btns {
+			/*display: flex;*/
+			width: 100%;
+		}
+		.gen-input {
+			flex: 1 1 auto;
+		}
+
+		@media (min-width: 768px) and (max-width: 810px) {
+			.select-good label {
+				font-size: 10.5px !important;
+			}
+		}
+	</style>
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" integrity="sha512-kq3FES+RuuGoBW3a9R2ELYKRywUEQv0wvPTItv3DSGqjpbNtGWVdvT8qwdKkqvPzT93jp8tSF4+oN4IeTEIlQA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.min.css" integrity="sha512-3//o69LmXw00/DZikLz19AetZYntf4thXiGYJP6L49nziMIhp6DVrwhkaQ9ppMSy8NWXfocBwI3E8ixzHcpRzw==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.2.1/air-datepicker.css">
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+	<div class="container-fluid py-4">
+		<h3>Создание Автоответов</h3>
+		<div class="card">
+			<div class="card-body">
+				<label for="name">Название</label>
+				<input type="text" name="name" id="name" class="form-control">
+			</div>
+		</div>
+		<div class="card mt-4">
+			<div class="card-body">
+				<h5>Выберите товары</h5>
+				<div class="select-good" style="position: relative;">
+					<label for="products">Введите название или любой артикул товара:</label>
+					<select type="text" name="products" id="products" class="form-select" multiple="multiple">
+						<!-- VALUE = SKU || data-img = product image  -->
+						<option value="124" data-img="{% static 'images/покемон1.png' %}"> 1Item 1</option> 
+						<option value="">Item 2</option>
+						<option value="">Item 3</option>
+						<option value="">Item 4</option>
+						<option value="">Item 5</option>
+						<option value="">Item 6</option>
+						<option value="">Item 7</option>
+						<option value="">Item 8</option>
+						<option value="">Item 9</option>
+						<option value="">Item 10</option>
+						<option value="">Item 11</option>
+						<option value="">Item 12</option>
+						<option value="">Item 13</option>
+						<option value="">Item 14</option>
+						<option value="">Item 15</option>
+						<option value="">Item 16</option>
+						<option value="">Item 17</option>
+						<option value="">Item 18</option>
+						<option value="">Item 19</option>
+						<option value="">Item 20</option>
+					</select>
+					<div class="form-check form-switch" style="position: absolute;top: -4px;right: 0;">
+						<input class="form-check-input mt-2" type="checkbox" id="select2-selectAll">
+						<label for="select2-selectAll" style="position: relative;top: 4px;">Выбрать всё</label>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card mt-4">
+			<div class="card-body">
+				<div class="options-and-variables">
+					<div class="options">
+						<div class="options__title">
+							<h6>
+								Ввод условий
+								<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="Введите условия отзывов для автоответа" id="monitoring__tip" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>
+							</h6>
+						</div>
+						<div class="options__content">
+							<div style="position: relative;">
+								<div class="rating-select">
+									<label for="rating-select"><span style="font-size: 20px; color: #ffeb3b;">★</span> Укажите рейтинг:</label>
+									<select id="rating-select">
+										<option value="5">★ 5</option>
+										<option value="4">★ 4</option>
+										<option value="3">★ 3</option>
+										<option value="2">★ 2</option>
+										<option value="1">★ 1</option>
+									</select>
+								</div>
+								<div class="brand">
+									<label for="brand">Укажите бренды:</label>
+									<select type="text" name="brand" id="brand" class="form-select" multiple="multiple">
+										<option value="">Gapa</option>
+										<option value="">Nike</option>
+										<option value="">Bike</option>
+									</select>
+								</div>
+								<div class="city">
+									<label for="city">Выберите страны:</label>
+									<select type="text" name="city" id="city" class="form-select" multiple="multiple">
+										<option value="">Не указана</option>
+										<option value="ru">Россия</option>
+										<option value="az">Азербайджан</option>
+										<option value="ua">Украина</option>
+										<option value="be">Беларусь</option>
+										<option value="md">Молдова</option>
+										<option value="kz">Казахстан</option>
+										<option value="uz">Узбекистан</option>
+										<option value="tj">Таджикистан</option>
+										<option value="am">Армения</option>
+										<option value="kg">Кыргызстан</option>
+									</select>
+								</div>
+								<div class="date">
+									<label for="date">📅 Выберите дату создания отзыва:</label>
+									<div class="d-flex">
+										<input type='text' readonly id="date" class="form-control" style="display: block">
+										<label for="date" style="width: 0;"><svg xmlns="http://www.w3.org/2000/svg" style="width: 20px;position: relative;left: -30px;top: 10px;cursor: pointer;" viewBox="0 0 448 512"><path fill="#848ea3" d="M160 32V64H288V32C288 14.33 302.3 0 320 0C337.7 0 352 14.33 352 32V64H400C426.5 64 448 85.49 448 112V160H0V112C0 85.49 21.49 64 48 64H96V32C96 14.33 110.3 0 128 0C145.7 0 160 14.33 160 32zM0 192H448V464C448 490.5 426.5 512 400 512H48C21.49 512 0 490.5 0 464V192zM64 304C64 312.8 71.16 320 80 320H112C120.8 320 128 312.8 128 304V272C128 263.2 120.8 256 112 256H80C71.16 256 64 263.2 64 272V304zM192 304C192 312.8 199.2 320 208 320H240C248.8 320 256 312.8 256 304V272C256 263.2 248.8 256 240 256H208C199.2 256 192 263.2 192 272V304zM336 256C327.2 256 320 263.2 320 272V304C320 312.8 327.2 320 336 320H368C376.8 320 384 312.8 384 304V272C384 263.2 376.8 256 368 256H336zM64 432C64 440.8 71.16 448 80 448H112C120.8 448 128 440.8 128 432V400C128 391.2 120.8 384 112 384H80C71.16 384 64 391.2 64 400V432zM208 384C199.2 384 192 391.2 192 400V432C192 440.8 199.2 448 208 448H240C248.8 448 256 440.8 256 432V400C256 391.2 248.8 384 240 384H208zM320 432C320 440.8 327.2 448 336 448H368C376.8 448 384 440.8 384 432V400C384 391.2 376.8 384 368 384H336C327.2 384 320 391.2 320 400V432z"/></svg></label>
+									</div>
+								</div>
+								<div class="keywords_div">
+									<label for="keywords">🔑 Ключевые слова или фразы:</label>
+									<input type='text' readonly id="keywords" class="form-control" style="display: block">
+								</div>
+								<div class="minKeywords_div">
+									<label for="minKeywords">Минус слова или фразы:</label>
+									<input type='text' readonly id="minKeywords" class="form-control" style="display: block">
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="variables">
+						<div class="variables__title">
+							<h6>
+								Ввод переменных
+								<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="Пример введение новых переменных приведён снизу" id="monitoring__tip" data-bs-toggle="tooltip" ><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>
+							</h6>
+						</div>
+						<div class="variables__content">
+							<div class="variables__input">
+								<label for="variables__textarea">Укажите переменные: <span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="" id="monitoring__tip" data-bs-toggle="tooltip"></span></label>
+								<textarea name="variables" class="form-control" id="variables__textarea" rows="10">%HELLO% = { Добрый день! | Приветствуем! | Здравствуйте! | Привет! | Здравствуйте, уважаемый покупатель!  | Добрый день, дорогой наш Покупатель }
+%THANKS% = { Благодарим, что уделили время на обратную связь!) | Спасибо, что выбираете нас и помогаете стать лучше!  | Благодарим вас за неравнодушие! | Большое спасибо за обратную связь | Спасибо за отзыв! | ИМЯ, благодарим вас за отзыв! |Признательны за то, что нашли время, чтобы оценить нас и написать отзыв. | Большое спасибо за то, что вы остановили выбор на нашем товаре |  Признательны за то, что вы уделили время и поделились своими впечатлениями |  Мы очень ценим, что вы оценили товар |  Благодарим Вас за то, что уделили время и написали отзыв | Благодарим Вас за уделенное время для написания отзыва и позитивную оценку нашей работы |  От всей нашей команды выражаем Вам признательность за положительный отзыв о нашей продукции| Приятно видеть Ваш отзыв | Благодарим, Вас что нашли время и возможность оценить нас! | Большое спасибо, что поделились своим впечатлением | Вы помогаете нам становиться лучше | Благодарю за обратную связь |  Наша команда всегда рада вашей искренней обратной связи. }
+%FILLING% = { Мы признательны за выбор нашего бренда | Мы очень ценим мнение наших покупателей. Ваши отзывы мотивируют нас на постоянное развитие и самосовершенствование| Абсолютно каждый товар проверяется в ручную, каждый! | Качество продаваемого товара и радость клиента — являются ведущим девизом нашей компании |  Всегда держим качество на высоте.| Товар полностью соответствует описанию | Очень рады, что Вам понравилось| Добавляйте нас в Любимые бренды, поставив сердечко в верхнем правом углу нашей странице. Тогда Вы будете оповещаться первыми о наших новинках и креативных решениях | Надеемся, что вы остались довольны покупкой! | Мы уверены, Вы найдете товары, которые Вас порадуют| Для нас очень важно, чтобы покупки приносили только положительные эмоции. }
+%FEEDBACK% = { Если у Вас возникли вопросы, Вы можете написать нам нам на почту | чтобы не пропустить самые выгодные предложения, Вы можете добавить наш магазин в свой любимый бренд и будете получать уведомления о наших акциях и новинках | Надеемся, что и дальше мы будем радовать Вас качественной и полностью удовлетворяющей Вас продукцией | Для урегулирования ситуации обратитесь техподдержку по средствам WhatsApp по номеру | Ведь мы решаем любые проблемы напишите нам в вотсап }
+%GOODBYE% = {Всего вам наилучшего! | С уважением |   Будем рады видеть Вас среди наших постоянных клиентов | Желаем Вам хорошего дня! | Хорошего дня и прекрасного настроения! | С заботой | С вниманием и заботой о Вас | Будем рады видеть вас вновь в числе покупателей! | Надеемся, что последующие покупки будут Вас только радовать! |  Желаем найти подходящий вам товар | Желаем удачных покупок | Желаем Вам приятных покупок и отличного настроения! | С наилучшими пожеланиями }
+%APOLOGIES% = {Приносим извинения от лица бренда | Вся наша продукция проходит проверку перед поступлением в продажу | Сделаем все возможное, чтобы в дальнейшем не были разочарованы в выборе нашей продукции | Надеемся у нас ещё будет шанс порадовать Вас! | Это был исключительный случай, и мы постараемся сделать все, чтобы такая ситуация больше не повторилась | Нам очень жаль что наш товар вам не понравился| Сожалеем, что Вам пришлось столкнуться с неудобствами.}</textarea>
+							</div>
+							<div class="variables__btn d-flex justify-content-end">
+								<button class="btn btn-outline-success mt-2">Сохранить</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="card mt-4">
+			<div class="card-body gen-save-btns">
+				<h5>Текст отзыва:
+					<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="Вы можете использовать ранее введённые переменные" id="monitoring__tip" data-bs-toggle="tooltip" ><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>
+				</h5>
+				<div class="gen-input">
+					<textarea name="generate" id="generate-ta" rows="3" class="form-control"></textarea>
+				</div>
+				<div class="gen-btns d-flex justify-content-end mt-2">
+					<button class="btn btn-info" id="generate" style="margin: 0; margin-right: 10px;" title="Генерация текста для просмотра примерных результатов." data-bs-toggle='tooltip' data-bs-trigger='hover'>
+						Сгенерировать
+					</button>
+					<button class="btn btn-primary save-btn" style="margin: 0;">
+						Сохранить
+					</button>
+				</div>
+			</div>
+		</div>
+	<div class="modal modal-generate-text">
+		<div class="modal-content d-block">
+			<span class="close justify-content-end">&times;</span>
+			<div class="generate-text__title">
+				<h5>Результат генерации</h5>
+			</div>
+			<div class="generate-text__result">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolores deserunt ullam quo harum odit voluptate perspiciatis soluta iure ut eaque repudiandae vitae laboriosam neque ipsam vero blanditiis nihil temporibus culpa totam nesciunt, corrupti exercitationem delectus cum! Consectetur, nam ut perspiciatis sit beatae porro incidunt corporis eveniet qui blanditiis recusandae? Fugiat illo ab nobis, recusandae id odio ut voluptatibus dolores dolorem neque? Quis ipsum odit nihil asperiores in iste omnis quia, numquam fugit incidunt. Quidem quasi cumque mollitia ratione ut dignissimos id cupiditate atque dolores rerum, provident quibusdam! Id mollitia architecto, iure consequatur accusantium provident, dolor nesciunt, dolorum magni enim sint?</div>
+		</div>
+	</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+	<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+	
+	<script src="/static/assets/js/jquery.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js" integrity="sha512-6UofPqm0QupIL0kzS/UIzekR73/luZdC6i/kXDbWnLOJoqwklBK6519iUnShaYceJ0y4FaiPtX/hRnV/X/xlUQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha512-z4OUqw38qNLpn1libAN9BsoDx6nbNFio5lA6CuTp9NlK83b89hgyCVq+N5FdBJptINztxn1Z3SaKSKUS5UP60Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.2.1/air-datepicker.min.js"></script>
+	<!-- <script src="{% static 'js/jquery.placeholder.label.min.js' %}"></script>
+	<script>
+		$(document).ready(function (){
+			$('input[placeholder]').placeholderLabel({
+				placeholderColor:"#898989",
+				labelColor:"#4AA2CC",
+				labelSize:"12px",
+				fontStyle:"normal",
+				inInput:true,
+				timeMove: 200
+			})
+		})
+	</script> -->
+
+
+	 <!-- Событие показа попапа при клике на новый запрос. -->
+	<script>
+		$(".close").on('click', event => {
+			$(".modal").css("display", "none")
+			$(".modal").removeClass("active")
+		}) 
+		$("#generate").on("click", event => {
+			event.preventDefault()
+			$(".modal").css("display", "block")
+			$(".modal").addClass("active")
+		})
+		$(window).on('mousedown', event => {
+			if (event.target == document.querySelector(".modal")) {
+				$(".modal").css("display", "none")
+				$(".modal").removeClass("active")
+		}
+		})
+	</script>
+
+	<!-- TagsInput -->
+	<script>
+		    (function(){
+
+		    "use strict"
+
+		    
+		    // Plugin Constructor
+		    var TagsInput = function(opts){
+		        this.options = Object.assign(TagsInput.defaults , opts);
+		        this.init();
+		    }
+
+		    // Initialize the plugin
+		    TagsInput.prototype.init = function(opts){
+		        this.options = opts ? Object.assign(this.options, opts) : this.options;
+
+		        if(this.initialized)
+		            this.destroy();
+		            
+		        if(!(this.orignal_input = document.getElementById(this.options.selector)) ){
+		            console.error("tags-input couldn't find an element with the specified ID");
+		            return this;
+		        }
+
+		        this.arr = [];
+		        this.wrapper = document.createElement('div');
+		        this.input = document.createElement('input');
+		        init(this);
+		        initEvents(this);
+
+		        this.initialized =  true;
+		        return this;
+		    }
+
+		    // Add Tags
+		    TagsInput.prototype.addTag = function(string){
+
+		        if(this.anyErrors(string))
+		            return ;
+
+		        this.arr.push(string);
+		        var tagInput = this;
+
+		        var tag = document.createElement('span');
+		        tag.className = this.options.tagClass;
+		        tag.innerText = string;
+
+		        var closeIcon = document.createElement('a');
+		        closeIcon.innerHTML = '&times;';
+		        
+		        // delete the tag when icon is clicked
+		        closeIcon.addEventListener('click' , function(e){
+		            e.preventDefault();
+		            var tag = this.parentNode;
+
+		            for(var i =0 ;i < tagInput.wrapper.childNodes.length ; i++){
+		                if(tagInput.wrapper.childNodes[i] == tag)
+		                    tagInput.deleteTag(tag , i);
+		            }
+		        })
+
+
+		        tag.appendChild(closeIcon);
+		        this.wrapper.insertBefore(tag , this.input);
+		        this.orignal_input.value = this.arr.join(',');
+
+		        return this;
+		    }
+
+		    // Delete Tags
+		    TagsInput.prototype.deleteTag = function(tag , i){
+		        tag.remove();
+		        this.arr.splice( i , 1);
+		        this.orignal_input.value =  this.arr.join(',');
+		        return this;
+		    }
+
+		    // Make sure input string have no error with the plugin
+		    TagsInput.prototype.anyErrors = function(string){
+		        if( this.options.max != null && this.arr.length >= this.options.max ){
+		            console.log('max tags limit reached');
+		            return true;
+		        }
+		        
+		        if(!this.options.duplicate && this.arr.indexOf(string) != -1 ){
+		            console.log('duplicate found " '+string+' " ')
+		            return true;
+		        }
+
+		        return false;
+		    }
+
+		    // Add tags programmatically 
+		    TagsInput.prototype.addData = function(array){
+		        var plugin = this;
+		        
+		        array.forEach(function(string){
+		            plugin.addTag(string);
+		        })
+		        return this;
+		    }
+
+		    // Get the Input String
+		    TagsInput.prototype.getInputString = function(){
+		        return this.arr.join(',');
+		    }
+
+
+		    // destroy the plugin
+		    TagsInput.prototype.destroy = function(){
+		        this.orignal_input.removeAttribute('hidden');
+
+		        delete this.orignal_input;
+		        var self = this;
+		        
+		        Object.keys(this).forEach(function(key){
+		            if(self[key] instanceof HTMLElement)
+		                self[key].remove();
+		            
+		            if(key != 'options')
+		                delete self[key];
+		        });
+
+		        this.initialized = false;
+		    }
+
+		    // Private function to initialize the tag input plugin
+		    function init(tags){
+		        tags.wrapper.append(tags.input);
+		        tags.wrapper.classList.add(tags.options.wrapperClass);
+		        tags.orignal_input.setAttribute('hidden' , 'true');
+		        tags.orignal_input.parentNode.insertBefore(tags.wrapper , tags.orignal_input);
+		    }
+
+		    // initialize the Events
+		    function initEvents(tags){
+		        tags.wrapper.addEventListener('click' ,function(){
+		            tags.input.focus();           
+		        });
+		        
+
+		        tags.input.addEventListener('keydown' , function(e){
+		            var str = tags.input.value.trim(); 
+
+		            if( !!(~["Enter", ","].indexOf( e.key ))  )
+		            {
+		                e.preventDefault();
+		                tags.input.value = "";
+		                if(str != "")
+		                    tags.addTag(str);
+		            }
+
+		        });
+		    }
+
+
+		    // Set All the Default Values
+		    TagsInput.defaults = {
+		        selector : '',
+		        wrapperClass : 'tags-input-wrapper',
+		        tagClass : 'tag',
+		        max : null,
+		        duplicate: false
+		    }
+
+		    window.TagsInput = TagsInput;
+
+		})();
+
+		 var tagInput1 = new TagsInput({
+		            selector: 'keywords',
+		            duplicate : false,
+		            max : null
+		        });
+		  var tagInput2 = new TagsInput({
+		            selector: 'minKeywords',
+		            duplicate : false,
+		            max : null
+		        });
+	</script>
+
+	<!-- Объявления селектов и инпутов -->
+	<script>
+		function formatState (state) {
+			if (state.disabled) {
+				return state.text;
+			}
+			var $state = state.element.hasAttribute('data-img') ? $(
+				 '<span><img src="' + state.element.dataset.img.toLowerCase() + `" class="select2-img" data-bs-html='true'/> ` + state.text + '</span>' 
+				) : state.text;
+			return $state;
+		};
+		function formatStateRating (state) {
+			if (state.disabled) {
+				return state.text;
+			}
+			var $state = state.element.hasAttribute('data-img') ? $(`<span>${state.element.dataset.img + state.text}</span>`) : state.text;
+			return $state;
+		};
+		// DOCUMENTATIONS       ------------------------------------                   https://select2.org/configuration/options-api
+		var sel1 = $('#products').select2({
+			multiple: true,
+			theme: "bootstrap",
+			templateResult: formatState,
+			matcher: function(params, data) { // link for script https://stackoverflow.com/questions/24021276/select2-search-options
+				// If there are no search terms, return all of the data
+				if ($.trim(params.term) === '') { return data; }
+
+				// Do not display the item if there is no 'text' property
+				if (typeof data.text === 'undefined') { return null; }
+
+				// `params.term` is the user's search term
+				// `data.id` should be checked against
+				// `data.text` should be checked against
+				var q = params.term.toLowerCase();
+				if (data.text.toLowerCase().indexOf(q) > -1 || data.id.toLowerCase().indexOf(q) > -1) {
+					return $.extend({}, data, true);
+				}
+
+				// Return `null` if the term should not be displayed
+				return null;
+			}
+		});
+		var sel2 = $('#brand').select2({
+			multiple: true,
+			theme: "bootstrap",
+			templateResult: formatState,
+		});
+		var rating = $('#rating-select').select2({
+			multiple: true,
+			theme: "bootstrap",
+			templateResult: formatStateRating,
+			// templateSelection: formatStateRating,
+			minimumResultsForSearch: Infinity,
+		});
+
+		var sel3 = $('#city').select2({
+			multiple: true,
+			theme: "bootstrap",
+			minimumResultsForSearch: Infinity,
+		});
+		var typeTemplate = $('#templateType').select2({
+			theme: "bootstrap",
+			minimumResultsForSearch: Infinity
+		});
+		function updateTP() {
+			var sel4 = $('.template__products').select2({
+				multiple: true,
+				theme: "bootstrap",
+				templateResult: formatState,
+				matcher: function(params, data) { // link for script https://stackoverflow.com/questions/24021276/select2-search-options
+					// If there are no search terms, return all of the data
+					if ($.trim(params.term) === '') { return data; }
+
+					// Do not display the item if there is no 'text' property
+					if (typeof data.text === 'undefined') { return null; }
+
+					// `params.term` is the user's search term
+					// `data.id` should be checked against
+					// `data.text` should be checked against
+					var q = params.term.toLowerCase();
+					if (data.text.toLowerCase().indexOf(q) > -1 || data.id.toLowerCase().indexOf(q) > -1) {
+						return $.extend({}, data, true);
+					}
+
+					// Return `null` if the term should not be displayed
+					return null;
+				}
+			});
+		}
+		updateTP()
+		
+		sel1.on("select2:opening", event =>{
+			$(".select2-search__field").css("display", "block")
+		})
+		sel1.on("select2:close", event =>{
+			$(".select2-search__field").css("display", "none")
+		})
+		sel2.on("select2:opening", event =>{
+			$(".select2-search__field").css("display", "block")
+		})
+		sel2.on("select2:close", event =>{
+			$(".select2-search__field").css("display", "none")
+		})
+		$("#select2-selectAll").click(function(){
+			if ($("#select2-selectAll").is(':checked')) {
+				$("#products > option").prop("selected",true);
+				$("#products").trigger("change");
+				$(".select2-selection__choice__remove").on("click", event => {
+					console.log('clcllc')
+					$("#select2-selectAll").is(':checked') ? $("#select2-selectAll").prop('checked', false) : null
+				})
+			} else {
+				$("#products > option").prop("selected",false);
+				$("#products").trigger("change");
+			}
+		});
+		//      date.rangeDateFrom     |||||      date.rangeDateTo
+		var date = new AirDatepicker('#date', {
+			range: true,
+			multipleDatesSeparator: '   ~~~   ',
+			position({$datepicker, $target, $pointer, isViewChange, done}) {
+        let popper = Popper.createPopper($target, $datepicker, {
+            placement: 'bottom',
+            onFirstUpdate: state => {
+                !isViewChange && anime.remove($datepicker);
+
+                $datepicker.style.transformOrigin = 'center top';
+
+                !isViewChange && anime({
+                    targets: $datepicker,
+                    opacity: [0, 1],
+                    rotateX: [-90, 0],
+                    easing: 'spring(1.3, 80, 5, 0)',
+                })
+
+            },
+            modifiers: [
+                {
+                    name: 'offset',
+                    options: {
+                        offset: [0, 10]
+                    }
+                },
+                {
+                    name: 'arrow',
+                    options: {
+                        element: $pointer,
+                    }
+                },
+                {
+                    name: 'computeStyles',
+                    options: {
+                        gpuAcceleration: false,
+                    },
+                },
+            ]
+        });
+
+        return () => {
+            anime({
+                targets: $datepicker,
+                opacity: 0,
+                rotateX: -90,
+                duration: 300,
+                easing: 'easeOutCubic'
+            }).finished.then(() => {
+                popper.destroy();
+                done();
+            })
+        }}
+		})
+		$('.select2').on('click', event => {
+			var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+			var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+			  return new bootstrap.Tooltip(tooltipTriggerEl)
+			})
+		})
+	</script>
+
+	<!-- АЯКС, отправление данных -->
+	<script>
+		function getData() {
+
+			function getSelectedData(element) {
+				let dataStr = element.data().select2.$container[0].innerText
+				let dataArray = dataStr.split('\n').map(el => el.replace('×', '').trim())
+				
+				return dataArray
+			}
+
+			function dateToStr(date) {
+				let day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
+				let month = date.getMonth() < 10 ? '0' + date.getMonth() : date.getMonth()
+				let year = date.getFullYear()
+
+				return `${day}-${month}-${year}`
+			}
+
+
+			let nameData = $('#name').val()
+			let productData = getSelectedData(sel1)
+			let rateData = getSelectedData(rating)
+			let brandData = getSelectedData(sel2)
+			let cityData = getSelectedData(sel3)
+			let dateData = { startDate: dateToStr(date.selectedDates[0]), endDate: dateToStr(date.selectedDates[1]) }
+			let keyWordsData = tagInput1.arr
+			let minusWordsData = tagInput2.arr
+
+			return { nameData, productData, rateData, brandData, cityData, dateData, keyWordsData, minusWordsData }
+		}
+
+		$('.save-btn').click(function() {
+			console.log(getData())
+
+			const ACTION_URL = ''
+			$.ajax({ 
+				type: "POST", 
+				url: ACTION_URL, 
+				data: getData(),
+				success: function(data) {
+					
+				} 
+			   });
+		})
+
+	</script>
+
+
+
+{% comment %}
+	<!-- СКРИПТ ИЗМЕНЕНИЯ ТАЙТЛА ШАБЛОНОВ editTitleName -->
+	<script>
+		var currentInput = null //текущий инпут с фокусом.
+		function editTitleName(event) {
+			setTimeout(function () {
+				let parent = event.target.closest(".template__title")
+				$('input', parent).val($('.template__title_text', parent).text())
+				$('.template__title_content', parent ).css("display", 'none')
+				$('.template__title_input', parent).css("display", 'block')
+				$('input', parent).focus()
+				$("input", parent).on('keypress', event => {
+					console.log(event.keyCode)
+					if (event.key == 'Enter') {
+						$('.template__title_text', parent).text($('input', parent).val())
+						$('.template__title_content', parent ).css("display", 'block')
+						$('.template__title_input', parent).css("display", 'none')
+					}
+				})
+				currentInput = parent.querySelector("input")
+			}, 100)
+		}
+		$(window).on("click", event => {
+			if (event.target != currentInput && currentInput != null) {
+				let parent = currentInput.closest(".template__title")
+				$('.template__title_text', parent).text($('input', parent).val())
+				$('.template__title_content', parent ).css("display", 'block')
+				$('.template__title_input', parent).css("display", 'none')
+				currentInput = null
+			}
+		})
+		$(".editTitle").on("click", editTitleName)
+	</script>
+
+	<!-- СКРИПТ ДОБАВЛЕНИЯ ВАРИАНТА addOption -->
+	<script>
+		function addOption(event) {
+			let parent = event.target.closest(".template")
+			let divOr = $("<div class='divOr'><div>Или</div></div>")
+			$(".template__inputs", parent).append(divOr);
+			console.log(!$(parent).hasClass('template__rec-field'))
+			if (!$(parent).hasClass('template__rec-field')) {
+				$(".template__inputs", parent).append($(`
+					<div class="template__input_field">
+						<label for="">Заполните вариант:</label>
+						<textarea class="form-control"></textarea>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="deleteOption style-delete"><path d="M175 175C184.4 165.7 199.6 165.7 208.1 175L255.1 222.1L303 175C312.4 165.7 327.6 165.7 336.1 175C346.3 184.4 346.3 199.6 336.1 208.1L289.9 255.1L336.1 303C346.3 312.4 346.3 327.6 336.1 336.1C327.6 346.3 312.4 346.3 303 336.1L255.1 289.9L208.1 336.1C199.6 346.3 184.4 346.3 175 336.1C165.7 327.6 165.7 312.4 175 303L222.1 255.1L175 208.1C165.7 199.6 165.7 184.4 175 175V175zM512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256zM256 48C141.1 48 48 141.1 48 256C48 370.9 141.1 464 256 464C370.9 464 464 370.9 464 256C464 141.1 370.9 48 256 48z"/></svg>
+					</div>
+				`))
+			} else {
+				$(".template__inputs", parent).append($(`
+				<div class="template__input_field">
+					<label for="">Заполните вариант:</label>
+					<textarea class="form-control"></textarea>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="deleteOption style-delete"><path d="M175 175C184.4 165.7 199.6 165.7 208.1 175L255.1 222.1L303 175C312.4 165.7 327.6 165.7 336.1 175C346.3 184.4 346.3 199.6 336.1 208.1L289.9 255.1L336.1 303C346.3 312.4 346.3 327.6 336.1 336.1C327.6 346.3 312.4 346.3 303 336.1L255.1 289.9L208.1 336.1C199.6 346.3 184.4 346.3 175 336.1C165.7 327.6 165.7 312.4 175 303L222.1 255.1L175 208.1C165.7 199.6 165.7 184.4 175 175V175zM512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256zM256 48C141.1 48 48 141.1 48 256C48 370.9 141.1 464 256 464C370.9 464 464 370.9 464 256C464 141.1 370.9 48 256 48z"/></svg>
+					<label for="">Выберите товары</label>
+					<select type="text" name="template__products" class="form-select template__products" multiple="multiple">
+						<!-- VALUE = SKU || data-img = product image  -->
+						<option value="124" data-img="{% static 'images/покемон1.png' %}">1Item 1</option> 
+						<option value="">Item 2</option>
+						<option value="">Item 3</option>
+						<option value="">Item 4</option>
+						<option value="">Item 5</option>
+						<option value="">Item 6</option>
+						<option value="">Item 7</option>
+						<option value="">Item 8</option>
+						<option value="">Item 9</option>
+					</select>
+				</div>
+				`))
+				updateTP()
+			}
+			Array.from(document.querySelectorAll(".deleteOption")).map(el => {
+				console.log(el)
+				el.onclick = deleteOption
+			})
+			if (parent.querySelectorAll(".template__input_field").length > 1) {
+				console.log('none')
+				$('.deleteOption', parent).css('display', 'block')
+			}
+		}
+		$(".template__button-add > button").on("click", addOption)
+	</script>
+
+	<!-- СКРИПТ УДАЛЕНИЯ ВАРИАНТА deleteOption -->
+	<script>
+		function deleteOption(event) {
+			let parent = event.target.closest(".template__input_field")
+			console.log($(parent).prev(".divOr"), $(parent).next(".divOr"))
+			if ($($(parent).prev(".divOr")).length != false) {
+				$(parent).prev(".divOr").remove()
+			} else if ($(parent).next(".divOr")) {
+				$(parent).next(".divOr").remove()
+			}
+			var parentOlder = event.target.closest(".template__inputs")
+			console.log(parentOlder, event.target)
+			parent.remove()
+			if (parentOlder.querySelectorAll(".template__input_field").length < 2) {
+				$('.deleteOption', parentOlder).css('display', 'none')
+			}
+		}
+		Array.from(document.querySelectorAll(".deleteOption")).map(el => {
+			el.onclick = deleteOption
+		})
+	</script>
+
+	<script>
+		function deleteTemplate(event) {
+			event.target.closest(".template").remove()
+		}
+		Array.from(document.querySelectorAll(".deleteTemplate")).map(el => {
+			el.onclick = deleteTemplate
+		})
+	</script>
+
+	<script>
+		$(".template__add_button > button").on("click", event => {
+			if ($(".template__add_name > input").val().length > 0) {
+				if (typeTemplate.val() == 'text') {
+					$(".all-templates").append(`
+						<div class="template template__text-field">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="deleteTemplate style-delete"><path d="M175 175C184.4 165.7 199.6 165.7 208.1 175L255.1 222.1L303 175C312.4 165.7 327.6 165.7 336.1 175C346.3 184.4 346.3 199.6 336.1 208.1L289.9 255.1L336.1 303C346.3 312.4 346.3 327.6 336.1 336.1C327.6 346.3 312.4 346.3 303 336.1L255.1 289.9L208.1 336.1C199.6 346.3 184.4 346.3 175 336.1C165.7 327.6 165.7 312.4 175 303L222.1 255.1L175 208.1C165.7 199.6 165.7 184.4 175 175V175zM512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256zM256 48C141.1 48 48 141.1 48 256C48 370.9 141.1 464 256 464C370.9 464 464 370.9 464 256C464 141.1 370.9 48 256 48z"/></svg>
+						<div class="template__title mb-2">
+							<div class="template__title_content">
+								<span class="template__title_text">${$(".template__add_name > input").val()}</span><span class="pencil editTitle" title="Редактировать" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" ><path d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/></svg></span>
+							</div>
+							<div class="template__title_input">
+								<input type="text" maxlength="40" class="form-control">
+							</div>
+						</div>
+						<div class="template__inputs">
+							<div class="template__input_field">
+								<label for="">Заполните вариант:</label>
+								<textarea class="form-control"></textarea> <!-- placeholder="Enter your name" alt="Name" -->
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="deleteOption style-delete"><path d="M175 175C184.4 165.7 199.6 165.7 208.1 175L255.1 222.1L303 175C312.4 165.7 327.6 165.7 336.1 175C346.3 184.4 346.3 199.6 336.1 208.1L289.9 255.1L336.1 303C346.3 312.4 346.3 327.6 336.1 336.1C327.6 346.3 312.4 346.3 303 336.1L255.1 289.9L208.1 336.1C199.6 346.3 184.4 346.3 175 336.1C165.7 327.6 165.7 312.4 175 303L222.1 255.1L175 208.1C165.7 199.6 165.7 184.4 175 175V175zM512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256zM256 48C141.1 48 48 141.1 48 256C48 370.9 141.1 464 256 464C370.9 464 464 370.9 464 256C464 141.1 370.9 48 256 48z"/></svg>
+							</div>
+						</div>
+						<div class="template__button-add d-flex justify-content-end mt-3">
+							<button class="btn btn-primary">добавить вариант</button>
+						</div>
+					</div>
+					`)
+				} else {
+					$(".all-templates").append(`
+						<div class="template template__rec-field">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="deleteTemplate style-delete"><path d="M175 175C184.4 165.7 199.6 165.7 208.1 175L255.1 222.1L303 175C312.4 165.7 327.6 165.7 336.1 175C346.3 184.4 346.3 199.6 336.1 208.1L289.9 255.1L336.1 303C346.3 312.4 346.3 327.6 336.1 336.1C327.6 346.3 312.4 346.3 303 336.1L255.1 289.9L208.1 336.1C199.6 346.3 184.4 346.3 175 336.1C165.7 327.6 165.7 312.4 175 303L222.1 255.1L175 208.1C165.7 199.6 165.7 184.4 175 175V175zM512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256zM256 48C141.1 48 48 141.1 48 256C48 370.9 141.1 464 256 464C370.9 464 464 370.9 464 256C464 141.1 370.9 48 256 48z"/></svg>
+						<div class="template__title mb-2">
+							<div class="template__title_content">
+								<span class="template__title_text">${$(".template__add_name > input").val()}</span><span class="pencil editTitle" title="Редактировать" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" ><path d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/></svg></span>
+							</div>
+							<div class="template__title_input">
+								<input type="text" maxlength="40" class="form-control">
+							</div>
+						</div>
+						<div class="template__inputs">
+							<div class="template__input_field">  
+								<label for="">Заполните вариант:</label>
+								<textarea class="form-control"></textarea> <!-- placeholder="Enter your name" alt="Name" -->
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="deleteOption style-delete"><path d="M175 175C184.4 165.7 199.6 165.7 208.1 175L255.1 222.1L303 175C312.4 165.7 327.6 165.7 336.1 175C346.3 184.4 346.3 199.6 336.1 208.1L289.9 255.1L336.1 303C346.3 312.4 346.3 327.6 336.1 336.1C327.6 346.3 312.4 346.3 303 336.1L255.1 289.9L208.1 336.1C199.6 346.3 184.4 346.3 175 336.1C165.7 327.6 165.7 312.4 175 303L222.1 255.1L175 208.1C165.7 199.6 165.7 184.4 175 175V175zM512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256zM256 48C141.1 48 48 141.1 48 256C48 370.9 141.1 464 256 464C370.9 464 464 370.9 464 256C464 141.1 370.9 48 256 48z"/></svg>
+								<select type="text" name="products" class="form-select template__products" multiple="multiple">
+									<!-- VALUE = SKU || data-img = product image  -->
+									<option value="124" data-img="{% static 'images/покемон1.png' %}">1Item 1</option> 
+									<option value="">Item 2</option>
+									<option value="">Item 3</option>
+									<option value="">Item 4</option>
+									<option value="">Item 5</option>
+									<option value="">Item 6</option>
+									<option value="">Item 7</option>
+									<option value="">Item 8</option>
+									<option value="">Item 9</option>
+								</select>
+							</div>
+						</div>
+						<div class="template__button-add d-flex justify-content-end mt-3">
+							<button class="btn btn-primary">добавить вариант</button>
+						</div>
+					</div>
+					`)
+					updateTP()
+				}
+				$(".template__add_name > input").val("")
+				Array.from(document.querySelectorAll(".deleteOption")).map(el => {
+					el.onclick = deleteOption
+				});
+				Array.from(document.querySelectorAll(".template__button-add > button")).map(el => {
+					el.onclick = addOption
+				});
+				Array.from(document.querySelectorAll(".editTitle")).map(el => {
+					el.onclick = editTitleName
+				});
+				Array.from(document.querySelectorAll(".deleteTemplate")).map(el => {
+					el.onclick = deleteTemplate
+				})
+			} else {
+				$(".template__add_name > input").addClass("error__input") 
+				$(".template__add_name > input").after("<div class='error__input_text'>Обязательное поле</div>")
+				setTimeout(() => {
+					$(".template__add_name > input").removeClass("error__input")
+					$(".error__input_text").remove()
+				}, 1500)
+			}
+		})
+	</script>
+{% endcomment %}
+
+{% endblock javascripts %}

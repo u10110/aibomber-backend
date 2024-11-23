@@ -1,0 +1,322 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load limits_bar %}
+
+{% block title %} Ecommerce Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,regular,500,600,700,800,300italic,italic,500italic,600italic,700italic,800italic" rel="stylesheet" />
+<style>
+    .servises-wrapper .card {
+        overflow: hidden;
+    }
+    .servises-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        grid-auto-rows: auto;
+    }
+
+    @media (max-width: 1100px) {
+        .servises-wrapper {
+            display: block;
+        }
+        .servises-wrapper .card {
+            display: block;
+            margin-bottom: 20px;
+        }
+    }
+
+    .service-main {
+        display: flex;
+        gap: 10px;
+        box-shadow: 0px 20px 27px rgba(0, 0, 0, 0.05);
+        background: #FFFFFF;
+        border-radius: 16px;
+        padding: 2em 0 2em 2em !important;
+    }
+
+    .service-body {
+        flex: 1 1 auto;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+    }
+
+    .service-main h5 {
+        color: #4D313E;
+        margin-bottom: 0.8em;
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: 600;
+        font-size: 1.3em;
+        line-height: 28px;
+        letter-spacing: -0.4px;
+        color: #4D313E;
+    }
+
+    .servises-wrapper p {
+        font-style: normal;
+        font-weight: 500;
+        font-size: 0.9em;
+        line-height: 22px;
+        letter-spacing: -0.4px;
+        color: rgba(77, 49, 62, 0.7);
+        font-family: 'Open Sans';
+    }
+
+    .service-body button {
+        border: none;
+        margin-top: auto;
+        background: linear-gradient(180deg, #E03385 0%, #CB317A 100%);
+        box-shadow: 11px 17px 33px -8px rgba(216, 50, 129, 0.4);
+        border-radius: 8px;
+        margin-bottom: 0px;
+        padding: 1.38em 2.64em 1.38em 2.2em;
+        font-style: normal;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: #FFF7FB;
+        font-family: 'Open Sans';
+        font-size: 0.9em;
+        line-height: 14px;
+        transition: all 100ms ease-out;
+    }
+
+    .service-body button:hover {
+        box-shadow: 0px 0px 30px -8px rgba(216, 50, 129, 0.4);
+        transform: scale(1.02);
+    }
+    
+    
+    .service-body button:active {
+        box-shadow: 0px 0px 30px -8px rgba(216, 50, 129, 0.4);
+        transform: scale(0.98);
+    }
+
+
+    .services-img {
+        width: 40%;
+        min-width: 200px;
+        background: url("{% static 'images/LogoTraced.png' %}") right/contain no-repeat;
+        display: flex;
+    }
+
+    @media (max-width: 450px) {
+        .services-img {
+            min-width: 100px;
+        }
+        .servises-wrapper .card {
+            font-size: 0.8em;
+        }
+    }
+
+    .services-bgImg {
+        position: absolute;
+        opacity: 0.2;
+        left: 60%;
+    }
+    .services-bgImg.top {
+        top: 0;
+    }
+    .services-bgImg.bottom {
+        bottom: 0;
+        left: 100%;
+        transform: translateX(-100%);
+    }
+    
+    .services-mainImg {
+        max-height: 200px;
+        align-self: center;
+        width: 100%;
+        object-fit: contain;
+        position: relative;
+        z-index: 1;
+    }
+
+    .services-lastCard {
+        grid-column: span 2;
+    }
+    .services-lastCard .service-body {
+        width: 40%;
+    }
+    .services-lastCard .services-img {
+        width: 70%;
+        background: none;
+    }
+    .services-lastCard img {
+        position: absolute;
+        right: 0;
+        height: 100%;
+    }
+
+    @media (max-width: 770px) {
+        .services-lastCard .service-main {
+            flex-direction: column-reverse;
+            gap: 0;
+        }
+        .services-lastCard .services-img {
+            width: 100%;
+        }
+        .services-lastCard img {
+            width: 100%;
+            margin: auto;
+            position: relative;
+        }
+        .services-lastCard h5 {
+            margin: 16px 0;
+        }
+        .services-lastCard .service-body {
+            width: 100%;
+            box-shadow: 0 -0.6em 1.2em 0.6em white;
+            z-index: 1;
+        }
+    }
+</style>
+
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="servises-wrapper">
+        <div class="card">
+            <div class="card-body service-main">
+                <div class="service-body">
+                    <h5>SEO оптимизация</h5>
+                    <p>Привлечем еще больше траффика на ваши товары по новым ключевым запросам</p>
+                    <button>Привлечь</button>
+                </div>
+                <div class="services-img">
+                    <img class="services-mainImg" src="{% static 'images/SEOMain.png' %}" alt="">
+                    <img class="services-bgImg top" src="{% static 'images/SEOShadow1.png' %}" alt="">
+                    <img class="services-bgImg bottom" src="{% static 'images/SEOShadow2.png' %}" alt="">
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body service-main">
+                <div class="service-body">
+                    <h5>Поисковое продвижение</h5>
+                    <p>Улучшаем конверсию вашей карточки за счет свойственного алгоритма</p>
+                    <button>Улучшить</button>
+                </div>
+                <div class="services-img">
+                    <img class="services-mainImg" src="{% static 'images/searchMain.png' %}" alt="">
+                    <img class="services-bgImg top" src="{% static 'images/searchShadowT.png' %}" alt="">
+                    <img class="services-bgImg bottom" src="{% static 'images/searchShadowB.png' %}" alt="">
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body service-main">
+                <div class="service-body">
+                    <h5>Оформление карточки</h5>
+                    <p>Дизайн фото и качественная фографика для вашего товара</p>
+                    <button>Оформить</button>
+                </div>
+                <div class="services-img">
+                    <img class="services-mainImg" src="{% static 'images/addMain.png' %}" alt="">
+                    <img class="services-bgImg top" src="{% static 'images/addShadowT.png' %}" alt="">
+                    <img class="services-bgImg bottom" src="{% static 'images/addShadowB.png' %}" alt="">
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body service-main">
+                <div class="service-body">
+                    <h5>Сертификация товара</h5>
+                    <p>Оставьте юридические вопросы  по сертификации нашим специалистам</p>
+                    <button>Оставить</button>
+                </div>
+                <div class="services-img">
+                    <img class="services-mainImg" src="{% static 'images/certMain.png' %}" alt="">
+                    <img class="services-bgImg bottom" style="top: 0;" src="{% static 'images/certShadowT.png' %}" alt="">
+                    <img class="services-bgImg bottom" src="{% static 'images/certShadowB.png' %}" alt="">
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body service-main">
+                <div class="service-body">
+                    <h5>Юридические услугу</h5>
+                    <p>Пропал товар, жалобы от клиентов, не приняли отгруженную палету? Поможем разобраться со всеми вопросами</p>
+                    <button>Обратиться</button>
+                </div>
+                <div class="services-img">
+                    <img class="services-mainImg" src="{% static 'images/guardMain.png' %}" alt="">
+                    <img class="services-bgImg bottom" style="top: 0;" src="{% static 'images/guardShadowT.png' %}" alt="">
+                    <img class="services-bgImg bottom" src="{% static 'images/guardShadowB.png' %}" alt="">
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body service-main">
+                <div class="service-body">
+                    <h5>Фулфилмент склад для бизнеса</h5>
+                    <p>Хранение товара, его упаковку и отгрузку на маркетплейс берем на себя</p>
+                    <button>Оставить заявку</button>
+                </div>
+                <div class="services-img">
+                    <img class="services-mainImg" src="{% static 'images/storageMain.png' %}" alt="">
+                    <img class="services-bgImg bottom" style="top: 0;" src="{% static 'images/storageShadowT.png' %}" alt="">
+                    <img class="services-bgImg bottom" src="{% static 'images/storageShadowB.png' %}" alt="">
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body service-main">
+                <div class="service-body">
+                    <h5>Доставки товар из Китая</h5>
+                    <p>Найдем выгодную закупку выбранного вами товара в Китае для получения максимальной прибыли</p>
+                    <button>Доставить</button>
+                </div>
+                <div class="services-img">
+                    <img class="services-mainImg" src="{% static 'images/deliveryMain.png' %}" alt="">
+                    <img class="services-bgImg bottom" style="top: 0;" src="{% static 'images/deliveryShadowT.png' %}" alt="">
+                    <img class="services-bgImg bottom" src="{% static 'images/deliveryShadowB.png' %}" alt="">
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body service-main">
+                <div class="service-body">
+                    <h5>Консультация по продвижению</h5>
+                    <p>Все понятно но ничего не понятно, тогда мы расскажем как эффективно продвигать свои карточки</p>
+                    <button>Помощь</button>
+                </div>
+                <div class="services-img">
+                    <img class="services-mainImg" src="{% static 'images/adviceMain.png' %}" alt="">
+                    <img class="services-bgImg bottom" style="top: 0;" src="{% static 'images/adviceShadowT.png' %}" alt="">
+                    <img class="services-bgImg bottom" src="{% static 'images/adviceShadowB.png' %}" alt="">
+                </div>
+            </div>
+        </div>
+        <div class="card services-lastCard">
+            <div class="card-body service-main">
+                <div class="service-body">
+                    <h5>Наставничество</h5>
+                    <p>Дойди до результата с своем бизнесе используя все рычаги маркетинга и продвижения от Максима и Александра</p>
+                    <button>Хочу!</button>
+                </div>
+                <div class="services-img">
+                    <img src="{% static 'images/mentor.png' %}" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "includes/footer.html" %}
+
+
+{% endblock content %}
+
+
+{% block javascripts %} 
+<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+
+{% endblock javascripts %}

@@ -1,0 +1,243 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<link rel="stylesheet" href="{% static 'assets/css/tooltip-style.css' %}">
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid py-4">
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header p-3">
+            <h5 class="mb-2">Реферальная программа</h5>
+            <p class="mb-0">Отслеживайте и находите все подробности о нашей реферальной программе, вашей статистике и доходах.</p>
+          </div>
+          <div class="card-body p-3">
+            <div class="row">
+              <div class="col-lg-3 col-sm-6 col-12 text-center">
+                <div class="border-dashed border-1 border-secondary border-radius-md py-3">
+                  <h6 class="text-primary text-gradient mb-0">Перешли по ссылке</h6>
+                  <h4 class="font-weight-bolder"><span id="state1" countTo="{{ count_click }}"></span><span class="small"> человек</span></h4>
+                </div>
+              </div>
+              <div class="col-lg-3 col-sm-6 col-12 text-center mt-4 mt-sm-0">
+                <div class="border-dashed border-1 border-secondary border-radius-md py-3">
+                  <h6 class="text-primary text-gradient mb-0">Зарегистрировались</h6>
+                  <h4 class="font-weight-bolder"><span id="state2" countTo="{{ count_signup }}"></span><span class="small"> человек</span></h4>
+                </div>
+              </div>
+              <div class="col-lg-3 col-sm-6 col-12 text-center mt-4 mt-lg-0">
+                <div class="border-dashed border-1 border-secondary border-radius-md py-3">
+                  <h6 class="text-primary text-gradient mb-0">Пополнили баланс</h6>
+                  <h4 class="font-weight-bolder"><span id="state3" countTo="{{ conter_paid }}"></span><span class="small"> человек</span></h4>
+                </div>
+              </div>
+              <div class="col-lg-3 col-sm-6 col-12 text-center mt-4 mt-lg-0">
+                <div class="border-dashed border-1 border-secondary border-radius-md py-3">
+                  <h6 class="text-primary text-gradient mb-0">Вы заработали</h6>
+                  <h4 class="font-weight-bolder"><span class="small">₽</span><span id="state4" countTo="{{ earned }}"></span></h4>
+                </div>
+              </div>
+            </div>
+            <div class="row mt-5">
+              <div class="col-lg-5 col-12">
+                <h6 class="mb-0">Привлечение рефералов</h6>
+                <p class="text-sm">Реферальная ссылка (нажмите на ссылку для копирования в буфер обмена):</p>
+                <div class="border-dashed border-1 border-secondary border-radius-md p-3">
+                  <p class="text-xs mb-2">Если вам нужна именная ссылка вида mplab.io/p/PARTNER , обратитесь в службу поддержки.</span></p>
+                  <div class="d-flex align-items-center">
+                    <div class="form-group w-70">
+                      <div class="input-group bg-gray-200">
+                        <input class="form-control form-control-sm" value="{{ link }}" id='rlink' type="text" disabled>
+                        <span class="input-group-text bg-transparent"><i class="ni ni-key-25"></i></span>
+                      </div>
+                    </div>
+                    <a class="btn btn-sm btn-outline-secondary ms-2 px-3 copyToClipboard"  data-bs-original-title="Скопировано!">Копировать</a>
+                  </div>
+
+                  {% comment %}
+                  <div class="d-flex align-items-center">
+                    <div class="form-group w-70">
+                      <div class="input-group bg-gray-200">
+                        <input class="form-control form-control-sm" value="{{ link_tg }}" id='rlinkTG' type="text" disabled>
+                        <span class="input-group-text bg-transparent"><i class="ni ni-key-25"></i></span>
+                      </div>
+                    </div>
+                    <a class="btn btn-sm btn-outline-secondary ms-2 px-3 copyToClipboard"  data-bs-original-title="Скопировано!" >Копировать</a>
+                  </div>
+                  {% endcomment %}
+
+                  <p class="text-xs mb-1">После перехода по одной из этих ссылок за пользователем закрепляется метка, которая проверяется в момент оплаты для закрепления за Вами рефера. </p>
+                </div>
+              </div>
+              <div class="col-lg-7 col-12 mt-4 mt-lg-0">
+                <h6 class="mb-0">Ваш баланс</h6>
+                <p class="text-sm">Вывести средства можно, когда на балансе будет не менее 2 000 рублей. Также процент бонуса растет с количеством приглашенных рефералов.</p>
+                <div class="row">
+                  <div class="col-md-4 col-12">
+                    <div class="card card-plain text-center">
+                      <div class="card-body p-2 ">
+                        <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md mb-2">
+                          <i class="ni ni-money-coins text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                        <p class="text-sm font-weight-bold mb-2">Текущий баланс</p>
+                        <h5 class="font-weight-bolder"><span class="small">₽</span>{{ earned }}</h5>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4 col-12">
+                    <div class="card card-plain text-center">
+                      <div class="card-body p-2">
+                        <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md mb-2">
+                          <i class="ni ni-send text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                        <p class="text-sm font-weight-bold mb-2">Бонус за реферала</p>
+                        <span style="font-size:0.8em">Первый уровень</span>
+                        <h5 class="font-weight-bolder mb-0">{{ bonus }}<span class="small">%</span></h5>
+                        
+                        {% if bonus_2level %}
+                          <span style="font-size:0.8em">Второй уровень<svg viewBox="0 0 24 24" data-bs-toggle="tooltip" data-bs-trigger="focus" data-bs-html="true" title="Возможность получать вознаграждение за пользователей которых привел ваш реферал" style="width: 17px;margin-left: 5px;fill: #b25dcd;"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path></svg></span>
+                          <h5 class="font-weight-bolder">{{ bonus_2level }}<span class="small">%</span></h5>
+                        {% endif %}
+
+
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4 col-12">
+                    <div class="card card-plain text-center">
+                      <div class="card-body p-2 ">
+                        <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md mb-2">
+                          <i class="ni ni-spaceship text-lg opacity-10" aria-hidden="true"></i>
+                        </div>
+                        <p class="text-sm font-weight-bold mb-2">Заявка на вывод средств</p>
+                        <h5 class="font-weight-bolder">Запросить в поддержке</h5>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+      <div class="col-12 mt-4">
+        <div class="card mb-4">
+          {% comment %} <div class="card-header pb-0 p-3">
+            <h6>Top Referred Users</h6>
+          </div> {% endcomment %}
+          <div class="card-body px-0 pt-0 pb-2">
+            <div class="table-responsive p-0">
+              <table class="table align-items-center mb-0">
+                <thead>
+                  <tr>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Индентификатор реферала</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Информация</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Статус</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Процент начисления</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Сумма оплаты или списания</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ваш бонус</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for object in objects %}
+                    <tr>
+                      <td>
+                        <p class="text-sm font-weight-bold mb-0">#{{ object.id }}</p>
+                      </td>
+                      <td>
+                        <p class="text-sm font-weight-bold mb-0">{{ object.info }}</p>
+                      </td>
+                      <td class="align-middle text-center text-sm">
+                        <p class="text-sm font-weight-bold mb-0">{{ object.status }}</p>
+                      </td>
+                      <td class="align-middle text-center text-sm">
+                        <p class="text-sm font-weight-bold mb-0">{{ object.percentage }}%</p>
+                      </td>
+                      <td class="align-middle text-center">
+                        <p class="text-sm font-weight-bold mb-0">{{ object.sum }}<span class="small">₽</span></p>
+                      </td>
+                      <td class="align-middle text-center">
+                        <p class="text-sm font-weight-bold mb-0">{{ object.bonus }}<span class="small">₽</span></p>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                 
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% include "includes/footer.html" %}
+    
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+
+  <!--  Plugin for TypedJS, full documentation here: https://github.com/inorganik/CountUp.js -->
+  <script src="/static/assets/js/plugins/countup.min.js"></script>
+  <script>
+    function copyToClipboard() {
+			$('.copyToClipboard').click(function() {
+				var $temp = $("<input>");
+				$("body").append($temp);
+				$temp.val($('input', $(this).closest('.d-flex')).val()).select();
+				document.execCommand("copy");
+				$temp.remove();
+				var tooltip = $(this).tooltip()
+				tooltip.tooltip('show')
+				setTimeout(() => {
+					tooltip.tooltip('hide')
+				}, 600)
+				setTimeout(() => {
+					tooltip.tooltip('dispose')
+				}, 800)
+			});
+		}
+		copyToClipboard()
+
+    if (document.getElementById('state1')) {
+      const countUp = new CountUp('state1', document.getElementById("state1").getAttribute("countTo"));
+      if (!countUp.error) {
+        countUp.start();
+      } else {
+        console.error(countUp.error);
+      }
+    }
+    if (document.getElementById('state2')) {
+      const countUp = new CountUp('state2', document.getElementById("state2").getAttribute("countTo"));
+      if (!countUp.error) {
+        countUp.start();
+      } else {
+        console.error(countUp.error);
+      }
+    }
+    if (document.getElementById('state3')) {
+      const countUp = new CountUp('state3', document.getElementById("state3").getAttribute("countTo"));
+      if (!countUp.error) {
+        countUp.start();
+      } else {
+        console.error(countUp.error);
+      }
+    }
+    if (document.getElementById('state4')) {
+      const countUp = new CountUp('state4', document.getElementById("state4").getAttribute("countTo"));
+      if (!countUp.error) {
+        countUp.start();
+      } else {
+        console.error(countUp.error);
+      }
+    }
+  </script>
+
+{% endblock javascripts %}

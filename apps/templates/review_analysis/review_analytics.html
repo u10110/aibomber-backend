@@ -1,0 +1,467 @@
+{% extends 'layouts/base.html' %} 
+{% load static %} 
+ 
+{% block title %} Ecommerce Products List {% endblock title %} 
+ 
+<!-- Specific CSS goes HERE --> 
+{% block stylesheets %} 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bxslider/4.2.15/jquery.bxslider.min.css" rel="stylesheet" />
+<style>
+	@keyframes loading {
+		form {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
+	}
+	.loader-svg {
+		animation: loading 1.5s linear 0ms infinite normal backwards;
+		width: 20px;
+		margin-left: 3px;
+		fill: #fff;
+	}
+</style>
+<style>
+    .main {
+        overflow: hidden;
+        transition: all 200ms ease;
+    }
+    
+    .title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2em;
+    }
+    .title-arrow {
+        width: 17px;
+        height: 17px;
+        transform: rotate(135deg);
+        margin-right: 10px;
+        border-left: 3px solid rgba(58, 65, 111, 0.8);
+        border-bottom: 3px solid rgba(58, 65, 111, 0.8);
+        transition: all 250ms ease;
+        font-size: 0;
+    }
+    .main.hide .title-arrow {
+        transform: rotate(-45deg) translate(6px, -6px);
+        border-left: 2px solid rgba(58, 65, 111, 0.5);
+        border-bottom: 2px solid rgba(58, 65, 111, 0.5);
+    }
+
+    .sku-text {
+        display: flex;
+        justify-content: space-between;
+    }
+    .sku-text label {
+        font-size: 16px;
+        color: #67748e;
+        font-weight: normal;
+        margin: 0;
+    }
+
+    /* Анимация загрузки */
+    @keyframes loading {
+		form {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
+	}
+	.analysis-refresh {
+		animation: loading 1.5s linear 0ms infinite normal backwards;
+		width: 20px;
+		margin-left: 5px;
+		fill: #fff;
+	}
+    /* ---------------------------- */
+
+    #analysis, #reset-sku {
+        margin: 8px 1em 0px 7px;
+    }
+    .card {
+        margin: 20px 0px;
+    }
+
+    /* Таблица */
+    .product__image {
+        width: 30vw;
+        max-width: 150px;
+        height: 30vw;
+        max-height: 150px;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    .product__image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+    thead tr > th {
+        font-size: 14px !important;
+        text-transform: unset !important;
+    }
+    td {
+        padding: 0.25rem 0.5rem;
+        text-align: center;
+        vertical-align: middle;
+    }
+    table {
+        border-collapse: unset;
+    }
+    /* Слайдер */
+    .mySlides > a > img{
+        width: 70%;
+        border-radius: 10px;
+    }
+    .mySlides > a > p{
+        font-size: 13px;
+        overflow: hidden;
+        max-width: 150px;
+        text-overflow: ellipsis;
+        margin-left: auto;
+        margin-right:auto;
+        margin-top: 5px;
+  
+    }
+    .mySlides {
+        display: none;
+        padding: 20px 30px;
+        text-align: center;
+    }
+    .slideshow-container {
+        position: relative;
+        background: #f1f1f1f1;
+        display: flex;
+        align-items: center;
+        height: 312px;
+        width: 250px;
+        border-radius: 15px;
+    }
+    .prev:hover, .next:hover {
+        background-color: rgba(0,0,0,0.8);
+        color: white;
+    }
+    .prev, .next {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        width: auto;
+        margin-top: -30px;
+        padding: 16px;
+        color: #888;
+        font-weight: bold;
+        font-size: 20px;
+        border-radius: 0 3px 3px 0;
+        user-select: none;
+    }
+    .next {
+        right: 0;
+        border-radius: 3px 0 0 3px;
+    }
+    .prev {
+        left: 0;
+        border-radius: 0 3px 3px 0;
+    }
+
+    .bx-wrapper {
+        border: none;
+        background-color: transparent;
+    }
+    
+    .disabledLink {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+    .disabledLink:hover {
+        transform: scale(1)
+    }
+
+    #backet {
+        width: 22px;
+        margin-left: 10px;
+        margin-bottom: 15px;
+        fill: #918181;
+        cursor: pointer;
+        transition: 200ms all ease;
+    }
+    #backet:hover {
+        fill: #726767;
+        transform: scale(1.07);
+    }
+
+    /* MSG */ 
+    .msg {
+        transform: translateX(110%);
+        position: fixed;
+        top: 14vh;
+        right: 0;
+        max-width: 300px;
+        width: 50vw;
+        z-index: 10000;
+        font-size: 0.8em;
+        line-height: 1.2;
+        padding: 14px;
+        box-shadow: 0px 0px 15px 0px #40ff40;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+        color: #ffffffc4;
+        font-weight: 700;
+        transition: 500ms all ease;
+        background-image: linear-gradient(310deg, #17ad37 0%, #84dc14 100%);
+    }
+    .msg.show {
+        transform: translateX(0%);
+    }
+    .msg.error {
+        top: 23vh;
+        box-shadow: 0px 0px 15px 0px #ff000099;
+        background: rgb(255,141,0);
+        background: linear-gradient(90deg, rgb(223 94 18) 0%, rgb(225 21 21) 100%);
+    }
+</style>
+ 
+{% endblock stylesheets %}  
+ 
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %} 
+ 
+{% block content %} 
+<div class="container-fluid py-4">
+    <div class="card main hide">
+        <div class="card-body">
+            <div class="title">
+                <h4>Аналитика отзывов карточки</h4>
+                <div class="title-arrow"></div>
+            </div>
+            <form>
+                <div class="sku-text">
+                    <label for="sku">Введите список SKU:</label>
+                    <span><span id="num-of-rows">0</span>/20</span>
+                </div>
+                <textarea class="form-control" name="sku" id="sku" rows="7"></textarea>
+                <div class="sku-hint">Каждое значение вводится с новой строки.</div>
+                <button class="btn btn-primary bg-gradient-primary float-end" id="analysis">Анализировать</button>
+                <button class="btn btn-primary bg-gradient-dark float-end" type="reset" id="reset-sku">Очистить полe</button>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body px-0 pb-0">
+            <div class="table-responsive">
+                <table class="table table-flush" id="products-list">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Товары</th>
+                            <th>Статус</th>
+                            <th>Дата созд.</th>
+                            <th>Кол-во отзывов</th>
+                            <th>Ср. рейтинг</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    {% for review in reviews %}
+                    <tbody>
+                        <tr id='review-{{ review.id }}'>
+                            <td>
+                                <div class="slideshow-container border">
+                                    {% for product in review.sku_list %}
+                                    <div class="mySlides mySlides-{{ review.current }}">
+                                        <a href="https://www.wildberries.ru/catalog/{{product.sku}}/detail.aspx?" target="_blank" href='#'>
+                                            <img class="ms-1" src="{{ product.cover }}">
+                                            <p>{{ product.title }}</p>
+                                            <label style='font-weight: 600;'>Арт: {{ product.sku }}</label>
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                
+                                    <!-- Next/prev buttons -->
+                                    <a class="prev" onclick="plusSlides(-1, {{ review.current }})">&#10094;</a>
+                                    <a class="next" onclick="plusSlides(1, {{ review.current }})">&#10095;</a>
+                                </div>
+                            </td>
+                            <td><span data-id='{{ review.id }}' {% if review.status == "active" %}class="badge badge-warning badge-sm checkResponse"> В процессе {% else %}class="badge badge-success badge-sm"> завершен {% endif %} </span></td>
+                            <td>{{ review.date }}</td>
+                            <td class="num_reviews">{% if review.numb_reviews %} {{ review.numb_reviews }} {% else %} — {% endif %}</td>
+                            <td class="average_rate">{% if review.average_rate %} {{ review.average_rate }} {% else %} — {% endif %} </td>
+                            <td><a  style="background-color:#007bff; color: #fff" href="{{ review.id }}" {% if review.status == "active" %} class="btn btn-primary disabledLink disabled" disabled> Открыть <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="loader-svg"><path d="M256 0c-17.7 0-32 14.3-32 32s14.3 32 32 32V0zM422.3 352c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7L422.3 352zM256 64c106 0 192 86 192 192h64C512 114.6 397.4 0 256 0V64zM448 256c0 35-9.4 67.8-25.7 96L477.7 384c21.8-37.7 34.3-81.5 34.3-128H448z"></path></svg>{% else  %} class="btn btn-primary"> Открыть {% endif %}</a> </td>
+                            <td>
+                                <div id="backet" onclick="showMsg( {{review.id}} )">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z"></path></svg>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="msg success" role="alert">Группа товаров успешно была удалена!</div>
+    <div class="msg error" role="alert">Произошла ошибка!</div>
+</div> 
+ 
+ 
+{% endblock content %} 
+ 
+<!-- Specific JS goes HERE -->  
+{% block javascripts %}  
+<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bxslider/4.2.15/jquery.bxslider.min.js"></script>
+
+<!-- Раскрытие поля ввода -->
+<script>
+    $(document).ready(() => {
+        const main = $('.main')
+        let height = main.height()
+        main.css('height', '90px')
+
+        $('.main .title').click(() => {
+            main.toggleClass('hide')
+            main.hasClass('hide') ? main.css('height', '90px') : main.css('height', height + 'px')
+        })
+    })
+</script>
+
+<!-- Сообщение -->
+<script>
+    function showMsg(taskId) {
+
+        $.ajax({
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            type: 'POST',
+            async:false,
+            data: JSON.stringify({"task_id": taskId}),
+            url: '{% url "delete-task" %}',
+            success: function(response){
+                $("#review-"+ taskId).remove()
+                $('.msg.success').addClass('show')
+                setTimeout(() => $('.msg.success').removeClass('show'), 4000)
+            },
+            error: function(response) {
+                $('.msg.error').addClass('show')
+                setTimeout(() => $('.msg.error').removeClass('show'), 4000)
+            },
+        });
+        
+    }
+</script>
+
+<!-- Реализация слайдера -->
+<script>
+    var slideIndex = 1;
+    for (let i = 1; i < $('table').children().length; i++) showSlides(slideIndex, i)
+    function plusSlides(n, index) {
+      showSlides(slideIndex += n, index);
+    }
+    
+    
+    function showSlides(n, index) {
+      var i;
+      var slides = document.getElementsByClassName(`mySlides-${index}`);
+      if (n > slides.length) slideIndex = 1
+      if (n < 1) slideIndex = slides.length
+      for (i = 0; i < slides.length; i++) slides[i].style.display = "none"
+      slides[slideIndex-1].style.display = "block";
+    }
+</script>
+
+<!-- Счетчик количества строк -->
+<script>
+    $('#sku').on('input', function() {
+        let numOfRows = $(this).val().split('\n').filter(el => el.trim() !== '')
+        $('#num-of-rows').text(numOfRows.length)
+        if (numOfRows.length >= 20) $(this).val(numOfRows.join('\n'))
+    })
+
+    $('#reset-sku').click(() => $('#num-of-rows').text(0))
+</script>
+
+<!-- Анимация загрузки кнопки проверка -->
+<script>
+	function disableBtn() {
+<!--		$('#analysis').attr('disabled', true);-->
+<!--		document.querySelector('#analysis').innerHTML = 'Анализ... <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="analysis-refresh"><path d="M105.1 202.6c7.7-21.8 20.2-42.3 37.8-59.8c62.5-62.5 163.8-62.5 226.3 0L386.3 160H336c-17.7 0-32 14.3-32 32s14.3 32 32 32H463.5c0 0 0 0 0 0h.4c17.7 0 32-14.3 32-32V64c0-17.7-14.3-32-32-32s-32 14.3-32 32v51.2L414.4 97.6c-87.5-87.5-229.3-87.5-316.8 0C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5zM39 289.3c-5 1.5-9.8 4.2-13.7 8.2c-4 4-6.7 8.8-8.1 14c-.3 1.2-.6 2.5-.8 3.8c-.3 1.7-.4 3.4-.4 5.1V448c0 17.7 14.3 32 32 32s32-14.3 32-32V396.9l17.6 17.5 0 0c87.5 87.4 229.3 87.4 316.7 0c24.4-24.4 42.1-53.1 52.9-83.7c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.5 62.5-163.8 62.5-226.3 0l-.1-.1L125.6 352H176c17.7 0 32-14.3 32-32s-14.3-32-32-32H48.4c-1.6 0-3.2 .1-4.8 .3s-3.1 .5-4.6 1z"/></svg>'-->
+		var skuList = document.getElementById("sku").value.split('\n');
+		console.log(skuList);
+		$.ajax({
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            type: 'POST',
+            async:false,
+            data: JSON.stringify({"sku_list": skuList}),
+            url: '{% url "review-analysis" %}',
+            success: function(response){
+              status = response["status"];
+              console.log(status);
+              if (status == "sku error"){
+                    Swal.fire('Ошибка', 'SKU не найден', 'error');
+                    return false;
+              }
+              if (status == "error"){
+                    Swal.fire('Ошибка', 'Что-то пошло не так', 'error');
+                    return false;
+              }
+              location.reload();
+              return false;
+            },
+        });
+        return false;
+	}
+
+	function enableBtn() {
+		$('#analysis').attr('disabled', false)
+		document.querySelector('#analysis').innerHTML = 'Анализировать'
+	}
+
+	$('#analysis').click(disableBtn)
+</script>
+<!-- Отключаем ещё не готовые ссылки. -->
+<script>
+    $(".disabledLink").on('click', e => {
+        e.preventDefault()
+    })
+</script>
+<!-- Типа сокеты :) -->
+<script>
+    function checkResponse() {
+        if ($(".checkResponse").length) {
+            let allSku = []
+            $(".checkResponse").each((index, el) => {
+                allSku.push(parseInt(el.dataset.id))
+            })
+            console.log(allSku);
+            $.ajax({
+                data: JSON.stringify({"ids_list": allSku}),
+                url: '{% url "check-task" %}',
+                type: 'POST',
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                success: data => {
+                    console.log(data)
+                    if (data["message"] != '') {
+                        data = data["message"];
+                        let keys = Object.keys(data)
+                        keys.forEach(el => {
+                            let elem = '#review-' + el
+                            $('.num_reviews', $(elem)).text(data[el][1])
+                            $('.average_rate', $(elem)).text(data[el][0]) 
+                            $('.disabledLink', $(elem)).off('click')
+                            $('.disabledLink', $(elem)).removeAttr('disabled').removeClass('disabled disabledLink').html('Открыть')
+                            $('.badge-warning', $(elem)).removeClass('badge-warning').addClass('badge-success').text('завершен')
+                            $(".checkResponse").each((index, item) => {
+                                if (el == parseInt(item.dataset.id)) {
+                                    $(item).removeClass("checkResponse")
+                                }
+                            })
+                        })
+                    }
+                }
+            })
+        }
+    }
+    checkResponse()
+    setInterval(checkResponse, 10000)
+</script>
+{% endblock javascripts %}

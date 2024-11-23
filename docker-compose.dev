@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+
+  appseed-app:
+    image: registry.mplab.io/mplab-web:latest
+    container_name: appseed_app
+    restart: always
+    env_file: ${ENV_DEV}
+    networks:
+      - web_network
+    ports:
+      - "5005:5005"
+
+
+networks:
+  web_network:
+       external: true
+       name: web_network

@@ -1,0 +1,295 @@
+.customSwal {
+    position: fixed;
+    top: 30px;
+    width: 25vw;
+    right: 0;
+    transform: translateX(100%);
+    transition: transform 1s ease;
+    background: #ffa7a7;
+    z-index: 9998;
+    padding: 15px;
+    border-bottom-left-radius: 15px;
+    border-top-left-radius: 15px;
+    display: flex;
+    align-items: baseline;
+}
+.customSwal.active {
+    right: -10px;
+    transform: translateX(0%);
+}
+.customSwal__icon svg{
+    height: 40px;
+}
+.customSwal__icon path {
+    fill: #e36767;
+}
+.customSwal__text {
+    margin-left: 15px;
+    font-size: 1.2em;
+    padding-right: 5vw;
+    color: #fff;
+}
+html {
+    overflow-x: hidden;
+}
+@media (max-width: 1100px) {
+    .customSwal {
+        width: 40vw;
+    }
+}
+@media (max-width: 700px) {
+    .customSwal {
+        width: 65vw;
+    }
+}
+
+
+.bs-tooltip-top .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="top"] .tooltip-arrow::before {
+    border-top-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+}
+.bs-tooltip-end .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="right"] .tooltip-arrow::before {
+    border-right-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+}
+.bs-tooltip-bottom .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="bottom"] .tooltip-arrow::before {
+    border-bottom-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+}
+.bs-tooltip-start .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="left"] .tooltip-arrow::before {
+    border-left-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+}
+.tooltip-inner {
+    max-width: 25vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+    color: #666; /* цвет шрифта */
+    background: #fff; /* цвет фона (по умолчанию #000) */
+    border: 1px solid #d7d7d7;
+    box-shadow: 0 0px 15px -7px rgb(0 0 0); 
+    border-radius: 15px; /* радиус скругдения углов */
+    
+}
+.tooltip.show{
+    opacity: 1 !important;
+}
+@media (max-width: 600px) {
+    .tooltip-inner {
+        max-width: 45vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+    }
+}
+
+
+.alert.alert-success {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.nav.nav-pills .nav-link {
+    background-color: transparent;
+}
+.alert-success > label{
+font-size: 0.8rem;
+}
+/*.customize-row {
+display: grid;
+grid-template: 1fr / 1fr 1fr 1fr 1fr;
+grid-gap: 15px;
+}*/
+.alert.alert-warning.d-flex.align-items-center.p-2.my-3 {
+    font-size: 0.85em;
+}
+.customize-col {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+@media (min-width: 800px) and (max-width: 1200px) {
+    .customize-col {
+        flex: 0 0 auto;
+        width: 50%;
+        padding-bottom: 10px
+    }
+}
+tr td {
+    padding: 0px 0px 3px 20px;
+}
+.card-body.text-lg-start.text-center.pt-0 {
+    display: flex;
+    flex-direction: column;
+}
+table {
+    flex: 1 0 100%;
+}
+span.irs-bar.irs-bar--single {
+    background-color: #8126c6;
+}
+span.irs-handle.single {
+border-color: #8126c6;
+}
+span.irs-single {
+    background-color: #8126c6 !important;
+}
+
+.irs--round .irs-from:before, .irs--round .irs-to:before, .irs--round .irs-single:before {
+    border-top-color: #8126c6 !important;
+}
+.flex-95 {
+    flex: 0 0 95%;
+}
+.flex-95 p {
+    display: none;
+}
+.prices {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+    align-items: end;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: calc(12px + 10 *(100vw / 1440));
+}
+.result__price {
+    justify-content: flex-start;
+    display: block;
+    margin-bottom: 0;
+    font-weight: 700;
+    font-size: 1.2em;
+}
+.text-right {
+    text-align: right;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+.quantity-arrow-minus, .quantity-arrow-plus {
+    margin: 0 8px;
+    border-radius: 50%;
+    width: 32px;
+    height: 30px;
+    border: 1px solid #8126c6;
+    background-color: #fff !important;
+    box-shadow: 0px 0px 13px -5px #8126c6;
+    color: #9f9f9f;
+    transition: all 0.6s ease;
+}
+.quantity-arrow-minus:hover, .quantity-arrow-plus:hover {
+    box-shadow: 0px 0px 18px -3px #8126c6;
+}
+.readonly {
+    cursor: default;
+}
+h4 {
+    margin-bottom: 0;
+}
+.form-control {
+    padding: 3px 5px;
+}
+@media (max-width: 625px) {
+    h4 {
+    font-size: calc(1rem + 0.3vw);
+    line-height: 1;
+    }
+    .price, .result__price {
+        font-size: 1.2em
+    }
+}
+@media (max-width: 425px) {
+    .result .btn {
+        padding: 10px 15px;
+        font-size: 0.7em;
+    }
+    .calculate .card-body {
+        padding: 0.5rem
+    }
+    .result .flex-95 {
+        flex: 0 0 50%;
+    }
+}
+span.irs.irs--round {
+    margin-top: -15px;
+    margin-bottom: 10px;
+}
+.plus-minus {
+    display: grid;
+    width: 95%;
+}
+.pinned-bottom {
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+}
+.pinned-bottom:last-child {
+    border-right: none;
+}
+.pinned-bottom h4 {
+    flex: 1;
+    font-size: 1em;
+}
+.pinned-bottom input {
+    margin-top: 5px;
+    flex: 0 0 26%;
+}
+@media (max-width: 1000px) {
+    .no-flex-1000 {
+        display: block !important;
+        width: 100%;
+        margin-top: 15px
+    }
+}
+.content-footer {
+    justify-content: space-between;
+    align-items: center;
+}
+.content-footer a, .content-footer p{
+    display: block;
+    margin: 5px 10px;
+}
+.content-footer p {
+    text-align: right;
+}
+footer {
+    position: relative;
+    margin-top: 25px;
+}
+.footer__logo {
+    position: relative;
+    left: calc(100% - 200px);
+    margin-bottom: 25px;
+}
+@media (max-width: 1070px) {
+    .content-footer {
+        flex-direction: column;
+    }
+    .footer__links {
+        margin-top: 50px;
+        margin-bottom: 50px;
+    }
+    .footer__info {
+        margin-bottom: 25px
+    }
+    .footer__logo {
+        position: relative;
+        left: calc(50% - 100px);
+        margin-bottom: 0;
+    }
+    .content-footer p {
+        text-align: center;
+    }
+}
+
+@media (max-width: 800px) {
+    .card table {
+        font-size: 0.9em;
+    }
+}
+.unactive {
+    filter: brightness(0.9);
+}
+.unactive a {
+    filter: contrast(0.5);
+    transform: scale(1) !important;
+    cursor: no-drop;
+}

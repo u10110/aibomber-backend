@@ -1,0 +1,1904 @@
+{% extends 'layouts/base.html' %}
+{% load static %} 
+
+
+{% block title %} Pricing {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+	<link rel="stylesheet" href="{% static 'css/pricing-style.css' %}">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/css/ion.rangeSlider.min.css"/>
+
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show  bg-gray-100 {% endblock %}
+
+{% block content %}
+
+
+
+	<div class="page-header bg-gradient-primary  position-relative m-3 border-radius-xl">
+		<img src="/static/assets/img/shapes/waves-white.svg" alt="pattern-lines" class="position-absolute opacity-6 start-0 top-0 w-100">
+		<div class="container pb-lg-9 pb-10 pt-7 postion-relative z-index-2">
+			<div class="row">
+				<div class="col-md-6 mx-auto text-center">
+					<h3 class="text-white">Посмотрите наши цены</h3>
+					<p class="text-white">У вас есть бесплатные неограниченные обновления и премиум-поддержка для каждого пакета.</p>
+				</div>
+			</div>
+			<div class="row ">
+				{% comment %} <div class="col-12 mx-auto text-center"> {% endcomment %}
+					<div class="col- mx-auto text-center">
+					<div class="nav-wrapper mt-5 position-relative z-index-2">
+						<ul class="nav nav-pills nav-fill flex-row p-1" id="tabs-pricing" role="tablist">
+							{% comment %} <li class="nav-item">
+								<a class="nav-link mb-0" data-bs-toggle="tab" id="month1" href=""  aria-controls="annual" aria-selected="true">
+									1 месяц
+								</a>
+							</li> {% endcomment %}
+							<li class="nav-item">
+								<a class="nav-link mb-0 active " data-bs-toggle="tab" id="month1" href=""  aria-controls="monthly" aria-selected="true">
+									1 месяц
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link mb-0"  data-bs-toggle="tab" id="month3" href=""  aria-controls="annual" aria-selected="false">
+									3 месяца (-10%)
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link mb-0"  data-bs-toggle="tab" id="month6" href=""  aria-controls="annual" aria-selected="false">
+									6 месяцев (-20%)
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link mb-0"  data-bs-toggle="tab" id="month12" href=""  aria-controls="annual" aria-selected="false">
+									12 месяцев (-30%)
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+	<div class="mt-n8">
+		<div class="container">
+			<div class="tab-content tab-space">
+				<div class="tab-pane active" id="monthly">
+					<div class="customize-row row">
+						{% comment %} <div class="col-lg-6 mb-lg-0 mb-4 mx-auto text-center">
+							<div class="card">
+								<div class="card-header text-center pt-4 pb-3">
+									<span class="badge rounded-pill bg-light text-dark">Закрытое тестирование</span>
+									<h1 class="font-weight-bold mt-2" id="showroom">
+										<small>₽</small>2990
+									</h1>
+								</div>
+								
+								<div class="card-body text-lg-start text-center pt-0">
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >200 выкупов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >200 отзыв</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >200 вопросов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >500 лайков </span>
+										</div>
+									</div>
+									
+					 
+									<a href="javascript:;" id="test" class="btn btn-icon bg-gradient-dark d-lg-block mt-3 mb-0">
+										Подключить
+										<i class="fas fa-arrow-right ms-1"></i>
+									</a>
+								</div>
+							</div>
+						</div> {% endcomment %}
+						
+						<div class="col-md-6 col-lg-3 mb-lg-0 mb-3 customize-col">
+							<div class="card">
+								<div class="card-header text-center pt-4 pb-1">
+									<span class="badge rounded-pill bg-light text-dark">Шоурум</span>
+									<h2 class="font-weight-bold mt-2" id="showroom">
+										<small>₽</small>4900
+									</h2>
+								</div>
+								<div class="alert alert-success w-50 mx-auto text-center p-1" role="alert" style='background-image:none;' id='s_calc'>
+									<label>32,7 руб./выкуп</label>
+									<label>32,7 руб./отзыв</label>
+								</div>
+								
+								<div class="card-body text-lg-start text-center pt-0 min-height">
+									<table>
+										<thead></thead>
+										<tbody>
+											<tr>
+												<td>
+													<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+														<i class="fas fa-check opacity-10"></i>
+													</div>
+												</td>
+												<td>
+													<div>
+													<span >75 выкупов</span>
+												</div>
+												</td>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >75 отзывов</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >15 вопросов</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >75 лайков</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >35 лайков на отзывы</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >1 монитор аналитики</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >2 мониторинг позиций ключевых запросов</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >Курс "Автовыкупы"</span>
+														</div>
+													</td>
+												</tr>
+												{% comment %} <tr>
+													<td>
+														<div class="icon icon-shape icon-xs bg-gradient-danger rounded-circle text-center" >
+															<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px;"><path fill="#fff" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >Поисковое продвижение </span>
+														</div>
+													</td>
+												</tr> {% endcomment %}
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs bg-gradient-danger rounded-circle text-center" >
+															<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px;"><path fill="#fff" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >Мониторинг ставок</span>
+														</div>
+													</td>
+												</tr>
+												{% comment %} <tr>
+													<td>
+														<div class="icon icon-shape icon-xs bg-gradient-danger rounded-circle text-center" >
+															<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px;"><path fill="#fff" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >Работа с рекламными компаниями</span>
+														</div>
+													</td>
+												</tr> {% endcomment %}
+											
+										</tbody>
+									</table>
+									
+									{% comment %} <div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >определение ключей для выкупов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >авторасчет стратегий</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-secondary shadow text-center">
+											<i class="fas fa-minus"></i>
+										</div>
+										<div>
+											<span >написание вопросов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-secondary shadow text-center">
+											<i class="fas fa-minus"></i>
+										</div>
+										<div>
+											<span >мониторинг позиций по выкупленным ключам</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-secondary shadow text-center">
+											<i class="fas fa-minus"></i>
+										</div>
+										<div>
+											<span >автоответы на отзывы и вопросы</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-secondary shadow text-center">
+											<i class="fas fa-minus"></i>
+										</div>
+										<div>
+											<span >написание вопросов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-secondary shadow text-center">
+											<i class="fas fa-minus"></i>
+										</div>
+										<div>
+											<span >автоответы на отзывы и вопросы</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-secondary shadow text-center">
+											<i class="fas fa-minus"></i>
+										</div>
+										<div>
+											<span >корректировка ставок</span>
+										</div>
+									</div> {% endcomment %}
+									<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+										<symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+											<path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+										</symbol>
+									</svg>
+									<div class="alert alert-warning d-flex align-items-center p-2 my-3" role="alert" style='background-image:none;'>
+										<svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+										<div>
+											Не использованные лимиты сгорают в конце месяца
+										</div>
+									</div>
+									<a href="javascript:;" id="showroom_order" class="btn btn-icon bg-gradient-dark d-lg-block mt-3 mb-0">
+										Подключить
+										<i class="fas fa-arrow-right ms-1"></i>
+									</a>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6 col-lg-3 mb-lg-0 mb-3 customize-col">
+							<div class="card">
+								<div class="card-header text-center pt-4 pb-1">
+									<span class="badge rounded-pill bg-light text-dark">Магазин</span>
+									<h2 class="font-weight-bold mt-2" id="shop">
+										<small>₽</small>8900
+									</h2>
+								</div>
+								<div class="alert alert-success w-50 mx-auto text-center p-1" role="alert" style='background-image:none;' id='m_calc'>
+									<label>29,7 руб./выкуп</label>
+									<label>29,7 руб./отзыв</label>
+								</div>
+								<div class="card-body text-lg-start text-center pt-0 min-height">
+
+									<table>
+										<thead></thead>
+										<tbody>
+											<tr>
+												<td>
+													<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+														<i class="fas fa-check opacity-10"></i>
+													</div>
+												</td>
+												<td>
+													<div>
+													<span >150 выкупов</span>
+												</div>
+												</td>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >150 отзывов</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >30 вопросов</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >150 лайков</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >70 лайков на отзывы</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >1 монитор аналитики</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >6 мониторинга позиций ключевых запросов</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >Курс "Автовыкупы"</span>
+														</div>
+													</td>
+												</tr>
+												{% comment %} <tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >1 поисковое продвижение </span>
+														</div>
+													</td>
+												</tr> {% endcomment %}
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >Мониторинг ставок</span>
+														</div>
+													</td>
+												</tr>
+												{% comment %} <tr>
+													<td>
+														<div class="icon icon-shape icon-xs bg-gradient-danger rounded-circle text-center" >
+															<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 10px;"><path fill="#fff" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >Работа с рекламными компаниями</span>
+														</div>
+													</td>
+												</tr> {% endcomment %}
+											
+										</tbody>
+									</table>
+									{% comment %} <div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >определение ключей для выкупов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >авторасчет стратегий</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >написание вопросов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >мониторинг позиций по выкупленным ключам</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >автоответы на отзывы и вопросы</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >написание вопросов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-secondary shadow text-center">
+											<i class="fas fa-minus"></i>
+										</div>
+										<div>
+											<span >автоответы на отзывы и вопросы</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-secondary shadow text-center">
+											<i class="fas fa-minus"></i>
+										</div>
+										<div>
+											<span >корректировка ставок</span>
+										</div>
+									</div> {% endcomment %}
+									<div class="alert alert-warning d-flex align-items-center p-2 my-3" role="alert" style='background-image:none;'>
+										<svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+										<div>
+											Не использованные лимиты сгорают в конце месяца
+										</div>
+									</div>
+									<a href="javascript:;" id="market_order" class="btn btn-icon bg-gradient-dark d-lg-block mt-3 mb-0">
+										Подключить
+										<i class="fas fa-arrow-right ms-1"></i>
+									</a>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6 col-lg-3 mb-lg-0  mb-3 customize-col">
+							<div class="card">
+								<div class="card-header text-center pt-4 pb-1">
+									<span class="badge rounded-pill bg-light text-dark">Гипермаркет</span>
+									<h2 class="font-weight-bold mt-2" id="market">
+										<small>₽</small>19900
+									</h2>
+								</div>
+								<div class="alert alert-success w-50 mx-auto text-center p-1" role="alert" style='background-image:none;' id='h_calc'>
+									<label>22,1 руб./выкуп</label>
+									<label>22,1 руб./отзыв</label>
+								</div>
+								<div class="card-body text-lg-start text-center pt-0 min-height">
+									<table>
+										<thead></thead>
+										<tbody>
+											<tr>
+												<td>
+													<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+														<i class="fas fa-check opacity-10"></i>
+													</div>
+												</td>
+												<td>
+													<div>
+													<span >450 выкупов</span>
+												</div>
+												</td>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >450 отзывов</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >90 вопросов</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >450 лайков</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >210 лайков на отзывы</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >5 монитор аналитики</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >20 мониторинга позиций ключевых запросов</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >Курс "Автовыкупы"</span>
+														</div>
+													</td>
+												</tr>
+												{% comment %} <tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >3 поисковых продвижений </span>
+														</div>
+													</td>
+												</tr> {% endcomment %}
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >Мониторинг ставок</span>
+														</div>
+													</td>
+												</tr>
+												{% comment %} <tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >Работа с рекламными компаниями</span>
+														</div>
+													</td>
+												</tr> {% endcomment %}
+										</tbody>
+									</table>
+									{% comment %} <div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >определение ключей для выкупов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >авторасчет стратегий</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >написание вопросов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >мониторинг позиций по выкупленным ключам</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >автоответы на отзывы и вопросы</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >написание вопросов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >автоответы на отзывы и вопросы</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >корректировка ставок</span>
+										</div>
+
+									</div> {% endcomment %}
+									<div class="alert alert-warning d-flex align-items-center p-2 my-3" role="alert" style='background-image:none;'>
+										<svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+										<div>
+											Не использованные лимиты сгорают в конце месяца
+										</div>
+									</div>
+									<a href="javascript:;" id="hypermarket" class="btn btn-icon bg-gradient-dark d-lg-block mt-3 mb-0">
+										Подключить
+										<i class="fas fa-arrow-right ms-1"></i>
+									</a>
+
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6 col-lg-3 mb-lg-0  mb-3 customize-col">
+							<div class="card">
+								<div class="card-header text-center pt-4 pb-1">
+									<span class="badge rounded-pill bg-light text-dark">Магигранд</span>
+									<h2 class="font-weight-bold mt-2" id="grand">
+										<small>₽</small>49900
+									</h2>
+								</div>
+								<div class="alert alert-success w-50 mx-auto text-center p-1" role="alert" style='background-image:none;' id='l_calc'>
+									<label>13,9 руб./выкуп</label>
+									<label>13,9 руб./отзыв</label>
+								</div>
+								<div class="card-body text-lg-start text-center pt-0 min-height">
+									<table>
+										<thead></thead>
+										<tbody>
+											<tr>
+												<td>
+													<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+														<i class="fas fa-check opacity-10"></i>
+													</div>
+												</td>
+												<td>
+													<div>
+													<span >1800 выкупов</span>
+												</div>
+												</td>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >1800 отзывов</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >360 вопросов</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >1800 лайков</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >840 лайков на отзывы</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >15 монитор аналитики</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >100 мониторинга позиций ключевых запросов</span>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >Курс "Автовыкупы"</span>
+														</div>
+													</td>
+												</tr>
+												{% comment %} <tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >9 поисковых продвижений </span>
+														</div>
+													</td>
+												</tr> {% endcomment %}
+												<tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >Мониторинг ставок</span>
+														</div>
+													</td>
+												</tr>
+												{% comment %} <tr>
+													<td>
+														<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+															<i class="fas fa-check opacity-10"></i>
+														</div>
+													</td>
+													<td>
+														<div>
+															<span >Работа с рекламными компаниями</span>
+														</div>
+													</td>
+												</tr> {% endcomment %}
+										</tbody>
+									</table>
+									{% comment %} <div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >определение ключей для выкупов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >авторасчет стратегий</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >написание вопросов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >мониторинг позиций по выкупленным ключам</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >автоответы на отзывы и вопросы</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >написание вопросов</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >автоответы на отзывы и вопросы</span>
+										</div>
+									</div>
+									<div class="d-flex justify-content-lg-start justify-content-center p-2">
+										<div class="icon icon-shape icon-xs rounded-circle bg-gradient-success shadow text-center">
+											<i class="fas fa-check opacity-10"></i>
+										</div>
+										<div>
+											<span >корректировка ставок</span>
+										</div>
+
+									</div> {% endcomment %}
+									<div class="alert alert-warning d-flex align-items-center p-2 my-3" role="alert" style='background-image:none;'>
+										<svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+										<div>
+											Не использованные лимиты сгорают в конце месяца
+										</div>
+									</div>
+									<a href="javascript:;" id="magigrand" class="btn btn-icon bg-gradient-dark d-lg-block mt-3 mb-0">
+										Подключить
+										<i class="fas fa-arrow-right ms-1"></i>
+									</a>
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+			</div>
+			
+			<div class="calculate mt-6">
+				<div class="card">
+					<div class="card-header pb-1">
+						<div class="calculate__title">
+							<h3>Калькулятор</h3>
+						</div>
+						<div class="calculate__suptitle">
+							<p style="margin-left: 5px;">Собери свой тариф</p>
+						</div>
+						
+					</div>
+					<div class="card-body pt-1">
+						<form action="{% url 'create_order' %}" method='POST' class="d-flex no-flex-1000">
+							{% csrf_token %}
+							<input type="text" class="d-none" name="tariff" value="custom" >
+							<input type="text" class="d-none" name="period" value='1' >
+							<div class="col-7 no-flex-1000">
+								<div class="redemption d-flex">
+									<div class="redemptions__choose flex-95">
+										<div class="d-flex">
+											<h4 class="col-10">
+												Выкупы
+												<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="Цена за штуку в текущем количестве: <strong>55₽</strong>" id="redemptions__tip" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>
+											</h4>
+											<input type="text" class="redemptions__input form-control"/>
+										</div>
+											<input type="text" class="redemptions__range slider-range" name="redemptions" value="" >
+									</div>
+									
+								</div>
+								<div class="reviews d-flex">
+									<div class="reviews__choose flex-95">
+										<div class="d-flex">
+											<h4 class="col-10">
+												Отзывы
+												<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="Цена за штуку в текущем количестве: <strong>55₽</strong>" id="reviews__tip" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>
+											</h4>
+											<input type="text" class="reviews__input form-control"/>
+										</div>
+										<input type="text" class="reviews__range" name="reviews" value="" >
+									</div>
+								</div>
+								<div class="likes d-flex">
+									<div class="likes__choose flex-95">
+										<div class="d-flex">
+											<h4 class="col-10">
+												Лайки
+												<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="Цена за штуку в текущем количестве: <strong>5₽</strong>" id="likes__tip" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>
+											</h4>
+											<input type="text" class="likes__input form-control"/>
+										</div>
+										<input type="text" class="likes__range" name="likes" value="" >
+									</div>
+								</div>
+								<div class="questions d-flex">
+									<div class="questions__choose flex-95">
+										<div class="d-flex">
+											<h4 class="col-10">
+												Вопросы
+												<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="Цена за штуку в текущем количестве: <strong>5₽</strong>" id="questions__tip" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>
+											</h4>
+											<input type="text" class="questions__input form-control"/>
+										</div>
+										<input type="text" class="questions__range" name="questions" value="" >
+									</div>
+								</div>
+								<div class="likes-on-reviews d-flex">
+									<div class="likes-on-reviews__choose flex-95">
+										<div class="d-flex">
+											<h4 class="col-10">
+												Лайки на отзывы
+												<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="Цена за штуку в текущем количестве: <strong>8₽</strong>" id="likes-on-reviews__tip" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>
+											</h4>
+											<input type="text" class="likes-on-reviews__input form-control"/>
+										</div>
+										<input type="text" class="likes-on-reviews__range" name="likes-on-reviews" value="" >
+									</div>
+									
+								</div>
+								<div class="plus-minus">
+<!--									<div class="promotion pinned-bottom">-->
+<!--										<h4>-->
+<!--											Поисковое продвижение-->
+<!--											<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="Функционал, который за счет определенных алгоритмов повышает активность на вашей карточке товара. Все эти действия значительно повышают активность на карточке товара и она сильнее ранжируется по сравнению с конкурентами<br><br>Цена за штуку в текущем количестве: <strong>10000₽</strong>" id="promotion__tip" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>-->
+<!--										</h4>-->
+<!--										<div class="d-flex" style="align-items:baseline;">-->
+<!--											<button class="quantity-arrow-minus__promotion quantity-arrow-minus" type="button"> - </button>-->
+<!--											<input readonly="readonly" type="number" class="promotion__input form-control mb-2 readonly" name="search_promotion" value=0>-->
+<!--											<button class="quantity-arrow-plus__promotion quantity-arrow-plus" type="button"> + </button>-->
+<!--										</div>-->
+<!--										-->
+<!--									</div>-->
+									<div class="monitor pinned-bottom">
+										<h4>
+											Монитор 
+											<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="Благодаря монитору аналитики вы можете следить за продажами товаров по времени, а также  получать расширенную статистику по выкупам с платформы<br><br>Цена за штуку в текущем количестве: <strong>300₽</strong>" id="monitor__tip" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>
+										</h4>
+										<div class="d-flex" style="align-items:baseline;">
+											<button class="quantity-arrow-minus__monitor quantity-arrow-minus" type="button"> - </button>
+											<input readonly="readonly" type="number" class="monitor__input form-control mb-2 readonly" name="monitor" value=0>
+											<button class="quantity-arrow-plus__monitor quantity-arrow-plus" type="button"> + </button>
+										</div>
+										
+									</div>
+									 <div class="monitoring pinned-bottom">
+										<h4>
+											Мониторинг КЗ
+											<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="Функционал, позволяющий отслеживать рост видимости и средней позиции своего товара на Вайлдберис, а также анализировать данные и отслеживать повышение конверсии поискового трафика по определенным ключевым фразам<br><br>Цена за штуку в текущем количестве: <strong>100₽</strong>" id="monitoring__tip" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>
+										</h4>
+										<div class="d-flex" style="align-items:baseline;">
+											<button class="quantity-arrow-minus__monitoring quantity-arrow-minus" type="button"> - </button>
+											<input readonly="readonly" type="number" class="monitoring__input form-control mb-2 readonly" name="monitoring_kz" value=0>
+											<button class="quantity-arrow-plus__monitoring quantity-arrow-plus" type="button"> + </button>
+										</div>
+										
+									</div>
+									{% comment %}
+									<div class="advertising-companies pinned-bottom">
+										<h4>
+											Работа с рекламными компаниями 
+											<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="Цена за штуку в текущем количестве: <strong>2990₽</strong>" id="advertising-companies__tip" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>
+										</h4>
+										<div class="d-flex" style="align-items:baseline;">
+											<button class="quantity-arrow-minus__advertising-companies quantity-arrow-minus" type="button"> - </button>
+											<input readonly="readonly" type="number" class="advertising-companies__input form-control mb-2 readonly" name="adv_company" value=0>
+											<button class="quantity-arrow-plus__advertising-companies quantity-arrow-plus" type="button"> + </button>
+										</div>
+										
+									</div>
+									{% endcomment %}
+								</div>
+								<div class="rate-monitoring d-flex mt-4">
+									<div class="rate-monitoring__choose flex-95">
+										<div class="d-flex" style="align-items:baseline;">
+											<div class="form-check form-switch">
+												<input class="form-check-input mt-2" type="checkbox"  id="rate-monitoring" name="rate-monitoring">
+												<label class="form-check-label" for="rate-monitoring">
+													<h4>
+														Мониторинг ставок
+														<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="с помощью данного функционала можно узнать актуальную стоимость ставки за 1000 показов по ключевому запросу<br><br>Цена: <strong>500₽</strong>" id="monitoring__tip" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>
+													</h4>
+												</label>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="course d-flex mt-2">
+									<div class="course__choose flex-95">
+									<div class="d-flex" style="align-items:baseline;">
+										<div class="form-check form-switch">
+											<input class="form-check-input mt-2" type="checkbox" value=0 id="course" name="course">
+											<label class="form-check-label" for="course">
+												<h4>
+													Курс "Автовыкупы"
+													<span style="padding: 0 5px;z-index: 5;position: relative;" data-bs-html='true' title="Возможность пройти курс из  обучающих видеоуроков, а также бонусом получить шаблон стратегии<br><br>Цена: <strong>5000₽</strong>" id="monitoring__tip" data-bs-toggle="tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path></svg></span>
+												</h4>
+											</label>
+										</div>
+									</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-5 no-flex-1000">
+								<div style="background: #f6f6f6;border-radius: 15px;box-shadow: 0 0 15px -5px #5f5f5f;padding: 15px;">
+									<table class="prices">
+										<tbody style="width: 100%">
+											<tr>
+												<th style="width: 100%">Выкупы:&nbsp;</th>
+												<th class="text-right"><span class="redemptions__price price"></span></th>
+											</tr>
+											<tr>
+												<th>Отзывы:&nbsp;</th>
+												<th class="text-right"><span class="reviews__price price"></span></th>
+											</tr>
+											<tr>
+												<th>Лайки:&nbsp;</th>
+												<th class="text-right"><span class="likes__price price"></span></th>
+											</tr>
+											<tr>
+												<th>Вопросы:&nbsp;</th>
+												<th class="text-right"><span class="questions__price price"></span></th>
+											</tr>
+											<tr>
+												<th>Лайки на отзывы:&nbsp;</th>
+												<th class="text-right"><span class="likes-on-reviews__price price"></span></th>
+											</tr>
+											<tr>
+												<th>Поиск. продвиж.:&nbsp;</th>
+												<th class="text-right"><span class="promotion__price price"><span>0</span><small>₽</small></span></th>
+											</tr>
+											<tr>
+												<th>Монитор:&nbsp;</th>
+												<th class="text-right"><span class="monitor__price price"><span>0</span><small>₽</small></span></th>
+											</tr>
+											 <tr>
+												<th>Мониторинг КЗ:&nbsp;</th>
+												<th class="text-right"><span class="monitoring__price price"><span>0</span><small>₽</small></span></th>
+											</tr>
+											{% comment %}
+											<tr>
+												<th>Рек. компании:&nbsp;</th>
+												<th class="text-right"><span class="advertising-companies__price price"><span>0</span><small>₽</small></span></th>
+											</tr>
+											{% endcomment %}
+											
+											<tr>
+												<th>Монит. ставок:&nbsp;</th>
+												<th class="text-right"><span class="rate-monitoring__price price"><span>0</span><small>₽</small></span></th>
+											</tr>
+											<tr>
+												<th>Курс АВ:&nbsp;</th>
+												<th class="text-right"><span class="course__price price"><span>0</span><small>₽</small></span></th>
+											</tr>
+										</tbody>
+									</table>
+									<div class="result mt-4">
+										<div>
+											<div class="result__price"><span>Итого: 0</span><small>₽</small></div>
+											<input type="hidden" name="result" class="result__input">
+										</div>
+										<button type="submit" class="btn bg-gradient-primary w-100" id="payCalculate">{% if not have_subscribe %}Оплатить на месяц{% else %}Пополнить текущий тариф{% endif %}</button>
+									</div>
+								</div>
+							</div>
+						</form>
+
+					</div>
+				</div>
+			</div>
+			
+		</div> 
+	</div>
+
+
+	<footer>
+		<div class="container">
+			<div class="card-body" style="position: relative;">
+				<img src="/static/assets/img/logo.png" class="footer__logo" width="200" height="60"  alt="main_logo">
+				<div class="d-flex content-footer">
+					<div class="footer__links">
+						<a href="/legal">Пользовательское соглашение</a>
+						<a href="/privacy">Политика конфиденциальности</a>
+						<a href="/policy">Политика оплаты и возврата</a>
+					</div>
+					<div class="footer__info">
+						<p>ООО “МПЛАБ”</p>
+						<p>ИНН: 9701184440</p>
+						<p>ОГРН: 1217700434566</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</footer>
+
+	<div class="customSwal">
+		<div class="customSwal__icon">
+			
+		</div>
+		<div class="customSwal__text"></div>
+	</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}
+<script src="/static/assets/js/jquery.js"></script>
+<script>
+	
+</script>
+<script>
+	var period = 1;
+	
+	$('#month1').on('click', function(){
+		period = 1;
+		$('#showroom').html('4900<small>₽</small>');
+		$('#s_calc').html('<label>32,7 руб./выкуп</label><label>32,7 руб./отзыв</label>');
+
+		$('#shop').html('8900<small>₽</small>');
+		$('#m_calc').html('<label>29,7 руб./выкуп</label><label>29,7 руб./отзыв</label>');
+
+		$('#market').html('19900<small>₽</small>');
+		$('#h_calc').html('<label>22,1 руб./выкуп</label><label>22,1 руб./отзыв</label>');
+
+		$('#grand').html('49900<small>₽</small>');
+		$('#l_calc').html('<label>13,9 руб./выкуп</label><label>13,9 руб./отзыв</label>');
+
+	});
+	$('#month3').on('click', function(){
+		period = 3;
+		$('#showroom').html('13230<small>₽</small>');
+		$('#s_calc').html('<label>29,4 руб./выкуп</label><label>29,4 руб./отзыв</label>');
+
+		$('#shop').html('24030<small>₽</small>');
+		$('#m_calc').html('<label>26,7 руб./выкуп</label><label>26,7 руб./отзыв</label>');
+
+		$('#market').html('53730<small>₽</small>');
+		$('#h_calc').html('<label>19,9 руб./выкуп</label><label>19,9 руб./отзыв</label>');
+
+		$('#grand').html('134730<small>₽</small>');
+		$('#l_calc').html('<label>12,5 руб./выкуп</label><label>12,5 руб./отзыв</label>');
+		});
+	$('#month6').on('click', function(){
+		period = 6;
+		$('#showroom').html('23520<small>₽</small>');
+		$('#s_calc').html('<label>26,2 руб./выкуп</label><label>26,2 руб./отзыв</label>');
+
+		$('#shop').html('42720<small>₽</small>');
+		$('#m_calc').html('<label>23,8 руб./выкуп</label><label>23,8 руб./отзыв</label>');
+
+		$('#market').html('95520<small>₽</small>');
+		$('#h_calc').html('<label>17,7 руб./выкуп</label><label>17,7 руб./отзыв</label>');
+
+		$('#grand').html('239520<small>₽</small>');
+		$('#l_calc').html('<label>11,1 руб./выкуп</label><label>11,1 руб./отзыв</label>');
+		});
+	$('#month12').on('click', function(){
+		period = 12;
+		$('#showroom').html('41160<small>₽</small>');
+		$('#s_calc').html('<label>22,9 руб./выкуп</label><label>22,9 руб./отзыв</label>');
+
+		$('#shop').html('74760<small>₽</small>');
+		$('#m_calc').html('<label>20,8 руб./выкуп</label><label>20,8 руб./отзыв</label>');
+
+		$('#market').html('167160<small>₽</small>');
+		$('#h_calc').html('<label>15,5 руб./выкуп</label><label>15,5 руб./отзыв</label>');
+
+		$('#grand').html('419160<small>₽</small>');
+		$('#l_calc').html('<label>9,8 руб./выкуп</label><label>9,8 руб./отзыв</label>');
+		});
+	
+		var hypermarket = document.getElementById('hypermarket');
+		hypermarket.addEventListener('click', make_order_hypermarket, false);
+		var market = document.getElementById('market_order');
+		market.addEventListener('click', make_order_market, false);
+		var showroom = document.getElementById('showroom_order');
+		showroom.addEventListener('click', make_order_showroom, false);
+		var magigrand = document.getElementById('magigrand')
+		magigrand.addEventListener('click', make_order_magigrand, false)
+		{% comment %} var showroom = document.getElementById('test');
+		showroom.addEventListener('click', make_order_test, false); {% endcomment %}
+
+		$("a", ".unactive").on("click", e => { // вешать класс на дивы с классом card, также убирать на данных тарифах событие make_order
+			e.preventDefault()
+			Swal.fire("", "Этот тариф можно приобрести только после окончания текущего.", "warning")
+		}) 
+
+		var tariff;
+		function make_order_hypermarket(e) {
+			e.preventDefault();
+			tariff = 'hypermarket';
+			make_order();
+		}
+		function make_order_market(e) {
+			e.preventDefault();
+			tariff = 'market';
+			make_order();
+		}
+		function make_order_showroom(e) {
+			e.preventDefault();
+			tariff = 'showroom';
+			make_order();
+		}
+		function make_order_test(e){
+			e.preventDefault();
+			tariff = 'test';
+			make_order();
+		}
+		function make_order_magigrand(e) {
+			e.preventDefault();
+			tariff = 'magigrand';
+			make_order();
+		}
+		function make_order(){
+			const request = new XMLHttpRequest();
+			const url = "{% url 'create_order' %}";
+			const params = "tariff=" + tariff+ "&period=" + period + "&csrfmiddlewaretoken=" + "{{ csrf_token }}";
+			request.onreadystatechange = function() { 
+			if (request.readyState == 4 && request.status == 200) { // when completed we can move away
+				var link = JSON.parse(request.responseText);
+				window.location.href = link['link'];
+				
+			}
+			}
+			request.open("POST", url, true);
+			request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			
+			request.send(params);
+			}
+			
+</script>
+<script>
+	var columns = document.querySelectorAll(".min-height")
+	console.log(columns)
+	var heightColumns = Array.from(columns).map(el => el.offsetHeight)
+	console.log(heightColumns)
+	var minHeightColumn = Math.max.apply(null, heightColumns)
+	columns.forEach(el => {
+		el.style.minHeight = minHeightColumn + "px"
+	})
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>
+<script>
+	// -------------------------------------------------------SLIDERS------------------------------------------------
+	var $redemptionsRange = $(".redemptions__range");
+	var $redemptionsInput = $(".redemptions__input");
+	var $redemptionsPrice = $(".redemptions__price");
+	var $reviewsRange = $(".reviews__range");
+	var $reviewsInput = $(".reviews__input");
+	var $reviewsPrice = $(".reviews__price");
+	var $likesRange = $(".likes__range");
+	var $likesInput = $(".likes__input");
+	var $likesPrice = $(".likes__price");
+	var $questionsRange = $(".questions__range");
+	var $questionsInput = $(".questions__input");
+	var $questionsPrice = $(".questions__price"); 
+	var $likesOnReviewsRange = $(".likes-on-reviews__range");
+	var $likesOnReviewsInput = $(".likes-on-reviews__input");
+	var $likesOnReviewsPrice = $(".likes-on-reviews__price"); 
+
+
+	var redemptionsInstance;
+	var reviewsInstance;
+	var likesInstance;
+	var questionsInstance;
+	var likesOnReviewsInstance;
+
+	var min = 0;
+
+	var maxRedemptions = 5000;
+	var maxReviews = 5000;
+	var maxLikes = 5000;
+	var maxQuestions = 5000;
+	var maxLikesOnReviews = 5000;
+
+	function checkValue(input, instance, max) {
+		var val = $(input).prop("value");
+
+		// validate
+		if (val < min) {
+				val = min;
+		} else if (val > max) {
+				val = max;
+		}
+
+		instance.update({
+				from: val
+		});
+		$(input).val(val);
+	}
+	function countRedemptions(val) {
+		var tip = $("#redemptions__tip")
+		if (val < 150) {
+			$redemptionsPrice.html(`<span>${val*55}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>55₽</strong>')
+		} else if (val < 450){
+			$redemptionsPrice.html(`<span>${val*40}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>40₽</strong>')
+		} else if (val < 1800){
+			$redemptionsPrice.html(`<span>${val*25}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>25₽</strong>')
+		} else {
+			$redemptionsPrice.html(`<span>${val*15}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>15₽</strong>')
+		}
+	}
+	function countReviews(val) {
+		var tip = $("#reviews__tip")
+		if (val < 30) {
+			$reviewsPrice.html(`<span>${val*55}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>55₽</strong>')
+		} else if (val < 90){
+			$reviewsPrice.html(`<span>${val*40}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>40₽</strong>')
+		} else if (val < 360){
+			$reviewsPrice.html(`<span>${val*25}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>25₽</strong>')
+		} else{
+			$reviewsPrice.html(`<span>${val*15}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>15₽</strong>')
+		}
+	}
+	function countLikes(val) {
+		var tip = $("#likes__tip")
+		if (val < 150) {
+			$likesPrice.html(`<span>${val*5}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>5₽</strong>')
+		} else if (val < 450){
+			$likesPrice.html(`<span>${val*4}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>4₽</strong>')
+		} else if (val < 1800){
+			$likesPrice.html(`<span>${val*3}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>3₽</strong>')
+		} else{
+			$likesPrice.html(`<span>${parseInt(val*2.5)}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>2.5₽</strong>')
+		}
+	}
+	function countQuestions(val) {
+		var tip = $("#questions__tip")
+		if (val < 30) {
+			$questionsPrice.html(`<span>${val*5}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>5₽</strong>')
+		} else if (val < 90){
+			$questionsPrice.html(`<span>${val*4}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>4₽</strong>')
+		} else if (val < 360){
+			$questionsPrice.html(`<span>${val*3}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>3₽</strong>')
+		} else{
+			$questionsPrice.html(`<span>${parseInt(val*2.5)}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>2.5₽</strong>')
+		}
+	}
+	function countLikesOnReviews(val) {
+		var tip = $("#likes-on-reviews__tip")
+		if (val < 70) {
+			$likesOnReviewsPrice.html(`<span>${val*8}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>8₽</strong>')
+		} else if (val < 210){
+			$likesOnReviewsPrice.html(`<span>${val*6}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>6₽</strong>')
+		} else if (val < 840){
+			$likesOnReviewsPrice.html(`<span>${val*4}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>4₽</strong>')
+		} else{
+			$likesOnReviewsPrice.html(`<span>${val*3}</span>` + "<small>₽</small>")
+			$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>3₽</strong>')
+		}
+	}
+	$redemptionsRange.ionRangeSlider({
+		skin: "round",
+		type: "single",
+		min: min,
+		max: maxRedemptions,
+		from: 0,
+		hide_min_max: true,
+		hide_from_to: true,
+		onStart: function(data) {
+				$redemptionsInput.prop("value", data.from);
+				$redemptionsPrice.html(data.from*65 + "<small>₽</small>")
+		},
+		onChange: function(data) {
+				$redemptionsInput.prop("value", data.from);
+				countRedemptions(data.from)
+				countResult()
+		}
+		});
+	redemptionsInstance = $redemptionsRange.data("ionRangeSlider");
+	$redemptionsInput.on("input", () => {checkValue($redemptionsInput, redemptionsInstance, maxRedemptions);countRedemptions(redemptionsInstance.old_from);countResult()});
+
+
+
+	 $reviewsRange.ionRangeSlider({
+		skin: "round",
+		type: "single",
+		min: min,
+		max: maxReviews,
+		from: 0,
+		hide_min_max: true,
+		hide_from_to: true,
+		onStart: function(data) {
+				$reviewsInput.prop("value", data.from);
+				$reviewsPrice.html(data.from*65 + "<small>₽</small>")
+		},
+		onChange: function(data) {
+				$reviewsInput.prop("value", data.from);
+				countReviews(data.from)
+				countResult()
+		}
+		});
+	reviewsInstance = $reviewsRange.data("ionRangeSlider");
+		
+	$reviewsInput.on("input", () => {checkValue($reviewsInput, reviewsInstance, maxReviews);countReviews(reviewsInstance.old_from);countResult()});
+
+
+
+	$likesRange.ionRangeSlider({
+		skin: "round",
+		type: "single",
+		min: min,
+		max: maxLikes,
+		from: 0,
+		hide_min_max: true,
+		hide_from_to: true,
+		onStart: function(data) {
+				$likesInput.prop("value", data.from);
+				$likesPrice.html(data.from*5 + "<small>₽</small>")
+		},
+		onChange: function(data) {
+				$likesInput.prop("value", data.from);
+				countLikes(data.from)
+				countResult()
+		}
+		});
+	likesInstance = $likesRange.data("ionRangeSlider");
+		
+	$likesInput.on("input", () => {checkValue($likesInput, likesInstance, maxLikes);countLikes(likesInstance.old_from);countResult()});
+
+
+	$questionsRange.ionRangeSlider({
+		skin: "round",
+		type: "single",
+		min: min,
+		max: maxQuestions,
+		from: 0,
+		hide_min_max: true,
+		hide_from_to: true,
+		onStart: function(data) {
+				$questionsInput.prop("value", data.from);
+				$questionsPrice.html(data.from*5 + "<small>₽</small>")
+		},
+		onChange: function(data) {
+				$questionsInput.prop("value", data.from);
+				countQuestions(data.from)
+				countResult()
+		}
+		});
+	questionsInstance = $questionsRange.data("ionRangeSlider");
+		
+	$questionsInput.on("input", () => {checkValue($questionsInput, questionsInstance, maxQuestions);countQuestions(questionsInstance.old_from);countResult()});
+
+
+	$likesOnReviewsRange.ionRangeSlider({
+		skin: "round",
+		type: "single",
+		min: min,
+		max: maxLikesOnReviews,
+		from: 0,
+		hide_min_max: true,
+		hide_from_to: true,
+		onStart: function(data) {
+				$likesOnReviewsInput.prop("value", data.from);
+				$likesOnReviewsPrice.html(data.from*8 + "<small>₽</small>")
+		},
+		onChange: function(data) {
+				$likesOnReviewsInput.prop("value", data.from);
+				countLikesOnReviews(data.from)
+				countResult()
+		}
+		});
+	likesOnReviewsInstance = $likesOnReviewsRange.data("ionRangeSlider");
+		
+	$likesOnReviewsInput.on("input", () => {checkValue($likesOnReviewsInput, likesOnReviewsInstance, maxLikesOnReviews);countLikesOnReviews(likesOnReviewsInstance.old_from);countResult()});
+// -------------------------------------------------------SLIDERS------------------------------------------------
+
+
+var promotionPrice = $(".promotion__price")
+var $promotionInput = $(".promotion__input");
+var $promotionQuantityArrowMinus = $(".quantity-arrow-minus__promotion");
+var $promotionQuantityArrowPlus = $(".quantity-arrow-plus__promotion");
+
+var monitorPrice = $(".monitor__price");
+var $monitorInput = $(".monitor__input");
+var $monitorQuantityArrowMinus = $(".quantity-arrow-minus__monitor");
+var $monitorQuantityArrowPlus = $(".quantity-arrow-plus__monitor");
+
+var monitoringPrice = $(".monitoring__price");
+var $monitoringInput = $(".monitoring__input");
+var $monitoringQuantityArrowMinus = $(".quantity-arrow-minus__monitoring");
+var $monitoringQuantityArrowPlus = $(".quantity-arrow-plus__monitoring");
+
+var advertisingСompaniesPrice = $(".advertising-companies__price");
+var $advertisingСompaniesInput = $(".advertising-companies__input");
+var $advertisingСompaniesQuantityArrowMinus = $(".quantity-arrow-minus__advertising-companies");
+var $advertisingСompaniesQuantityArrowPlus = $(".quantity-arrow-plus__advertising-companies");
+
+
+$promotionQuantityArrowMinus.on("click", () => {changePricePromotion(quantityMinus(0, $promotionInput));countResult()});
+$promotionQuantityArrowPlus.on("click", () => {changePricePromotion(quantityPlus(100, $promotionInput));countResult()});
+
+$monitorQuantityArrowMinus.on("click", () => {changePriceMonitor(quantityMinus(0, $monitorInput));countResult()});
+$monitorQuantityArrowPlus.on("click", () => {changePriceMonitor(quantityPlus(10000, $monitorInput));countResult()});
+
+$monitoringQuantityArrowMinus.on("click", () => {changePriceMonitoring(quantityMinus(0, $monitoringInput));countResult()});
+$monitoringQuantityArrowPlus.on("click", () => {changePriceMonitoring(quantityPlus(10000, $monitoringInput));countResult()});
+
+$advertisingСompaniesQuantityArrowMinus.on("click", () => {changePriceAdvertisingСompanies(quantityMinus(0, $advertisingСompaniesInput));countResult()});
+$advertisingСompaniesQuantityArrowPlus.on("click", () => {changePriceAdvertisingСompanies(quantityPlus(10000, $advertisingСompaniesInput));countResult()});
+
+function quantityMinus(min, input) {
+
+	if (input.val() > min) {
+		input.val(+input.val() - 1);
+	}
+	return input.val()
+}
+
+function quantityPlus(max, input) {
+	if (input.val() < max) {
+		input.val(+input.val() + 1);
+	}
+	return input.val()
+}
+
+function  changePricePromotion(number) {
+	var tip = $("#promotion__tip")
+	var textTip = "Функционал, который за счет определенных алгоритмов повышает активность на вашей карточке товара. Все эти действия значительно повышают активность на карточке товара и она сильнее ранжируется по сравнению с конкурентами<br><br>"
+	if (number <= 2){
+		promotionPrice.html(`<span>${number*10000}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", textTip + 'Цена за штуку в текущем количестве: <strong>10000₽</strong>')
+	}
+	else if (number <= 9){
+		promotionPrice.html(`<span>${number*8000}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", textTip + 'Цена за штуку в текущем количестве: <strong>8000₽</strong>')
+	}
+	else{
+		promotionPrice.html(`<span>${number*7000}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", textTip + 'Цена за штуку в текущем количестве: <strong>7000₽</strong>')
+	}
+	
+}
+function  changePriceMonitor(number) {
+	var tip = $("#monitor__tip")
+	var textTip = "Благодаря монитору аналитики вы можете следить за продажами товаров по времени, а также  получать расширенную статистику по выкупам с платформы<br><br>"
+	if (number == 1) {
+		monitorPrice.html(`<span>${number*300}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", textTip + 'Цена за штуку в текущем количестве: <strong>300₽</strong>')
+	} else if (number < 4) {
+		monitorPrice.html(`<span>${number*250}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", textTip + 'Цена за штуку в текущем количестве: <strong>250₽</strong>')
+	} else if (number < 10) {
+		monitorPrice.html(`<span>${number*200}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", textTip + 'Цена за штуку в текущем количестве: <strong>200₽</strong>')
+	} else {
+		monitorPrice.html(`<span>${number*150}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>150₽</strong>')
+	}
+}
+
+function  changePriceMonitoring(number) {
+	var tip = $("#monitoring__tip")
+	var textTip = "Функционал, позволяющий отслеживать рост видимости и средней позиции своего товара на Вайлдберис, а также анализировать данные и отслеживать повышение конверсии поискового трафика по определенным ключевым фразам<br><br>"
+	if (number == 1) {
+		monitoringPrice.html(`<span>${number*100}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", textTip + 'Цена за штуку в текущем количестве: <strong>100₽</strong>')
+	} else if (number < 5) {
+		monitoringPrice.html(`<span>${number*70}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", textTip + 'Цена за штуку в текущем количестве: <strong>70₽</strong>')
+	} else if (number < 30) {
+		monitoringPrice.html(`<span>${number*55}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", textTip + 'Цена за штуку в текущем количестве: <strong>55₽</strong>')
+	} else {
+		monitoringPrice.html(`<span>${number*35}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", textTip + 'Цена за штуку в текущем количестве: <strong>35₽</strong>')
+	}
+}
+function  changePriceAdvertisingСompanies(number) {
+	var tip = $("#monitor__tip")
+	if (number == 1) {
+		advertisingСompaniesPrice.html(`<span>${number*2990}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>2990₽</strong>')
+	} else if (number < 3) {
+		advertisingСompaniesPrice.html(`<span>${number*2390}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>2390₽</strong>')
+	} else if (number < 7) {
+		advertisingСompaniesPrice.html(`<span>${number*1590}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>1590₽</strong>')
+	} else {
+		advertisingСompaniesPrice.html(`<span>${number*1290}</span>` + "<small>₽</small>")
+		$(tip).attr("data-bs-original-title", 'Цена за штуку в текущем количестве: <strong>1290₽</strong>')
+	}
+}
+
+
+
+var rateMonitoring = $("#rate-monitoring")
+rateMonitoring.val(0)
+var rateMonitoringPrice = $(".rate-monitoring__price")
+rateMonitoring.change(() => {
+	if (rateMonitoring.is(':checked')) {
+		rateMonitoringPrice.html(`<span>500</span>` + "<small>₽</small>")
+		rateMonitoring.val(1)
+	} else {
+		rateMonitoringPrice.html(`<span>0</span>` + "<small>₽</small>")
+		rateMonitoring.val(0)
+	}
+	countResult()
+})
+
+var course = $("#course")
+course.val(0)
+var coursePrice = $(".course__price")
+course.change(() => {
+	if (course.is(':checked')) {
+		coursePrice.html(`<span>5000</span>` + "<small>₽</small>")
+		course.val(1)
+	} else {
+		coursePrice.html(`<span>0</span>` + "<small>₽</small>")
+		course.val(0)
+	}
+	countResult()
+})
+
+
+//  -----------------------------------RESULT------------------------------------
+var resultPrice = $(".result__price")
+var resultInput = $(".result__input")
+var fullResult = 0
+function countResult() {
+	var allPrices = Array.from(document.querySelectorAll(".price>span")).map(el => parseInt(el.innerHTML))
+	var res = allPrices.reduce((a, b) => {return a + b})
+	fullResult = res
+	resultPrice.html(`<span>Итого: ${res}</span>` + "<small>₽</small>")
+	resultInput.val(res)
+}
+$("#payCalculate").on("click", event => {
+	if (fullResult == 0) {
+		event.preventDefault()
+		customSwal('Вы ничего не выбрали, чтобы покупать', {type: 'error'})
+	}
+})
+</script>
+<script>
+	var alerts = document.querySelectorAll(".alert.alert-success")
+	var heightAlerts = Array.from(alerts).map(el => el.offsetHeight)
+	var minHeightAlerts = Math.max.apply(null, heightAlerts)
+	alerts.forEach(el => {
+	 el.style.minHeight = minHeightAlerts + "px"
+	})
+</script>
+<!-- CUSTOM SWAL -->
+<script>
+	
+	function customSwal(text = "Success!", options = {
+		animationTime: '1s',
+		animatiomType: 'ease',
+		hideDelay: '3500',
+		type: 'success'
+	}) { // animationTime = '1s', animatiomType = 'ease', hideDelay = 1500
+		console.log(arguments)
+		if ((options.type || "success") == "success") {
+			$(".customSwal__icon").html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/></svg>')
+			$(".customSwal").css('background', '#cceecb')
+			$(".customSwal__icon path").css('fill', '#76c574')
+			$(".customSwal__text").css('color', '#656565')
+
+		} else if (options.type == 'error') {
+			$(".customSwal__icon").html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"/></svg>')
+			$(".customSwal").css('background', '#ffa7a7')
+			$(".customSwal__icon path").css('fill', '#e36767')
+			$(".customSwal__text").css('color', '#fcfcfc')
+		} else {
+			return console.error(`type ${options.type} does not exsist.\navailable types:\n'success', 'error'` )
+		}
+		$(".customSwal").css('transition', `transform ${options.animationTime || '1s'} ${options.animatiomType || 'ease'}`)
+		$(".customSwal").addClass("active")
+		$(".customSwal__text").text(text)
+		let removeClassActive = setTimeout(function () {
+		$(".customSwal").removeClass("active")
+	}, options.hideDelay || '3500')
+		$(".customSwal").click(event => {
+			$(event.target).removeClass("active")
+			clearTimeout(removeClassActive)
+		})
+
+	}
+</script>
+   
+{% endblock javascripts %}

@@ -1,0 +1,265 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Панель управления {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+  <style>
+    .raz::-webkit-inner-spin-button { 
+      display: none;
+    }
+    .scroll-x-for-table {
+      overflow-x: auto;
+    }
+    .scroll-x-for-table::-webkit-scrollbar {
+      -webkit-appearance: none;
+  }
+
+  .scroll-x-for-table::-webkit-scrollbar:vertical {
+      width: 12px;
+  }
+
+  .scroll-x-for-table::-webkit-scrollbar:horizontal {
+      height: 12px;
+  }
+
+  .scroll-x-for-table::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, .5);
+      border-radius: 10px;
+      border: 2px solid #ffffff;
+  }
+
+  .scroll-x-for-table::-webkit-scrollbar-track {
+      border-radius: 10px;
+      background-color: #ffffff;
+  }
+  .info {
+    display: inline;
+    font-weight: 700;
+  }
+  </style>
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid py-4">
+      <div class="col-lg-9 col-12 mx-auto">
+        {% comment %}
+         <div class="nav-wrapper mt-5 position-relative z-index-2">
+          <ul class="nav nav-pills nav-fill flex-row p-1" id="tabs-pricing" role="tablist" style="background-color: #fdfdfd">
+            <li class="nav-item">
+              <a class="nav-link mb-0 active " data-bs-toggle="tab" id="month1" href=""  aria-controls="monthly" aria-selected="true">
+                1 месяц
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link mb-0"  data-bs-toggle="tab" id="month3" href=""  aria-controls="annual" aria-selected="false">
+                3 месяца (-10%)
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link mb-0"  data-bs-toggle="tab" id="month6" href=""  aria-controls="annual" aria-selected="false">
+                6 месяцев (-20%)
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link mb-0"  data-bs-toggle="tab" id="month12" href=""  aria-controls="annual" aria-selected="false">
+                12 месяцев (-30%)
+              </a>
+            </li>
+          </ul>
+        </div>
+        {% endcomment %}
+        <div class="card card-body mt-4">
+          <div class="row gx-4">
+            <div class="col-auto">
+            </div>
+            <div class="col-auto my-auto mt-2">
+               <div class="h-100">
+                <h3 class="mb-0">
+                  {% if not have_subscribe or request.GET.prolonagation_calculated == '1' or request.GET.from_test == '1' %}
+                    Оплата тарифа
+                    {% else %}
+                    Ваша подписка
+                    {% endif %}
+                </h3>
+              </div> 
+            </div>
+        </div>
+        <hr class="horizontal dark my-3">
+        <div class="container mt-5">
+            <div class="col-2"></div>
+            <div class="col-10">
+                {% if not have_subscribe or request.GET.prolonagation_calculated == '1' or request.GET.from_test == '1' %}
+                <h2>Сумма к оплате</h2>
+                <h1 class="font-weight-bold mt-2" id="showroom">
+                    <small>₽</small>{{ price }}
+                </h1>
+                <h4>Тариф {{ tariff }} продолжительностью {{ period }}</h4>
+                <div class="justify-content-start mt-4">
+                  <input id="promocode" type="text" name="promocode" class="multisteps-form__input form-control w-auto m-0 d-inline" placeholder="Промокод"/>
+                  <button id="promocode_btn"  class="btn btn-primary d-inline mb-0" style='background-color: #007bff;'>Применить</button>
+              </div>
+                <div class="d-flex justify-content-start mt-4">
+                    <button  type="submit" id="pay"  class="btn bg-gradient-primary" >Оплатить</button>
+                </div>
+                {% else %}
+                    <h4 >Информация о вашем тарифе</h4>
+                    <h5 class="mt-4">Ваш тариф: <p class="info">{{ tariff }}</p></h5>
+                    <h5 class="mt-4">Действителен до:  <p class="info">{{ end_date }}</p></h5>
+                    <h5 class="mt-4">Ваши лимиты</h5>
+                    <div class="scroll-x-for-table">
+                      <table class="table">
+                          <thead>
+                            <tr>
+                              <td scope="col">Выкупы</td>
+                              <td scope="col">Отзывы</td>
+                              <td scope="col">Вопросы</td>
+                              <td scope="col">Лайки</td>
+                              <td scope="col">Лайки на отзывы</td>
+                              <td scope="col">Позиции ключевых запросов</td>
+                              <td scope="col">Поисковое продвижение</td>
+                              
+                              {% comment %}
+                              <td scope="col">Лайки на отзывы</td>
+                              {% endcomment %}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>{{ limits.buyout_limit }}</td>
+                              <td>{{ limits.review_limit }}</td>
+                              <td>{{ limits.question_limit }}</td>
+                              <td>{{ limits.like_limit }}</td>
+                              <td>{{ limits.like_review_limit }}</td>
+                              <td>{{ limits.positions_limit }}</td>
+                              <td>{{ limits.search_promotion_limit }}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <p class="mt-5">Лимиты действительны до {{ limit_end_date }}</p>
+                      {% if tariff in 'Закрытое тестирование,Шоурум,Магазин,Гипермаркет,Магигранд' %}
+                        <a href="{% url 'prolongation-tariff' %}" class="btn bg-gradient-primary">Продлить доступ</a>
+                      {% endif %}
+                {% endif %}
+            </div>
+        </div>
+      
+        </div>
+      </div>
+      <div class="container-fluid py-4">
+
+      </div>
+      </div>
+    </div>
+    {% include "includes/footer.html" %}
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+    <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+    <script src="/static/assets/js/plugins/choices.min.js"></script>
+    <script src="/static/assets/js/plugins/quill.min.js"></script>
+    <script src="/static/assets/js/plugins/flatpickr.min.js"></script>
+    <script src="/static/assets/js/plugins/dropzone.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script src="/static/assets/js/plugins/datatables.js"></script>
+    <script src="/static/assets/js/jquery.js"></script>
+
+    <script type="text/javascript">
+        var button = document.getElementById('pay');
+        button.addEventListener('click', send_success, false);
+        var countMonth = 1
+
+        function send_success(){
+            const request = new XMLHttpRequest();
+            const url = "{% url 'bill' %}";
+            const params = "&csrfmiddlewaretoken={{ csrf_token }}" + `month=${countMonth}`;
+            request.open("POST", url, true);
+            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            request.onreadystatechange = function() {
+              if (request.readyState === 4) {
+                var response = JSON.parse(request.responseText);
+                  if (request.status === 200) {
+                     window.location.replace(response['url']);
+                  }
+              }
+            }
+            request.send(params);
+
+        }
+
+        var button_promocode = document.getElementById('promocode_btn');
+        button_promocode.addEventListener('click', check_promocode, false);
+
+        function check_promocode(){
+          const request = new XMLHttpRequest();
+            const url = "{% url 'check_promocode' %}";
+            const params = "&csrfmiddlewaretoken=" + "{{ csrf_token }}" + "&promocode=" + $('#promocode').val();
+            request.open("POST", url, true);
+            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            request.onreadystatechange = function() {
+              if (request.readyState === 4) {
+                var response = JSON.parse(request.responseText);
+                  if (request.status === 200) {
+                     var resp_status = response['resp'];
+                     if (resp_status == 'ok'){
+                      location.reload();
+                     }
+                     else if (resp_status == 'expired'){
+                      Swal.fire('Ошибка', 'Промокод истек', 'error');
+                     }
+                     else if (resp_status == 'used'){
+                      Swal.fire('Ошибка', 'Вы уже использовали данный промокод', 'error');
+                     }
+                     else{
+                      Swal.fire('Ошибка', 'Промокод не найден', 'error');
+                     }
+                  }
+              }
+            }
+            request.send(params);
+        }
+
+        if ('{{ error }}' == 'True'){
+          Swal.fire('Ошибка', '{{ error_message }}', 'error');
+        }
+        else if ('{{ error }}' == 'False'){
+          Swal.fire("Готово!", "Оплата произведена успешно", "success").then(function() {
+            window.location = "{% url 'bill' %}";
+            });;
+        }
+    </script>
+    {% comment %}
+    <script>
+      let defaultPrice = parseFloat('{{ price }}')
+      let period = $("#tariff-period")
+      let price = $("#price")
+      $("#month1").on('click', () => {
+        countMonth = 1
+        $(price).text(String(defaultPrice).replace('.', ','))
+        $(period).text('1 месяц')
+      })
+      $("#month3").on('click', () => {
+        countMonth = 3
+        $(price).text(String(defaultPrice * 3 - (defaultPrice * 3 / 100 * 10)).replace('.', ','))
+        $(period).text('3 месяца')
+      })
+      $("#month6").on('click', () => {
+        countMonth = 6
+        $(price).text(String(defaultPrice * 6 - (defaultPrice * 6 / 100 * 20)).replace('.', ','))
+        $(period).text('6 месяцев')
+      })
+      $("#month12").on('click', () => {
+        countMonth = 12
+        $(price).text(String(defaultPrice * 12 - (defaultPrice * 12 / 100 * 30)).replace('.', ','))
+        $(period).text('12 месяцев')
+      })
+    </script>
+    {% endcomment %}
+{% endblock javascripts %}

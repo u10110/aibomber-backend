@@ -1,0 +1,148 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Панель управления {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+  <style>
+    .raz::-webkit-inner-spin-button { 
+      display: none;
+    }
+    .count-month {
+      width: 10%
+    }
+    @media (max-width: 550px) {
+      .count-month {
+        width: 20%
+      }
+    }
+  </style>
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid py-4">
+      <div class="col-lg-9 col-12 mx-auto">
+        <div class="card card-body mt-4">
+          <div class="row gx-4">
+            <div class="col-auto">
+            </div>
+            <div class="col-auto my-auto mt-2">
+               <div class="h-100">
+                <h3 class="mb-0">
+                    Продление тарифа
+                </h3>
+              </div>
+            </div>
+        </div>
+        <hr class="horizontal dark my-3">
+        <div class="container">
+            <div class="col-2"></div>
+            <div class="col-10">
+                {% if price %}
+                <h2>Сумма к оплате</h2>
+                <h1 class="font-weight-bold mt-2" style='height: 60px;' id="price">
+                    <small>₽</small>{{ price }}
+                </h1>
+                <div class="d-flex justify-content-start mt-4">
+                    <button  type="submit" id="pay"  class="btn bg-gradient-primary" >Оплатить</button>
+                </div>
+                <div class="justify-content-start mt-4">
+                  <input id="promocode" type="text" name="promocode" class="multisteps-form__input form-control w-auto m-0 d-inline" placeholder="Промокод"/>
+                  <button id="promocode_btn"  class="btn btn-primary d-inline mb-0" style='background-color: #007bff;'>Применить</button>
+              </div>
+                {% else %}
+                    <h4 class="mt-4">Вы не можете продлить данный тариф</h4>
+                {% endif %}
+            </div>
+        </div>
+
+        </div>
+      </div>
+      <div class="container-fluid py-4">
+
+      </div>
+      </div>
+    </div>
+    {% include "includes/footer.html" %}
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+    <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+    <script src="/static/assets/js/plugins/choices.min.js"></script>
+    <script src="/static/assets/js/plugins/quill.min.js"></script>
+    <script src="/static/assets/js/plugins/flatpickr.min.js"></script>
+    <script src="/static/assets/js/plugins/dropzone.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script src="/static/assets/js/plugins/datatables.js"></script>
+    <script src="/static/assets/js/jquery.js"></script>
+
+    <script type="text/javascript">
+    var button_promocode = document.getElementById('promocode_btn');
+        button_promocode.addEventListener('click', check_promocode, false);
+
+        function check_promocode(){
+          const request = new XMLHttpRequest();
+            const url = "{% url 'check_promocode' %}";
+            const params = "&csrfmiddlewaretoken=" + "{{ csrf_token }}" + "&promocode=" + $('#promocode').val();
+            request.open("POST", url, true);
+            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            request.onreadystatechange = function() {
+              if (request.readyState === 4) {
+                var response = JSON.parse(request.responseText);
+                  if (request.status === 200) {
+                     var resp_status = response['resp'];
+                     if (resp_status == 'ok'){
+                      location.reload();
+                     }
+                     else if (resp_status == 'expired'){
+                      Swal.fire('Ошибка', 'Промокод истек', 'error');
+                     }
+                     else if (resp_status == 'used'){
+                      Swal.fire('Ошибка', 'Вы уже использовали данный промокод', 'error');
+                     }
+                     else if (resp_status == 'no prolong'){
+                      Swal.fire('Ошибка', 'Промокод не предназначен для продления', 'error');
+                     }
+                     else{
+                      Swal.fire('Ошибка', 'Промокод не найден', 'error');
+                     }
+                  }
+              }
+            }
+            request.send(params);
+        }
+        var button = document.getElementById('pay');
+        button.addEventListener('click', send_success, false);
+        function send_success(){
+            const request = new XMLHttpRequest();
+            const url = "{% url 'prolongation-pay-link' %}";
+            const params = "&csrfmiddlewaretoken=" + `{{ csrf_token }}`;
+            request.open("POST", url, true);
+            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            request.onreadystatechange = function() {
+              if (request.readyState === 4) {
+                var response = JSON.parse(request.responseText);
+                  if (request.status === 200) {
+                     window.location.replace(response['url']);
+                  }
+              }
+            }
+            request.send(params);
+
+        }
+        if ('{{ error }}' == 'True'){
+          Swal.fire('Ошибка', '{{ error_message }}', 'error');
+        }
+        else if ('{{ error }}' == 'False'){
+          Swal.fire("Готово!", "Оплата произведена успешно", "success").then(function() {
+            window.location = "{% url 'bill' %}";
+            });;
+        }
+    </script>
+{% endblock javascripts %}

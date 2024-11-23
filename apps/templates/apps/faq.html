@@ -1,0 +1,380 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Панель управления {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+  <style>
+    .faq-heading{
+        border-bottom: #777;
+        padding: 20px 60px;
+    }
+    .faq-container{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        margin: 0 auto;
+    }
+    .hr-line{
+      width: 90%;
+      {% comment %} margin: auto; {% endcomment %}
+      
+    }
+    /* Style the buttons that are used to open and close the faq-page body */
+    .faq-page {
+        /* background-color: #eee; */
+        color: #444;
+        cursor: pointer;
+        padding: 30px 20px;
+        border: none;
+        outline: none;
+        transition: 0.4s;
+        margin: auto;
+        width: 90%;
+        {% comment %} display:inline-block; {% endcomment %}
+    }
+    .faq-body{
+        margin: auto;
+        /* text-align: center; */
+        width: 80%;
+       padding: auto;
+       
+    }
+    /* Add a background color to the button if it is clicked on (add the .active-faq class with JS), and when you move the mouse over it (hover) */
+    .active-faq,
+    .faq-page:hover {
+        background-color: #F9F9F9;
+    }
+    /* Style the faq-page panel. Note: hidden by default */
+    .faq-body {
+        padding: 0 18px;
+        background-color: white;
+        display: none;
+        overflow: hidden;
+    }
+    .faq-page:after {
+        content: '\002B';
+        /* Unicode character for "plus" sign (+) */
+        font-size: 33px;
+        color: #777;
+        float: right;
+        border: 0;
+        line-height: 26px;
+    }
+    .active-faq:after {
+        content: "\002D";
+        font-size: 33px;
+        /* Unicode character for "minus" sign (-) */
+    }
+    .faq-page > p{
+        font-size: 18px;
+        padding-right: 50px;
+    }
+    .desc > p{
+        font-size: 16px;
+        color: #444;
+    }
+  </style>
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid py-4">
+    <div class="row align-items-center">
+      <div class="col-lg-9 col-12 mx-auto">
+        <div class="card card-body mt-4">
+          <div class="row gx-4">
+            <div class="col-auto">
+            </div>
+            <div class="col-auto my-auto mt-2">
+               <div class="h-100">
+                <h3 class="mb-0">
+                  Часто задаваемые вопросы
+                </h3>
+              </div> 
+            </div>
+            <hr class="horizontal dark my-3">
+        </div>
+
+        <section class="faq-container mt-3">
+            <div class='w-90 mx-auto mb-5 desc'>
+                <p>Платформа для автоматизации повышения репутации бренда и стратегии продвижения товара в топ на маркетплейсах.</p>
+                   
+            </div> 
+            
+            <div class="w-90 m-auto">
+                <h4 class="mb-0">
+                  Общие вопросы
+                </h4>
+            </div> 
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Зачем мне сервис mplab?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Наша платформа MP LAB – сервис эффективного продвижения и автоматизации для Wb и Ozon  создана, чтобы выводить товары в Топ, за счёт увеличение репутации бренда и автоматизации безопасных выкупов. Это позволит вам избежать блокировки или теневого бана ваших аккаунтов роботами, которые отслеживают ботов на маркетплейсах. А также вывести ваши товары на первые позиции по нужным ключевым запросам.
+
+                        <br>Также Вы сможете доминировать над конкурентами в поисковой рекламе и рекламе в карточке товара, получите максимум продаж, с помощью рекламы и сможете выйти в топ по поисковым запросам</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Как работает ваша платформа?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Перед тем, как зарегистрироваться, наша платформа имитирует естественное поведение обычного человека в интернете и на маркетплейсе. Это позволяет избежать внимания ботов и последующей блокировки и только после этого идет выполнять ваши задания.</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Почему делать выкупы у вас безопаснее? </p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Прежде чем совершать выкуп, необходимо перейти на вкладку “Список ПВЗ”, где нажав на кнопку “Добавить ПВЗ”, можно выбрать удобные для вас пункты выдачи. Рекомендуется выбирать несколько ПВЗ. После этого, у вас появится возможность выбрать пункт выдачи заказа при совершении выкупа.</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div class="w-90 m-auto">
+                <h4 class="mb-0">
+                    Вопросы по пункту выдачи заказов
+                </h4>
+            </div> 
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Почему мне не дает выбрать ПВЗ при совершении выкупа?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Прежде чем совершать выкуп, необходимо перейти на вкладку “Список ПВЗ”, где нажав на кнопку “Добавить ПВЗ”, можно выбрать удобные для вас пункты выдачи. Рекомендуется выбирать несколько ПВЗ. После этого, у вас появится возможность выбрать пункт выдачи заказа при совершении выкупа.</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Могу ли я забирать сразу несколько товаров с одного ПВЗ?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Можете, достаточно прийти на пункт выдачи и предъявить QR-код или назвать ФИО аккаунта, совершившего выкуп и сказать код.</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Совершил выкуп, но указал не тот адрес ПВЗ, могу ли я его поменять?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>К сожалению уже нет. Товар будет доставлен на указанный при выкупе адрес. Если у Вас нет возможности забрать товар с этого ПВЗ, не расстраивайтесь, спустя время, он вернется обратно на склад и произойдет возврат денежных средств вам на карту.</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div class="w-90 m-auto">
+                <h4 class="mb-0">
+                    Вопросы по выкупу товара
+                </h4>
+            </div> 
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Я первый раз делаю выкуп, где я могу посмотреть инструкцию?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Вы можете ознакомиться с обучающим видео на вкладке “Выкупы”, нажав на кнопку “Инструкция”, а также возникшие вопросы при создании выкупа, задать в чат с технической поддержкой, где вам быстро помогут решить их.</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>По какой цене приложение будет выкупать товар?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Выкуп производится по фактической цене в момент покупки, с учетом скидки покупателя, проще говоря - выкуп будет производиться по самой минимальной цене.</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Оплатил успешно выкуп, но на сайте  приложения не отображает товар в доставках, что делать?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Иногда проверка оплаты на Wildberries занимает некоторое время, необходимо просто подождать и ваш товар успешно появится во вкладке “Доставки”</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Можно ли совершать выкупы с одной карты?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Да, мы проводили проверку оплат одной картой выкупов на протяжении длительного времени, каких-либо проблем выявлено не было, но рекомендуется иметь несколько карт для оплаты выкупа, чтобы обезопасить себя от будущих возможных изменений Wildberries.</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Что будет с моим выкупом если я не успел ввести смс об оплате в Телеграм бот?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Данный выкуп переходит в статус не оплачен. Вы можете создать новый выкуп данного товара или обратиться в техническую поддержку, чтобы перезапустить старый неоплаченный выкуп.</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div class="w-90 m-auto">
+                <h4 class="mb-0">
+                    Отзывы
+                </h4>
+            </div> 
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Какие рекомендации по оставлению отзывов?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Соблюдайте пропорции отзывов: 1 отзыв на 10-15 продаж. Имеют значения сроки выкупа. Если вы сделали выкупы месяц назад и теперь решили писать отзывы - такие отзывы скорее всего будут исключаться ВБ считает выкупы для отзывов за последние 7 дней - это значит, чтобы написать отзыв должно быть 20-30 выкупов за последние 7 дней. Не рекомендуется публикация отзывов в ночное время с 23:00 до 7:00. Необходимо исключить превосходную степень в содержании отзыва, не нужно писать "лучший", "самый", также текст отзыва не должен быть слишком короткий и слишком длинный. Не оставлять отзывы  на новый товар, ранее 10 дней с момента начала первых продаж на ВБ</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Будут ли совпадать данные ФИО в выкупе и отзыве?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Да, аккаунт привязывается к каждому выкупу, чтобы в дальнейшем была возможность с него же оставить отзыв на выкупленный товар.</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div class="w-90 m-auto">
+                <h4 class="mb-0">
+                    Оплата и лимиты тарифа
+                </h4>
+            </div> 
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Что такое автооплата?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Это возможность удобно и быстро совершать выкупы без ручного ввода банковской карты для оплаты.  В настоящее время возможна автооплата через “Телеграм бот”</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Как настроить автооплаты через Telegram СБП</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>
+                        Удобный и быстрый способ оплатить ваши выкупы с помощью системы быстрых платежей. Данный способ оплаты поддерживает более 30 банков и требует минимальных усилий для настройки, а также не требует ввода реквизитов своей карты в разделе “Настройка оплаты”!
+                        <br><br>
+                        Для начала, необходимо авторизоваться в нашем чат боте <a href="tg://resolve?domain=mplabio_bot"><strong>@mplabio_bot</strong></a>, куда вам будут приходить уведомления об оплате выкупа. Стоит отметить, что авторизацию в данном телеграм боте необходимо проходить со своего номера телефона, на который вы регистрировались на нашем сервисе.
+                        <br><br>
+                        После авторизации переходим к созданию группы выкупов. 
+                        <br><br>
+                        В разделе “<strong>выкупы</strong>” вы нажимаете кнопку “Добавить выкуп” и вводите нужный артикул товара, который хотели бы выкупить, далее заполняете все параметры задания на выкуп ( указываете количество товара, размер, пол аккаунта, ключевую фразу, дату начала и конца выкупов).
+                        <br><br>
+                        После успешного создания группы выкупов, у вас откроется данная группа и в ней нажимаем кнопку “<strong>автооплата</strong>”. 
+                        <img src='/static/images/faq/tgSBP1.png' class='w-100'/>
+                        <br><br>
+                        Выбираем способ автооплаты “Telegram СБП”, а также настраиваем диапазон времени, за который будут проходить оплаты выкупов. После этого, нажимаем кнопку <strong>“Подтвердить”</strong>
+                        <br><br>
+                        <img src='/static/images/faq/tgSBP2.png' class='w-100' style="border-radius: 20px;"/>
+                        <br><br>
+                        Появится уведомление об успешном подключении автооплаты с помощью <strong>Telegram СБП</strong>
+                        <br><br>
+                        Остается ждать уведомления в чат бот Телеграм для первой оплаты. Как только наступит диапазон времени, который вы указали для оплаты, вам придет сообщение в чат с ботом для оплаты вашего товара.
+                        <br><br>
+                        <img src='/static/images/faq/tgSBP3.png' class='w-100'/>
+                        <br><br>
+                        Вы нажимаете кнопку <strong>“Оплатить”</strong> и переходите к выбору банка для оплаты.
+                        <br><br>
+                        <img src='/static/images/faq/tgSBP4.png' class='w-100'/>
+                        <br><br>
+                        После выбора банка, у Вас откроется банковское приложение, где вы сможете завершить оплату. Оплатив успешно выкуп, он перейдет в раздел “Доставки”, где вы сможете отслеживать его дальнейшие статусы. 
+                    </p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Как настроить автооплату</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Для подключения автооплаты вам необходимо перейти на сайт банка и открыть расчетный счет для ИП или ООО. К сожалению физ. лица не могут открывать расчетный счет в данном банке. После успешного открытия счета, на сайте нужно выпустить несколько цифровых карт и указать абонентский номер для получения смс уведомлений, который сгенерирован на нашем сайте во вкладке “Настройка оплаты”
+                        <br><br>
+                        <img src='/static/images/faq/tochka.png' class='w-100'/>
+                        <br><br> 
+                        Как только вы выполнили все вышеуказанные действия, необходимо перейти на вкладку “Выкупы” и открыть интересующий нас выкуп и нажать кнопку “Автооплата”. Далее появится окно “Выберите тип перехвата СМС для автооплаты”. После этого, в указанный период времени выкупа произойдет автоматическое списание денежных средств и статус выкупа можно будет отслеживать во вкладке “Доставки”, где указана вся подробная информация о заказе.</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Какие банковские карты поддерживаются в вашем сервисе?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Вы можете добавить карты банков Тинькофф, Qiwi, Точка, Альфа и Сбер. </p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>С какой карты будут списываться деньги? Программа сама выбирает карту для оплаты?</p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Карты и ПВЗ распределяются случайно и поровну.</p>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div>
+                <!-- faq question -->
+                <div class="faq-page w-90"><p class='d-inline'>Если у меня заканчиваются лимиты, как мне быть? </p></div>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <p>Остаток не переносится на следующий месяц. Но в скором времени появится возможность докупать недостающие лимиты к вашему тарифу. Вы можете приобрести новый  удобный для вас тариф и продолжить пользоваться нашим приложением.</p>
+                </div>
+            </div>
+            
+            <p><br></p>
+            
+        </section>
+        </div>
+      </div>
+      <div class="container-fluid py-4">
+
+      </div>
+      </div>
+    </div>
+    {% include "includes/footer.html" %}
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+  <script src="/static/assets/js/jquery.js"></script>
+  <script>
+    var faq = document.getElementsByClassName("faq-page");
+    var i;
+    for (i = 0; i < faq.length; i++) {
+        faq[i].addEventListener("click", function () {
+            /* Toggle between adding and removing the "active-faq" class,
+            to highlight the button that controls the panel */
+            this.classList.toggle("active-faq");
+            /* Toggle between hiding and showing the active-faq panel */
+            var body = this.nextElementSibling;
+            if (body.style.display === "block") {
+                body.style.display = "none";
+                
+            } else {
+
+                body.style.display = "block";
+                
+            }
+        });
+    }
+  </script>
+{% endblock javascripts %}

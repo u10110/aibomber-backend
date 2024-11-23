@@ -1,0 +1,95 @@
+{% extends 'layouts/base.html' %} 
+{% load static %} 
+ 
+{% block title %} Ecommerce Products List {% endblock title %} 
+ 
+<!-- Specific CSS goes HERE --> 
+{% block stylesheets %} 
+ 
+<style>
+	.card-checking {
+	}
+	.example {
+		border-bottom: 1px dashed #344767;
+		cursor: pointer;
+	}
+	.example:hover {
+		border-bottom: none;
+	}
+
+</style>
+{% endblock stylesheets %}  
+	 
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %} 
+ 
+{% block content %} 
+<div class="container-fluid py-4">
+	<div class="card">
+		<div class="card-body">
+			<div class="card-checking">
+				
+				<h3 class="card-checking__title text-center " style="font-weight: 500;">
+					Проверка карточки товара
+				</h3>
+				<div class="card-checking__subtitle text-center mb-4 w-90 mx-auto">
+					Проверка вхождений слов и фраз в текст карточки товара. Это поможет покрыть большее число запросов и привлечь продажи.
+				</div>
+				<form action="/product-card/" method="POST" >
+					{% csrf_token %}
+					<div class="card-checking__search w-80 mx-auto">
+						<input type="text" class="form-control" id="search-sku" name="sku" required>
+						<label for="search-sku">
+							Введите <span class="example" id="link-example" data-example="https://www.wildberries.ru/catalog/33249123/detail.aspx">ссылку на товарную позицию WB</span> или <span class="example" id="sku-example" data-example="13182299">SKU</span>
+						</label>
+					</div>
+					<button type="submit" class="btn btn-primary bg-gradient-primary mx-auto d-flex">
+						Проверить
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div> 
+ 
+ 
+{% endblock content %} 
+ 
+<!-- Specific JS goes HERE -->  
+{% block javascripts %}  
+<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+<script>
+  {% if messages %}
+	{% for message in messages %}
+	Swal.fire(
+		'Ошибка',
+		'{{ message }}',
+		'error')
+	{% endfor %}
+  {% endif %}
+</script>
+<script>
+	if (!String.prototype.startsWith) { // Если нету метода startsWith, мы его создаём.
+		Object.defineProperty(String.prototype, 'startsWith', {
+			enumerable: false,
+			configurable: false,
+			writable: false,
+			value: function(searchString, position) {
+				position = position || 0;
+				return this.indexOf(searchString, position) === position;
+			}
+		});
+	}
+	$("#link-example, #sku-example").on('click', e => {
+		$('#search-sku').val(e.target.dataset.example);
+	})
+	$('form').submit( (event) => {
+		
+		let el = $('#search-sku').val()
+		if (el.startsWith('http') || el.startsWith('www.') || el.startsWith("wildberries")) {
+			$('#search-sku').val(el.match(/catalog\/(\d+)\//)[1])
+		}
+		let formData = new FormData(event.target)
+		console.log($('#search-sku').val(), event, formData.get('sku'));
+	});
+</script>
+{% endblock javascripts %}

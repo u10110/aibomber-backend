@@ -1,0 +1,625 @@
+{% extends 'layouts/base.html' %} 
+{% load static %} 
+ 
+{% block title %} Ecommerce Products List {% endblock title %} 
+ 
+<!-- Specific CSS goes HERE --> 
+{% block stylesheets %} 
+  	<link rel="stylesheet" href="{% static 'css/selection-requests-style.css' %}">
+
+	<!-- Include the core CSS, this is needed by the grid -->
+	<link rel="stylesheet"
+		href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/>
+	<!-- Include the theme CSS, only need to import the theme you are going to use -->
+	<link rel="stylesheet"
+		href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"/>
+
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+	<link rel="stylesheet"
+		href="https://unpkg.com/ag-grid-community/styles/ag-theme-material.css"/>
+{% endblock stylesheets %}  
+ 
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %} 
+ 
+{% block content %} 
+<div class="container-fluid py-4">
+	<div class="card">
+		<div class="card-body">
+			<div class="selection-requests">
+				<div class="selection-requests__title">
+					<h4>Подбор запросов</h4>
+				</div>
+				<div class="selection-requests__content">
+					<ul class="nav nav-tabs" id="myTab" role="tablist">
+						<li class="nav-item" role="presentation">
+							<button class="nav-link active" id="selection-phrases-tab" data-bs-toggle="tab" data-bs-target="#phrases" type="button" role="tab" aria-controls="requests" aria-selected="true">Подбор фраз</button>
+						</li>
+						<li class="nav-item" role="presentation">
+							<button class="nav-link" id="select-phrases-tab" data-bs-toggle="tab" data-bs-target="#select-phrases" type="button" role="tab" aria-controls="select-phrases" aria-selected="false">Выбранные фразы</button>
+						</li>
+						<li class="nav-item" role="presentation">
+							<button class="nav-link" id="result-tab" data-bs-toggle="tab" data-bs-target="#result" type="button" role="tab" aria-controls="result" aria-selected="false">Результат</button>
+						</li>
+					</ul>
+					<div class="tab-content" id="myTabContent">
+						<div class="tab-pane fade show active" id="phrases" role="tabpanel" aria-labelledby="phrases-tab">
+							<div class="phrases__input mt-2">
+								<div class="input-group mb-3" style="width: 50%;">
+									<input type="text" class="form-control" placeholder="Введите фразу" aria-label="Введите фразу" aria-describedby="button-addon2" id="search">
+									<button class="btn btn-primary" type="button" id="button-addon2" style="margin-bottom: 0;">Поиск </button>
+								</div>
+							</div>
+							<div class="choice_all d-flex justify-content-end pe-3 mt-4">
+								<button class="btn bg-gradient-primary" title="Выбрать всё в описание" id="choiceAll" data-bs-toggle="tooltip" data-bs-trigger="hover">Выбрать всё</button>
+							</div>
+							<div class="table-wrapper" >
+								<div id="table-phrases" class="ag-theme-material" style="height: 400px;"></div>
+							</div>
+						</div>
+						<div class="tab-pane fade" id="select-phrases" role="tabpanel" aria-labelledby="select-phrases-tab">
+							<div class="table-wrapper mt-4">
+								<div class="table-flex">
+									<div>
+										<label for="textareaName" class="textareaName">Название</label>
+										<div id="table-select-name" class="ag-theme-material" style="height: 400px;"></div>
+										<div class="clear-name">
+											<button data-type-field="phrasesName" class="btn btn-danger w-100 clearPhrases">Очистить</button>
+										</div>
+									</div>
+									<div>
+										<label for="textareaDesc" class="textareaDesc">Описание</label>
+										<div id="table-select-desc" class="ag-theme-material" style="height: 400px;"></div>
+										<div class="clear-desc">
+											<button data-type-field="phrasesDesc" class="btn btn-danger w-100 clearPhrases">Очистить</button>
+										</div>
+									</div>
+								</div>
+								
+							</div>
+						</div>
+						<div class="tab-pane fade" id="result" role="tabpanel" aria-labelledby="result-tab">
+							<div class="result">
+								<div class="result__title">
+									<p style="margin-top: 10px;padding: 0 30px;font-size: 0.87em;font-weight: 500;">
+										Показаны только уникальные слова. Чтобы при создании карточки не было дубликатов
+									</p>
+								</div>
+								<div class="result__content">
+									<div class="result__content-flex">
+										<div class="result__name">
+
+											<div class="edit-fields">
+												<label for="textareaName" class="textareaName">Название</label>
+												<div class="d-flex">
+													<textarea class="form-control" name="textareaName" id="textareaName" rows="5"></textarea>
+													<div class="count-symbols">
+														<span class="currentAmount"></span>/<span class="maxAmount">60</span>
+													</div>
+												</div>
+											</div>
+											<div class="copyText">
+												<button class="btn btn-primary copyToClipboard" data-bs-original-title='Скопировано!'>Скопировать</button>
+											</div>
+										</div>
+										<div class="result__desc">
+
+											<div class="edit-fields">
+												<label for="textareaDesc" class="textareaDesc">Описание</label>
+												<div class="d-flex">
+													<textarea class="form-control text-input-field" name="textareaDesc" id="textareaDesc"  rows="5"></textarea>
+													<div class="count-symbols">
+														<span class="currentAmount"></span>/<span class="maxAmount">5000</span>
+													</div>
+												</div>
+											</div>
+											<div class="copyText">
+												<button class="btn btn-primary copyToClipboard" data-bs-original-title='Скопировано!'>Скопировать</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div> 
+
+<div class="customSwal">
+	<div class="customSwal__icon">
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"/></svg>
+	</div>
+	<div class="customSwal__text"></div>
+</div>
+ 
+ 
+{% endblock content %} 
+ 
+<!-- Specific JS goes HERE -->  
+{% block javascripts %}  
+<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.0.0/ag-grid-community.min.js" integrity="sha512-7VPz1NAYcuVu1/eQooUfDUcG2sGRdmy2P9sa6ZgtXOpAVY66bN4u+cDXPcmhrVKA44LdznEEZwMabZ3qO8HB6A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- CUSTOM SWAL -->
+  <script>
+	
+	function customSwal(text = "Success!", options = {
+	  animationTime: '1s',
+	  animatiomType: 'ease',
+	  hideDelay: '3500',
+	  type: 'success',
+	  html: false
+	}) { // animationTime = '1s', animatiomType = 'ease', hideDelay = 1500
+	  console.log(arguments)
+	  if ((options.type || "success") == "success") {
+		$(".customSwal__icon").html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/></svg>')
+		$(".customSwal").css('background', '#cceecb')
+		$(".customSwal__icon path").css('fill', '#76c574')
+		$(".customSwal__text").css('color', '#656565')
+
+	  } else if (options.type == 'error') {
+		$(".customSwal__icon").html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"/></svg>')
+		$(".customSwal").css('background', '#ffa7a7')
+		$(".customSwal__icon path").css('fill', '#e36767')
+		$(".customSwal__text").css('color', '#fcfcfc')
+	  } else {
+		return console.error(`type ${options.type} does not exsist.\navailable types:\n'success', 'error'` )
+	  }
+	  $(".customSwal").css('transition', `transform ${options.animationTime || '1s'} ${options.animatiomType || 'ease'}`)
+	  $(".customSwal").addClass("active")
+	  options.html || false ? $(".customSwal__text").html(text) :  $(".customSwal__text").text(text)
+	  let removeClassActive = setTimeout(function () {
+	  $(".customSwal").removeClass("active")
+	}, options.hideDelay || '3500')
+	  $(".customSwal").click(event => {
+		$(event.target.closest('.customSwal')).removeClass("active")
+		clearTimeout(removeClassActive)
+	  })
+
+	}
+  </script>
+
+<!-- кол во символов в полях -->
+<script>
+	// $(".currentAmount")
+	// $(".maxAmount")
+	function countSymbols(el) {
+		$('.currentAmount', $(el).closest('.d-flex')).text($(el).val().length)
+		if ($(el).val().length >= parseInt($('.maxAmount',  $(el).closest('.d-flex')).text())) {
+			$('.count-symbols', $(el).closest('.d-flex')).addClass('tooMuchSymbols')
+			Swal.fire('', `Лимит символов в <span class='${$(el).attr("name") == "textareaName" ? "counterPhraseName" : "counterPhraseDesc"}'>${$(el).attr("name") == "textareaName" ? "названии" : "описании"}</span> исчерпан!<div class='align-center tooMuchSymbols'>${$(el).val().length}/${$('.maxAmount',  $(el).closest('.d-flex')).text()}</div>`, 'warning')
+		} else {
+			$('.count-symbols', $(el).closest('.d-flex')).removeClass('tooMuchSymbols')
+		}
+	}
+	document.addEventListener('DOMContentLoaded',() => {
+		$('textarea', $('.count-symbols').closest('.d-flex')).each((index, el) => {
+			countSymbols(el)
+			$(el).on('input change', event => {
+				countSymbols(el)
+			})
+		})
+	})
+</script>
+
+<!-- UPDATETOOLTIP -->
+<script>
+	function updateTP(params, parentEl = '') {
+		console.log(parentEl);
+		var tooltipTriggerList = [].slice.call(document.querySelectorAll(parentEl + ' [data-bs-toggle="tooltip"]'))
+		var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+			return new bootstrap.Tooltip(tooltipTriggerEl)
+		})
+	}
+</script>
+<!-- TABLE PHRASES id  =  table-phrases -->
+<script>
+	var allData = []
+	var phrasesName = {}
+	var phrasesDesc = {}
+	function renderDataPhrase(params) {
+		console.log(typeof params);
+		let nameAdded = Object.keys(phrasesName).includes(params.value) ? 'added' : ''
+		let descAdded = Object.keys(phrasesDesc).includes(params.value) ? 'added' : ''
+		console.log(params.value, Object.keys(phrasesName).includes(params.value), nameAdded);
+		return `<span data-bs-original-title="Добавить в название" onclick='addToName(this, ${JSON.stringify(params.data)})' id='phrase-name-${params.data.id}' data-bs-toggle="tooltip" data-bs-trigger="hover" class="${nameAdded}"><svg viewBox="0 0 256 256" class="addToName ag-svg-add" xmlns="http://www.w3.org/2000/svg"><rect height="256" width="256"/><circle cx="128" cy="128" r="96"/><circle cx="128" cy="128" r="96" stroke-miterlimit="10" stroke-width="16"/><line stroke-linecap="round" stroke-linejoin="round" stroke-width="16" x1="88" x2="168" y1="128" y2="128"/><line stroke-linecap="round" stroke-linejoin="round" stroke-width="16" x1="128" x2="128" y1="88" y2="168"/></svg></span>    <span data-bs-original-title="Добавить в описание" id='phrase-desc-${params.data.id}' onclick='addToDesc(this, ${JSON.stringify(params.data)})' data-bs-toggle="tooltip" data-bs-trigger="hover" class="${descAdded}"><svg viewBox="0 0 256 256" class="addToDesc ag-svg-add" xmlns="http://www.w3.org/2000/svg"><rect height="256" width="256"/><circle cx="128" cy="128" r="96"/><circle cx="128" cy="128" r="96" stroke-miterlimit="10" stroke-width="16"/><line stroke-linecap="round" stroke-linejoin="round" stroke-width="16" x1="88" x2="168" y1="128" y2="128"/><line stroke-linecap="round" stroke-linejoin="round" stroke-width="16" x1="128" x2="128" y1="88" y2="168"/></svg></span>` + params.value
+	}
+	function renderData(params) {
+		return params.value == 1 ? 'Полное вхождение' : params.value == 0 ? "Косвенное вхождение" : '—'
+	}
+	function renderDataIndex(params) {
+		return params.value == 1 ? "+" : '—'
+	}
+	function renderDataNumbers(params) {
+		return params.value == undefined ? '—' : params.value.toLocaleString('ru')
+	}
+	// function cellStyle(params) {
+	// 	let color = ''
+	// 	if (params.value == 1) {
+	// 		color = "rgba(233,249,238,.5)"
+	// 	} else if (params.value == 0) {
+	// 		color = "rgba(229,245,255,.5)"
+	// 	}
+	// 	return {
+	// 		backgroundColor: color,
+	// 	};
+	// }
+	var mainColumn = [{
+			field: 'phrases',
+			headerName: 'Фразы',
+			width: 220,
+			cellRenderer: renderDataPhrase
+		},
+		{
+			field: 'frequencyMonthly', 
+			width: 120, 
+			headerName: 'Частотность в месяц', 
+			sort: 'desc',
+			cellRenderer: renderDataNumbers
+		},
+		{
+			field: 'frequencyAverageDay',
+			width: 120,
+			headerName: 'Частотность средняя в день', 
+			cellRenderer: renderDataNumbers,
+		},
+		{
+			field: 'countProducts',
+			width: 120,
+			headerName: 'Количество продуктов на WB',
+			cellRenderer: renderDataNumbers,
+			headerComponentParams: {
+				template:
+					 '<div class="ag-cell-label-container" role="presentation">' +
+					'  <span ref="eMenu" class="ag-header-icon ag-header-cell-menu-button"></span>' +
+					'  <div ref="eLabel" class="ag-header-cell-label" role="presentation">' +
+					'    <span ref="eText" class="ag-header-cell-text" role="columnheader" title="Количество продуктов на WB"></span>' +
+					'    <span ref="eSortOrder" class="ag-header-icon ag-sort-order" ></span>' +
+					'    <span ref="eSortAsc" class="ag-header-icon ag-sort-ascending-icon" ></span>' +
+					'    <span ref="eSortDesc" class="ag-header-icon ag-sort-descending-icon" ></span>' +
+					'    <span ref="eSortNone" class="ag-header-icon ag-sort-none-icon" ></span>' +
+					'    <span ref="eFilter" class="ag-header-icon ag-filter-icon"></span>' +
+					'  </div>' +
+					'</div>'
+			},
+		},
+	]
+	var columnDefs = [
+		...mainColumn,
+	];
+
+
+
+	function deselect(){
+			gridOptions.api.deselectAll()
+	}
+	const gridOptions = {
+		defaultColDef: {
+			resizable: true,
+			lockPinned: true,
+			sortable: true,
+		},
+		animateRows: true,
+		columnDefs: columnDefs,
+		onFirstDataRendered: updateTP,
+		getDetailRowData: (params) => {
+			params.successCallback(params.data.callRecords);
+		},
+		// debug: true,
+		localeText: {noRowsToShow: 'Введите фразу'},
+		onBodyScroll: () => {$('.tooltip').remove(); updateTP()},
+		rowData: [],
+		// suppressDragLeaveHidesColumns: true,
+		// onFirstDataRendered: onFirstDataRendered,
+	};
+
+	var eGridDiv = document.getElementById("table-phrases");
+	var gridPhrases = new agGrid.Grid(eGridDiv, gridOptions);
+	gridOptions.api.sizeColumnsToFit()
+</script>
+
+
+<!-- TABLE NAME AND DESC -->
+<script>
+
+	// Table name
+
+	function renderDataPhraseNameAndDesc(params) {
+		return params.data.topData ? params.value :`<span data-bs-original-title="Удалить" data-bs-toggle="tooltip" onclick='deletePhrase(${JSON.stringify(params.data)})' data-bs-trigger="hover"><svg viewBox="0 0 256 256" class="deletePhrase ag-svg-add" xmlns="http://www.w3.org/2000/svg"><rect height="256" width="256"/><circle cx="128" cy="128" r="96"/><circle cx="128" cy="128" r="96" stroke-miterlimit="10" stroke-width="16"/><line stroke-linecap="round" stroke-linejoin="round" stroke-width="16" x1="88" x2="168" y1="128" y2="128"/><line stroke-linecap="round" stroke-linejoin="round" stroke-width="16" x1="128" x2="128" y1="88" y2="168"/></svg></span>` + params.value
+	}
+	function renderDataIndex(params) {
+		return params.value == 1 ? "+" : '—'
+	}
+	function renderDataNumbers(params) {
+		return params.value == undefined ? '—' : params.value.toLocaleString('ru')
+	}
+	// function cellStyle(params) {
+	// 	let color = ''
+	// 	if (params.value == 1) {
+	// 		color = "rgba(233,249,238,.5)"
+	// 	} else if (params.value == 0) {
+	// 		color = "rgba(229,245,255,.5)"
+	// 	}
+	// 	return {
+	// 		backgroundColor: color,
+	// 	};
+	// }
+	var mainColumnNameAndDesc = [{
+			field: 'phrases',
+			headerName: 'Фразы',
+			width: 220,
+			cellRenderer: renderDataPhraseNameAndDesc
+		},
+		{
+			field: 'frequencyMonthly', 
+			width: 120, 
+			headerName: 'Частотность в месяц', 
+			sort: 'desc',
+			cellRenderer: renderDataNumbers
+		},
+		{
+			field: 'frequencyAverageDay',
+			width: 120,
+			headerName: 'Частотность средняя в день', 
+			cellRenderer: renderDataNumbers,
+		}
+	]
+	var columnDefsNameAndDesc = [
+		...mainColumnNameAndDesc,
+	];
+
+
+	const gridOptionsName = {
+		defaultColDef: {
+			resizable: true,
+			lockPinned: true,
+			sortable: true,
+		},
+		animateRows: true,
+		columnDefs: columnDefsNameAndDesc,
+		pinnedTopRowData: [{phrases: 'Итого', frequencyMonthly: 0, frequencyAverageDay: 0, topData: true}],
+		localeText: {noRowsToShow: 'Добавьте фразы в предыдущей вкладке'},
+		rowData: [],
+	};
+
+	var eGridDivName = document.getElementById("table-select-name");
+	new agGrid.Grid(eGridDivName, gridOptionsName);
+	
+
+
+	// Table desc
+
+	const gridOptionsDesc = {
+		defaultColDef: {
+			resizable: true,
+			lockPinned: true,
+			sortable: true,
+		},
+		animateRows: true,
+		columnDefs: columnDefsNameAndDesc,
+		pinnedTopRowData: [{phrases: 'Итого', frequencyMonthly: 0, frequencyAverageDay: 0, topData: true}],
+		localeText: {noRowsToShow: 'Добавьте фразы в предыдущей вкладке'},
+		rowData: [],
+	};
+
+	var eGridDivDesc = document.getElementById("table-select-desc");
+	new agGrid.Grid(eGridDivDesc, gridOptionsDesc);
+	
+	$("#select-phrases-tab").on("click", e => {
+		gridOptionsName.api.sizeColumnsToFit()
+		gridOptionsDesc.api.sizeColumnsToFit()
+	})
+</script>
+<!-- COUNT PHRASES -->
+<script>
+	function countPhrases() {
+		$("#select-phrases-tab").html(Object.keys(phrasesName).length + Object.keys(phrasesDesc).length == 0 ? 'Выбранные фразы' : `Выбранные фраз<span class="counterPhraseName">(${Object.keys(phrasesName).length})</span><span class="counterPhraseDesc">(${Object.keys(phrasesDesc).length})</span>`)
+	}
+</script>
+<!-- ADDING PHRASES -->
+<script>
+	function formatterObj(obj) {
+		const result = []
+		let frequencyMonthlySum = 0
+		let frequencyAverageDaySum = 0
+		for (let el of Object.entries(obj)) {
+			if (el) {
+				result.push({
+					phrases: el[0],
+					frequencyMonthly: el[1][0],
+					frequencyAverageDay: el[1][1],
+					tableName: el[1][2],
+					id: el[1][3]
+				})
+				frequencyMonthlySum += el[1][0] || 0
+				frequencyAverageDaySum += el[1][1] || 0
+			}
+		}
+		return {result, frequencyMonthlySum, frequencyAverageDaySum}
+	}
+
+	function addToName(el, data) {
+		$(el).addClass('added')
+		phrasesName[data.phrases] = [data.frequencyMonthly, data.frequencyAverageDay, true, $(el).attr('id')]
+		console.log(phrasesName);
+		let temporaryObject = formatterObj(phrasesName)
+		console.log(temporaryObject);
+		gridOptionsName.api.setRowData(temporaryObject.result)
+		gridOptionsName.api.setPinnedTopRowData([{phrases: 'Итого', frequencyMonthly: temporaryObject.frequencyMonthlySum, frequencyAverageDay: temporaryObject.frequencyAverageDaySum, topData: true}])
+		setTimeout(() => {updateTP(null, '#table-select-name')}, 300)
+		$('.tooltip').remove()
+		formatter('#textareaName', phrasesName)
+		countPhrases()
+	}
+	function addToDesc(el, data) {
+		$(el).addClass('added')
+		phrasesDesc[data.phrases] = [data.frequencyMonthly, data.frequencyAverageDay, false, $(el).attr('id')]
+		console.log(phrasesDesc);
+		let temporaryObject = formatterObj(phrasesDesc)
+		console.log(temporaryObject);
+		gridOptionsDesc.api.setRowData(temporaryObject.result)
+		gridOptionsDesc.api.setPinnedTopRowData([{phrases: 'Итого', frequencyMonthly: temporaryObject.frequencyMonthlySum, frequencyAverageDay: temporaryObject.frequencyAverageDaySum, topData: true}])
+		setTimeout(() => {updateTP(null, '#table-select-desc')}, 300)
+		$('.tooltip').remove()
+		formatter('#textareaDesc', phrasesDesc)
+		countPhrases()
+	}
+</script>
+
+<!-- DELETE PHRASES -->
+<script>
+	function deletePhrase(data) {
+		console.log(data);
+		if (data.tableName) {
+			delete phrasesName[data.phrases]
+			let temporaryObject = formatterObj(phrasesName)
+			console.log(temporaryObject);
+			gridOptionsName.api.setRowData(temporaryObject.result)
+			gridOptionsName.api.setPinnedTopRowData([{phrases: 'Итого', frequencyMonthly: temporaryObject.frequencyMonthlySum, frequencyAverageDay: temporaryObject.frequencyAverageDaySum, topData: true}])
+			setTimeout(() => {updateTP(null, '#table-select-name')}, 300)
+			formatter('#textareaName', phrasesName)
+		} else {
+			delete phrasesDesc[data.phrases]
+			let temporaryObject = formatterObj(phrasesDesc)
+			gridOptionsDesc.api.setRowData(temporaryObject.result)
+			gridOptionsDesc.api.setPinnedTopRowData([{phrases: 'Итого', frequencyMonthly: temporaryObject.frequencyMonthlySum, frequencyAverageDay: temporaryObject.frequencyAverageDaySum, topData: true}])
+			setTimeout(() => {updateTP(null, '#table-select-desc')}, 300)
+			formatter('#textareaDesc', phrasesDesc)
+		}
+		$(`#${data.id}`).removeClass('added')
+		$('.tooltip').remove()
+		countPhrases()
+	}
+</script>
+
+<!-- Clear phrases -->
+<script>
+	$(".clearPhrases").on('click', e => {
+		if (e.target.dataset.typeField == 'phrasesName') {
+			Object.keys(phrasesName).forEach(el => {
+				$(`#${phrasesName[el][3]}`).removeClass('added')
+			})
+			phrasesName = {}
+			gridOptionsName.api.setRowData([])
+			gridOptionsName.api.setPinnedTopRowData([{phrases: 'Итого', frequencyMonthly: 0, frequencyAverageDay: 0, topData: true}])
+			formatter('#textareaName', phrasesName, false)
+			countSymbols('#textareaName')
+		} else {
+			Object.keys(phrasesDesc).forEach(el => {
+				$(`#${phrasesDesc[el][3]}`).removeClass('added')
+			})
+			phrasesDesc = {}
+			gridOptionsDesc.api.setRowData([])
+			gridOptionsDesc.api.setPinnedTopRowData([{phrases: 'Итого', frequencyMonthly: 0, frequencyAverageDay: 0, topData: true}])
+			formatter('#textareaDesc', phrasesDesc, false)
+			countSymbols('#textareaDesc')
+		}
+		countPhrases()
+	})
+</script>
+
+<!-- FORMATTERING FIELDS -->
+<script>
+	function formatter(field, objField, showAlert = true) {
+		$(field).val(Array.from(new Set(Object.keys(objField).map(el => el.split(' ')).flat())).join(' '))
+		if (showAlert) {
+			$('textarea', $('.count-symbols').closest('.d-flex')).each((index, el) => {
+				countSymbols(el)
+			})
+		}
+		
+	}
+</script>
+
+<!-- Choice all -->
+<script>
+	$("#choiceAll").on('click', () => {
+		let temporaryObject = {}
+		allData.forEach(el => {
+			console.log(el.id);
+			temporaryObject[el.phrases] = [el.frequencyMonthly, el.frequencyAverageDay, false, 'phrase-desc-' + el.id]
+		})
+		phrasesDesc = temporaryObject
+		console.log(temporaryObject);
+		temporaryObject = formatterObj(temporaryObject)
+		console.log(temporaryObject);
+		gridOptionsDesc.api.setRowData(temporaryObject.result)
+		gridOptionsDesc.api.setPinnedTopRowData([{phrases: 'Итого', frequencyMonthly: temporaryObject.frequencyMonthlySum, frequencyAverageDay: temporaryObject.frequencyAverageDaySum, topData: true}])
+		$('.addToDesc').closest('span').addClass('added')
+		countPhrases()
+		formatter('#textareaDesc', phrasesDesc)
+	})
+</script>
+
+<!-- COPY TEXT -->
+<script>
+	$('.copyToClipboard').click(function() {
+		var val = $('textarea', $(this).closest('div').siblings('div')).val()
+		if (val != '') {
+			var $temp = $("<input>");
+			$("body").append($temp);
+			console.log($('textarea', $(this).closest('div').siblings('div')), $(this).closest('div').siblings('div'));
+			$temp.val($('textarea', $(this).closest('div').siblings('div')).val()).select();
+			document.execCommand("copy");
+			$temp.remove();
+			
+			document.execCommand("copy")
+			var tooltip = $(this).tooltip()
+			tooltip.tooltip('show')
+			setTimeout(() => {
+				tooltip.tooltip('hide')
+			}, 600)
+			setTimeout(() => {
+				tooltip.tooltip('dispose')
+			}, 800)
+		}
+		
+	});
+</script>
+
+<!-- AJAX REQUEST -->
+<script>
+	//.html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="loader-svg"><path d="M256 0c-17.7 0-32 14.3-32 32s14.3 32 32 32V0zM422.3 352c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7L422.3 352zM256 64c106 0 192 86 192 192h64C512 114.6 397.4 0 256 0V64zM448 256c0 35-9.4 67.8-25.7 96L477.7 384c21.8-37.7 34.3-81.5 34.3-128H448z"></path></svg>')
+	$('#search').on('keypress', event => {
+		event.key == 'Enter' ? loaded() : null
+	})
+	$('#button-addon2').on('click', loaded)
+	function loaded() {
+		let val = $('#search').val()
+		if (val == '') {
+			return customSwal('Сначало введите что то в поле поиска!', {hideDelay: 4500, type: 'error'})
+		}
+		$.ajax({
+			type: "POST", 
+			url: '', 
+			data: {'csrfmiddlewaretoken': '{{ csrf_token }}', phrase: val},
+			beforeSend: function() {
+				$('#button-addon2').html('Поиск <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="loader-svg"><path d="M256 0c-17.7 0-32 14.3-32 32s14.3 32 32 32V0zM422.3 352c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7L422.3 352zM256 64c106 0 192 86 192 192h64C512 114.6 397.4 0 256 0V64zM448 256c0 35-9.4 67.8-25.7 96L477.7 384c21.8-37.7 34.3-81.5 34.3-128H448z"></path></svg>')
+				$('#button-addon2').attr('disabled', true)
+			},
+			success: function(data) 
+			{ 
+				{% comment %} var obj = $.parseJSON(data) {% endcomment %}
+				allData = data['objects']
+				console.log(data)
+				console.log(data['objects'])
+				gridOptions.api.setRowData(data['objects'])
+			},
+			complete: function() {
+				$('#button-addon2').html('Поиск')
+				$('#button-addon2').attr('disabled', false)
+				updateTP()
+			},
+		})
+		
+	}
+</script>
+
+
+
+
+
+{% endblock javascripts %} 
+

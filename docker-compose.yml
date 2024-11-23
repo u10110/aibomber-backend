@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+
+  appseed-app:
+    container_name: appseed_app
+    #build: .
+    image: registry.mplab.io/mplab-web:latest
+    restart: always
+    env_file: ${ENV_PROD}
+    networks:
+      - web_network
+    volumes:
+      - /mnt/media/images:/app/apps/media/images
+    expose:
+      - "5005"
+
+networks:
+  web_network:
+       external: true
+       name: web_network

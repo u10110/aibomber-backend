@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Выберите способ оплаты</title>
+	<!-- Обнуление css -->
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+	<style>
+		/* Указываем box sizing */
+		*,
+		*::before,
+		*::after {
+			box-sizing: border-box;
+		}
+
+		/* Убираем внутренние отступы */
+		ul[class],
+		ol[class] {
+			padding: 0;
+		}
+
+		/* Убираем внешние отступы */
+		body,
+		h1,
+		h2,
+		h3,
+		h4,
+		h5,
+		h6,
+		p,
+		ul[class],
+		ol[class],
+		li,
+		figure,
+		figcaption,
+		blockquote,
+		dl,
+		dd {
+			margin: 0;
+		}
+
+		/* Выставляем основные настройки по-умолчанию для body */
+		body {
+			min-height: 100vh;
+			scroll-behavior: smooth;
+			text-rendering: optimizeSpeed;
+			line-height: 1.5;
+		}
+
+		/* Удаляем стандартную стилизацию для всех ul и il, у которых есть атрибут class*/
+		ul[class],
+		ol[class] {
+			list-style: none;
+		}
+
+		/* Элементы a, у которых нет класса, сбрасываем до дефолтных стилей */
+		a {
+			text-decoration: none;
+			color: inherit;
+		}
+
+		/* Упрощаем работу с изображениями */
+		img {
+			max-width: 100%;
+			display: block;
+		}
+
+		/* Указываем понятную периодичность в потоке данных у article*/
+		article > * + * {
+			margin-top: 1em;
+		}
+
+		/* Наследуем шрифты для инпутов и кнопок */
+		input,
+		button,
+		textarea,
+		select {
+			font: inherit;
+		}
+	</style>
+
+	<!-- Стили -->
+	<style>
+		* {
+			font-family: "Roboto", "Open Sans";
+		}
+		.container {
+			max-width: 768px;
+			margin: 0 auto;
+		}
+		.content {
+			padding: 0 10px;
+			margin-top: 20px;
+		}
+		.payment-choice {}
+		.card {
+			box-shadow: 0 0px 20px 10px rgb(0 0 0 / 5%);
+			position: relative;
+			display: flex;
+			flex-direction: column;
+			min-width: 0;
+			word-wrap: break-word;
+			background-color: #fff;
+			background-clip: border-box;
+			border: 0 solid rgba(0, 0, 0, 0.125);
+			border-radius: 1rem;
+		}
+		.card-body {
+			padding: 0.85rem;
+		}
+		.title {
+			font-weight: 600;
+			color: #344767;
+		}
+		.title-6 {
+			font-size: 1.2em;
+		}
+		.payment-choice__title {
+			margin-bottom: 20px;
+		}
+		.payment-choice__subtitle {}
+		.payment-choice__banks {}
+		.bank {
+			margin: 20px 0;
+		}
+		.bank__link {
+			display: flex;
+			padding: 5px 10px;
+			box-shadow: 0 0px 10px 5px rgb(0 0 0 / 5%);
+			border-radius: 10px;
+			align-items: center;
+			transition: all 0.4s ease;
+		}
+		.bank__link:hover {
+			padding: 10px 15px;
+		}
+		.bank__image {
+			width: 50px;
+			margin-right: 10px;
+		}
+		.bank__name {
+			color: #344767;
+			flex: 1 0 auto;
+		}
+		.bank__svg {
+			fill: #344767;
+			width: 20px;
+		}
+		.text {
+			font-size: 1em;
+			color: #67748E;
+			line-height: 1.5;
+		}
+		.form-control {
+			display: block;
+			width: 100%;
+			padding: 0.5rem 0.75rem;
+			font-size: 0.875rem;
+			font-weight: 400;
+			line-height: 1.4rem;
+			color: #495057;
+			background-color: #fff;
+			background-clip: padding-box;
+			border: 1px solid #d2d6da;
+			-webkit-appearance: none;
+			-moz-appearance: none;
+			appearance: none;
+			border-radius: 0.5rem;
+			transition: box-shadow 0.15s ease, border-color 0.15s ease;
+		}
+		.input-with-svg {
+			padding-left: 28px;
+		}
+		.form-control:focus {
+			color: #495057;
+			background-color: #fff;
+			border-color: #e293d3;
+			outline: 0;
+			box-shadow: 0 0 0 2px #e9aede;
+		}
+		.search {
+			width: 60%;
+		}
+		.icon-search svg {
+			width: 20px;
+			position: absolute;
+			left: 5px;
+			top: 10px;
+		}
+		.icon-search {
+			fill: #344767;
+			position: relative;
+
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<div class="container">
+			<div class="content">
+				<section class="payment-choice card">
+					<div class="card-body">
+						<h6 class="title title-6 payment-choice__title">
+							Выберите банк для оплаты
+						</h6>
+						<p class="subtitle payment-choice__subtitle text">
+							После выбора банка, у Вас откроется банковское приложение, где вы сможете завершить оплату
+						</p>
+						<div class="search">
+							<div class="icon-search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></div>
+							<input type="text" placeholder="Поиск..." class="form-control input-with-svg" id="serach">
+						</div>
+						<ul class="payment-choice__banks">
+							{% for bank in data %}
+							<li class="bank" data-name="{{bank.title}}">
+								<a class="bank__link" href="{{bank.url}}">
+									<img src="{{bank.icon}}" alt="" class="bank__image">
+									<span class="bank__name text">{{bank.title}}</span>
+									<svg class="bank__svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M342.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L274.7 256 105.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>
+								</a>
+							</li>
+							{% endfor %}
+						</ul>
+					</div>
+				</section>
+			</div>
+		</div>
+	</main>
+	<script>
+		function search(that, elemClass) {
+			console.log(that, elemClass);
+			let allElemets = document.querySelectorAll('.' + elemClass)
+			allElemets.forEach((el, index) => {
+				console.log(that.value, el.dataset.name, el.dataset.name.toLowerCase().indexOf(that.value.toLowerCase()));
+				if (el.dataset.name.toLowerCase().indexOf(that.value.toLowerCase()) != -1 || that.value.trim() == '') {
+					el.style = `display: block`
+				} else {
+					el.style = `display: none`
+				}
+			})
+		}
+		document.querySelector('#serach').addEventListener('input', function() {search(this, 'bank')})
+	</script>
+	
+</body>
+</html>

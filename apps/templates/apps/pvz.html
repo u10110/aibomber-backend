@@ -1,0 +1,465 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Ecommerce Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+{% comment %} <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+    /> {% endcomment %}
+    <link rel="stylesheet" href="/static/assets/css/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="/static/assets/css/MarkerCluster.css" />
+    <link rel="stylesheet" href="/static/assets/css/datatables.min.css">
+    <link rel="stylesheet" href="{% static 'css/pvz-style.css' %}">
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+{% if error %}
+<!-- <script type="text/javascript">soft.showSwal('basic')</script> -->
+{% endif %}
+<div class="container-fluid py-4">
+
+      <div class="col-12 mt-sm-0 mt-4">
+        <div class="row">
+            <div class="col-12 p-0">
+              <div class="card">
+                <!-- Card header -->
+                <div class="card-header pb-0">
+                  <div class="d-lg-flex">
+                    <div class='col-lg-7 col-12'>
+                      <h5 class="mb-0">Добавленные ПВЗ</h5>
+                      <p class="text-sm mb-0">
+                        Сформируйте список ПВЗ на которые будете делать выкупы. Для формирования списка выберете нужные ПВЗ на карте и нажмите “Добавить в список“.
+                      </p>
+                    </div>
+                    <div class=" col-auto ms-auto my-auto mt-lg-0 mt-4">
+                      <div class="ms-auto my-auto">
+                        
+                        
+                        <button class="btn btn-outline-primary btn-sm export mb-0 mt-sm-0 mt-1" data-type="csv" type="button" name="button">Экспорт</button>
+                        <button id='guide' class="btn border border-dark btn-sm mb-0 mt-sm-0 mt-1 " type="button" name="button"><i class="fa fa-play m-1 mw-5 d-inline-block" aria-hidden="true"></i>Инструкция</button><br>
+                        
+                      </div>
+                      {% comment %} <button class="btn bg-gradient-primary btn-sm mt-3 float-right" id='map_show'>Добавить ПВЗ</button> {% endcomment %}
+                    </div>
+                    
+                  </div>
+                  <div style="margin-top: 10px;margin-bottom: -15px;font-size: 0.9em;" id="loadPVZ">Загрузка всех пвз...</div>
+                  <button class="btn bg-gradient-primary btn-sm mt-3 float-right" id='map_show'>Добавить ПВЗ</button>
+                </div>
+                <div class="card-body px-0 pb-0">
+                  <div class="table-responsive col-12" style="position: relative;">
+                    <button class="btn btn-danger float-end" id='del-all-pvz-btn' style="z-index: 1;">Удалить все ПВЗ</button>
+                    <table class="table table-striped dataTable col-12" id="products-list">
+                      <thead class="thead-light">
+                        <tr>
+                          <th scope="col">Маркетплейс</th>
+                          <th scope="col">ПВЗ</th>
+                          <th scope="col">Статус</th>
+                          <th scope="col"></th>
+                          {% comment %} <th>Статус</th> {% endcomment %}
+
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for object in objects%}
+                        <tr id='pvz-{{ object.id }}'>
+                          <td class="text-sm" data-order="{{object.updated_at|date:"U" }}">{{object.marketplace.name}}</td>
+                          <td class="text-sm">{{object.pvz.address}}</td>
+                          <td class="text-sm">{% if object.pvz.actual_status == True %}<span class="badge badge-success">Активен</span>{% else %}<span class="badge badge-danger">Не активен</span>{% endif %}</td>
+                          {% comment %} <td class="text-sm">
+                            {% if object.id in error_pvz %}<span class="badge badge-danger">Ошибка</span>{% elif object.id in good_pvz %}<span class="badge badge-success">Успешно</span>{% else %}<span class="badge badge-secondary">На проверке</span>{% endif %}</td> {% endcomment %}
+                          <td class="text-sm pr-5">
+                              </a>
+                              <a class="delete-pvz" onclick='delete_pvz("{{ object.id }}", this)' data-bs-toggle="tooltip" data-bs-original-title="Удалить ПВЗ">
+                                <i class="fas fa-trash text-secondary"></i>
+                              </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="msg success" role="alert">ПВЗ было удалено!</div>
+    <div class="msg error" role="alert">Произошла ошибка!</div>
+  </div>
+  <div class="container-fluid py-4">
+    
+    
+    </div>
+
+    {% include "includes/footer.html" %}
+    
+  </div>
+  <div id="myModalMap" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content px-5">
+      <div class="modal-header">
+        <h4>Выберите ПВЗ</h4>
+        <span class="close justify-content-end">&times;</span>
+      </div>
+      <div class="row">
+        
+        <div class='col-12 justify-content-end'>
+          <div id='map'></div>
+        </div>
+        <div class="col-12 myModalMap-body">
+          <h4 style='display: none;'>Выбранные ПВЗ:</h4>
+          <div class='list-group row' id='pvz_lst'>
+            {% comment %} <div class='list-group-item'><label class='w-90' style='float:left;'>г. Москва, м Площадь Ильича, Николоямская улица, д. 62</label><a class='justify-content-end d-flex' href="#" onclick="delete_pvz_lst('г. Москва, м Площадь Ильича, Николоямская улица, д. 62')"><span>x</span></a></div> {% endcomment %}
+          </div>
+          <form action="/pvz/" method="post" style='display: none;'>
+                  {% csrf_token %}
+                <input type='hidden' id="address" name="address" class="multisteps-form__textarea form-control"></input>
+              
+              <div class="d-flex justify-content-end mt-4">
+                <button  type="submit"  class="btn bg-gradient-primary m-0 ms-2" >Добавить в список</button>
+              </div>
+            </form>
+
+        </div>
+      </div>
+      {% comment %} <div class="w-30">
+        <h4>Добавленные ПВЗ:</h4>
+        <div class='list-group'>
+          <div class='list-group-item'>г. Москва, м Площадь Ильича, Николоямская улица, д. 62</div>
+          <div class='list-group-item'>г. Москва, м Пл123ощадь Иль123ча, Николоямская улица, д. 62</div>
+        </div>
+      </div>
+      <div class='w-70 justify-content-end float-left' style='margin-left:auto;'>
+        <div id='map'></div>
+      </div> {% endcomment %}
+      
+      
+    </div>
+  
+  </div>
+  <div class="customSwal">
+		<div class="customSwal__icon">
+			
+		</div>
+		<div class="customSwal__text"></div>
+	</div>
+
+<!-- Модальное окно удаления всех ПВЗ -->
+  <div class="modal" id="del-all-pvz-modal">
+    <div class="modal-content">
+      <div style="background-color: rgb(233, 33, 33); padding: 0.4rem 1rem;">
+        <h5 style="color: #fff;">Удаление всех ПВЗ</h5>
+      </div>
+      <div class="modal-body" style="font-weight: 700; font-size: 0.96em;">
+        Вы действительно хотите удалить все ПВЗ?
+      </div>
+      <div class="modal-footer" style="padding: 0.3rem 0.75rem 0 0;">
+        <button type="button" class="btn btn-behance">Отмена</button>
+        <button type="button" class="btn btn-danger" id="delAllPVZ">Удалить</button>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+
+<script src="/static/assets/js/jquery.js"></script>
+<script src="/static/assets/js/plugins/datatables.min.js"></script>
+<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
+<script src="/static/assets/js/plugins/leaflet.markercluster.js"></script>
+<script src="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script src="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.5/esri-leaflet-geocoder.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/0.0.1-beta.5/esri-leaflet-geocoder.css">
+<script>
+  var loadPVZel = $("#loadPVZ")
+  var loadPVZ = setInterval(() => {
+    loadPVZel.html('Загрузка всех пвз.')
+    setTimeout(() => {
+      loadPVZel.html('Загрузка всех пвз..')
+    }, 400)
+    setTimeout(() => {
+      loadPVZel.html('Загрузка всех пвз...')
+    }, 800)
+  }, 1200)
+  $( document ).ajaxComplete(function() {
+    console.log("AJAX COMPLETE11")
+    afterLoadData();
+    clearInterval(loadPVZ);
+    loadPVZel.remove()
+  });
+  var data;
+  jQuery.ajaxSetup({async:true});
+  $.get( "{% url 'get-pvz' %}", function( data_r ) {
+    data = data_r;
+  });
+  function afterLoadData(){
+    $( document ).ajaxComplete(function() {
+      console.log("AJAX COMPLETE")
+    });
+    $("form").submit(function(e) {
+
+      e.preventDefault(); // avoid to execute the actual submit of the form.
+
+      var form = $(this);
+      var actionUrl = form.attr('action');
+      
+      $.ajax({
+          type: "POST",
+          url: actionUrl,
+          data: form.serialize(), // serializes the form's elements.
+          success: function(data)
+          {
+            document.getElementById("myModalMap").style.display = 'none';
+            Swal.fire(
+        'Готово!',
+        `Добавлено ${data['count_new']}/${data['count_all']} ПВЗ. Было у вас в списке из них ${data['count_old']}`,
+        'success'
+      ).then(function(){
+        window.location.href = '{% url "pvz" %}';
+      })
+          }
+      });
+      
+  });
+
+    const delAllPvzModal = $('#del-all-pvz-modal')
+    $('#del-all-pvz-btn').click(() => {
+      delAllPvzModal.css('display', 'block')
+    })
+
+    document.querySelector('#del-all-pvz-modal .modal-content').onclick = function (event) {
+      event.stopPropagation()
+    }
+    delAllPvzModal.click(() => {
+      delAllPvzModal.css('display', 'none')
+    }) 
+    
+    $('#del-all-pvz-modal button').click(() => {
+      delAllPvzModal.css('display', 'none')
+    })
+
+    
+    
+    var modal = document.getElementById("myModalMap");
+    var span = document.getElementsByClassName("close")[0];
+    span.onclick = function() {
+      modal.style.display = "none";
+    }
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+    const map = L.map("map", { "tap": false }).setView([55.754989002265646, 37.62285232543945], 14);
+    $('#map_show').click(function(){
+      setTimeout(function() {
+        map.invalidateSize();
+      }, 10);
+      modal.style.display = "block";
+    })
+    var searchControl = new L.esri.Controls.Geosearch().addTo(map);
+
+    var results = new L.LayerGroup().addTo(map);
+
+      searchControl.on('results', function(data){
+        results.clearLayers();
+        for (var i = data.results.length - 1; i >= 0; i--) {
+          results.addLayer(L.marker(data.results[i].latlng));
+        }
+      });
+    const osm = L.tileLayer(
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      {
+        maxZoom: 19,
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }
+    ).addTo(map);
+    const geojsonMarkerOptions = new L.Icon({
+      iconSize: [27, 27],
+       iconAnchor: [13, 27],
+       popupAnchor:  [1, -24],
+       iconUrl: '/static/assets/img/wb.svg'
+    });
+
+    // loading geojson
+    const lightData = L.geoJSON(data, {
+      onEachFeature: function (feature, layer) {
+
+             const popupContent =
+             '<div class="leaflet-popup-content" style="width: 260px;">' +
+              feature.properties.Name+
+               '<br><i class="fa fa-lg fa-star text-purple"></i> ' +
+               feature.properties.rate+
+              '</div>'+
+              `<a onclick="adding_pvz('${feature.properties.Name}', '${feature.properties.rate}', '${feature.geometry.coordinates[0]}', '${feature.geometry.coordinates[1]}', '${feature.properties.id}');document.querySelector('.leaflet-popup-close-button').click();" class="btn btn-primary not-black">Выбрать</a>`;
+            
+            layer.bindPopup(popupContent, {autoClose: true, closeOnClick: true});
+
+      },
+      pointToLayer: function (feature, latlng) {
+        return  L.marker(latlng, {icon: geojsonMarkerOptions});
+      },
+    });
+    {% comment %} }).addTo(map); {% endcomment %}
+
+    const markers = L.markerClusterGroup({showCoverageOnHover: false}).addLayer(lightData);
+
+    // marker clustering
+    map.addLayer(markers);
+
+
+    $('#guide').click(function(){
+      Swal.fire({
+        {% comment %} title: '<strong>HTML <u>example</u></strong>', {% endcomment %}
+        html:
+          '<div class="frame_blc"><iframe src="https://www.youtube.com/embed/1ZnNog0h8n4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>',
+        showCloseButton: true,
+        showCancelButton: false,
+        focusConfirm: false,
+        showConfirmButton: false,
+        width: '50%',
+      })
+    })
+  }
+  function delete_pvz(pvz_id, thisEl){
+    $($(thisEl).closest('td')).html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="check-refresh"><path d="M256 0c-17.7 0-32 14.3-32 32s14.3 32 32 32V0zM422.3 352c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7L422.3 352zM256 64c106 0 192 86 192 192h64C512 114.6 397.4 0 256 0V64zM448 256c0 35-9.4 67.8-25.7 96L477.7 384c21.8-37.7 34.3-81.5 34.3-128H448z"></path></svg>')
+    console.log($(this), $(this).closest('td'))
+    $('.tooltip').remove()
+      $.get(`{% url 'pvz-delete' 1 %}`.replace('/1/', `/${pvz_id}/`), function(){
+        let pvzName = dataTablePVZ.fnGetData($('#pvz-'+pvz_id))[1]
+        dataTablePVZ.fnDeleteRow($('#pvz-'+pvz_id))
+        console.log('delete');
+        customSwal(`ПВЗ <strong>${pvzName}</strong> успешно удалено!`, {type: 'success', hideDelay: 7000, html: true})
+      })
+    }
+    
+      var dataTablePVZ = $('table').dataTable({
+        "searching": false,
+        "responsive": true,
+        
+        "order": [[ 0, "desc" ]],
+        "language": {
+          "emptyTable": "Данные отсутствуют",
+          "infoEmpty": "",
+          "lengthMenu": "_MENU_  записей на странице",
+          "info": "Страница _PAGE_ из _PAGES_",
+          "paginate": {
+            "first":      "Начало",
+            "last":       "Последняя",
+            "next":       ">",
+            "previous":   "<"
+        },
+      },
+      
+      perPage: 20,
+      pageLength: 20,
+      "lengthMenu": [ [5, 10, 15, 20, 25, 30, 50, 100, -1], [5, 10, 15, 20, 25, 30, 50, 100, "Все"] ]
+      });
+      $('.dataTables_length').addClass('bs-select');
+
+
+    function delete_pvz_lst(pvz_name){
+      console.log(this, $(this))
+      $(this).parents(".list-group-item").remove()
+      console.log(document.getElementById('address').value, pvz_name+'\\n')
+      $('#address').val($('#address').val().replace(pvz_name+'\\n', ''))
+      
+      if (!$('#pvz_lst').children().length) {
+        $('.myModalMap-body h4').css('display', 'none')
+        $('.myModalMap-body form').css('display', 'none')
+      }
+    }
+    function adding_pvz(address, rating, cors_long, cors_lat, status){
+      var pvz_area = $('#address').val();
+      if (pvz_area.includes(address)){
+
+      }
+      else{
+        $('#address').val($('#address').val()+address + ';' + cors_lat + ';' + cors_long + ';' + status + '\\n');
+        $('#pvz_lst').append( `<div class='list-group-item col-5'><label class='w-90' style='float:left;'>${address}</label><a class='justify-content-end d-flex' href="#" onclick="delete_pvz_lst.bind(this, '${address + ';' + cors_lat + ';' + cors_long + ';' + status}')()"><span>x</span></a></div>` );
+      }
+      
+      if ($('#pvz_lst').children().length) {
+        $('.myModalMap-body h4').css('display', 'block')
+        $('.myModalMap-body form').css('display', 'block')
+      }
+
+    }
+  </script>
+
+  <!-- Delete all PVZ -->
+<script>
+  $('#delAllPVZ').click(() => {
+    $.ajax({
+      type: 'POST',
+      async: false,
+      data: {'client_id': '{{ request.user }}', 'csrfmiddlewaretoken': '{{ csrf_token }}',},
+      url: 'all-delete/',
+      success: function(response){
+        dataTablePVZ.api().clear().draw()
+        $('.msg.success').addClass('show')
+        setTimeout(() => $('.msg.success').removeClass('show'), 4000)
+      },
+      error: function(response) {
+        $('.msg.error').addClass('show')
+        setTimeout(() => $('.msg.error').removeClass('show'), 4000)
+      }
+  });
+  })
+</script>
+
+  <!-- CUSTOM SWAL -->
+	<script>
+		
+		function customSwal(text = "Success!", options = {
+			animationTime: '1s',
+			animatiomType: 'ease',
+			hideDelay: '3500',
+			type: 'success',
+			html: false
+		}) { // animationTime = '1s', animatiomType = 'ease', hideDelay = 1500
+			console.log(arguments)
+			if ((options.type || "success") == "success") {
+				$(".customSwal__icon").html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/></svg>')
+				$(".customSwal").css('background', '#cceecb')
+				$(".customSwal__icon path").css('fill', '#76c574')
+				$(".customSwal__text").css('color', '#656565')
+
+			} else if (options.type == 'error') {
+				$(".customSwal__icon").html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"/></svg>')
+				$(".customSwal").css('background', '#ffa7a7')
+				$(".customSwal__icon path").css('fill', '#e36767')
+				$(".customSwal__text").css('color', '#fcfcfc')
+			} else {
+				return console.error(`type ${options.type} does not exsist.\navailable types:\n'success', 'error'` )
+			}
+			$(".customSwal").css('transition', `transform ${options.animationTime || '1s'} ${options.animatiomType || 'ease'}`)
+			$(".customSwal").addClass("active")
+			options.html || false ? $(".customSwal__text").html(text) :  $(".customSwal__text").text(text)
+			let removeClassActive = setTimeout(function () {
+			$(".customSwal").removeClass("active")
+		}, options.hideDelay || '3500')
+			$(".customSwal").click(event => {
+				$(event.target.closest('.customSwal')).removeClass("active")
+				clearTimeout(removeClassActive)
+			})
+
+		}
+	</script>
+
+{% endblock javascripts %}

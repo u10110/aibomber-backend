@@ -1,0 +1,887 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Ecommerce Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+	<style>
+		.form-control__custom {
+			display: inherit;
+			width: inherit;
+		}
+		.products-sortable {
+			display: flex;
+		}
+		.products-table {
+			margin-top: 20px;
+		}
+		.products-table img {
+			width: 75px;
+		}
+		.products-sortable__brand {
+			margin-left: 15px;
+		}
+		.dataTables_paginate svg{
+			width: 20px;
+		}
+		.dataTables_paginate {
+			padding-top: 1.3em !important;
+		}
+		.dataTables_info {
+			padding-top: 2em !important;
+		}
+		.dataTables_paginate .paginate_button {
+			margin-left: 10px !important;
+			transition: all 0.4s ease !important;
+		}
+		.dataTables_paginate .paginate_button.current {
+			border-radius: 50% !important;
+			background: #d1f0ff !important;
+			box-shadow: 0 0 10px 0px #d1f0ff !important;
+			border: 1px solid #d1f0ff !important;
+		}
+
+		.dataTables_paginate .paginate_button:hover {
+			border-radius: 50% !important;
+			color: #3f4446 !important;
+			background: #a9e0fb !important;
+			box-shadow: 0 0 10px 1px #a9e0fb !important;
+			border: 1px solid #a9e0fb !important;
+			margin-left: 10px !important;
+			color: #fff !important;
+		}
+		.dataTables_paginate .paginate_button path {
+			transition: all 0.4s ease !important;
+		}
+		.dataTables_paginate .paginate_button:hover path{
+			fill: #fff;
+		}
+		.dataTables_length > label > .select2 {
+			width: 70px !important;
+			display: inline-block;
+		}
+	</style>
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" integrity="sha512-kq3FES+RuuGoBW3a9R2ELYKRywUEQv0wvPTItv3DSGqjpbNtGWVdvT8qwdKkqvPzT93jp8tSF4+oN4IeTEIlQA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock stylesheets %} 
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+	<div class="container-fluid py-4">
+		<div class="card">
+			<div class="card-body">
+				<h5>Ваши товары:</h5>
+				<div class="products-sortable">
+					<div class="products-sortable__api">
+						<label for="api__search">Выберите API</label>
+						<select name="" id="api__search">
+							<option value="">Всё</option>
+						</select>
+					</div>
+					<div class="products-sortable__brand">
+						<label for="brand__search">Выберите бренд</label>
+						<select name="" id="brand__search">
+							<option value="">Всё</option>
+						</select>
+					</div>
+					<!-- <div class="products-sortable__additionally">
+						<select name="" id="additionally__search">
+							<option value="apiapiapi">apiapiapi</option>
+						</select>
+					</div> -->
+				</div>
+				<div class="products-table">
+					<table class="table">
+						<thead>
+							<th>Артикул</th>
+							<th>API</th>
+							<th>Бренд</th>
+							<th>Фото</th>
+							<th>Название</th>
+							<th>Рейтинг</th>
+							<th>Остаток</th>
+							<th>Фин.<br>цена</th>
+							<th></th>
+						</thead>
+						<tbody>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика украшений
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									3api
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									1k
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									1k
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									1k
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apiapiapi
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									1k
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apia
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+							<tr>
+								<td title="Артикул" data-bs-toggle="tooltip">
+									<a href="https://www.wildberries.ru/catalog/10867816/detail.aspx" target="_blank">10867816</a>
+								</td>
+								<td data-bs-toggle="tooltip" title="API">
+									apia
+								</td>
+								<td title="Бренд" data-bs-toggle="tooltip">
+									Фабрика
+								</td>
+								<td title="Фото" data-bs-toggle="tooltip">
+									<a href="https://images.wbstatic.net/big/new/10860000/10867816-1.jpg" data-toggle="lightbox" data-title="Номенклатура 10867816"><img src="https://img1.wbstatic.net/tm/new/10860000/10867816-1.jpg" alt=""></a>                        </td>
+								<td title="Название" data-bs-toggle="tooltip">
+									<div>
+										<a href="/wb/cabinet/product/10867816" target="_blank">Сувенир "Массажный ролик из нефрита"</a>
+									</div>
+								</td>
+								<td data-bs-toggle="tooltip" title="Рейтинг">
+									<span class="rating-1 rating rating_stars">
+										1
+									</span>
+								</td>
+								<td data-bs-toggle="tooltip" title="Остаток">
+									10
+								</td>
+								<td data-bs-toggle="tooltip" title="Финальная цена">
+									439 ₽
+								</td>
+								<td>
+									<a class="btn btn-primary btn-sm btn-simple" data-toggle="tooltip" title="" data-original-title="Wildberries API сейчас не работает, поэтому изменение названий невозможно">
+										Изменить
+									</a>
+								</td>
+							</tr>
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% include "includes/footer.html" %}
+
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+	<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+	<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+	<script>
+		var dataTableSearch = $('.table').DataTable({
+			scrollX: true,
+			language: {
+				info: "Показано от _START_ до _END_ из _TOTAL_",
+				search: "Поиск:",
+				lengthMenu: "Показывать сразу _MENU_",
+				paginate: {
+					first: "Первый",
+					last: "Последний",
+					next: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l370.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"/></svg>',
+					previous: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M109.3 288L480 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-370.7 0 73.4-73.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-128 128c-12.5 12.5-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 288z"/></svg>',
+				},
+				infoEmpty: "Показано 0 из 0 из _MAX_",
+				infoFiltered: "",
+				zeroRecords: "Ничего не найдено"
+			},
+			initComplete: function () {
+				this.api()
+					.columns(2)
+					.every(function () {
+						var column = this;
+						var select = $('#brand__search')
+							.on('change', function () {
+								var val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+								column.search(val ? '^' + val + '$' : '', true, false).draw();
+							});
+						column
+							.data()
+							.unique()
+							.sort()
+							.each(function (d, j) {
+								select.append('<option value="' + d + '">' + d + '</option>');
+							});
+					});
+				this.api()
+					.columns(1)
+					.every(function () {
+						var column = this;
+						var select = $('#api__search')
+							.on('change', function () {
+								var val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+								column.search(val ? '^' + val + '$' : '', true, false).draw();
+							});
+						column
+							.data()
+							.unique()
+							.sort()
+							.each(function (d, j) {
+								select.append('<option value="' + d + '">' + d + '</option>');
+							});
+					});
+			},
+			
+		});
+
+		 $('div.dataTables_filter input').addClass('form-control').addClass('form-control__custom')
+		var apiSearch = $('#api__search').select2({
+			theme: "bootstrap",
+			minimumResultsForSearch: Infinity,
+		});
+		var brandSearch = $('#brand__search').select2({
+			theme: "bootstrap",
+			minimumResultsForSearch: Infinity,
+		}); 
+		var dataTablesLength = $('.dataTables_length > label > select').select2({
+			theme: "bootstrap",
+			minimumResultsForSearch: Infinity,
+		});
+	</script>
+	<script>
+		//$(".products-table").html(String($(".products-table").html()).replace('v', '')) // ДЛЯ НЕПОНЯТНО ОТКУДА ВЗЯВШЕЙСЯ V
+	</script>
+{% endblock javascripts %}
+
+
+
+

@@ -1,0 +1,12 @@
+{
+        "chrome": {
+                "default": "98.0",
+                "versions": {
+                        "98.0": {
+                                "image": "selenoid/chrome:98.0",
+                                "port": "4444",
+                                "tmpfs": {"/tmp":"size=512m"}
+                        }
+                }
+        }
+}

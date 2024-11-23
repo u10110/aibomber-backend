@@ -1,0 +1,967 @@
+{% extends 'layouts/base.html' %}
+{% load tz %}
+{% load static %}
+
+{% block title %} Ecommerce Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<link rel="stylesheet" href="/static/assets/css/datatables.min.css">
+<link rel="stylesheet" href="{% static 'css/buyout2-style.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/customSwal.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.2.1/air-datepicker.css">
+
+  {% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid mt-4">
+    <div class="row align-items-center">
+      <div class="col-12">
+        <div class="nav-wrapper position-relative end-0">
+          {% comment %} <ul class="nav nav-pills nav-fill p-1"> {% endcomment %}
+          <ul class="nav nav-fill nav-custom p-1">
+            <li class="nav-item col-12 col-md-3">
+              <a class="nav-link mb-0 px-0 py-1  {% if request.GET.status == 'all' %} custom-active {% endif %} "  href="{% url 'buyout' %}?status=all&group={{request.GET.group}}" role="tab" aria-selected="true">
+                Все выкупы группы
+              </a>
+            </li>
+            <li class="nav-item col-12 col-md-3">
+              <a class="collapse show nav-link mb-0 px-0 py-1   {% if request.GET.status == 'active' %} custom-active {% endif %}"  href="{% url 'buyout' %}?status=active&group={{request.GET.group}}" role="tab" aria-selected="true">
+              Активные
+            </a>
+          
+          </li>
+            <li class="nav-item col-12 col-md-3">
+                <a class="collapse show nav-link mb-0 px-0 py-1   {% if request.GET.status == 'delivery' %} custom-active {% endif %}"  href="{% url 'buyout' %}?status=delivery&group={{request.GET.group}}" role="tab" aria-selected="true">
+                В процессе
+              </a>
+            
+            </li>
+            
+            <li class="nav-item col-12 col-md-3">
+                <a class="nav-link mb-0 px-0 py-1  {% if request.GET.status == "done" %} custom-active {% endif %}" href="{% url 'buyout' %}?status=done&group={{request.GET.group}}" role="tab" aria-selected="{% if request.get_full_path == "/buyout?status=done" %}true{% endif %}">
+                Завершенные
+              </a>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid py-4">
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <!-- Card header -->
+          <div class="card-header pb-0">
+            <div class="d-lg-flex">
+              <div class="col-md-6 col-lg-6">
+                <h5 class="mb-0">Все выкупы группы</h5>
+                <p class="text-sm mb-0">
+                  {% if request.GET.status == 'all' %}
+                  Смотрите всю стратегию по выкупу товара группы и контролируйте на какой стадии выкупа находиться ваш товар.
+                  {% elif request.GET.status == 'active' %}
+                  Здесь отображаются выкупы которые не оплачены (находятся в плане оплат если вы используете автоматизированный метод оплаты) или находятся на стадии проверки оплаты.
+                  {% elif request.GET.status == 'delivery' %}
+                  В данный разделе находятся покупки по которым произошел выкуп и оплата подтверждена но сам товар еще не забран.
+                  {% elif request.GET.status == "done" %}
+                  В данном разделе группы находятся товары забранные с ПВЗ
+                  {% endif %}
+                </p>
+                {% if request.get_full_path == '/buyout?status=delivery' %}
+                <div class="alert alert-info p-2 mt-3" style='background-image: none;' role="alert">
+                  Для просмотра статуса выкупа перейдите в раздел <a href='delivery?status=all' class="alert-link">Доставки</a>
+                </div>
+                {% endif %}
+              </div>
+              <div class="ms-auto my-auto mt-4">
+                <div class="ms-auto my-auto d-flex">
+                  <div class="dropdown download" style="margin-right: 5px;">
+										<button class="btn btn-outline-primary btn-sm mb-0 mt-sm-0 mt-1" data-bs-toggle="dropdown" type="button" name="button" aria-haspopup="true" aria-expanded="false" id="download">Экспорт</button>
+										
+										<div class="dropdown-menu mt-0" aria-labelledby="download" >
+											<a class="dropdown-item export" onclick="export_data('xlsx');" data-type="xlsx">Скачать XLSX</a>
+											<a class="dropdown-item export" onclick="export_data('csv');" data-type="csv">Скачать CSV</a>
+										</div>
+									</div>
+                  <button id='guide' class="btn border border-dark btn-sm mb-0 mt-sm-0 mt-1 " type="button" name="button"><i class="fa fa-play m-1 mw-5 d-inline-block" aria-hidden="true"></i>Инструкция</button>
+                </div>
+              </div>
+            </div>
+            {% if 'active' in request.get_full_path and objects %} 
+                <div class="buttons"> 
+                  
+                {% if is_auto_pay %} 
+                <a class="btn btn-sm mb-0 mt-3 d-inline btn-danger" style='color: #fff;' href="{% url 'auto-pay-stop' group %}"  type="button" name="button">Отключить автооплату</a> <!-- href="URL" --> 
+                <p style="font-size: 0.85em;margin-top: 5px;color: #8bd898;"><span class="blink-circle"></span>Автооплата включена || c  {{ tg_start_date }} до {{ tg_end_date }}</p>
+                {% else %} 
+                <button id='buyout-select-pay' class="btn btn-sm mb-0 mt-3 d-inline" style='background-color: #007bff; color: #fff;'  type="button" name="button">Автооплата</button> 
+                {% endif %}</div> <!-- enable --- """color: #8bd898;""" disable --- """color: #ea0606;""" --> 
+            {% endif %}
+          </div>
+          <div class="card-body px-0 pb-0">
+            <div class="table-responsive">
+              <table  class="table table-flush dataTable" id='products-list'>
+                <thead class="thead-light">
+                  <tr>
+                    <th>Продукт</th>
+                    
+                    <th>{% if pay_type == 'no' and 'status=active' in request.get_full_path %}Рекомендуемая {% endif %}Дата</th>
+                    {% if request.GET.status == 'done' %}
+                      <th>Дата получения товара</th>
+                    {% endif %}
+                    {% if 'status=active' in request.get_full_path or 'status=all' in request.get_full_path %}<th>Статус</th>{%endif%}
+                    <th>Размер</th>
+                    <th>Ключевая фраза</th>
+                    <th>Цена {% if '/buyout?status=active' not in request.get_full_path %}выкупа{%endif%}</th>
+                    <th>SKU</th>
+                    <th>Информция о ПВЗ</th>
+                    
+                    {% if '/buyout?status=active' in request.get_full_path %}
+                      <th>Оплата</th>
+                      <th>Действия</th>
+                    {%endif%}
+                    
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for object in objects %}
+                  <tr id='buyout-{{object.id}}'>
+                    <td>
+                      <div class="d-flex">
+                        {% comment %} <div class="form-check my-auto">
+                          <input class="form-check-input" type="checkbox" id="customCheck1" checked>
+                        </div> {% endcomment %}
+                        <img class="ms-1 img-product" title="{{object.product.title}}" src={{object.product.cover}} alt="hoodie">
+                        <a class="text-sm p-text"  title="{{object.product.title}}" href="https://www.wildberries.ru/catalog/{{object.product.sku}}/detail.aspx?" target='_blank'>{{object.product.title}}</a>
+                      </div>
+                    </td>
+                    <td class="text-sm" data-order="{{object.buyout_date|date:"U" }}">
+                      <div class="product_date">{{object.buyout_date|date:"d.m.Y" }}</div>
+                      <div class="product_datePicker d-none"><input autocomplete="off" name="review_date" class="form-control datetimepicker" id="datetimepicker-{{object.id}}" type="text"value='{{object.buyout_date|date:"d.m.Y" }}' ></div>
+                    </td>
+                    {% if 'status=active' in request.get_full_path %}
+                      <td class="text-sm" id='status-pay-{{ object.id }}'>
+                        {% if object.status == 'active' and object.payment_status == 'not_payed' %}
+                          Новый
+                        {% elif object.payment_status == 'pay_await' %}
+                          <label  style='color: #ff9500; margin-bottom:0;'>Ожидание</label>
+                        {% elif object.payment_status == 'bad_pay' or object.status == 'error' or object.status == 'mp_error'%}
+                        <label  style='color: #f13434; margin-bottom:0;'>Не оплачено</label>
+                        {% elif object.payment_status == 'pay_check' %}
+                          Проверка оплаты
+                        {% endif %}
+                      </td>
+                    {% elif 'status=all' in request.get_full_path %}
+                      <td class="text-sm">
+                          {% if object.status == 'active' %}
+                            <span class="badge badge-primary" style='background-color: #007bff; color: #fff;'>Активный</span>
+                          {% elif object.status == 'done' %}
+                            <span class="badge badge-secondary" >Завершен</span>
+                          {% else %}
+                            <span class="badge badge-success" >В процессе</span>
+                          {% endif %}
+                      </td>
+                    {%endif%}
+                    
+                    <td class="text-sm product_size">{% if object.size != "0" %}
+                      <p class="mb-0">{{object.size}}</p>
+                        <span>
+                          <select name="product_size" class="form-control d-none" style="width: 100px;">
+                            {% for sku, size_list in sizes.items %}
+                              {% if sku == object.product.sku %}
+                                {% for size in size_list %}
+                                <option value="{{ size }}" {% if object.size == size %} selected {% endif %}> {{ size }}</option>
+                                {% endfor %}
+                              {% endif %}
+                            {% endfor %}
+                          </select>
+                        </span>{% else %}{% endif %}</td>
+                    <td class="text-sm key_phrase"><p class="mb-0">{{object.key_phrase}}</p><span><input type="text" class="form-control d-none" value="{{object.key_phrase}}" name='key_phrase'></span></td>
+                    <td class="text-sm">{% if '/buyout?status=active' in request.get_full_path %}{{object.product.price}}{% else %}{{object.price_buy|default_if_none:"-"}}{% endif %}</td>
+                    <td class="text-sm">{{object.product.sku}}</td>
+                    <td class="text-sm" data-bs-toggle="tooltip" data-bs-trigger="hover" title="{{object.pvz.address}}">{{object.pvz.address|truncatechars:40}} </td>
+                    
+                    {% if '/buyout?status=active' in request.get_full_path %}
+                      <td class="text-sm">
+                        <div class="loading loading-{{object.id}}" style='display: none;'>
+                          <p><img src="/static/images/Spinner-1s-200px.gif" /> Идет загрузка</p>
+                        </div>
+                        <div id="pay-types-{{object.id}}">
+                        {% if object.payment_status == 'pay_await' %}
+                          <a onclick='get_pay_link("{{ object.id }}");' class='btn mb-0'>
+                            {% if object.pay_method == 'qr' %}QR{% else %}Карта{% endif %}
+                            
+                          </a>
+                          <label style='font-size: 10px;' class='d-block timer-to-pay' link-generated='{{ object.pay_link_generated|date:"U" }}' id='timer-pay-{{ object.id }}'></label>
+                        {% elif pay_type != 'no' and object.payment_status == 'not_payed' %}
+                          <a class='btn' onclick='$("#payment-{{object.id}}").show(); $("#pay_now-{{object.id}}").hide();' id='pay_now-{{object.id}}'>Оплатить сейчас</a>
+                        {% else %}
+                        {% if object.payment_status == 'pay_check'%}
+                          <label>Производится проверка</label>
+                        {% else %}
+                        
+                        {% if object.payment_status == 'bad_pay' %}
+                        <a onclick='check_payed("{{ object.id }}");' class='btn'>Я оплатил</a>
+                        {% endif %}
+                    <a onclick='make_pay("qr", "{{ object.id }}");' class='btn'>QR</a>
+                    <a onclick='make_pay("card", "{{ object.id }}");' class='btn'>Карта</a>
+                    {% endif %}
+                        {% endif %}
+                        <div id='payment-{{object.id}}' style='display:none;'>
+                        <a onclick='make_pay("qr", "{{ object.id }}");' class='btn'>QR</a>
+                    <a onclick='make_pay("card", "{{ object.id }}");' class='btn'>Карта</a>
+                        </div>
+                      </div>
+                        
+                          
+                    </td>
+                      {% comment %} <a href="javascript:;" data-bs-toggle="tooltip" data-bs-original-title="Preview product">
+                        <i class="fas fa-eye text-secondary"></i>
+                      </a>
+                      <a href="javascript:;" class="mx-3" data-bs-toggle="tooltip" data-bs-original-title="Edit product">
+                        <i class="fas fa-user-edit text-secondary"></i> 
+                        {% if object.payment_status != 'pay_check' and object.payment_status != 'pay_await'%}
+                        
+                      </a>
+                      {% endcomment %}
+                      <td class="text-sm">
+                        {% if request.GET.status == 'active' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="check-refresh d-none me-1"><path d="M256 0c-17.7 0-32 14.3-32 32s14.3 32 32 32V0zM422.3 352c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7L422.3 352zM256 64c106 0 192 86 192 192h64C512 114.6 397.4 0 256 0V64zM448 256c0 35-9.4 67.8-25.7 96L477.7 384c21.8-37.7 34.3-81.5 34.3-128H448z"></path></svg>
+                        <button class="btn btn-success d-none save-change me-1" data-id="{{ object.id }}" data-size='{% if object.size != "0" %}true{% else %}false{% endif %}'>Сохранить</button>
+                        <button class="btn btn-danger d-none cancel-change me-3" data-id="{{ object.id }}" data-size='{% if object.size != "0" %}true{% else %}false{% endif %}'>Отменить</button>
+                        <a href="javascript:;" data-id="{{ object.id }}" data-size='{% if object.size != "0" %}true{% else %}false{% endif %}' class="mx-3 edit-buyout" data-bs-toggle="tooltip" data-bs-original-title="Изменить">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width=18><path fill='#8392AB' d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.8 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160V416c0 53 43 96 96 96H352c53 0 96-43 96-96V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H96z"/></svg>
+                        </a>
+                        {% endif %}
+                      <a href='#' id='deletebuyout' onclick='deletebuy({{object.id}});' data-bs-toggle="tooltip" data-bs-original-title="Удалить">
+                        <i class="fas fa-trash text-secondary"></i></a>
+                      
+                      
+                    </td>
+                    {% endif %}
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+
+    {% include "includes/footer.html" %}
+    
+  </div>
+  <div id="myModal" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content d-block">
+      <span class="close justify-content-end">&times;</span>
+      <h3>Введите количество выкупов, которые хотите удалить</h3>
+      <div class='col-6 mt-4'>
+        <input id='delete-count' autocapitalize="off" class="form-control d-block mx-auto" placeholder="" type="number" >
+      </div>
+      
+      <div id="send-again-timer"><p>Доступно Х</p></div>
+      <div class="justify-content-end d-flex">
+        <button class='btn btn-success col-auto justify-content-end d-flex' id="send-delete">Подтвердить</button>
+      </div>
+      
+    </div>
+  
+  </div>
+  <div id="myModal_pay_card" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content d-block w-30">
+      <span class="close justify-content-end">&times;</span>
+      <h3>Оплата</h3>
+      
+      <div id="pay_warning"></div>
+      <button class='btn btn-info col-auto mt-4' style='display:none;' id="sms_repeat">Выслать код повторно</button>
+      <div class="justify-content-end d-flex">
+        <a class='btn btn-primary col-12 justify-content-center' id='pay_link' href='' target="_blank">Оплатить</a>
+      </div>
+      
+    </div>
+  
+  </div>
+  <div id="modal_type_payment" class="modal">
+    <div class="modal-content d-block">
+      <span class="close justify-content-end">&times;</span>
+      <h3>Выберете тип перехвата СМС для автооплаты</h3>
+      <p>Добавить способ для перехвата СМС вы можете на странице <a href='{% url "add-card" %}' target='_blank'>Настройка оплаты</a>.</p>
+      <div class='col-12 mt-4'>
+        <select class="form-control w-50" id="payment_type" name="payment_type">
+          {% comment %} <option value="no">Не выбрано</option> {% endcomment %}
+          {% comment %} {% if is_app_connect %}<option value="app" {% if pay_type == 'app' %}selected{% endif %}>Приложение</option>{% endif %} {% endcomment %}
+<!--          {% if is_tg_connect %}<option value="tg" {% if pay_type == 'tg' %}selected{% endif %}>Telegram</option>{% endif %}-->
+          {% if is_tg_connect %}<option value="tgsbp" {% if pay_type == 'tgsbp' %}selected{% endif %}>Telegram СБП</option>{% endif %}
+        </select>
+        <div class="tg-time" {% if not is_tg_connect %}style='display: none;'{% endif %}>
+          <div class="start-time">
+            <label>Выберите начало временного диапазона(по МСК)</label>
+            <div class="col-3">
+              <input autocomplete="off" class="form-control" type="time" placeholder="Укажите дату начала выкупов" id='buyout_date_start_tg' name="buyout_date_start_tg">
+            </div>
+          </div>
+          <div class="end-time">
+            <label>Выберите конец временного диапазона(по МСК)</label>
+            <div class="col-3">
+              <input autocomplete="off" class="form-control" type="time" placeholder="Укажите дату окончания выкупов" id='buyout_date_end_tg' name="buyout_date_end_tg" >
+            </div>
+          </div>
+        </div>
+        <div class="justify-content-end d-flex">
+          <button class='btn btn-success col-auto justify-content-end d-flex' id="sms-choice-done">Подтвердить</button>
+        </div>
+      </div>
+      </div>
+    </div>
+  
+  </div>
+  <div id="modal_type_payment_sbp" class="modal">
+		<div class="modal-content d-block">
+			<section class="payment-choice">
+				<div class="">
+					<span class="close justify-content-end">&times;</span>
+					<h6 class="title title-6 payment-choice__title">
+						Выберите банк для оплаты
+					</h6>
+					<p class="subtitle payment-choice__subtitle text">
+						После выбора банка, у Вас откроется банковское приложение, где вы сможете завершить оплату
+					</p>
+					<div class="search">
+						<div class="icon-search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></div>
+						<input type="text" placeholder="Поиск..." class="form-control input-with-svg" id="search">
+					</div>
+					<ul class="payment-choice__banks">
+						{% for bank in data %}
+						<li class="bank" data-name="{{bank.title}}">
+							<a class="bank__link" href="{{bank.url}}">
+								<img src="{{bank.icon}}" alt="" class="bank__image">
+								<span class="bank__name text">{{bank.title}}</span>
+								<svg class="bank__svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M342.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L274.7 256 105.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>
+							</a>
+						</li>
+						{% endfor %}
+					</ul>
+				</div>
+			</section>
+		</div>
+	</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+  
+  <script src="/static/assets/js/jquery.js"></script>
+  {% comment %} <script src="/static/assets/js/datatables.js"></script> {% endcomment %}
+  <script src="/static/assets/js/plugins/datatables.min.js"></script>
+  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+  <script src="/static/assets/js/plugins/moment.js"></script>
+  <script src="/static/assets/js/plugins/moment-with-locales.js"></script>
+  <script src="//cdn.datatables.net/plug-ins/1.10.12/sorting/datetime-moment.js"></script>
+  <script src="/static/assets/js/plugins/flatpickr.min.js"></script>
+
+  <script src="/static/assets/js/plugins/customSwal.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js" integrity="sha512-6UofPqm0QupIL0kzS/UIzekR73/luZdC6i/kXDbWnLOJoqwklBK6519iUnShaYceJ0y4FaiPtX/hRnV/X/xlUQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha512-z4OUqw38qNLpn1libAN9BsoDx6nbNFio5lA6CuTp9NlK83b89hgyCVq+N5FdBJptINztxn1Z3SaKSKUS5UP60Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.2.1/air-datepicker.min.js"></script>
+
+  <script>
+		function search(that, elemClass) {
+			console.log(that, elemClass);
+			let allElemets = document.querySelectorAll('.' + elemClass)
+			allElemets.forEach((el, index) => {
+				console.log(that.value, el.dataset.name, el.dataset.name.toLowerCase().indexOf(that.value.toLowerCase()));
+				if (el.dataset.name.toLowerCase().indexOf(that.value.toLowerCase()) != -1 || that.value.trim() == '') {
+					el.style = `display: block`
+				} else {
+					el.style = `display: none`
+				}
+			})
+		}
+		document.querySelector('#search').addEventListener('input', function() {search(this, 'bank')})
+	</script>
+
+  <script>
+     function makeTimer(){
+
+      Array.from(document.getElementsByClassName('timer-to-pay')).forEach(async (elem) => {
+        {% comment %} console.log('{{ object.pay_link_generated|date:"U" }}'); {% endcomment %}
+        var endTime=new Date(elem.getAttribute("link-generated")* 1000);
+        {% comment %} endTime.setHours(endTime.getHours() + 3); {% endcomment %}
+        {% comment %} console.log(endTime); {% endcomment %}
+        endTime.setMinutes(endTime.getMinutes() + 5);
+        endTime = (Date.parse(endTime) / 1000);
+        
+            var now = new Date();
+            {% comment %} console.log(now); {% endcomment %}
+            now = (Date.parse(now) / 1000);
+    
+            var timeLeft = endTime - now;
+            {% comment %} console.log(timeLeft); {% endcomment %}
+
+            if (timeLeft > 0){
+              var days = Math.floor(timeLeft / 86400);
+              var hours = Math.floor((timeLeft - (days * 86400)) / 3600);
+              var minutes = Math.floor((timeLeft - (days * 86400) - (hours * 3600 )) / 60);
+              var seconds = Math.floor((timeLeft - (days * 86400) - (hours * 3600) - (minutes * 60)));;
+            }
+            else{
+              var minutes = 0;
+              var seconds = 0;
+              $.get("{% url 'set-bad-payed' %}", function(data, status){
+                clearInterval(timer);
+                location.reload(1);
+              });
+              {% comment %} setTimeout(function () { location.reload(1); }, 5000); {% endcomment %}
+            }
+    
+            
+
+
+            var left_time = 'Осталось ' + minutes + ' мин. ' + seconds + ' сек.';
+            $('#'+elem.id).html(left_time);
+          });
+        }
+   
+   
+   var timer = setInterval(function() { makeTimer(); }, 1000);
+
+    function get_pay_link(buyout_id){
+			$.ajax({
+				headers: { "X-CSRFToken": '{{ csrf_token }}' },
+				type: 'POST',
+				async:false, 
+				data: {
+					'buyout_id': buyout_id,
+				},
+				url: '{% url "get-pay-link" %}',
+				success: function(response){
+					if (response['payment_type'] == 'sbp') {
+						modal_pay_sbp.style.display = 'block';
+					} else {
+						modal_pc.style.display = 'block';
+						$('#pay_link').attr("href", response['link']);
+					}
+				},
+			});
+		}
+    function is_good_sms_type(){
+      var sms_type = $("#payment_type option:selected").val();
+      if (sms_type == 'tg'){
+  
+        var tg_start = $('#buyout_date_start_tg').val();
+        var tg_end = $('#buyout_date_end_tg').val();
+        console.log('{{ is_tg_connect }}');
+        if ('{{ is_tg_connect }}' == 'None'){
+          Swal.fire('Ошибка', `У вас не подлючен Telegram Bot. Для того чтобы  подключить - перейдите на страницу <a href="{% url 'add-card' %}">Настройка оплаты</a>`, 'error');
+          return false
+        }
+        else if (tg_start == '' && tg_end == ''){
+          Swal.fire('Ошибка', 'Заполните временной диапазон для типа перехвата СМС по Telegram', 'error');
+          return false
+        }
+        else if (tg_start == tg_end){
+          Swal.fire('Ошибка', 'Время начала не может равняться времени окончания', 'error');
+          return false
+        }
+        else if ( tg_start > tg_end || tg_start < '08:00'){
+        modal_pay.style.display = "none";
+        Swal.fire('Ошибка', `Укажите время начала с 8:00, а время окончания до 23:59`, 'error');
+        console.log(tg_start);
+        console.log(tg_end);
+        console.log(tg_start > tg_end);
+        console.log(tg_start >= '08:00');
+        console.log(tg_end <= '23:59');
+          return false
+        }
+      }
+      else if ( sms_type == 'app'){
+        if ('{{ is_app_connect }}' == ''){
+          Swal.fire('Ошибка', `У вас не подлючено приложение для перехвата СМС. Для того чтобы  подключить - перейдите на страницу <a href="{% url 'add-card' %}">Настройка оплаты</a>`, 'error');
+          return false
+        }
+      }
+  
+
+      return true
+    }
+    var modal_pay = document.getElementById("modal_type_payment");
+		var span_pay = document.getElementsByClassName("close")[2];
+
+		var modal_pay_sbp = document.getElementById("modal_type_payment_sbp");
+		var span_pay_sbp = document.getElementsByClassName("close")[3];
+
+		span_pay.onclick = function() {
+				modal_pay.style.display = "none";
+			
+		}
+		span_pay_sbp.onclick = function() {
+				modal_pay_sbp.style.display = "none";
+			
+		}
+		$(window).on('click', function(event) {
+			console.log(event.target)
+			if (event.target == modal_pay) {
+				modal_pay.style.display = "none";
+			} else if (event.target == modal_pay_sbp) {
+				modal_pay_sbp.style.display = "none";
+			}
+		}) 
+
+    var sms_close = document.getElementById('sms-choice-done');
+
+    sms_close.onclick = function() {
+      if (is_good_sms_type() == true){
+        var sms_type = $("#payment_type option:selected").val();
+        var tg_start = $('#buyout_date_start_tg').val();
+        var tg_end = $('#buyout_date_end_tg').val();
+        $.ajax({
+          headers: { "X-CSRFToken": '{{ csrf_token }}' },
+          type: 'POST',
+          async:false, 
+          data: {
+            'num_group': {{ request.GET.group }},
+            'sms_type': sms_type,
+            'start_time': tg_start,
+            'end_time': tg_end,
+
+          },
+          url: '{% url "set-sms-type" %}',
+          success: function(response){
+                
+            $('.buttons').html(`<a class="btn btn-sm mb-0 mt-3 d-inline btn-danger" style='color: #fff;' href="{% url 'auto-pay-stop' group %}"  type="button" name="button">Отключить автооплату</a> <p style="font-size: 0.85em;margin-top: 5px;color: #8bd898;"><span class="blink-circle"></span> Автооплата включена || с ${tg_start} до ${tg_end}</p>`)
+            Swal.fire(
+        'Готово!',
+        'Вы включили автооплату с перехватом СМС по '+$("#payment_type option:selected").text(),
+        'success'
+      )
+          },
+        });
+
+        modal_pay.style.display = "none";
+      }
+    }
+  $('#payment_type').ready(function() {
+    var val = $("#payment_type option:selected").val();
+    if (val == 'tg'){
+      $(".timepicker").attr("readonly", false);
+      $('.tg-time').show();
+    }
+
+});
+  $('#payment_type').change(function() {
+    var val = $("#payment_type option:selected").val();
+    if (val == 'tg' || val == 'tgsbp'){
+      $(".timepicker").attr("readonly", false);
+      $('.tg-time').show();
+    }
+    else{
+      $('#buyout_date_start_tg').val('');
+      $('#buyout_date_end_tg').val('');
+      $('.tg-time').hide();
+    }
+
+});
+    $('#buyout-select-pay').click(function(){
+      modal_pay.style.display = "block";
+    })
+    $('.payment').hide();
+    function check_payed(product_id){
+      $.ajax({
+        headers: { "X-CSRFToken": '{{ csrf_token }}' },
+        type: 'POST',
+        async:false,
+        data: {'product_id': product_id},
+        url: '{% url "check-payed" %}',
+        success: function(response){
+          location.reload();
+        },
+      });
+    }
+    function make_pay(payment_type, product_id){
+<!--      if (payment_type == 'qr'){-->
+<!--           Swal.fire({-->
+<!--              icon: 'info',-->
+<!--              title: 'Уведомление',-->
+<!--              text: 'Уважаемые пользователи нашего сервиса! На Вайлдберис произошли изменения, после которых способ оплаты с помощью qr-кода через интерфейс Вайлбериес сейчас недоступен. Как только вайлдберис вернет данный способ оплаты, мы сразу вас оповестим. Хорошего дня!',-->
+<!--            });-->
+<!--            return false;-->
+
+<!--      }-->
+      $.ajax({
+        headers: { "X-CSRFToken": '{{ csrf_token }}' },
+        type: 'POST',
+        {% comment %} async:false, {% endcomment %}
+        data: {'payment_type': payment_type,
+              'product_id': product_id},
+        url: '{% url "get-payment-link" %}',
+        beforeSend: function() { $('.loading-'+product_id.toString()).show(); $('#pay-types-'+product_id).hide(); },
+        complete: function() { $('.loading-'+product_id).hide(); },
+        success: function(response){
+          {% comment %} console.log(response); {% endcomment %}
+          
+          var payment_type;
+          if (response['payment_type'] == 'sbp') {
+            modal_pay_sbp.style = 'display: block'
+            console.log(response)
+            renderBanks(response)
+          } else if (response['is_limit'] == true){
+            $('#pay-types-'+product_id).show();
+            Swal.fire({
+              icon: 'error',
+              title: 'Ошибка',
+              text: 'Необходимо оплатить предыдущие заказы, перед тем как переходить к следующим',
+            })
+          }
+          else{
+            console.log(response['payment_type'])
+            if (response['payment_type'] == 'qr'){
+              payment_type = 'QR';
+              $("#pay_warning").html(`
+                <p>Использование QR-кода для оплаты - это быстро и удобно!</p>
+
+                <p>Данный способ позволит вам затратить минимальное количество времени на оплату покупки. Операция занимает не более минуты, так как вам не требуется вручную вводить реквизиты платежа. Средства перечисляются мгновенно. Также использование QR-кода исключает ошибки при совершении оплаты. Вероятность отправить платёж по неверным реквизитам отсутствует в силу того, что каждый код уникален и в данном случае соответствует только одной организации.</p>
+  
+                <p>При нажатии кнопки “Оплатить” откроется окно с QR-кодом, который вы  с легкостью можете отсканировать в любом удобном приложении банка и оплатить.</p>
+                
+              `)
+            }
+            else{
+              payment_type = 'Карта';
+              $("#pay_warning").html(`
+                <p>Надежная и безопасная оплата с помощью карты.</p>
+  
+                <p>Возможность оплатить выкуп  любой удобной для вас картой, не используя каких-либо банковских приложений.</p>
+  
+                <p>При нажатии кнопки “Оплатить” откроется платежная система Wildberries где необходимо указать платежные данные удобной для вас карты. После  успешной оплаты, ваша карта сразу удаляется  из аккаунта Wildberries.</p>
+              `)
+            }
+            modal_pc.style.display = 'block';
+            var now = new Date();
+            $('#pay-types-'+product_id).html(`<a onclick='get_pay_link("${ product_id }");' class='btn mb-0'>
+              ${payment_type}
+              
+            </a>
+            <label style='font-size: 10px;' class='d-block timer-to-pay' link-generated='${Date.now()/1000}' id='timer-pay-${ product_id }'></label>`);
+            $('#pay-types-'+product_id).show();
+            $('#pay_link').attr("href", response['resp']);
+            $('#status-pay-'+product_id).html(`<label  style='color: #ff9500; margin-bottom:0;'>Ожидание</label>`);
+          }
+          
+
+
+
+          
+        },
+        error: function(xhr, status, error){
+          $('#pay-types-'+product_id).show();
+          var message = JSON.parse(xhr.responseText)['resp']
+          console.log(message);
+          Swal.fire({
+            icon: 'error',
+            title: 'Ошибка',
+            text: message,
+          })
+        },
+      });
+    }
+
+    $($('table')).ready(function(){
+      $.fn.dataTable.moment('DD/MM/YY h:mm');
+      $('table').dataTable({
+        "searching": false,
+        "responsive": true,
+        
+        "columnDefs" : [{"targets":1, "render": $.fn.dataTable.moment()}],
+        "order": [[ 1, "asc" ]],
+        "language": {
+          "emptyTable": "Данные отсутствуют",
+          "infoEmpty": "",
+          "lengthMenu": "_MENU_  записей на странице",
+          "info": "Страница _PAGE_ из _PAGES_",
+          "paginate": {
+            "first":      "Начало",
+            "last":       "Последняя",
+            "next":       ">",
+            "previous":   "<"
+        },
+      },
+      
+      perPage: 20,
+      pageLength: 20,
+      "lengthMenu": [ [5, 10, 15, 20, 25, 30, 50, 100, -1], [5, 10, 15, 20, 25, 30, 50, 100, "Все"] ]
+
+      });
+  });
+  $('.dataTables_length').addClass('bs-select');
+
+    var modal = document.getElementById("myModal");
+    var modal_pc = document.getElementById("myModal_pay_card");
+    var span = document.getElementsByClassName("close")[0];
+    var span_pc = document.getElementsByClassName("close")[1];
+    const avail_count = document.querySelector('#send-again-timer');
+    span.onclick = function() {
+      modal.style.display = "none";
+    };
+    span_pc.onclick = function() {
+      modal_pc.style.display = "none";
+    };
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+      if (event.target == modal_pc) {
+        modal_pc.style.display = "none";
+      }
+    };
+
+    function deletebuy(id) {
+      Swal.fire({
+        title: 'Вы действительно хотите это удалить?',
+        showCloseButton: true,
+        confirmButtonText: 'Удалить',
+      }).then((result) => {
+
+        if (result.isConfirmed) {
+          $.get(`{% url 'buyout-delete' 1 %}`.replace('/1/', `/${id}/`), function(data){
+            $('#buyout-'+id).remove();
+            $('body>.tooltip').remove();
+            console.log(data['is_last']);
+            console.log(data['is_last'] == true);
+            if (data['is_last'] == true){
+              window.location.href = "{% url 'group-buyouts' %}?status=active";
+            }
+          })
+        }
+
+      })
+    };
+
+    $('#guide').click(function(){
+      Swal.fire({
+        {% comment %} title: '<strong>HTML <u>example</u></strong>', {% endcomment %}
+        html:
+          '<div class="frame_blc"><iframe src="https://www.youtube.com/embed/OAlxAHQIeyI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>',
+        showCloseButton: true,
+        showCancelButton: false,
+        focusConfirm: false,
+        showConfirmButton: false,
+        width: '50%',
+      })
+    })
+    function getGet(name) {
+    var s = window.location.search;
+    s = s.match(new RegExp(name + '=([^&=]+)'));
+    return s ? s[1] : false;
+    }
+
+      document.querySelectorAll(".export").forEach(function(el) {
+        el.addEventListener("click", function(e) {
+          // console.log( getGet('status'));
+          // var requestURL = '/export_buyout' + '?status=' + getGet('status');
+          // const xhr = new XMLHttpRequest();
+          // xhr.open('GET', requestURL);
+          // xhr.onreadystatechange = function() {
+          //   if (xhr.readyState !== 4 || xhr.status !== 200) {
+          //     return;
+          //   }
+          //   const response = xhr.response;
+          //   console.log(response);
+          // }
+          // xhr.send();
+          // const response = xhr.response;
+          // console.log(response);
+          var type = el.dataset.type;
+          window.location.href = '/export_buyout' + '?status=' + getGet('status') + '&group=' + getGet('group') + '&type=' + type;
+        });
+      });
+      if (document.querySelector('.timepicker')) {
+        flatpickr('.timepicker', {
+          enableTime: true,
+      noCalendar: true,
+      dateFormat: "H:i",
+      time_24hr: true
+        }); // flatpickr
+      }
+  </script>
+
+  <script>
+  function initializeDatePicker(elClass) {
+      var date = new AirDatepicker('#' + elClass, {
+        dateFormat: 'dd.MM.yyyy',
+        position({$datepicker, $target, $pointer, isViewChange, done}) {
+          let popper = Popper.createPopper($target, $datepicker, {
+              placement: 'bottom',
+              onFirstUpdate: state => {
+                  !isViewChange && anime.remove($datepicker);
+
+                  $datepicker.style.transformOrigin = 'center top';
+
+                  !isViewChange && anime({
+                      targets: $datepicker,
+                      opacity: [0, 1],
+                      rotateX: [-90, 0],
+                      easing: 'spring(1.3, 80, 5, 0)',
+                  })
+
+              },
+              modifiers: [
+                  {
+                      name: 'offset',
+                      options: {
+                          offset: [0, 10]
+                      }
+                  },
+                  {
+                    name: 'arrow',
+                    options: {
+                        element: $pointer,
+                    }
+                  },
+                  {
+                      name: 'computeStyles',
+                      options: {
+                          gpuAcceleration: false,
+                      },
+                  },
+              ]
+          });
+
+          return () => {
+              anime({
+                  targets: $datepicker,
+                  opacity: 0,
+                  rotateX: -90,
+                  duration: 300,
+                  easing: 'easeOutCubic'
+              }).finished.then(() => {
+                  popper.destroy();
+                  done();
+              })
+          }}
+      }) // air
+    }
+    window.addEventListener('DOMContentLoaded', (event) => {
+        $('.datetimepicker').each((ind, el) => {
+          initializeDatePicker($(el).attr('id'))
+        })
+    });
+</script>
+
+  <script>
+    function saveEdit(e) {
+      console.log(e.currentTarget.dataset.id);
+      const parentEl = e.currentTarget.closest('tr')
+      $(parentEl.querySelector('.check-refresh')).removeClass('d-none')
+      $(parentEl.querySelector('.key_phrase input')).addClass('d-none')
+      $(parentEl.querySelector('.key_phrase p')).removeClass('d-none')
+      if (e.currentTarget.dataset.size == 'true') {
+        $(parentEl.querySelector('.product_size select')).addClass('d-none')
+        $(parentEl.querySelector('.product_size p')).removeClass('d-none')
+      }
+      $(parentEl.querySelector('.product_datePicker')).addClass('d-none')
+      $(parentEl.querySelector('.product_date')).removeClass('d-none')
+      
+      
+      $('button', e.currentTarget.closest('td')).addClass('d-none')
+      $.ajax({
+        headers: { "X-CSRFToken": '{{ csrf_token }}' },
+        type: 'POST',
+        async:false, 
+        data: {
+          'buyout_id': e.currentTarget.dataset.id,
+          'key_phrase': $(parentEl.querySelector('.key_phrase input')).val(),
+          'product_date': $(parentEl.querySelector('.product_datePicker input')).val(),
+          'product_size': e.currentTarget.dataset.size == 'true' ? $('option:selected', parentEl.querySelector('.product_size select')).attr('value') : false
+        },
+        url: '{% url "buyout-edit" %}',
+        success: function(response) {
+          console.log(response);
+          customSwal('Сохранено!', {
+            type: 'success',
+            hideDelay: '4000'
+          })
+          $(parentEl.querySelector('.check-refresh')).addClass('d-none')
+          $('.edit-buyout', parentEl).removeClass('d-none')
+          
+          $(parentEl.querySelector('.product_date')).text($(parentEl.querySelector('.product_datePicker input')).val())
+
+          $(parentEl.querySelector('.key_phrase p')).text($(parentEl.querySelector('.key_phrase input')).val())
+          if (e.currentTarget.dataset.size == 'true') {
+            $(parentEl.querySelector('.product_size p')).text($('option:selected', parentEl.querySelector('.product_size select')).attr('value'))
+          }
+        },
+        error: function(error) {
+          customSwal('Ошибка!', {
+            type: 'error',
+            hideDelay: '4000'
+          })
+          $(parentEl.querySelector('.check-refresh')).addClass('d-none')
+          $('.edit-buyout', parentEl).removeClass('d-none')
+        }
+      });
+    }
+
+    function cancelEdit(e) {
+      console.log(e.currentTarget);
+      const parentEl = e.currentTarget.closest('tr')
+      $('.edit-buyout', parentEl).removeClass('d-none')
+      $(parentEl.querySelector('.product_datePicker')).addClass('d-none')
+      $(parentEl.querySelector('.product_date')).removeClass('d-none')
+      $(parentEl.querySelector('.key_phrase input')).addClass('d-none')
+      $(parentEl.querySelector('.key_phrase p')).removeClass('d-none')
+      if (e.currentTarget.dataset.size == 'true') {
+        $(parentEl.querySelector('.product_size select')).addClass('d-none')
+        $(parentEl.querySelector('.product_size p')).removeClass('d-none')
+      }
+      $('button', e.currentTarget.closest('td')).addClass('d-none')
+    }
+
+    function activateEdit(e) {
+      console.log(e.currentTarget);
+      const parentEl = e.currentTarget.closest('tr')
+      $(e.currentTarget).addClass('d-none')
+      $(parentEl.querySelector('.product_datePicker')).removeClass('d-none')
+      $(parentEl.querySelector('.product_date')).addClass('d-none')
+      $(parentEl.querySelector('.key_phrase input')).removeClass('d-none')
+      $(parentEl.querySelector('.key_phrase p')).addClass('d-none')
+      if (e.currentTarget.dataset.size == 'true') {
+        $(parentEl.querySelector('.product_size select')).removeClass('d-none')
+        $(parentEl.querySelector('.product_size p')).addClass('d-none')
+      }
+      
+      $('button', e.currentTarget.closest('td')).removeClass('d-none')
+    }
+
+    $('.edit-buyout').on('click', activateEdit)
+    $('.save-change').on('click', saveEdit)
+    $('.cancel-change').on('click', cancelEdit)
+  </script>
+  <script> 
+    function renderBanks(data) { 
+     data.data.forEach(el => { 
+      let template = $(`<li class="bank" data-name="${el.title}"> 
+        <a class="bank__link" href="${el.url}"> 
+         <img src="${el.icon}" alt="" class="bank__image"> 
+         <span class="bank__name text">${el.title}</span> 
+         <svg class="bank__svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M342.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L274.7 256 105.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg> 
+        </a> 
+       </li> 
+       `) 
+       $('.payment-choice__banks').append(template) 
+     }) 
+    } 
+   </script>
+{% endblock javascripts %}

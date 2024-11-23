@@ -1,0 +1,736 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Ecommerce Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+	<link rel="stylesheet" href="{% static 'css/position_details-style.css' %}">
+   <script src="https://unpkg.com/ag-grid-enterprise/dist/ag-grid-enterprise.min.noStyle.js"></script>
+   <!-- Include the core CSS, this is needed by the grid -->
+   <link rel="stylesheet"
+     href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/>
+   <!-- Include the theme CSS, only need to import the theme you are going to use -->
+   <link rel="stylesheet"
+     href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"/>
+     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+	{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+	<div class="container-fluid py-4">
+		<div class="row mb-3">
+			<div class="col-4">
+				<div class="d-flex"><input type="text" class="form-control" id="date-range"><svg xmlns="http://www.w3.org/2000/svg" onclick="$('#date-range').click()" style="width: 20px;position: relative;left: -25px;cursor: pointer;" viewBox="0 0 448 512"><path fill="#848ea3" d="M160 32V64H288V32C288 14.33 302.3 0 320 0C337.7 0 352 14.33 352 32V64H400C426.5 64 448 85.49 448 112V160H0V112C0 85.49 21.49 64 48 64H96V32C96 14.33 110.3 0 128 0C145.7 0 160 14.33 160 32zM0 192H448V464C448 490.5 426.5 512 400 512H48C21.49 512 0 490.5 0 464V192zM64 304C64 312.8 71.16 320 80 320H112C120.8 320 128 312.8 128 304V272C128 263.2 120.8 256 112 256H80C71.16 256 64 263.2 64 272V304zM192 304C192 312.8 199.2 320 208 320H240C248.8 320 256 312.8 256 304V272C256 263.2 248.8 256 240 256H208C199.2 256 192 263.2 192 272V304zM336 256C327.2 256 320 263.2 320 272V304C320 312.8 327.2 320 336 320H368C376.8 320 384 312.8 384 304V272C384 263.2 376.8 256 368 256H336zM64 432C64 440.8 71.16 448 80 448H112C120.8 448 128 440.8 128 432V400C128 391.2 120.8 384 112 384H80C71.16 384 64 391.2 64 400V432zM208 384C199.2 384 192 391.2 192 400V432C192 440.8 199.2 448 208 448H240C248.8 448 256 440.8 256 432V400C256 391.2 248.8 384 240 384H208zM320 432C320 440.8 327.2 448 336 448H368C376.8 448 384 440.8 384 432V400C384 391.2 376.8 384 368 384H336C327.2 384 320 391.2 320 400V432z"/></svg></div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+					<!-- Card header -->
+					<div class="card-header">
+
+						<div class="diagrams">
+							<div class="diagrams__doughunt diagram">
+								<div style="padding-right: 10px;"><canvas class="doughunt" width="150px" height="150px"></canvas></div>
+								<table class="number-informations">
+									<tr class="number-informations__up number-information">
+										<th class="number-informations__icon">
+											↑
+										</th>
+										<th class="number-informations__number">
+											{{object.position_increased}}
+										</th>
+										<th class="number-informations__percentage">
+											{{object.position_increased_procent}}%
+										</th>
+									</tr>
+									<tr class="number-informations__average number-information">
+										<th class="number-informations__icon">
+											=
+										</th>
+										<th class="number-informations__number">
+											{{object.position_nochanged}}
+										</th>
+										<th class="number-informations__percentage">
+											{{object.position_nochanged_procent}}%
+										</th>
+									</tr>
+									<tr class="number-informations__down number-information">
+										<th class="number-informations__icon">
+											↓
+										</th>
+										<th class="number-informations__number">
+											{{object.position_decreased}}
+										</th>
+										<th class="number-informations__percentage">
+											{{object.position_decreased_procent}}%
+										</th>
+									</tr>
+								</table>
+							</div>
+							<div class="diagrams__bar1 diagram">
+								<div class="bar1__header bar__header">
+									<div class="bar1__icon bar__icon"><div style="width: 50%;height: 1px;background:#fff"></div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="10px"><path fill="#fff" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg></div>
+									<div class="bar1__title bar__title">Средняя</div>
+									<div class="bar__warning"></div>
+								</div>
+								<div class="bar1__diagram bar__diagram"><canvas class="bar1" width="250px" height="100px"></canvas></div>
+								<div class="bar__numbers">
+									<div class="bar__number-start">{{object.average_position_today}}</div>
+									{% if object.average_position_change > 0%}
+									<div class="bar__number-end diffrence__up">{{object.average_position_change}}</div>
+									{% else %}
+									<div class="bar__number-end diffrence__down">{{object.average_position_change}}</div>
+									{% endif %}
+								</div>
+							</div>
+							<div class="diagrams__bar2 diagram">
+								<div class="bar2__header bar__header">
+									<div class="bar2__icon bar__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="20px"><path fill="#fff" d="M279.6 160.4C282.4 160.1 285.2 160 288 160C341 160 384 202.1 384 256C384 309 341 352 288 352C234.1 352 192 309 192 256C192 253.2 192.1 250.4 192.4 247.6C201.7 252.1 212.5 256 224 256C259.3 256 288 227.3 288 192C288 180.5 284.1 169.7 279.6 160.4zM480.6 112.6C527.4 156 558.7 207.1 573.5 243.7C576.8 251.6 576.8 260.4 573.5 268.3C558.7 304 527.4 355.1 480.6 399.4C433.5 443.2 368.8 480 288 480C207.2 480 142.5 443.2 95.42 399.4C48.62 355.1 17.34 304 2.461 268.3C-.8205 260.4-.8205 251.6 2.461 243.7C17.34 207.1 48.62 156 95.42 112.6C142.5 68.84 207.2 32 288 32C368.8 32 433.5 68.84 480.6 112.6V112.6zM288 112C208.5 112 144 176.5 144 256C144 335.5 208.5 400 288 400C367.5 400 432 335.5 432 256C432 176.5 367.5 112 288 112z"/></svg></div>
+									<div class="bar2__title bar__title">Видимость</div>
+									<div class="bar__warning"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#E49389" d="M506.3 417l-213.3-364c-16.33-28-57.54-28-73.98 0l-213.2 364C-10.59 444.9 9.849 480 42.74 480h426.6C502.1 480 522.6 445 506.3 417zM232 168c0-13.25 10.75-24 24-24S280 154.8 280 168v128c0 13.25-10.75 24-23.1 24S232 309.3 232 296V168zM256 416c-17.36 0-31.44-14.08-31.44-31.44c0-17.36 14.07-31.44 31.44-31.44s31.44 14.08 31.44 31.44C287.4 401.9 273.4 416 256 416z"/></svg></div>
+								</div>
+								<div class="bar2__diagram bar__diagram"><canvas class="bar2" width="250px" height="100px"></canvas></div>
+								<div class="bar__numbers">
+									<div class="bar__number-start">{{object.visiability_today}}</div>
+									{% if object.visiability_change > 0%}
+									<div class="bar__number-end diffrence__up">{{object.visiability_change}}</div>
+									{% else %}
+									<div class="bar__number-end diffrence__down">{{object.visiability_change}}</div>
+									{% endif %}
+								</div>
+							</div>
+							<div class="diagrams__numbers1 diagrams__number">
+								<div class="numbers1__1 number">
+									<div class="number__range number__range-1">1-3</div>
+									<div class="number__percentage">{{object.le3_procent}}%</div>
+									<div class="vertical-line"></div>
+									<div class="number__number">{{object.le3}}</div>
+									{% if object.le3_change > 0 %}
+									<div class="number__difference diffrence__up">{{object.le3_change}}</div>
+									{% elif object.le3_change == 0 %}
+									<div class="number__difference diffrence__eq">{{object.le3_change}}</div>
+									{% else %}
+									<div class="number__difference diffrence__down">{{object.le3_change}}</div>
+									{% endif %}
+								</div>
+								<div class="numbers1__2 number">
+									<div class="number__range number__range-2">11-30</div>
+									<div class="number__percentage">{{object.ge11le30_procent}}%</div>
+									<div class="vertical-line"></div>
+									<div class="number__number">{{object.ge11le30}}</div>
+									{% if object.ge11le30_change > 0 %}
+									<div class="number__difference diffrence__up">{{object.ge11le30_change}}</div>
+									{% elif object.ge11le30_change == 0 %}
+									<div class="number__difference diffrence__eq">{{object.ge11le30_change}}</div>
+									{% else %}
+									<div class="number__difference diffrence__down">{{object.ge11le30_change}}</div>
+									{% endif %}
+								</div>
+								<div class="numbers1__3 number">
+									<div class="number__range number__range-3">51-100</div>
+									<div class="number__percentage">{{object.ge51le100_procent}}%</div>
+									<div class="vertical-line"></div>
+									<div class="number__number">{{object.ge51le100}}</div>
+									{% if object.ge51le100_change > 0%}
+									<div class="number__difference diffrence__up">{{object.ge51le100_change}}</div>
+									{% elif object.ge51le100_change == 0 %}
+									<div class="number__difference diffrence__eq">{{object.ge51le100_change}}</div>
+									{% else %}
+									<div class="number__difference diffrence__down">{{object.ge51le100_change}}</div>
+									{% endif %}
+								</div>
+							</div>
+							<div class="diagrams__numbers2 diagrams__number">
+								<div class="numbers2__1 number">
+									<div class="number__range number__range-4">3-10</div>
+									<div class="number__percentage">{{object.g3e10_procent}}%</div>
+									<div class="vertical-line"></div>
+									<div class="number__number">{{object.g3e10}}</div>
+									{% if object.g3e10_change > 0 %}
+									<div class="number__difference diffrence__up">{{object.g3e10_change}}</div>
+									{% elif object.g3e10_change == 0 %}
+									<div class="number__difference diffrence__eq">{{object.g3e10_change}}</div>
+									{% else %}
+									<div class="number__difference diffrence__down">{{object.g3e10_change}}</div>
+									{% endif %}
+								</div>
+								<div class="numbers2__2 number">
+									<div class="number__range number__range-5">31-50</div>
+									<div class="number__percentage">{{object.ge31le50_procent}}%</div>
+									<div class="vertical-line"></div>
+									<div class="number__number">{{object.ge31le50}}</div>
+									{% if object.ge31le50_change > 0%}
+									<div class="number__difference diffrence__up">{{object.ge31le50_change}}</div>
+									{% elif object.ge31le50_change == 0 %}
+									<div class="number__difference diffrence__eq">{{object.ge31le50_change}}</div>
+									{% else %}
+									<div class="number__difference diffrence__down">{{object.ge31le50_change}}</div>
+									{% endif %}
+								</div>
+								<div class="numbers2__3 number">
+									<div class="number__range number__range-6">100+</div>
+									<div class="number__percentage">{{object.g100_procent}}%</div>
+									<div class="vertical-line"></div>
+									<div class="number__number">{{object.g100}}</div>
+									{% if object.g100_change > 0%}
+									<div class="number__difference diffrence__up">{{object.g100_change}}</div>
+									{% elif object.g100_change == 0 %}
+									<div class="number__difference diffrence__eq">{{object.g100_change}}</div>
+									{% else %}
+									<div class="number__difference diffrence__down">{{object.g100_change}}</div>
+									{% endif %}
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+				<div class="card mt-4 p-3" style="overflow-x: hidden;">
+					<div class="card-body px-0 pb-0">
+						<h5>
+								Таблица ключевых запросов
+							</h5>
+						<div class="export-button">
+							<div class="dropdown download" style="margin-right: 5px;">
+								<button class="btn btn-outline-primary btn-sm mb-0 mt-sm-0 mt-1" data-bs-toggle="dropdown" type="button" aria-haspopup="true" aria-expanded="false" id="download">Экспорт</button>
+								
+								<div class="dropdown-menu mt-0" aria-labelledby="download" >
+									<button class="dropdown-item" href="#" onclick="onBtnExportCsv()" data-type="csv">Скачать CSV</button>
+									<button class="dropdown-item" href="#" onclick="onBtnExportExcel()" data-type="csv">Скачать XLSX</button>
+								</div>
+							</div>
+						</div>
+						<div class="table-responsive">
+							<div id="myGrid" class="ag-theme-alpine" style="height: 500px">
+								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+
+		{% include "includes/footer.html" %}
+		
+	</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+
+	<script src="/static/assets/js/jquery.js"></script>
+	<script src="/static/assets/js/plugins/datatables.min.js"></script>
+	<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+	<script src="/static/assets/js/plugins/moment.js"></script>
+	<script src="/static/assets/js/plugins/moment-with-locales.js"></script>
+	<script src="/static/assets/js/plugins/bootstrap.min.js"></script>
+	<script src='//cdn.datatables.net/plug-ins/1.11.5/sorting/formatted-numbers.js'></script>
+	
+	{% comment %} <script src="/static/assets/js/plugins/sweetalert.min.js"></script> {% endcomment %}
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+	
+	<script src="{% static 'assets/js/ag-grid_locale.ru.js' %}"></script>
+	
+	<script>
+		var slideIndex = 1;
+		{% for i in data %}
+		showSlides(slideIndex, '{{i}}');
+		{% endfor %}
+		{% comment %} showSlides(slideIndex, '2');
+		showSlides(slideIndex, '1');
+		 {% endcomment %}
+		function plusSlides(n, index) {
+			showSlides(slideIndex += n, index);
+		}
+		
+		
+		function showSlides(n, index) {
+				console.log(this);
+			var i;
+			var slides = document.getElementsByClassName("mySlides"+'-'+index);
+			{% comment %} var dots = document.getElementsByClassName("dot"+'-'+index); {% endcomment %}
+			if (n > slides.length) {slideIndex = 1}
+				if (n < 1) {slideIndex = slides.length}
+				for (i = 0; i < slides.length; i++) {
+					slides[i].style.display = "none";
+				}
+				{% comment %} for (i = 0; i < dots.length; i++) {
+					dots[i].className = dots[i].className.replace(" active", "");
+				} {% endcomment %}
+			slides[slideIndex-1].style.display = "block";
+			{% comment %} dots[slideIndex-1].className += " active"; {% endcomment %}
+		}
+
+
+
+		$('#guide').click(function(){
+			Swal.fire({
+				{% comment %} title: '<strong>HTML <u>example</u></strong>', {% endcomment %}
+				html:
+					'<div class="frame_blc"><iframe src="https://www.youtube.com/embed/OAlxAHQIeyI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>',
+				showCloseButton: true,
+				showCancelButton: false,
+				focusConfirm: false,
+				showConfirmButton: false,
+				width: '50%',
+			})
+		})
+		function getGet(name) {
+		var s = window.location.search;
+		s = s.match(new RegExp(name + '=([^&=]+)'));
+		return s ? s[1] : false;
+		}
+				// $(document).ready(function(){
+				// 		$('table').DataTable({
+							
+				// 			"paging": false,
+				// 			"searching": false,
+				// 			'bInfo': false,
+				// 			"language": {
+				// 				"url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/ru.json"
+				// 			},
+				// 			columnDefs: [
+				// 				{ type: 'formatted-num', targets: 0 }
+				// 			],
+				// 			"order": [[ 0, "desc" ]],
+				// 		});
+				// 		{% comment %} $("[rel=tooltip]").tooltip({ placement: 'right'}); {% endcomment %}
+				// });
+
+			document.querySelectorAll(".export").forEach(function(el) {
+				el.addEventListener("click", function(e) {
+					window.location.href = '/export_buyout' + '?status=' + getGet('status') + '&group=all';
+				});
+			});
+	</script>
+	<script>
+		var datePicker = $('#date-range').daterangepicker({
+			maxDate: moment(),
+    ranges: {
+        'Вчера': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+        'Последние 7 дней': [moment().subtract(6, 'days'), moment()],
+        'Последние 30 дней': [moment().subtract(29, 'days'), moment()],
+        'Текущий месяц': [moment().startOf('month'), moment().endOf('month')],
+        'Последний месяц': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+    },
+    "locale": {
+        "format": "DD.MM.YYYY",
+        "separator": " - ",
+        "applyLabel": "Применить",
+        "cancelLabel": "Отменить",
+        "fromLabel": "От",
+        "toLabel": "До",
+        "customRangeLabel": "Произвольно",
+        "weekLabel": "W",
+        "daysOfWeek": [
+            "Вс",
+            "Пн",
+            "Вт",
+            "Ср",
+            "Чт",
+            "Пт",
+            "Сб"
+        ],
+        "monthNames": [
+            "Январь",
+            "Февраль",
+            "Март",
+            "Апрель",
+            "Май",
+            "Июнь",
+            "Июль",
+            "Август",
+            "Сентябрь",
+            "Октябрь",
+            "Ноябрь",
+            "Декабрь"
+        ],
+        "firstDay": 1
+    },
+    "startDate":  moment().subtract(29, 'days'),  // change columns
+    "endDate": moment().subtract(1, 'days'),
+    "opens": "center"
+}, function(start, end, label) {
+  console.log('New date range selected: ' + start.format('DD.MM.YYYY') + ' to ' + end.format('DD.MM.YYYY') + ' (predefined range: ' + label + ')');
+});
+
+Date.prototype.addDays = function(days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+}
+
+function formatDate(date) {
+
+  var dd = date.getDate();
+  if (dd < 10) dd = '0' + dd;
+
+  var mm = date.getMonth() + 1;
+  if (mm < 10) mm = '0' + mm;
+
+  return date.getFullYear()+ '-' + mm + '-' + dd;
+}
+function getDates(startDate, stopDate) {
+    var dateArray = new Array();
+    var currentDate = startDate;
+    while (currentDate <= stopDate) {
+        dateArray.push(formatDate(new Date (currentDate)));
+        currentDate = currentDate.addDays(1);
+    }
+    return dateArray;
+}
+	</script>
+	<script>
+		var data = {
+			datasets: [{
+				data: [{{object.position_increased}}, {{object.position_nochanged_procent}}, {{object.position_decreased_procent}},], // -------------------------DATA__FOR__DOUGHNUT__DIAGRAM--------------------------
+				backgroundColor: [
+					'rgb(149, 210, 58)',
+					'rgb(255, 205, 86)',
+					'rgb(230, 109, 99)',
+				],
+				hoverOffset: 4,
+			}],
+		};
+		var config = {
+			type: 'doughnut',
+			data: data,
+			options: {
+				elements: {
+					arc: {
+						borderWidth: 0
+					}
+				}
+			}
+		};
+		var ChartDoughunt = new Chart(document.querySelector(".doughunt").getContext("2d"), config)
+		var label2 = getDates(new Date(datePicker.data('daterangepicker').startDate), new Date(datePicker.data('daterangepicker').endDate)).map(el => {
+			return el.substr(2).split('-').reverse().join('.')
+		});
+		console.log(label2)
+		var data2 = {
+			labels: label2,
+			datasets: [{
+				label: false,
+				data: {{object.average_60days}},
+				backgroundColor: [
+					'rgba(57, 115, 246, 0.6)',
+				],
+				borderWidth: 0,
+				borderRadius: 100,
+			}]
+		}
+		var config2 = {
+			type: 'bar',
+			data: data2,
+			options: {
+				scales: {
+					xAxes: {
+						display: false
+					},
+					yAxes: {
+						display: false
+					}
+				},
+				
+				plugins: {
+					legend: {
+						display: false,
+					},
+				},
+			}
+		}
+		var ChartBar1 = new Chart(document.querySelector(".bar1").getContext("2d"), config2)
+		var label3 = getDates(new Date(datePicker.data('daterangepicker').startDate), new Date(datePicker.data('daterangepicker').endDate)).map(el => {
+			return el.substr(2).split('-').reverse().join('.')
+		});
+		var data3 = {
+			labels: label3,
+			datasets: [{
+				label: false,
+				data: {{object.visibility_60days}},
+				backgroundColor: [
+					'rgba(211, 61, 208, 0.6)',
+				],
+				borderWidth: 0,
+				borderRadius: 100,
+			}]
+		}
+		var config3 = {
+			type: 'bar',
+			data: data3,
+			options: {
+				scales: {
+					xAxes: {
+						display: false
+					},
+					yAxes: {
+						display: false
+					}
+				},
+				plugins: {
+					legend: {
+						display: false,
+					},
+				},
+			}
+		}
+		var ChartBar2 = new Chart(document.querySelector(".bar2").getContext("2d"), config3)
+	</script>
+	<script>
+		agGrid.LicenseManager.setLicenseKey("CompanyName=MPLAB,LicensedApplication=MPLAB,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=1,LicensedProductionInstancesCount=0,AssetReference=AG-034191,SupportServicesEnd=23_October_2023_[v2]_MTY5ODAxNTYwMDAwMA==3b4ce1e31fc57311e3399877777ff001");
+		function renderData(params) {
+      return typeof params.value == typeof [] ? `${params.value[0]} <sup>${params.value[1] > 0 ? '+' + params.value[1] : params.value[1] !== 0 ? params.value[1] : ''}</sup>` : String(params.value) != 'undefined' ? params.value : '-';
+  	}
+	  function renderDataPhrase(params) {
+			return 'Ср. позиция' != params.value && 'Видимость' != params.value ? `<a target="_blank" href="https://www.wildberries.ru/catalog/0/search.aspx?sort=popular&search=${params.value.replaceAll(' ', '+')}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width='15px'><path fill="#939393" d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></a> <span title="${params.value}">${params.value}</span>` : params.value
+		}
+  	function customSortable(valueA, valueB, nodeA, nodeB, isDescending) {
+		if (typeof valueA == typeof []) {
+			valueA = valueA[0]
+		} 
+		if (typeof valueB == typeof []){
+			valueB = valueB[0]
+		}
+		if ( String(valueA) == 'undefined' && String(valueB) != 'undefined') {
+			return -1
+		} else if (String(valueB) == 'undefined' && String(valueA) != 'undefined') {
+			return 1
+		} else if (String(valueA) == 'undefined' && String(valueB) == 'undefined') {
+			return 0
+		}
+		if (valueA == valueB) return 0;
+		return (valueA > valueB) ? 1 : -1;
+	}
+		var mainColumn = [{
+		    field: 'phrase',
+		    pinned: 'left',
+		    headerName: 'Ключевое слово',
+		    width: 220,
+			cellRenderer: renderDataPhrase
+		  },
+		  { field: 'frequency', width: 90, pinned: 'left', headerName: 'Частотность', sort: 'desc'},
+		//   { field: 'result', width: 90, pinned: 'left', headerName: 'Результаты', },
+		  { field: 'averagePosition', width: 90, pinned: 'left', headerName: 'Ср. позиция',}]
+		var columnDefs = [
+		  ...mainColumn,
+		];
+
+
+
+		function deselect(){
+		    gridOptions.api.deselectAll()
+		}
+
+		var oneRow = {{object.visibility_by_dates | safe}} // date: number | '2022-09-09': 1
+		var twoRow = {{object.average_position_by_dates | safe}}
+
+		const gridOptions = {
+		  defaultColDef: {
+		    resizable: true,
+		    lockPinned: true,
+		    sortable: true,
+		    suppressMovable: true
+		  },
+		  columnDefs: columnDefs,
+		  // debug: true,
+		  localeText: AG_GRID_LOCALE_RU,
+			rowData: null,
+			pinnedTopRowData: createData(),
+			suppressDragLeaveHidesColumns: true,
+			onFirstDataRendered: onFirstDataRendered,
+		};
+		function cellStyle(params) {
+			console.log('cs: ', params, params.value)
+			console.log('cs type: ',typeof params.value)
+			if (typeof params.value == typeof []) {
+				console.log('cs string: ',)
+				var color = numberToColor(params.value[1]);
+			}
+		  if (!color) {
+		  	return ''
+		  }
+		  return {
+		    backgroundColor: color,
+		  };
+		}
+		function numberToColor(val) {
+			console.log('ntc: ', val)
+			if (val < 0) {
+				return '#ffc7c7';
+			  } else if (val > 0) {
+				return '#dbf9db';
+			  } else if (val === 0){
+				  return '#fdfcca'
+			  } else {
+				return '';
+			  }
+			}
+		
+		
+
+		function createData(count, prefix) {
+			var result = [];
+				result.push(Object.assign({
+					phrase: 'Видимость',
+					frequency: ' Запросы ',}, 
+						oneRow));
+				console.log("RESULT", result)
+				result.push(Object.assign({
+					phrase: 'Ср. позиция',
+				}, twoRow));
+			
+			return result;
+		}
+		function onFirstDataRendered(event) {
+			$(".ag-body-horizontal-scroll-viewport").scrollLeft($(".ag-body-horizontal-scroll-container").width())
+		}
+		function onBtnExportCsv() {
+			gridOptions.api.exportDataAsCsv();
+		}
+
+	</script>
+
+	<script>
+
+$('#date-range').on("apply.daterangepicker", (ev, picker) => { // СОБЫТИЕ ВЫБОРА ДАТЫ
+	console.log(ev, picker)
+	var dates = getDates(new Date(picker.startDate), new Date(picker.endDate))
+	var date_start_raw = formatDate(new Date(picker.startDate))
+	var date_end_raw = formatDate(new Date(picker.endDate))
+	$.ajax({
+		type: "POST",
+		data: {
+			date_start: String(date_start_raw),
+			date_end: String(date_end_raw),
+			'csrfmiddlewaretoken': '{{ csrf_token }}',
+		},
+		url: '',
+		success: data => {
+			console.log(data)
+			console.log(data.status_dev)
+			console.log(dates)
+			function checkClass(number) {
+				return number == 0 ? 'diffrence__eq' : number > 0 ? 'diffrence__up' : 'diffrence__down'
+			}
+			$(".diagrams__bar1 > .bar__numbers > .bar__number-start").text(data.average_position_today) 
+			$(".diagrams__bar1 > .bar__numbers > .bar__number-end").text(data.average_position_change > 0 ? "+" + data.average_position_change : data.average_position_change) 
+			$(".diagrams__bar2 > .bar__numbers > .bar__number-start").text(data.visiability_today) 
+			$(".diagrams__bar2 > .bar__numbers > .bar__number-end").text(data.visiability_change > 0 ? "+" + data.visiability_change : data.visiability_change) 
+			
+			$(".diagrams__bar1 > .bar__numbers > .bar__number-end").removeClass('diffrence__up diffrence__eq diffrence__down') 
+			$(".diagrams__bar2 > .bar__numbers > .bar__number-end").removeClass('diffrence__up diffrence__eq diffrence__down') 
+
+			$(".diagrams__bar1 > .bar__numbers > .bar__number-end").addClass(checkClass(data.average_position_change)) 
+			$(".diagrams__bar2 > .bar__numbers > .bar__number-end").addClass(checkClass(data.visiability_change))
+
+
+			$($(".number-informations__number").get(0)).text(data.position_increased) 
+			$($(".number-informations__percentage").get(0)).text(data.position_increased_procent + '%')
+
+			$($(".number-informations__number").get(1)).text(data.position_nochanged) 
+			$($(".number-informations__percentage").get(1)).text(data.position_nochanged_procent + '%')
+
+			$($(".number-informations__number").get(2)).text(data.position_decreased) 
+			$($(".number-informations__percentage").get(2)).text(data.position_decreased_procent + '%')
+
+			// ChartDoughunt.data.datasets[0].data = [14, 42, 193]
+			ChartBar1.data.labels = dates.map(el => {
+				return el.substr(2).split('-').reverse().join('.')
+			});
+			console.log(dates)
+			ChartBar1.data.datasets[0].data = data.average_60days
+			ChartBar2.data.labels = dates.map(el => {
+				return el.substr(2).split('-').reverse().join('.')
+			});
+			ChartBar2.data.datasets[0].data = data.visibility_60days
+			ChartDoughunt.update()
+			ChartBar1.update()
+			ChartBar2.update()
+			var numbers = $(".number")
+			function checkValue(number) {
+				return number == 0 ? '' : number > 0 ? '+' : ''
+			}
+			$('.number__difference', $(numbers)).removeClass('diffrence__up diffrence__eq diffrence__down')
+
+
+			$('.number__percentage', $(numbers).get(0)).text(data.le3_procent)
+			$('.number__number', $(numbers).get(0)).text(data.le3)
+			$('.number__difference', $(numbers).get(0)).text(checkValue(data.le3_change) + data.le3_change)
+			$('.number__difference', $(numbers).get(0)).addClass(checkClass(data.le3_change))
+
+			$('.number__percentage', $(numbers).get(1)).text(data.ge11le30_procent)
+			$('.number__number', $(numbers).get(1)).text(data.ge11le30)
+			$('.number__difference', $(numbers).get(1)).text(checkValue(data.ge11le30_change) + data.ge11le30_change)
+			$('.number__difference', $(numbers).get(1)).addClass(checkClass(data.ge11le30_change))
+
+			$('.number__percentage', $(numbers).get(2)).text(data.ge51le100_procent)
+			$('.number__number', $(numbers).get(2)).text(data.ge51le100)
+			$('.number__difference', $(numbers).get(2)).text(checkValue(data.ge51le100_change) + data.ge51le100_change)
+			$('.number__difference', $(numbers).get(2)).addClass(checkClass(data.ge51le100_change))
+
+			$('.number__percentage', $(numbers).get(3)).text(data.g3e10_procent)
+			$('.number__number', $(numbers).get(3)).text(data.g3e10)
+			$('.number__difference', $(numbers).get(3)).text(checkValue(data.g3e10_change) + data.g3e10_change)
+			$('.number__difference', $(numbers).get(3)).addClass(checkClass(data.g3e10_change))
+
+			$('.number__percentage', $(numbers).get(4)).text(data.ge31le50_procent)
+			$('.number__number', $(numbers).get(4)).text(data.ge31le50)
+			$('.number__difference', $(numbers).get(4)).text(checkValue(data.ge31le50_change) + data.ge31le50_change)
+			$('.number__difference', $(numbers).get(4)).addClass(checkClass(data.ge31le50_change))
+
+			$('.number__percentage', $(numbers).get(5)).text(data.g100_procent)
+			$('.number__number', $(numbers).get(5)).text(data.g100)
+			$('.number__difference', $(numbers).get(5)).text(checkValue(data.g100_change) + data.g100_change)
+			$('.number__difference', $(numbers).get(5)).addClass(checkClass(data.g100_change))
+
+
+			columnDefs = dates.map(el => {
+					return {field: el, headerName: el.split('-').join('.').substr(2), width: 90, cellStyle: cellStyle, cellRenderer: renderData, 
+						comparator: customSortable}
+				})
+			console.log(columnDefs)
+			gridOptions.columnDefs =[...mainColumn, ...columnDefs]
+			gridOptions.api.destroy()
+			new agGrid.Grid(eGridDiv, gridOptions);
+			gridOptions.api.setRowData(data.phrases);
+		},
+		error: er => {
+			Swal.fire(
+				'Ошибка',
+				'Попробуйте снова.',
+				'error'
+				)
+		}
+	})
+	
+})
+	var dates = getDates(new Date(datePicker.data('daterangepicker').startDate), new Date(datePicker.data('daterangepicker').endDate))
+	console.log(dates)
+	columnDefs = dates.map(el => {
+			return {field: el, headerName: el.substr(2).split('-').reverse().join('.'), width: 90, cellStyle: cellStyle, cellRenderer: renderData, 
+        comparator: customSortable}
+		})
+	// get div to host the grid
+	var eGridDiv = document.getElementById("myGrid");
+	// new grid instance, passing in the hosting DIV and Grid Options
+	console.log([...mainColumn, ...columnDefs])
+	gridOptions.columnDefs = [...mainColumn, ...columnDefs]
+	new agGrid.Grid(eGridDiv, gridOptions);
+	gridOptions.api.setRowData({{object.phrases | safe}})
+	</script>
+
+
+{% endblock javascripts %}
+
+
+
+

@@ -1,0 +1,605 @@
+{% extends 'layouts/base.html' %}
+{% load static %} 
+
+{% block title %} Ecommerce Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+	<link rel="stylesheet" href="{% static 'css/group_buyouts-style.css' %}">
+	<link rel="stylesheet" href="{% static 'assets/css/custom-swal.css' %}">
+	<style>
+		@keyframes loading {
+			form {
+				transform: rotate(0deg);
+			}
+			to {
+				transform: rotate(360deg);
+			}
+		}
+		.check-refresh {
+			animation: loading 1.5s linear 0ms infinite normal backwards;
+			width: 20px;
+			margin-left: -3px;
+			fill: #fff;
+		}
+
+		.btn-info.mr-1 {
+			margin-right: 1em;
+		}
+
+		.modal {
+			display: none; /* Hidden by default */
+			align-items: center;
+			justify-content: center;
+			position: fixed; /* Stay in place */
+			z-index: 1000000000; /* Sit on top */
+			left: 0;
+			top: 0;
+			width: 100%; /* Full width */
+			height: 100%; /* Full height */
+			overflow: auto; /* Enable scroll if needed */
+			background-color: rgb(0,0,0); /* Fallback color */
+			background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+		}
+		
+		/* Modal Content */
+		.modal-content {
+			background-color: #fefefe;
+			margin: auto;
+			padding: 10px;
+			border: 1px solid #888;
+			z-index: 1000000000;
+		}
+		#del-group-modal .modal-content {
+			padding: 0; 
+			box-shadow: 0px 0px 20px 5px #ff00008c; 
+			border: 1px solid rgb(233, 33, 33); 
+			max-width: 450px;
+			overflow: hidden;
+		}
+		
+		@media (max-width: 499px){
+			.modal-content{
+				width: 100%;
+			}
+		}
+		
+		@media (min-width: 500px){
+			.modal-content{
+				width: 80%;
+			}
+		}
+	</style>
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+	{% if not haveBuyots %}
+	<div class="container-fluid py-4">
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-body">
+						<div class="d-lg-flex">
+							<div class="col-lg-6 col-12">
+								<h5 class="mb-0">Выкупы</h5>
+								<p class="text-sm mb-0">
+									Вы еще не добавляли ни одного выкупа. Изучите нашу инструкцию или добавьте выкуп прямо сейчас
+								</p>
+							</div>
+							<div class="ms-auto my-auto">
+									<button id='guide' class="btn border border-dark btn-sm mb-0 mt-sm-0 mt-1 " type="button" name="button"><i class="fa fa-play m-1 mw-5 d-inline-block" aria-hidden="true"></i>Инструкция</button>
+							</div>
+						</div>
+						<a href="/buyout/create/" class="btn bg-gradient-primary btn-sm mb-0 mt-3 add-redemptions" target="_blank">+&nbsp; Добавить выкуп</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% else %}
+
+	<div class="container-fluid mt-4">
+		<div class="row align-items-center">
+			<div class="col-lg-6 col-sm-10 col-md-10 col-12">
+				<div class="nav-wrapper position-relative end-0">
+					<ul class="nav nav-fill nav-custom p-1">
+						<li class="nav-item col-12 col-sm-3 all-redemptions">
+							<a class="nav-link mb-0 px-0 py-1  {% if request.GET.status == 'all' %} custom-active {% endif %} "  href="{% url 'group-buyouts' %}?status=all" role="tab" aria-selected="true">
+								Все выкупы
+							</a>
+						</li>
+						<li class="nav-item col-12 col-sm-3 active-redemptions">
+							<a class="collapse show nav-link mb-0 px-0 py-1   {% if request.GET.status == 'active' %} custom-active {% endif %}"  href="{% url 'group-buyouts' %}?status=active" role="tab" aria-selected="true">
+							Активные
+						</a>
+					
+					</li>
+						
+						<li class="nav-item col-12 col-sm-3">
+								<a class="nav-link mb-0 px-0 py-1  {% if request.GET.status == 'done' %} custom-active {% endif %}" href="{% url 'group-buyouts' %}?status=done" role="tab" aria-selected="{% if request.get_full_path == "/buyout?status=done" %}true{% endif %}">
+								Завершенные
+							</a>
+						</li>
+						
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="container-fluid py-4">
+
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+					<!-- Card header -->
+					<div class="card-header pb-0">
+						<div class="d-lg-flex">
+							<div class="col-lg-6 col-12">
+								<h5 class="mb-0">Все выкупы</h5>
+								<p class="text-sm mb-0">
+									{% if request.GET.status == 'all' %}
+									Формируйте задания для последующего выкупа товара. Для создания группы нажмите на кнопку "Добавить выкуп". Отслеживайте выполнения в разделах “Активные“ и “Завершенные“, а также в счетчиках групп.
+									{% elif request.GET.status == 'active' %}
+									В данном разделе вы можете мониторить группы в активной стадии, в группе находятся товары которые ожидают оплаты через автоматический или ручной метод.
+									{% elif request.GET.status == 'done' %}
+									В данном разделе находятся группы в которых были оплачены и забраны все товары.
+									{% endif %}
+								</p>
+								{% if request.get_full_path == '/buyout?status=delivery' %}
+								<div class="alert alert-info p-2 mt-3" style='background-image: none;' role="alert">
+									Для просмотра статуса выкупа перейдите в раздел <a href='delivery?status=all' class="alert-link">Доставки</a>
+								</div>
+								{% endif %}
+							</div>
+							<div class="ms-auto my-auto mt-6">
+
+
+								<div class="ms-auto my-auto" style="display: flex;">
+									<div class="dropdown download" style="margin-right: 5px;">
+										<button class="btn btn-outline-primary btn-sm mb-0 mt-sm-0 mt-1" data-bs-toggle="dropdown" type="button" name="button" aria-haspopup="true" aria-expanded="false" id="download">Экспорт</button>
+										
+										<div class="dropdown-menu mt-0" aria-labelledby="download" >
+											<a class="dropdown-item export" onclick="export_data('xlsx');" data-type="xlsx">Скачать XLSX</a>
+											<a class="dropdown-item export" onclick="export_data('csv');" data-type="csv">Скачать CSV</a>
+										</div>
+									</div>
+
+									<button id='guide' class="btn border border-dark btn-sm mb-0 mt-sm-0 mt-1 " type="button" name="button"><i class="fa fa-play m-1 mw-5 d-inline-block" aria-hidden="true"></i>Инструкция</button>
+									
+								</div>
+							</div>
+						</div>
+						<a href="/buyout/create/" class="btn bg-gradient-primary btn-sm mb-0 mt-3 add-redemptions" target="_blank">+&nbsp; Добавить выкуп</a>
+					</div>
+					<div class="card-body px-0 pb-0">
+						<div class="table-responsive">
+							<table class="table dataTable " style='margin-left:30px;'>
+								<thead>
+									<tr>
+										<th >Группа</th>
+										<th >Товары</th>
+										<th >Статус</th>
+										<th >Дата создания</th>
+										<th >Оплачено<br/>заказов</th>
+										<th >Завершено <br/>заказов</th>
+										<th ></th>
+									</tr>
+								</thead>
+								<tbody>
+										
+									{% for index, group in data.items %}
+									<tr id="buyout-{{ index }}">
+										<td class="cell">№{{ index }}</td>
+										<td class="cell">
+												<div class="slideshow-container border">
+
+														{% for product in group.products %}
+														<div class="mySlides mySlides-{{ index }}">
+																<a target="_blank" href='https://www.wildberries.ru/catalog/{{ product.sku }}/detail.aspx?targetUrl=XS'>
+																		<img class="ms-1" title="{{ product.title }}" src="{{ product.image }}">
+																		<p>{{ product.title }}</p>
+																		<label style='font-weight: 600;'>Арт: {{ product.sku }}</label>
+																</a>
+														</div>
+														{% endfor %}
+													
+														{% comment %} <div class="mySlides mySlides-{{ index }}">
+															<q>But man is not made for defeat. A man can be destroyed but not defeated.</q>
+															<p class="author">- Ernest Hemingway</p>
+														</div>
+													
+														<div class="mySlides mySlides-{{ index }}">
+															<q>I have not failed. I've just found 10,000 ways that won't work.</q>
+															<p class="author">- Thomas A. Edison</p>
+														</div> {% endcomment %}
+													
+														<!-- Next/prev buttons -->
+														<a class="prev" onclick="plusSlides(-1, '{{ index }}')">&#10094;</a>
+														<a class="next" onclick="plusSlides(1, '{{ index }}')">&#10095;</a>
+													</div>
+													
+
+										</td>
+										<td class="cell">
+												{% if group.status == 0 %}
+														<span class="badge badge-danger badge-sm">Завершен</span>
+												{% else %}
+														<span class="badge badge-success badge-sm">Активный</span>
+												{% endif %}
+										</td>
+										<td class="cell" data-order="{{group.date|date:"U" }}">{{ group.date }}</td>
+										<td class="cell text-center">{{group.count_payed}}/{{group.count_all}}<br><span style="font-size: 0.85em;color: #3b424e;font-weight: 400;">{{group.price_done}} ₽</span> / <span style="font-size: 0.85em;color: #3b424e;font-weight: 400;">{{group.price_all}} ₽</span></td>
+										<td class="cell">{{group.count_done}}/{{group.count_all}}</td>
+										<td class="cell"><a href='{% url "buyout" %}?status=active&group={{ index }}' class='btn btn-primary' style='background-color:#007bff;'>Открыть</a>
+										<button href='#' class='btn btn-danger ms-2' onclick="deleteGroup('{{ index }}')" data-button-delete='{{ index }}'>Удалить</button>
+										</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+
+		{% include "includes/footer.html" %}
+		
+	</div>
+	<div class="customSwal">
+		<div class="customSwal__icon">
+			
+		</div>
+		<div class="customSwal__text"></div>
+	</div>
+	{% endif %}
+	<div class="modal" id="del-group-modal">
+		<div class="modal-content">
+		  <div style="background-color: rgb(233, 33, 33); padding: 0.4rem 1rem;">
+			<h5 style="color: #fff;">Удаление группы</h5>
+		  </div>
+		  <div class="modal-body" style="font-weight: 700; font-size: 0.96em;">
+			Вы действительно хотите удалить группу?
+		  </div>
+		  <div class="modal-footer" style="padding: 0.3rem 0.75rem 0 0;">
+			<button type="button" class="btn btn-behance">Отмена</button>
+			<button type="button" class="btn btn-danger" id="delGroup">Удалить</button>
+		  </div>
+		</div>
+	  </div>
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+
+	<script src="/static/assets/js/jquery.js"></script>
+	<script src="/static/assets/js/plugins/datatables.min.js"></script>
+	<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+	<script src="/static/assets/js/plugins/moment.js"></script>
+	<script src="/static/assets/js/plugins/moment-with-locales.js"></script>
+	<script src="/static/assets/js/plugins/bootstrap.min.js"></script>
+	<script src="/static/assets/js/custom-swal.js"></script>
+	<script src='//cdn.datatables.net/plug-ins/1.11.5/sorting/formatted-numbers.js'></script>
+	
+	{% comment %} <script src="/static/assets/js/plugins/sweetalert.min.js"></script> {% endcomment %}
+	<script>
+		var intro = introJs()
+intro.setOptions({
+	steps:[
+	{element: document.querySelector('.guide4'),
+		title: 'Выкупы',
+		intro: 'Сейчас вы находитесь в разделе Выкупы. Здесь можно формировать задания для последующего выкупа товара, а также работать с уже созданными группами выкупов.',
+		position: 'right'
+	},
+	{element: document.querySelector('.all-redemptions'),
+		title: 'Все выкупы',
+		intro: 'все созданные вами ранее задания, разбитые по группам. Именно здесь нажав кнопку “Добавить выкуп” начинается процесс формирования заказа. Каждую группу выкупов можно открыть изучить общую информацию о выкупе и оплатить с помощью QR- кода или карты, введя данные карты вручную. Также на разделе “Все выкупы” имеется видео инструкция, где подробно рассказывается о формировании первого выкупа.',
+		position: 'bottom'
+	},
+		{element: document.querySelector('.bg-gradient-primary'),
+		title: 'Создание выкупов',
+		intro: 'Кликнув на эту кнопку, вы перейдёте на страницу создания выкупов.',
+		position: 'bottom'
+	},
+		{element: document.querySelector('.bg-gradient-primary'),
+		title: 'Первый шаг формирования выкупа',
+		intro: 'Здесь вы указываете артикул товара, который вы хотели бы выкупить на Wildberries и затем, нажимаете кнопку “Добавить”',
+		position: 'bottom'
+	},
+
+		{element: document.querySelector('.bg-gradient-primary'),
+		title: 'Второй шаг в добавлении выкупа',
+		intro: 'Перед вами открывается таблица с вашим товаром, где вы указываете количество товара, которое планируете выкупить, ключевую фразу вашего товара, указываете временной диапазон, когда планируете совершить выкуп, а также выбираете ПВЗ, с какого будете забирать свой товар. ( Перед добавлением выкупа необходимо перейти на вкладку “Список ПВЗ” и выбрать удобные для вас пункты выдачи заказов). Можно выбрать несколько ПВЗ, при успешной оплате выкупа, ПВЗ выберется случайным образом из вашего списка. После того, как все поля заполнены, нажимаете кнопку “Добавить выкупы”.',
+		position: 'bottom'
+	},
+	{element: document.querySelector('.all-redemptions'),
+		title: 'Выкуп успешно создан',
+		intro: 'После уведомления о том, что Выкупы добавлены, вы можете его увидеть на вкладке “Все выкупы”, где также указана дата создания и его статус. Жмите кнопку “Открыть”, чтобы подробней изучить созданный выкуп. ',
+		position: 'bottom'
+	},
+	{element: document.querySelector('.active-redemptions'),
+		title: 'Активные',
+		intro: 'Здесь отображаются неоплаченные выкупы, информация о товаре и способ оплаты через QR-код или картой, а также возможность удалить данный выкуп. Чтобы оплатить нажмите на кнопку “QR-код“ или “карта”, после чего вас перенаправит на сайт для оплаты, где вы сканируете код для оплаты или вручную вводите реквизиты банковской карты (в зависимости от того, какую кнопку вы нажали). После успешной оплаты на вкладке “Все выкупы группы” будет отображаться статус “оплачен”, а подробная информация о сроках и данных аккаунта, который совершил выкуп, будут отображаться в разделе “Доставки”. Автооплата Чтобы каждый раз не вводить вручную реквизиты карты, можно настроить автооплату с помощью “Телеграм бот”. Выберите о каком способе вы бы хотели узнать подробней? <br> <div class="buttons_in_tips"><button class="telegram_bot_guide close_intro">ТГ бот</button><button class="point_bank_guide close_intro"></button></div>',
+		position: 'bottom',
+	},
+	],
+	nextLabel: 'Далее',
+	prevLabel: 'Назад',
+	doneLabel: 'Завершить',
+});
+
+
+var introTg = new introJs()
+
+introTg.setOptions({
+	steps:[
+	{
+		title: 'Добавление карты',
+		intro: 'Прежде чем настроить автооплату с помощью Телеграм бота, вам необходимо перейти во вкладку “Настройка оплаты” и добавить карты для использования метода “Автооплата“ в выкупах группы. После успешного добавления банковской карты, также важно настроить способ перехвата СМС через Telegram Bot.',
+	},
+	{
+		title: 'Установка API Токена в бот',
+		intro: 'При первой настройке статус будет “Не активирован” и гореть красным. Необходимо нажать на Telegram Bot и в диалог указать Ваш индивидуальный Telegram API Token, который указан ниже или в личном кабинете. После этого, Telegram Bot напишет “Вы успешно подписались на уведомления MPLAB!” и статус должен измениться на “Активирован” и гореть зеленым.',
+	},
+	{
+		title: 'Пример использования автооплаты',
+		intro: 'Как только вы выполнили все вышеуказанные действия, необходимо перейти на вкладку “Выкупы” и открыть интересующий нас выкуп и нажать кнопку “Автооплата”',
+	},
+	{
+		title: 'Пример использования автооплаты',
+		intro: 'Далее появится окно “Выберите тип перехвата СМС для автооплаты”, где вы указываете Telegram Bot , а также указываете диапазон времени за который будет производиться выкуп товара(время указывается по Мск !). Когда наступит указанное время для выкупа товара, В Telegram Bot придет уведомление о необходимости ввести СМС-код для оплаты товара. Как только вы введете его и оплата пройдет успешно, статус выкупа можно будет отслеживать во вкладке “Доставки”, где указана вся подробная информация о заказе. <span class="help_class_for_return"></span>',
+	},
+	],
+	nextLabel: 'Далее',
+	prevLabel: 'Назад',
+	doneLabel: 'Завершить',
+});
+
+var introBank = new introJs()
+
+introBank.setOptions({
+	steps:[
+	{
+		title: 'Открытие счёта',
+		intro: 'Для подключения автооплаты вам необходимо перейти на сайт банка и открыть расчетный счет для ИП или ООО. К сожалению физ. лица не могут открывать расчетный счет в данном банке.',
+	},
+	{
+		title: 'Выпуск цифровых карт и указание абонентского номера',
+		intro: 'После успешного открытия счета, на сайте нужно выпустить несколько цифровых карт и указать абонентский номер для получения смс уведомлений, который сгенерирован на нашем сайте во вкладке “Настройка оплаты”',
+	},
+	{
+		title: 'Пример использования автооплаты',
+		intro: 'Как только вы выполнили все вышеуказанные действия, необходимо перейти на вкладку “Выкупы” и открыть интересующий нас выкуп и нажать кнопку “Автооплата”',
+	},
+	{
+		title: 'Пример использования автооплаты',
+		intro: 'Далее появится окно “Выберите тип перехвата СМС для автооплаты”. После этого, в указанный период времени выкупа произойдет автоматическое списание денежных средств и статус выкупа можно будет отслеживать во вкладке “Доставки”, где указана вся подробная информация о заказе. <span class="help_class_for_return"></span>',
+	},
+	],
+	nextLabel: 'Далее',
+	prevLabel: 'Назад',
+	doneLabel: 'Завершить',
+});
+
+
+var checkedDOM = new MutationObserver( () => {
+	console.log('mutOb')
+	if (document.querySelector('.telegram_bot_guide')) {
+		document.querySelector('.telegram_bot_guide').addEventListener('click', () => {
+			document.querySelector('.introjs-donebutton').click()
+			introTg.start()
+		})
+		document.querySelector('.point_bank_guide').addEventListener('click', () => {
+			document.querySelector('.introjs-donebutton').click()
+			introBank.start()
+		})
+	}
+	if (document.querySelector('.help_class_for_return')) {
+		document.querySelector('.introjs-donebutton').addEventListener('click', () => {
+			intro.goToStep(6).start()
+		})
+	}
+})
+
+checkedDOM.observe(document.documentElement, {
+	childList: true,
+	subtree: true,
+});
+
+var searchString = new URLSearchParams(window.location.search);
+
+if (document.querySelector('#start-guide2')) {
+	document.querySelector('#start-guide2').addEventListener('click', event => {
+		event.preventDefault()
+		intro.start()
+	})
+}
+if (searchString.get('tips') == 'show'){
+	intro.start()
+}     
+		
+
+		var slideIndex = 1;
+		{% for i in data %}
+		showSlides(slideIndex, '{{i}}');
+		{% endfor %}
+		{% comment %} showSlides(slideIndex, '2');
+		showSlides(slideIndex, '1');
+		 {% endcomment %}
+		function plusSlides(n, index) {
+			showSlides(slideIndex += n, index);
+		}
+		
+		
+		function showSlides(n, index) {
+				console.log(this);
+			var i;
+			var slides = document.getElementsByClassName("mySlides"+'-'+index);
+			{% comment %} var dots = document.getElementsByClassName("dot"+'-'+index); {% endcomment %}
+			if (n > slides.length) {slideIndex = 1}
+				if (n < 1) {slideIndex = slides.length}
+				for (i = 0; i < slides.length; i++) {
+					slides[i].style.display = "none";
+				}
+				{% comment %} for (i = 0; i < dots.length; i++) {
+					dots[i].className = dots[i].className.replace(" active", "");
+				} {% endcomment %}
+			slides[slideIndex-1].style.display = "block";
+			{% comment %} dots[slideIndex-1].className += " active"; {% endcomment %}
+		}
+
+
+
+		$('#guide').click(function(){
+			Swal.fire({
+				{% comment %} title: '<strong>HTML <u>example</u></strong>', {% endcomment %}
+				html:
+					'<div class="frame_blc"><iframe src="https://www.youtube.com/embed/OAlxAHQIeyI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>',
+				showCloseButton: true,
+				showCancelButton: false,
+				focusConfirm: false,
+				showConfirmButton: false,
+				width: '50%',
+			})
+		})
+		function getGet(name) {
+			var s = window.location.search;
+			s = s.match(new RegExp(name + '=([^&=]+)'));
+			return s ? s[1] : false;
+		}
+		let buyoutTable
+				$(document).ready(function(){
+						buyoutTable = $('table').DataTable({
+							
+							"paging": false,
+							"searching": false,
+							'bInfo': false,
+							"language": {
+								"url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/ru.json"
+							},
+							columnDefs: [
+								{ type: 'formatted-num', targets: 0 }
+							],
+							"order": [[ 0, "desc" ]],
+						});
+						{% comment %} $("[rel=tooltip]").tooltip({ placement: 'right'}); {% endcomment %}
+				});
+
+			document.querySelectorAll(".export").forEach(function(el) {
+				el.addEventListener("click", function(e) {
+					var type = el.dataset.type;
+					window.location.href = '/export_buyout' + '?status=' + getGet('status') + '&group=all' + '&type=' + type;
+				});
+			});
+	</script>
+
+	<script>
+		if (innerWidth <= 990) {
+			$('.download').removeClass("dropdown").addClass('dropup')
+		}
+	</script>
+
+	<!-- delete group buyouts -->
+	<script>
+		function deleteGroup(el) {
+			Swal.fire({
+				customClass: {
+					confirmButton: 'btn btn-danger',
+					cancelButton: 'btn btn-info mr-1'
+				},
+				icon: 'warning',
+				buttonsStyling: false,
+				html: '<strong>Нельзя удалять</strong> группы выкупов, если в ней были успешные оплаты, они также пропадут и не будут отображаться в других разделах',
+				showCancelButton: true,
+				showConfirmButton: true,
+				cancelButtonText: 'Отменить',
+				confirmButtonText: 'Продолжить',
+				reverseButtons: true,
+			}).then(result => {
+				if (result.isConfirmed) {
+					const delGroupModal = $('#del-group-modal')
+					delGroupModal.css('display', 'flex')
+				
+					document.querySelector('#del-group-modal .modal-content').onclick = function (event) {
+					  event.stopPropagation()
+					}
+					delGroupModal.click(() => {
+					  delGroupModal.css('display', 'none')
+					}) 
+					
+					$('#del-group-modal button').click(() => {
+					  delGroupModal.css('display', 'none')
+					})
+					$('#delGroup').click(() => {
+						$.ajax({
+							type: 'POST',
+							async: false,
+							data: {'csrfmiddlewaretoken': '{{ csrf_token }}', 'index': parseInt(el)},
+							url: '{% url "buyout-group-delete" %}',
+							success: function(response){
+								console.log('Success')
+								buyoutTable.row($('#buyout-' + el)).remove().draw()
+								customSwal('Группа выкупов удалена!', {type: 'success'})
+							},
+							error: function(response) {
+								console.log('Error')
+								customSwal('Ошибка!', {type: 'error'})
+								$(`[data-button-delete='${el}']`).text('Удалить')
+									.attr('disabled', false)
+							}
+						});
+					})
+				}
+			})
+		};
+			
+	</script>
+
+{% if not havePvz or not havePricing %}
+	<script>
+		$(".add-redemptions").on('click', event => {
+			event.preventDefault()
+
+			{% if not havePvz %}
+			Swal.fire({
+				icon: 'warning',
+				title: '',
+				text: 'Привет! Выбери нужные ПВЗ на карте, чтобы иметь возможность добавлять выкупы',
+				confirmButtonText: 'Выбрать ПВЗ',
+				showCloseButton: true,
+				customClass: {
+					confirmButton: 'btn btn-success',
+				},
+				buttonsStyling: false
+			}).then((result) => {
+				if (result.isConfirmed) {
+					window.location = "{% url 'pvz' %}"
+				}
+			})
+			{% else %}
+
+			Swal.fire({
+				icon: 'warning',
+				title: '',
+				text: 'Привет! К сожалению, выкупы могут добавлять только пользователи с оплаченным тарифом. Пока ты можешь посмотреть инструкцию по добавлению выкупов. Выбери удобный для тебя тариф и пользуйся всеми возможностями сервиса.',
+				confirmButtonText: 'Выбрать тариф',
+				showCloseButton: true,
+				customClass: {
+					confirmButton: 'btn btn-success',
+				},
+				buttonsStyling: false
+			}).then((result) => {
+				if (result.isConfirmed) {
+					window.location = "{% url 'pricing' %}"
+				}
+			})
+			{% endif %}
+		})
+	</script>
+{% endif %}
+
+{% endblock javascripts %}

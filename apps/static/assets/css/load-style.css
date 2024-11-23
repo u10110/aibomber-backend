@@ -1,0 +1,18 @@
+@keyframes loading {
+  form {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+  }
+  #check {
+    display: flex;
+    align-items: center;
+  }
+  .check-refresh {
+    animation: loading 1.5s linear 0ms infinite normal backwards;
+    width: 20px;
+    margin-left: -3px;
+    fill: #8392AB;
+  }

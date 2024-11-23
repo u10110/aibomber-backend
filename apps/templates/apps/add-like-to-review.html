@@ -1,0 +1,578 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Панель управления {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+  <style>
+    .raz::-webkit-inner-spin-button { 
+      display: none;
+    }
+    .v-counter {
+    border-radius: 32px;
+    overflow: auto;
+    padding: 0px 4px;
+    border: 1px solid #323140;
+    margin: 10px;
+    padding: 9px;
+}
+
+.v-counter input[type=button]:hover {
+    color: black;
+    font-weight: bold;
+    background-color: transparent;
+}
+.v-counter span {
+   
+    font-size: 13px;
+    color: black;
+    font-family: 'Open Sans';
+}
+.v-counter input[type=button], input[type=text] {
+    display: inline-block;
+    width: 40px;
+    background-color: transparent;
+    outline: none;
+    border: none;
+    text-align: center;
+    cursor: pointer;
+    padding: 0px;
+    color: black;
+    height: 33px;
+    font-family: 'Open Sans';
+    position: relative;
+}
+.card{
+  height: 100%;
+  padding: 24px 16px;
+  border: 1px solid rgba(0,0,0,.125);
+  position: relative;
+  word-wrap: break-word;
+}
+.review-rating > .active{
+  fill: #ff9500;
+}
+{% comment %} .make_order{
+  margin-right: 3%;
+} {% endcomment %}
+.nounderline{
+  text-decoration: none !important;
+}
+.frame_blc{
+  overflow:hidden;
+  position:relative;
+  padding-bottom:56.25%;
+  padding-top:30px;
+  height:0;
+  margin-top: 10%;
+}
+.frame_blc iframe {
+  position:absolute;
+  height:80%;
+  width:100%;
+  left:0;
+  top:0;
+}
+.rounded-circle, .avatar.rounded-circle img {
+  width: 50px;
+  height: 50px;
+}
+
+  </style>
+
+  <link rel="stylesheet" href="{% static 'assets/css/load-style.css' %}">
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid py-4">
+      <div class="col-lg-11 col-12 mx-auto">
+        <div class="card card-body mt-4">
+          <div class="row gx-4">
+            <div class="col-auto">
+            </div>
+            <div class="col-auto my-auto mt-2">
+               <div class="h-100">
+                <h3 class="mb-0">
+                  Накрутка лайков на отзывы
+                </h6>
+              </div> 
+            </div>
+        </div>
+        <form action="/add-like-to-review/" method="post">
+          {% csrf_token %}
+          <hr class="horizontal dark my-3">
+
+
+            <div class="form-group row d-flex">
+                <!-- <label class="col-form-label text-left col-4 col-sm-4 col-xl-4">Имя</i></label> -->
+                <div class="col-7 col-md-3 ml-2">
+                    <input id="sku" type="number" name="sku" class="multisteps-form__input form-control" placeholder="SKU" />
+            
+                </div>
+                <div class='col-auto'>
+                  <select id="sort" type="text" name="sort" class="form-control multisteps-form__input">
+                  <option value="dateDesc" selected="">По дате</option>
+                  <option value="valuationDescSummary">По оценке</option>
+                  <option value="rankDesc">По полезности</option>
+                </select>
+                </div>
+                <div class="form-check col-auto my-auto">
+                  <input class="form-check-input" type="hidden" value="false" id="has_photo" type="text" name="has_photo">
+                  <input class="form-check-input" type="checkbox" value="true" id="has_photo" type="text" name="has_photo">
+                  <label class="form-check-label" for="flexCheckDefault">
+                    С фото
+                  </label>
+                </div>
+                
+                <div class="col-auto">
+                  <button  type="submit"  class="btn bg-gradient-dark text-white m-0 ms-2" >Показать   отзывы</button>
+                </div>
+                <div class='make_order d-flex justify-content-end mr-13 col-md'>
+                </div>
+                  {% if reviews %}
+                <div class='make_order d-flex justify-content-end mr-13 col-auto'>
+                  <a  href="#"  class="btn bg-gradient-primary m-0 ms-2" id='make_order'>Создать задание</a>
+                </div>
+                {% endif %}
+                {% comment %} <div class='mx-3 justify-content-end col-auto mt-1 border border-dark rounded btn-outline-dark btn-sm mb-0 mt-sm-0 mt-1 '>
+                  <a href='#' id='guide' class="nounderline">
+                    <p class='d-inline-block'><i class="fa fa-play m-1 mw-5 d-inline-block" aria-hidden="true"></i>Гайд</p>
+                  </a>
+                  
+                </div> {% endcomment %}
+
+            </div>
+            
+          </form>
+          
+      
+            <div class="container-fluid py-4">
+              <div class="row likes-card-items">
+                {% comment %} <div class="likes-card col-12 col-md-6 mt-4">
+                  <div class="card"><div class="row">
+                    <div class="col-auto">
+                      <div class="profile-photo-container">
+                        <img src="https://images.wbstatic.net/img/0/small/PersonalPhoto.png?2" class="rounded-circle">
+                      </div>
+                    </div> 
+                    <div class="col">
+                      <div class="row">
+                        <div class="col-auto name">Глеб</div> 
+                        <div class="col date">23 февраля, 15:40</div>
+                      </div> 
+                      <div class="row">
+                        <div class="review-rating">
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="active">
+                            <path d="M6.87166 4.81324C7.29971 3.74612 7.51373 3.21256 7.86145 3.13861C7.95288 3.11916 8.04738 3.11916 8.13881 3.13861C8.48653 3.21256 8.70055 3.74612 9.1286 4.81324C9.37203 5.4201 9.49374 5.72352 9.72148 5.9299C9.78536 5.98779 9.8547 6.03934 9.92853 6.08384C10.1918 6.24249 10.5204 6.27192 11.1775 6.33078C12.29 6.43041 12.8463 6.48023 13.0162 6.79739C13.0514 6.86308 13.0753 6.9342 13.0869 7.00779C13.1432 7.36315 12.7343 7.73519 11.9165 8.47927L11.6893 8.68589C11.307 9.03376 11.1158 9.2077 11.0052 9.42477C10.9389 9.55498 10.8944 9.69521 10.8736 9.83985C10.8388 10.081 10.8948 10.3333 11.0068 10.838L11.0468 11.0183C11.2476 11.9233 11.348 12.3758 11.2226 12.5982C11.1101 12.798 10.9027 12.9259 10.6736 12.9369C10.4186 12.949 10.0593 12.6562 9.34065 12.0707C8.86718 11.6848 8.63044 11.4919 8.36764 11.4166C8.12747 11.3477 7.87279 11.3477 7.63262 11.4166C7.36982 11.4919 7.13308 11.6848 6.65961 12.0707C5.94096 12.6562 5.58163 12.949 5.32662 12.9369C5.09755 12.9259 4.89019 12.798 4.77761 12.5982C4.65228 12.3758 4.75268 11.9233 4.95348 11.0183L4.99348 10.838C5.10545 10.3333 5.16144 10.081 5.1267 9.83985C5.10585 9.69521 5.06138 9.55498 4.99504 9.42477C4.88446 9.2077 4.69328 9.03376 4.31092 8.68589L4.0838 8.47927C3.26594 7.73519 2.85701 7.36315 2.91333 7.00779C2.92499 6.9342 2.94891 6.86308 2.98409 6.79739C3.15396 6.48023 3.71021 6.43041 4.82272 6.33078C5.47991 6.27192 5.8085 6.24249 6.07173 6.08384C6.14556 6.03934 6.2149 5.98779 6.27878 5.9299C6.50652 5.72352 6.62824 5.4201 6.87166 4.81324Z" stroke="#FF9500" stroke-width="2"></path></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="active"><path d="M6.87166 4.81324C7.29971 3.74612 7.51373 3.21256 7.86145 3.13861C7.95288 3.11916 8.04738 3.11916 8.13881 3.13861C8.48653 3.21256 8.70055 3.74612 9.1286 4.81324C9.37203 5.4201 9.49374 5.72352 9.72148 5.9299C9.78536 5.98779 9.8547 6.03934 9.92853 6.08384C10.1918 6.24249 10.5204 6.27192 11.1775 6.33078C12.29 6.43041 12.8463 6.48023 13.0162 6.79739C13.0514 6.86308 13.0753 6.9342 13.0869 7.00779C13.1432 7.36315 12.7343 7.73519 11.9165 8.47927L11.6893 8.68589C11.307 9.03376 11.1158 9.2077 11.0052 9.42477C10.9389 9.55498 10.8944 9.69521 10.8736 9.83985C10.8388 10.081 10.8948 10.3333 11.0068 10.838L11.0468 11.0183C11.2476 11.9233 11.348 12.3758 11.2226 12.5982C11.1101 12.798 10.9027 12.9259 10.6736 12.9369C10.4186 12.949 10.0593 12.6562 9.34065 12.0707C8.86718 11.6848 8.63044 11.4919 8.36764 11.4166C8.12747 11.3477 7.87279 11.3477 7.63262 11.4166C7.36982 11.4919 7.13308 11.6848 6.65961 12.0707C5.94096 12.6562 5.58163 12.949 5.32662 12.9369C5.09755 12.9259 4.89019 12.798 4.77761 12.5982C4.65228 12.3758 4.75268 11.9233 4.95348 11.0183L4.99348 10.838C5.10545 10.3333 5.16144 10.081 5.1267 9.83985C5.10585 9.69521 5.06138 9.55498 4.99504 9.42477C4.88446 9.2077 4.69328 9.03376 4.31092 8.68589L4.0838 8.47927C3.26594 7.73519 2.85701 7.36315 2.91333 7.00779C2.92499 6.9342 2.94891 6.86308 2.98409 6.79739C3.15396 6.48023 3.71021 6.43041 4.82272 6.33078C5.47991 6.27192 5.8085 6.24249 6.07173 6.08384C6.14556 6.03934 6.2149 5.98779 6.27878 5.9299C6.50652 5.72352 6.62824 5.4201 6.87166 4.81324Z" stroke="#FF9500" stroke-width="2"></path></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="active"><path d="M6.87166 4.81324C7.29971 3.74612 7.51373 3.21256 7.86145 3.13861C7.95288 3.11916 8.04738 3.11916 8.13881 3.13861C8.48653 3.21256 8.70055 3.74612 9.1286 4.81324C9.37203 5.4201 9.49374 5.72352 9.72148 5.9299C9.78536 5.98779 9.8547 6.03934 9.92853 6.08384C10.1918 6.24249 10.5204 6.27192 11.1775 6.33078C12.29 6.43041 12.8463 6.48023 13.0162 6.79739C13.0514 6.86308 13.0753 6.9342 13.0869 7.00779C13.1432 7.36315 12.7343 7.73519 11.9165 8.47927L11.6893 8.68589C11.307 9.03376 11.1158 9.2077 11.0052 9.42477C10.9389 9.55498 10.8944 9.69521 10.8736 9.83985C10.8388 10.081 10.8948 10.3333 11.0068 10.838L11.0468 11.0183C11.2476 11.9233 11.348 12.3758 11.2226 12.5982C11.1101 12.798 10.9027 12.9259 10.6736 12.9369C10.4186 12.949 10.0593 12.6562 9.34065 12.0707C8.86718 11.6848 8.63044 11.4919 8.36764 11.4166C8.12747 11.3477 7.87279 11.3477 7.63262 11.4166C7.36982 11.4919 7.13308 11.6848 6.65961 12.0707C5.94096 12.6562 5.58163 12.949 5.32662 12.9369C5.09755 12.9259 4.89019 12.798 4.77761 12.5982C4.65228 12.3758 4.75268 11.9233 4.95348 11.0183L4.99348 10.838C5.10545 10.3333 5.16144 10.081 5.1267 9.83985C5.10585 9.69521 5.06138 9.55498 4.99504 9.42477C4.88446 9.2077 4.69328 9.03376 4.31092 8.68589L4.0838 8.47927C3.26594 7.73519 2.85701 7.36315 2.91333 7.00779C2.92499 6.9342 2.94891 6.86308 2.98409 6.79739C3.15396 6.48023 3.71021 6.43041 4.82272 6.33078C5.47991 6.27192 5.8085 6.24249 6.07173 6.08384C6.14556 6.03934 6.2149 5.98779 6.27878 5.9299C6.50652 5.72352 6.62824 5.4201 6.87166 4.81324Z" stroke="#FF9500" stroke-width="2"></path></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="active"><path d="M6.87166 4.81324C7.29971 3.74612 7.51373 3.21256 7.86145 3.13861C7.95288 3.11916 8.04738 3.11916 8.13881 3.13861C8.48653 3.21256 8.70055 3.74612 9.1286 4.81324C9.37203 5.4201 9.49374 5.72352 9.72148 5.9299C9.78536 5.98779 9.8547 6.03934 9.92853 6.08384C10.1918 6.24249 10.5204 6.27192 11.1775 6.33078C12.29 6.43041 12.8463 6.48023 13.0162 6.79739C13.0514 6.86308 13.0753 6.9342 13.0869 7.00779C13.1432 7.36315 12.7343 7.73519 11.9165 8.47927L11.6893 8.68589C11.307 9.03376 11.1158 9.2077 11.0052 9.42477C10.9389 9.55498 10.8944 9.69521 10.8736 9.83985C10.8388 10.081 10.8948 10.3333 11.0068 10.838L11.0468 11.0183C11.2476 11.9233 11.348 12.3758 11.2226 12.5982C11.1101 12.798 10.9027 12.9259 10.6736 12.9369C10.4186 12.949 10.0593 12.6562 9.34065 12.0707C8.86718 11.6848 8.63044 11.4919 8.36764 11.4166C8.12747 11.3477 7.87279 11.3477 7.63262 11.4166C7.36982 11.4919 7.13308 11.6848 6.65961 12.0707C5.94096 12.6562 5.58163 12.949 5.32662 12.9369C5.09755 12.9259 4.89019 12.798 4.77761 12.5982C4.65228 12.3758 4.75268 11.9233 4.95348 11.0183L4.99348 10.838C5.10545 10.3333 5.16144 10.081 5.1267 9.83985C5.10585 9.69521 5.06138 9.55498 4.99504 9.42477C4.88446 9.2077 4.69328 9.03376 4.31092 8.68589L4.0838 8.47927C3.26594 7.73519 2.85701 7.36315 2.91333 7.00779C2.92499 6.9342 2.94891 6.86308 2.98409 6.79739C3.15396 6.48023 3.71021 6.43041 4.82272 6.33078C5.47991 6.27192 5.8085 6.24249 6.07173 6.08384C6.14556 6.03934 6.2149 5.98779 6.27878 5.9299C6.50652 5.72352 6.62824 5.4201 6.87166 4.81324Z" stroke="#FF9500" stroke-width="2"></path></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="active"><path d="M6.87166 4.81324C7.29971 3.74612 7.51373 3.21256 7.86145 3.13861C7.95288 3.11916 8.04738 3.11916 8.13881 3.13861C8.48653 3.21256 8.70055 3.74612 9.1286 4.81324C9.37203 5.4201 9.49374 5.72352 9.72148 5.9299C9.78536 5.98779 9.8547 6.03934 9.92853 6.08384C10.1918 6.24249 10.5204 6.27192 11.1775 6.33078C12.29 6.43041 12.8463 6.48023 13.0162 6.79739C13.0514 6.86308 13.0753 6.9342 13.0869 7.00779C13.1432 7.36315 12.7343 7.73519 11.9165 8.47927L11.6893 8.68589C11.307 9.03376 11.1158 9.2077 11.0052 9.42477C10.9389 9.55498 10.8944 9.69521 10.8736 9.83985C10.8388 10.081 10.8948 10.3333 11.0068 10.838L11.0468 11.0183C11.2476 11.9233 11.348 12.3758 11.2226 12.5982C11.1101 12.798 10.9027 12.9259 10.6736 12.9369C10.4186 12.949 10.0593 12.6562 9.34065 12.0707C8.86718 11.6848 8.63044 11.4919 8.36764 11.4166C8.12747 11.3477 7.87279 11.3477 7.63262 11.4166C7.36982 11.4919 7.13308 11.6848 6.65961 12.0707C5.94096 12.6562 5.58163 12.949 5.32662 12.9369C5.09755 12.9259 4.89019 12.798 4.77761 12.5982C4.65228 12.3758 4.75268 11.9233 4.95348 11.0183L4.99348 10.838C5.10545 10.3333 5.16144 10.081 5.1267 9.83985C5.10585 9.69521 5.06138 9.55498 4.99504 9.42477C4.88446 9.2077 4.69328 9.03376 4.31092 8.68589L4.0838 8.47927C3.26594 7.73519 2.85701 7.36315 2.91333 7.00779C2.92499 6.9342 2.94891 6.86308 2.98409 6.79739C3.15396 6.48023 3.71021 6.43041 4.82272 6.33078C5.47991 6.27192 5.8085 6.24249 6.07173 6.08384C6.14556 6.03934 6.2149 5.98779 6.27878 5.9299C6.50652 5.72352 6.62824 5.4201 6.87166 4.81324Z" stroke="#FF9500" stroke-width="2"></path>
+                            </svg>
+                          </div>
+                        </div> 
+                        <div class="row review-text">
+                                            Из 10 заказанных этот понравился больше всего .
+                            На обычный 42-44 162 рост  S хорошо . Костюм теплый ,пошит качественно . Цвет просто огонь. 
+                            Первые впечатления прекрасные, надеюсь такими и останутся .
+                            На фото цвет немного не тот ,вживую он мягче .
+                        </div> 
+                        <div class="row"></div> 
+                        <div class="row appraisals-container">
+                          <div class="col-12 likes my-3">
+                              <div class="thumbs thumbs-up d-inline">👍</div> 
+                            <p class="appraisals d-inline">Лайков:</p> 
+                            <div class="v-counter d-inline justify-content-end col-2">
+                              <input type="button" class="minusBtn " value="-" />
+                              <input type="text" size="25" value="1" class="count" /> <span></span>
+                              <input type="button" class="plusBtn" value="+" />
+                            </div>
+                            </div>
+                              <div class="col-12 dislikes my-3">
+                              <div class="thumbs thumbs-down d-inline">👎</div>
+                              <p class="appraisals d-inline">Дизлайков:</p> 
+                              <div class="v-counter d-inline justify-content-end">
+                                <input type="button" class="minusBtn " value="-" />
+                                <input type="text" size="25" value="1" class="count" /> <span></span>
+                                <input type="button" class="plusBtn" value="+" />
+                              </div>
+                              </div>
+                            </div>
+                             
+                          </div>
+                          
+                        </div>
+                        
+                      </div>
+                      
+                    </div> {% endcomment %}
+                    {% for review in reviews %}
+                    <div class="likes-card col-12 col-lg-6 mt-4" >
+                      <div class="card"><div class="row">
+                        <div class="col-auto">
+                          <div class="profile-photo-container">
+                            {% if review.wbUserDetails.hasPhoto == True %}
+                              <img src="https://photos.wbstatic.net/img/{{ review.wbUserId }}/small/PersonalPhoto.jpg" class="rounded-circle">
+                            {% else %}
+                              <img src="https://images.wbstatic.net/img/0/small/PersonalPhoto.png?2" class="rounded-circle">
+                            {% endif %}
+                            {% comment %} <img src="https://images.wbstatic.net/img/0/small/PersonalPhoto.png?2" class="rounded-circle"> {% endcomment %}
+                          </div>
+                        </div> 
+                        <div class="col">
+                          <div class="row">
+                            <div class="col-auto name">{{ review.wbUserDetails.name }}</div> 
+                            <div class="col date">{{ review.createdDate }}</div>
+                          </div> 
+                          <div class="row">
+                            <div class="review-rating">
+                              
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="{% if review.productValuation > 0 %}active{% endif %}">
+                                <path d="M6.87166 4.81324C7.29971 3.74612 7.51373 3.21256 7.86145 3.13861C7.95288 3.11916 8.04738 3.11916 8.13881 3.13861C8.48653 3.21256 8.70055 3.74612 9.1286 4.81324C9.37203 5.4201 9.49374 5.72352 9.72148 5.9299C9.78536 5.98779 9.8547 6.03934 9.92853 6.08384C10.1918 6.24249 10.5204 6.27192 11.1775 6.33078C12.29 6.43041 12.8463 6.48023 13.0162 6.79739C13.0514 6.86308 13.0753 6.9342 13.0869 7.00779C13.1432 7.36315 12.7343 7.73519 11.9165 8.47927L11.6893 8.68589C11.307 9.03376 11.1158 9.2077 11.0052 9.42477C10.9389 9.55498 10.8944 9.69521 10.8736 9.83985C10.8388 10.081 10.8948 10.3333 11.0068 10.838L11.0468 11.0183C11.2476 11.9233 11.348 12.3758 11.2226 12.5982C11.1101 12.798 10.9027 12.9259 10.6736 12.9369C10.4186 12.949 10.0593 12.6562 9.34065 12.0707C8.86718 11.6848 8.63044 11.4919 8.36764 11.4166C8.12747 11.3477 7.87279 11.3477 7.63262 11.4166C7.36982 11.4919 7.13308 11.6848 6.65961 12.0707C5.94096 12.6562 5.58163 12.949 5.32662 12.9369C5.09755 12.9259 4.89019 12.798 4.77761 12.5982C4.65228 12.3758 4.75268 11.9233 4.95348 11.0183L4.99348 10.838C5.10545 10.3333 5.16144 10.081 5.1267 9.83985C5.10585 9.69521 5.06138 9.55498 4.99504 9.42477C4.88446 9.2077 4.69328 9.03376 4.31092 8.68589L4.0838 8.47927C3.26594 7.73519 2.85701 7.36315 2.91333 7.00779C2.92499 6.9342 2.94891 6.86308 2.98409 6.79739C3.15396 6.48023 3.71021 6.43041 4.82272 6.33078C5.47991 6.27192 5.8085 6.24249 6.07173 6.08384C6.14556 6.03934 6.2149 5.98779 6.27878 5.9299C6.50652 5.72352 6.62824 5.4201 6.87166 4.81324Z" stroke="#FF9500" stroke-width="2"></path>
+                              </svg>
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="{% if review.productValuation > 1 %}active{% endif %}">
+                                <path d="M6.87166 4.81324C7.29971 3.74612 7.51373 3.21256 7.86145 3.13861C7.95288 3.11916 8.04738 3.11916 8.13881 3.13861C8.48653 3.21256 8.70055 3.74612 9.1286 4.81324C9.37203 5.4201 9.49374 5.72352 9.72148 5.9299C9.78536 5.98779 9.8547 6.03934 9.92853 6.08384C10.1918 6.24249 10.5204 6.27192 11.1775 6.33078C12.29 6.43041 12.8463 6.48023 13.0162 6.79739C13.0514 6.86308 13.0753 6.9342 13.0869 7.00779C13.1432 7.36315 12.7343 7.73519 11.9165 8.47927L11.6893 8.68589C11.307 9.03376 11.1158 9.2077 11.0052 9.42477C10.9389 9.55498 10.8944 9.69521 10.8736 9.83985C10.8388 10.081 10.8948 10.3333 11.0068 10.838L11.0468 11.0183C11.2476 11.9233 11.348 12.3758 11.2226 12.5982C11.1101 12.798 10.9027 12.9259 10.6736 12.9369C10.4186 12.949 10.0593 12.6562 9.34065 12.0707C8.86718 11.6848 8.63044 11.4919 8.36764 11.4166C8.12747 11.3477 7.87279 11.3477 7.63262 11.4166C7.36982 11.4919 7.13308 11.6848 6.65961 12.0707C5.94096 12.6562 5.58163 12.949 5.32662 12.9369C5.09755 12.9259 4.89019 12.798 4.77761 12.5982C4.65228 12.3758 4.75268 11.9233 4.95348 11.0183L4.99348 10.838C5.10545 10.3333 5.16144 10.081 5.1267 9.83985C5.10585 9.69521 5.06138 9.55498 4.99504 9.42477C4.88446 9.2077 4.69328 9.03376 4.31092 8.68589L4.0838 8.47927C3.26594 7.73519 2.85701 7.36315 2.91333 7.00779C2.92499 6.9342 2.94891 6.86308 2.98409 6.79739C3.15396 6.48023 3.71021 6.43041 4.82272 6.33078C5.47991 6.27192 5.8085 6.24249 6.07173 6.08384C6.14556 6.03934 6.2149 5.98779 6.27878 5.9299C6.50652 5.72352 6.62824 5.4201 6.87166 4.81324Z" stroke="#FF9500" stroke-width="2"></path>
+                              </svg>
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="{% if review.productValuation > 2 %}active{% endif %}">
+                                <path d="M6.87166 4.81324C7.29971 3.74612 7.51373 3.21256 7.86145 3.13861C7.95288 3.11916 8.04738 3.11916 8.13881 3.13861C8.48653 3.21256 8.70055 3.74612 9.1286 4.81324C9.37203 5.4201 9.49374 5.72352 9.72148 5.9299C9.78536 5.98779 9.8547 6.03934 9.92853 6.08384C10.1918 6.24249 10.5204 6.27192 11.1775 6.33078C12.29 6.43041 12.8463 6.48023 13.0162 6.79739C13.0514 6.86308 13.0753 6.9342 13.0869 7.00779C13.1432 7.36315 12.7343 7.73519 11.9165 8.47927L11.6893 8.68589C11.307 9.03376 11.1158 9.2077 11.0052 9.42477C10.9389 9.55498 10.8944 9.69521 10.8736 9.83985C10.8388 10.081 10.8948 10.3333 11.0068 10.838L11.0468 11.0183C11.2476 11.9233 11.348 12.3758 11.2226 12.5982C11.1101 12.798 10.9027 12.9259 10.6736 12.9369C10.4186 12.949 10.0593 12.6562 9.34065 12.0707C8.86718 11.6848 8.63044 11.4919 8.36764 11.4166C8.12747 11.3477 7.87279 11.3477 7.63262 11.4166C7.36982 11.4919 7.13308 11.6848 6.65961 12.0707C5.94096 12.6562 5.58163 12.949 5.32662 12.9369C5.09755 12.9259 4.89019 12.798 4.77761 12.5982C4.65228 12.3758 4.75268 11.9233 4.95348 11.0183L4.99348 10.838C5.10545 10.3333 5.16144 10.081 5.1267 9.83985C5.10585 9.69521 5.06138 9.55498 4.99504 9.42477C4.88446 9.2077 4.69328 9.03376 4.31092 8.68589L4.0838 8.47927C3.26594 7.73519 2.85701 7.36315 2.91333 7.00779C2.92499 6.9342 2.94891 6.86308 2.98409 6.79739C3.15396 6.48023 3.71021 6.43041 4.82272 6.33078C5.47991 6.27192 5.8085 6.24249 6.07173 6.08384C6.14556 6.03934 6.2149 5.98779 6.27878 5.9299C6.50652 5.72352 6.62824 5.4201 6.87166 4.81324Z" stroke="#FF9500" stroke-width="2"></path>
+                              </svg>
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="{% if review.productValuation > 3 %}active{% endif %}">
+                                <path d="M6.87166 4.81324C7.29971 3.74612 7.51373 3.21256 7.86145 3.13861C7.95288 3.11916 8.04738 3.11916 8.13881 3.13861C8.48653 3.21256 8.70055 3.74612 9.1286 4.81324C9.37203 5.4201 9.49374 5.72352 9.72148 5.9299C9.78536 5.98779 9.8547 6.03934 9.92853 6.08384C10.1918 6.24249 10.5204 6.27192 11.1775 6.33078C12.29 6.43041 12.8463 6.48023 13.0162 6.79739C13.0514 6.86308 13.0753 6.9342 13.0869 7.00779C13.1432 7.36315 12.7343 7.73519 11.9165 8.47927L11.6893 8.68589C11.307 9.03376 11.1158 9.2077 11.0052 9.42477C10.9389 9.55498 10.8944 9.69521 10.8736 9.83985C10.8388 10.081 10.8948 10.3333 11.0068 10.838L11.0468 11.0183C11.2476 11.9233 11.348 12.3758 11.2226 12.5982C11.1101 12.798 10.9027 12.9259 10.6736 12.9369C10.4186 12.949 10.0593 12.6562 9.34065 12.0707C8.86718 11.6848 8.63044 11.4919 8.36764 11.4166C8.12747 11.3477 7.87279 11.3477 7.63262 11.4166C7.36982 11.4919 7.13308 11.6848 6.65961 12.0707C5.94096 12.6562 5.58163 12.949 5.32662 12.9369C5.09755 12.9259 4.89019 12.798 4.77761 12.5982C4.65228 12.3758 4.75268 11.9233 4.95348 11.0183L4.99348 10.838C5.10545 10.3333 5.16144 10.081 5.1267 9.83985C5.10585 9.69521 5.06138 9.55498 4.99504 9.42477C4.88446 9.2077 4.69328 9.03376 4.31092 8.68589L4.0838 8.47927C3.26594 7.73519 2.85701 7.36315 2.91333 7.00779C2.92499 6.9342 2.94891 6.86308 2.98409 6.79739C3.15396 6.48023 3.71021 6.43041 4.82272 6.33078C5.47991 6.27192 5.8085 6.24249 6.07173 6.08384C6.14556 6.03934 6.2149 5.98779 6.27878 5.9299C6.50652 5.72352 6.62824 5.4201 6.87166 4.81324Z" stroke="#FF9500" stroke-width="2"></path>
+                              </svg>
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="{% if review.productValuation > 4 %}active{% endif %}">
+                                <path d="M6.87166 4.81324C7.29971 3.74612 7.51373 3.21256 7.86145 3.13861C7.95288 3.11916 8.04738 3.11916 8.13881 3.13861C8.48653 3.21256 8.70055 3.74612 9.1286 4.81324C9.37203 5.4201 9.49374 5.72352 9.72148 5.9299C9.78536 5.98779 9.8547 6.03934 9.92853 6.08384C10.1918 6.24249 10.5204 6.27192 11.1775 6.33078C12.29 6.43041 12.8463 6.48023 13.0162 6.79739C13.0514 6.86308 13.0753 6.9342 13.0869 7.00779C13.1432 7.36315 12.7343 7.73519 11.9165 8.47927L11.6893 8.68589C11.307 9.03376 11.1158 9.2077 11.0052 9.42477C10.9389 9.55498 10.8944 9.69521 10.8736 9.83985C10.8388 10.081 10.8948 10.3333 11.0068 10.838L11.0468 11.0183C11.2476 11.9233 11.348 12.3758 11.2226 12.5982C11.1101 12.798 10.9027 12.9259 10.6736 12.9369C10.4186 12.949 10.0593 12.6562 9.34065 12.0707C8.86718 11.6848 8.63044 11.4919 8.36764 11.4166C8.12747 11.3477 7.87279 11.3477 7.63262 11.4166C7.36982 11.4919 7.13308 11.6848 6.65961 12.0707C5.94096 12.6562 5.58163 12.949 5.32662 12.9369C5.09755 12.9259 4.89019 12.798 4.77761 12.5982C4.65228 12.3758 4.75268 11.9233 4.95348 11.0183L4.99348 10.838C5.10545 10.3333 5.16144 10.081 5.1267 9.83985C5.10585 9.69521 5.06138 9.55498 4.99504 9.42477C4.88446 9.2077 4.69328 9.03376 4.31092 8.68589L4.0838 8.47927C3.26594 7.73519 2.85701 7.36315 2.91333 7.00779C2.92499 6.9342 2.94891 6.86308 2.98409 6.79739C3.15396 6.48023 3.71021 6.43041 4.82272 6.33078C5.47991 6.27192 5.8085 6.24249 6.07173 6.08384C6.14556 6.03934 6.2149 5.98779 6.27878 5.9299C6.50652 5.72352 6.62824 5.4201 6.87166 4.81324Z" stroke="#FF9500" stroke-width="2"></path>
+                                </svg>
+                              </div>
+                            </div> 
+                            <div class="row review-text">
+                                                {{ review.text }}
+                            </div> 
+                            <div class="row"></div> 
+                            <div class="row appraisals-container">
+                              <div class="col-12 likes my-3">
+                                  <div class="thumbs thumbs-up d-inline">👍</div> 
+                                <p class="appraisals d-inline">Лайков:</p> 
+                                <div class="v-counter d-inline justify-content-end">
+                                    <input type="button" class="minusBtn " value="-" />
+                                    <input user='{{ review.wbUserId }}' data-name='{{ review.wbUserDetails.name }}' data-text='{{ review.text|truncatechars:50 }}' action='like' type="text" size="25" value="{{ review.votes.pluses|default:"0" }}" class="count" /> <span></span>
+                                    <input type="button" class="plusBtn" value="+" />
+                                </div>
+                                </div>
+                                  <div class="col-12 dislikes my-3">
+                                    <div class="thumbs thumbs-down d-inline">👎</div>
+                                    <p class="appraisals d-inline">Дизлайков:</p> 
+                                    <div class="v-counter d-inline justify-content-end">
+                                      <input type="button" class="minusBtn " value="-" />
+                                      <input user='{{ review.wbUserId }}' data-name='{{ review.wbUserDetails.name }}' data-text='{{ review.text|truncatechars:50 }}' action='dislike' type="text" size="25" value="{{ review.votes.minuses|default:"0" }}" class="count" /> <span></span>
+                                      <input type="button" class="plusBtn" value="+" />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="row">
+                                  {% for photo in review.photos %}
+                                  <div class="col-auto">
+                                    <img src='//feedbackphotos.wbstatic.net/{{photo.minSizeUri}}'>
+                                  </div>
+                                    
+                                  {% endfor %}
+                                </div>
+                                 
+                              </div>
+                              
+                            </div>
+                            
+                          </div>
+                          
+                        </div>
+                      {% comment %} </div> {% endcomment %}
+                        {% endfor %}
+                        
+                      </div>
+                     
+                      
+                      
+                                   
+                                </div>
+                                {% if is_end == False %}
+                                <button id='show_more' class="btn bg-gradient-primary btn-sm mt-5 w-40 mx-auto" id="check"><svg fill="#fff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="check-refresh d-none"><path d="M256 0c-17.7 0-32 14.3-32 32s14.3 32 32 32V0zM422.3 352c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7L422.3 352zM256 64c106 0 192 86 192 192h64C512 114.6 397.4 0 256 0V64zM448 256c0 35-9.4 67.8-25.7 96L477.7 384c21.8-37.7 34.3-81.5 34.3-128H448z"></path></svg>Показать больше</button>
+                              {% endif %}
+                                
+                              </div>
+                              
+                            </div>
+                            
+                          </div>
+                        </div>
+
+
+
+                  </div>
+                  
+              </div>
+              
+            </div>
+            
+        
+          
+            
+          </div>
+        </div>
+      </div>
+    </div>
+      
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+      </div>
+    </div>
+    </div> 
+  </div>
+    {% include "includes/footer.html" %}
+</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+  <script src="/static/assets/js/jquery.js"></script>
+
+  <script type="text/javascript">
+    $('#show_more').click(function(){
+    {% comment %} var sm = $('#show_more');
+    sm.remove(); {% endcomment %}
+     var count = $('.likes-card').length;
+     $.ajax({
+        url: '{% url "show-more-review" %}',         /* Куда пойдет запрос */
+        method: 'post',             /* Метод передачи (post или get) */
+        dataType: 'json',          /* Тип данных в ответе (xml, json, script, html). */
+        data: {
+          sku: '{{ sku }}',
+          count: count,
+          sort: '{{ sort }}',
+          has_photo: '{{ has_photo }}',
+        }, 
+        beforeSend: () => {
+          $('#show_more svg').removeClass('d-none')
+          $('#show_more').attr('disabled', true)
+          $('#show_more').addClass('disabled')
+        },
+        complete: () => {
+          $('#show_more svg').addClass('d-none')
+          $('#show_more').attr('disabled', false)
+          $('#show_more').removeClass('disabled')
+        },
+        success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
+          console.log(data)
+          if (data['result'] == 'have not new reviews') {
+            return Swal.fire('', 'У этого товара больше не имеется отзывов!', 'warning')
+          }
+          data['reviews'].forEach(review => 
+              $(".likes-card-items").append(review));
+          console.log(data['is_end']);
+          if (data['is_end'] == 'True'){
+            var sm = $('#show_more');
+            sm.remove();
+          }
+          else{
+            $('#show_more').appendTo($(".likes-card-items"));
+          }
+
+          var resultEl = document.querySelector(".resultSet"),
+          plusMinusWidgets = document.querySelectorAll(".v-counter");
+          for (var i = 0; i < plusMinusWidgets.length; i++) {
+            plusMinusWidgets[i].querySelector(".minusBtn").addEventListener("click", clickHandler);
+            plusMinusWidgets[i].querySelector(".plusBtn").addEventListener("click", clickHandler);
+          }
+        }
+      });
+    })
+
+    $('#guide').click(function(){
+      Swal.fire({
+        html:
+          '<div class="frame_blc"><iframe src="https://www.youtube.com/embed/iY2T4Tsv5zY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>',
+        showCloseButton: true,
+        showCancelButton: false,
+        focusConfirm: false,
+        showConfirmButton: false,
+        width: '50%',
+      })
+    })
+
+  
+  var resultEl = document.querySelector(".resultSet"),
+  plusMinusWidgets = document.querySelectorAll(".v-counter");
+  var result = {};
+  var counter = 0;
+
+// Attach the handlers to each plus-minus thing
+for (var i = 0; i < plusMinusWidgets.length; i++) {
+  plusMinusWidgets[i].querySelector(".minusBtn").addEventListener("click", clickHandler);
+  plusMinusWidgets[i].querySelector(".plusBtn").addEventListener("click", clickHandler);
+}
+
+/*****
+ * both plus and minus use the same function, but value is set by the class of the
+ *  button
+ *****/
+function clickHandler(event) {
+  // reference to the count input field
+  var countEl = event.target.parentNode.querySelector(".count");
+  var countChange = event.target.parentNode.querySelector(".v-counter > span");
+  
+  console.log(countChange);
+  console.log(countEl);
+  var action = countEl.getAttribute('action');
+  var user = countEl.getAttribute('user');
+  var name = countEl.getAttribute('data-name');
+  var text = countEl.getAttribute('data-text');
+  if (event.target.className.match(/\bminusBtn\b/) && countChange.innerHTML != '') {
+    result[user][action] -= 1;
+    counter -= 1;
+    countEl.value = Number(countEl.value) - 1;
+    var countChangeBefore = Number(countChange.innerHTML.replace('(+', '').replace(')', ''));
+    var newVal = countChangeBefore - 1;
+    if (newVal == 0){
+      countChange.innerHTML = '';
+    }
+    else{
+      countChange.innerHTML = `(+${newVal})`;
+    }
+  } else if (event.target.className.match(/\bplusBtn\b/)) {
+    if (user in result){
+      if (action in result[user]){
+        result[user][action] += 1;
+      }
+      else{
+        if (Object.keys(result[user]).length == 1){
+          result[user][action] = 1;
+        }
+        else{
+          result[user] = {};
+          result[user][action] = 1;
+        }
+      }
+        
+    }
+    else{
+      result[user] = {};
+      result[user][action] = 1;
+      result[user]['info'] = {"name": name, "text": text}
+    }
+
+    counter += 1;
+    countEl.value = Number(countEl.value) + 1;
+      if (countChange.innerHTML == ''){
+        countChange.innerHTML = `(+1)`;
+      }
+      else if (countChange.innerHTML != ''){
+        var countChangeBefore = Number(countChange.innerHTML.replace('(+', '').replace(')', ''));
+        var newVal = countChangeBefore + 1;
+        countChange.innerHTML = `(+${newVal})`;
+      }
+      
+
+    
+  }
+  // When we programmatically change the value, we need to manually trigger
+  //  the change event.
+  console.log(result);
+  triggerEvent(countEl, "change");
+  triggerEvent(countChange, "change");
+};
+
+/*****
+ * changeHandler() processes whenever a plusMinusWidget's count el is changed.
+ *  It iterates over all plusMinusWidgets, gets their count, and outputs that
+ *  to the given resultEl input field.
+ *****/
+{% comment %} function changeHandler(event) {
+  // remove all value from the result el.
+  resultEl.value = '';
+  /******
+   * Here is the only functional change, per your comment. Rather
+   *  concatenating a string, you want to sum values of the 
+   *  plusMinusWidget. To do this, we need to cast the value of each
+   *  plusMinusWidget to a Number value, and add that to the Number
+   *  value of the resultEl.
+   *****/
+  for (var i = 0; i < plusMinusWidgets.length; i++) {
+    // Add the current plusMinusWidget value to the resultEl value.
+    resultEl.value = Number(resultEl.value) + Number(plusMinusWidgets[i].querySelector('.count').value);
+
+  }
+
+}; {% endcomment %}
+
+/*****
+ * triggerEvent() -- function to trigger an HTMLEvent on a given element.
+ *  similar to jquery's trigger(), simply a convenience function. Not the
+ *  point of this exercise.
+ *****/
+
+function triggerEvent(el, type){
+   if ('createEvent' in document) {
+        // modern browsers, IE9+
+        var e = document.createEvent('HTMLEvents');
+        e.initEvent(type, false, true);
+        el.dispatchEvent(e);
+    } else {
+        // IE 8
+        var e = document.createEventObject();
+        e.eventType = type;
+        el.fireEvent('on'+e.eventType, e);
+    }
+}
+
+    if ("{{error}}" == "False"){
+          Swal.fire(
+      'Готово!',
+      'Обновления применены',
+      'success'
+    )
+      }
+    else if ("{{error}}" == "True"){
+      Swal.fire(
+      'Ошибка',
+      '{{ error_message }}',
+      'error'
+    )
+    }
+    $('#make_order').on('click', function(){
+      data = JSON.stringify(result);
+      console.log(result);
+      var count = $('.likes-card').length;
+      console.log(count);
+      $.ajax({
+        type: "POST",
+        url: "{% url 'get_likes_data' %}",
+        data: {
+          data,
+          'sku': '{{ sku }}',
+          'count': count,
+          'sort': '{{ sort }}',
+          'has_photo': '{{ has_photo }}',
+        },
+        success: function (data) {
+          Swal.fire(
+            'Готово!',
+            'Задачи добавлены',
+            'success'
+          )
+          setTimeout(() => {
+            window.location.href = "{% url 'like-to-review' %}"
+          }, 1500)
+        },
+        error: function (data) {
+          Swal.fire(
+            'Ошибка',
+            'Что-то пошло не так',
+            'error')
+        },
+    });
+  });
+	</script>
+{% endblock javascripts %}

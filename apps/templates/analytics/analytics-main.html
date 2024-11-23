@@ -1,0 +1,1089 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Главная страница аналитики {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<script src="https://unpkg.com/ag-grid-enterprise/dist/ag-grid-enterprise.min.noStyle.js"></script>
+
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+
+ <link rel="stylesheet"
+	 href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/>
+<link rel="stylesheet"
+	 href="https://unpkg.com/ag-grid-community/styles/ag-theme-material.css"/>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<link rel="stylesheet" href="{% static 'analytics/css/analytics-main-style.css' %}">
+
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+	<div class="container-fluid py-4">
+		<div class="card mb-4">
+			<div class="card-body">
+				<div class="filters">
+					<div class="filters-item">
+						<div class="form-check form-switch">
+							<input class="form-check-input mt-2" type="checkbox" id="buyouts" name="buyouts" value="0">
+							<label class="form-check-label" for="buyouts" style="transform: translate(0, 5px)">
+								<h6>
+									Самовыкупы
+								</h6>
+							</label>
+						</div>
+					</div>
+					<div class="filters-item">
+						<div class="d-flex position-relative"><input type="text" class="form-control" id="date-range"><svg xmlns="http://www.w3.org/2000/svg" onclick="$('#date-range').click()" style="width: 20px;position: absolute;right: 7px;top: 9px;cursor: pointer;" viewBox="0 0 448 512"><path fill="#848ea3" d="M160 32V64H288V32C288 14.33 302.3 0 320 0C337.7 0 352 14.33 352 32V64H400C426.5 64 448 85.49 448 112V160H0V112C0 85.49 21.49 64 48 64H96V32C96 14.33 110.3 0 128 0C145.7 0 160 14.33 160 32zM0 192H448V464C448 490.5 426.5 512 400 512H48C21.49 512 0 490.5 0 464V192zM64 304C64 312.8 71.16 320 80 320H112C120.8 320 128 312.8 128 304V272C128 263.2 120.8 256 112 256H80C71.16 256 64 263.2 64 272V304zM192 304C192 312.8 199.2 320 208 320H240C248.8 320 256 312.8 256 304V272C256 263.2 248.8 256 240 256H208C199.2 256 192 263.2 192 272V304zM336 256C327.2 256 320 263.2 320 272V304C320 312.8 327.2 320 336 320H368C376.8 320 384 312.8 384 304V272C384 263.2 376.8 256 368 256H336zM64 432C64 440.8 71.16 448 80 448H112C120.8 448 128 440.8 128 432V400C128 391.2 120.8 384 112 384H80C71.16 384 64 391.2 64 400V432zM208 384C199.2 384 192 391.2 192 400V432C192 440.8 199.2 448 208 448H240C248.8 448 256 440.8 256 432V400C256 391.2 248.8 384 240 384H208zM320 432C320 440.8 327.2 448 336 448H368C376.8 448 384 440.8 384 432V400C384 391.2 376.8 384 368 384H336C327.2 384 320 391.2 320 400V432z"/></svg></div>
+					</div>
+					<div class="filter-item">
+						<div class="checkselect brands">
+							<label><input type="checkbox" name="brands[]" value="all"> Всё</label>
+							<label><input type="checkbox" name="brands[]" value="2"> Apple Inc.</label>
+							<label><input type="checkbox" name="brands[]" value="3"> Microsoft</label>
+							<label><input type="checkbox" name="brands[]" value="4"> Facebook</label>
+							<label><input type="checkbox" name="brands[]" value="5"> Amazon</label>
+							<label><input type="checkbox" name="brands[]" value="6"> Verizon</label>
+						</div>
+					</div>
+					<div class="filter-item">
+						<div class="checkselect api">
+							<label><input type="checkbox" name="api[]" value="all"> Всё</label>
+							<label><input type="checkbox" name="api[]" value="2">api1</label>
+							<label><input type="checkbox" name="api[]" value="3">api2</label>
+							<label><input type="checkbox" name="api[]" value="4">api3</label>
+							<label><input type="checkbox" name="api[]" value="5">api4</label>
+							<label><input type="checkbox" name="api[]" value="6">api5</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card mb-4">
+			<div class="card-body">
+				<div class="indicators">
+					<div class="indicators-content">
+						<div class="indicator">
+							<div class="line-top"></div>
+							<div class="indicator-title">Прибыль</div>
+							<div class="indicator-content">
+
+								<div class="indicator-value">
+									<div class="indicator-text">Сумма</div>
+									<div class="indicator-numbers rubles-symbol" id="profit1">111111</div>
+									<div class="indicator-diffrence diffrence-up rubles-symbol" id="profitDif1">43124</div>
+								</div>
+								<div class="indicator-value">
+									<!-- <div class="indicator-numbers"></div>
+									<div class="indicator-diffrence diffrence-up diffrence-down"></div>
+									<div class="indicator-text"></div> -->
+								</div>
+							</div>
+						</div>
+						<div class="indicator">
+							<div class="line-top"></div>
+							<div class="indicator-title">ROI</div>
+							<div class="indicator-content">
+
+								<div class="indicator-value">
+									<div class="indicator-text">Процент</div>
+									<div class="indicator-numbers percentage-symbol" id="roi1">145</div>
+									<div class="indicator-diffrence diffrence-up percentage-symbol" id="roiDif1">2134</div>
+									<div class="indicator-subtext"></div>
+								</div>
+								<div class="indicator-value">
+									<!-- <div class="indicator-numbers"></div>
+									<div class="indicator-diffrence diffrence-up diffrence-down"></div>
+									<div class="indicator-text"></div> -->
+								</div>
+							</div>
+						</div>
+						<div class="indicator">
+							<div class="line-top"></div>
+							<div class="indicator-title">Рентабельность</div>
+							<div class="indicator-content">
+
+								<div class="indicator-value">
+									<div class="indicator-text">что-то..</div>
+									<div class="indicator-numbers" id="profitability1">0.44</div>
+									<div class="indicator-diffrence diffrence-down" id="profitabilityDif1">0.5</div>
+									<div class="indicator-subtext"></div>
+								</div>
+								<div class="indicator-value">
+									<!-- <div class="indicator-numbers"></div>
+									<div class="indicator-diffrence diffrence-up diffrence-down"></div>
+									<div class="indicator-text"></div> -->
+								</div>
+							</div>
+						</div>
+						<div class="indicator">
+							<div class="line-top"></div>
+							<div class="indicator-title">Выкуп</div>
+							<div class="indicator-content">
+
+								<div class="indicator-value">
+									<div class="indicator-text">Процент</div>
+									<div class="indicator-numbers percentage-symbol" id="redemption1">11</div>
+									<div class="indicator-diffrence diffrence-down percentage-symbol" id="redemptionDif1">4</div>
+									<div class="indicator-subtext"></div>
+								</div>
+								<div class="indicator-value">
+									<!-- <div class="indicator-numbers"></div>
+									<div class="indicator-diffrence diffrence-up diffrence-down"></div>
+									<div class="indicator-text"></div> -->
+								</div>
+							</div>
+						</div>
+						<div class="indicator indicator_two">
+							<div class="line-top"></div>
+							<div class="indicator-title">Продажи</div>
+							<div class="indicator-content">
+
+								<div class="indicator-value">
+									<div class="indicator-text">Сумма</div>
+									<div class="indicator-numbers rubles-symbol" id="sale1">111111</div>
+									<div class="indicator-diffrence diffrence-down rubles-symbol" id="saleDif1">3245</div>
+									<div class="indicator-subtext"></div>
+								</div>
+								<div class="indicator-value">
+									<div class="indicator-text">Кол-во</div>
+									<div class="indicator-numbers rubles-symbol" id="sale2">1332</div>
+									<div class="indicator-diffrence diffrence-up rubles-symbol rubles-symbol" id="saleDif2">432</div>
+									<div class="indicator-subtext"></div>
+								</div>
+							</div>
+						</div>
+						<div class="indicator indicator_two">
+							<div class="line-top"></div>
+							<div class="indicator-title">Заказы</div>
+							<div class="indicator-content">
+
+								<div class="indicator-value">
+									<div class="indicator-text">Сумма</div>
+									<div class="indicator-numbers rubles-symbol" id="orders1">111111</div>
+									<div class="indicator-diffrence diffrence-down rubles-symbol" id="ordersDif1">214</div>
+									<div class="indicator-subtext"></div>
+								</div>
+								<div class="indicator-value">
+									<div class="indicator-text">Кол-во</div>
+									<div class="indicator-numbers rubles-symbol" id="orders2">15321</div>
+									<div class="indicator-diffrence diffrence-up rubles-symbol " id="ordersDif2">4235</div>
+									<div class="indicator-subtext"></div>
+								</div>
+							</div>
+						</div>
+						<div class="indicator indicator_two">
+							<div class="line-top"></div>
+							<div class="indicator-title">Возвраты</div>
+							<div class="indicator-content">
+
+								<div class="indicator-value">
+									<div class="indicator-text">Сумма</div>
+									<div class="indicator-numbers rubles-symbol" id="refunds1">111111</div>
+									<div class="indicator-diffrence diffrence-up rubles-symbol " id="refundsDif1">868</div>
+									<div class="indicator-subtext"></div>
+								</div>
+								<div class="indicator-value">
+									<div class="indicator-text">Кол-во</div>
+									<div class="indicator-numbers rubles-symbol" id="refunds2">52</div>
+									<div class="indicator-diffrence diffrence-up rubles-symbol" id="refundsDif2">4646</div>
+									<div class="indicator-subtext"></div>
+								</div>
+							</div>
+						</div>
+						<div class="indicator indicator_two">
+							<div class="line-top"></div>
+							<div class="indicator-title">Самовыкупы</div>
+							<div class="indicator-content">
+
+								<div class="indicator-value">
+									<div class="indicator-text">Сумма</div>
+									<div class="indicator-numbers rubles-symbol" id="buyouts1">111111</div>
+									<div class="indicator-diffrence diffrence-down rubles-symbol" id="buyoutsDif1">3532</div>
+									<div class="indicator-subtext"></div>
+								</div>
+								<div class="indicator-value">
+									<div class="indicator-text">Кол-во</div>
+									<div class="indicator-numbers " id="buyouts2">432</div>
+									<div class="indicator-diffrence diffrence-down" id="buyoutsDif2">245</div>
+									<div class="indicator-subtext"></div>
+								</div>
+							</div>
+						</div>
+						<div class="indicator indicator_three">
+							<div class="line-top"></div>
+							<div class="indicator-title"><a href="#">Собестоимость</a></div>
+							<div class="indicator-content">
+
+								<div class="indicator-value">
+									<div class="indicator-text">Сумма</div>
+									<div class="indicator-numbers rubles-symbol" id="cost1">111111</div>
+									<div class="indicator-diffrence diffrence-down rubles-symbol" id="costDif1">3532</div>
+									<div class="indicator-subtext"></div>
+								</div>
+								<div class="indicator-value">
+									<!-- <div class="indicator-text">Сумма</div>
+									<div class="indicator-numbers rubles-symbol">111111</div>
+									<div class="indicator-diffrence diffrence-down rubles-symbol">3532</div>
+									<div class="indicator-subtext"></div> -->
+								</div>
+							</div>
+						</div>
+						<div class="indicator indicator_three">
+							<div class="line-top"></div>
+							<div class="indicator-title">Логистика</div>
+							<div class="indicator-content">
+
+								<div class="indicator-value">
+									<div class="indicator-text">К клиенту</div>
+									<div class="indicator-numbers" id="logistics1">312</div>
+									<div class="indicator-diffrence diffrence-down " id="logisticsDif1">423</div>
+									<div class="indicator-subtext"></div>
+								</div>
+								<div class="indicator-value">
+									<div class="indicator-text">От клиента</div>
+									<div class="indicator-numbers" id="logistics2">324</div>
+									<div class="indicator-diffrence diffrence-down" id="logisticsDif2">54</div>
+									<div class="indicator-subtext"></div>
+								</div>
+							</div>
+						</div>
+						<div class="indicator indicator_three">
+							<div class="line-top"></div>
+							<div class="indicator-title">Комиссия и штрафы</div>
+							<div class="indicator-content">
+
+								<div class="indicator-value">
+									<div class="indicator-text">Комиссия WB</div>
+									<div class="indicator-numbers rubles-symbol" id="com&pen1">111111</div>
+									<div class="indicator-diffrence diffrence-down rubles-symbol" id="com&penDif1">3532</div>
+									<div class="indicator-subtext"></div>
+								</div>
+								<div class="indicator-value">
+									<div class="indicator-text">Штрафы WB</div>
+									<div class="indicator-numbers rubles-symbol" id="com&pen2">111111</div>
+									<div class="indicator-diffrence diffrence-down rubles-symbol" id="com&penDif2">3532</div>
+									<div class="indicator-subtext"></div>
+								</div>
+							</div>
+						</div>
+						<div class="indicator indicator_three">
+							<div class="line-top"></div>
+							<div class="indicator-title">Средний чек</div>
+							<div class="indicator-content">
+
+								<div class="indicator-value">
+									<div class="indicator-text">Сумма</div>
+									<div class="indicator-numbers rubles-symbol" id="avCheck1">111111</div>
+									<div class="indicator-diffrence diffrence-down rubles-symbol" id="avCheckDif1">3532</div>
+									<div class="indicator-subtext"></div>
+								</div>
+								<div class="indicator-value">
+									<!-- <div class="indicator-text">Сумма</div>
+									<div class="indicator-numbers rubles-symbol">111111</div>
+									<div class="indicator-diffrence diffrence-down rubles-symbol">3532</div>
+									<div class="indicator-subtext"></div> -->
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="chart">
+					<div class="chart-wrapper">
+						<div class="chart-title">
+							<h4>
+								График...
+							</h4>
+							<div class="title-switch">
+								<input type="checkbox" name="rub" id="rub">
+								<div class="checkbox rub checked">Рубли</div>
+								<div class="checkbox count">Кол-во</div>
+							</div>
+						</div>
+						<div class="chart-subtitle mb-4">
+							<p>
+								
+							</p>
+						</div>
+						<div class="tab-content" id="myTabContent">
+							<div class="tab-pane fade show active" id="rub-chart" role="tabpanel" aria-labelledby="orders-tab">
+								<div class="table-wrapper mt-4" >
+									<canvas id="mixed-chart" class="chart-canvas" height="300"></canvas>
+								</div>
+							</div>
+							<div class="tab-pane fade" id="num-chart" role="tabpanel" aria-labelledby="sales-tab">
+								<div class="table-wrapper mt-4" >
+									<canvas id="mixed-chart-1" class="chart-canvas" height="300"></canvas>
+								</div>
+							</div>
+						</div>
+						<div class="chart-content">
+							
+						</div>
+					</div>
+				</div>
+				<div class="table-wrapper">
+					<div class="table ag-theme-material" id="table"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+	<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+	<script src="/static/assets/js/plugins/chartjs.min.js"></script>
+	<script src="{% static 'js/select-with-checkbox.js' %}"></script>
+	<!-- <script src="/static/assets/js/plugins/moment.js"></script>  -->
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+	<script src="/static/assets/js/plugins/moment-with-locales.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+	
+	<script src="{% static 'assets/js/ag-grid_locale.ru.js' %}"></script>
+	<!-- Table Tooltips --> 
+	<script>
+		class CustomTooltip {
+			init(params) {
+				const eGui = (this.eGui = document.createElement('div'));
+				const color = params.color || '#eee';
+				const data = params.api.getDisplayedRowAtIndex(params.rowIndex).data;
+
+				eGui.classList.add('custom-tooltip');
+				//@ts-ignore
+				eGui.style['background-color'] = color;
+				eGui.style['border-radius'] = '15px'
+				eGui.innerHTML = `
+					<div class='width-custom-tooltip'> <img src="${data.image}" alt="" style='height: 150px'></div>
+				`;
+			}
+
+			getGui() {
+				return this.eGui;
+			}
+		}
+	</script>
+	<!-- Table -->
+	<script>
+		agGrid.LicenseManager.setLicenseKey("CompanyName=MPLAB,LicensedApplication=MPLAB,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=1,LicensedProductionInstancesCount=0,AssetReference=AG-034191,SupportServicesEnd=23_October_2023_[v2]_MTY5ODAxNTYwMDAwMA==3b4ce1e31fc57311e3399877777ff001");
+		function renderDataImg(params) {
+			return params.value ? `<img src="${params.value}" style='height: 100%'>` : '—'
+		}
+		function renderDataNumbers(params) {
+			return params.value == undefined ? '—' : params.value.toLocaleString('ru')
+		}
+		function renderDataPercentage(params) {
+			return params.value == undefined ? '—' : params.value + ' %'
+		}
+		// function cellStyle(params) {
+		// 	let color = ''
+		// 	if (params.value == 1) {
+		// 		color = "rgba(233,249,238,.5)"
+		// 	} else if (params.value == 0) {
+		// 		color = "rgba(229,245,255,.5)"
+		// 	}
+		// 	return {
+		// 		backgroundColor: color,
+		// 	};
+		// }
+		var mainColumn = [{
+				field: 'image',
+				headerName: 'Фото',
+				width: 150,
+				cellRenderer: renderDataImg,
+				// tooltipComponent: CustomTooltip,
+				tooltipField: 'image'
+			},
+			{
+				field: 'barcode', 
+				width: 120, 
+				headerName: 'Штрихкод', 
+			},
+			{
+				field: 'brand',
+				width: 120,
+				headerName: 'Бренд', 
+			},
+			{
+				field: 'size',
+				width: 120,
+				headerName: 'Размер',
+			},
+			{
+				field: 'skuVn',
+				width: 120,
+				headerName: 'Артикул вн',
+			},
+			{
+				field: 'position',
+				width: 120,
+				headerName: 'Позиция',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'sku',
+				width: 120,
+				headerName: 'Артикул',
+			},
+			{
+				field: 'orders',
+				width: 120,
+				headerName: 'Заказов',
+				cellRenderer: renderDataNumbers,
+				filter: 'agNumberColumnFilter',
+				
+			},
+			{
+				field: 'ordersSum',
+				width: 120,
+				headerName: 'Заказов на сумму',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'selling',
+				width: 120,
+				headerName: 'Продаж',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'sellingSum',
+				width: 120,
+				headerName: 'Продаж на сумму',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'returns',
+				width: 120,
+				headerName: 'Возвратов',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'cost',
+				width: 120,
+				headerName: 'Собестоимость',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'profit',
+				width: 120,
+				headerName: 'Прибыль',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'logistics',
+				width: 120,
+				headerName: 'Логистика',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'commission',
+				width: 120,
+				headerName: 'Комиссия',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'ransom',
+				width: 120,
+				headerName: '% Выкупа',
+				cellRenderer: renderDataPercentage,
+			},
+			{
+				field: 'roi',
+				width: 120,
+				headerName: 'ROI, %',
+				cellRenderer: renderDataPercentage,
+			},
+		]
+		var columnDefs = [
+			...mainColumn,
+		];
+
+
+
+		function deselect(){
+				gridOptions.api.deselectAll()
+		}
+		const gridOptions = {
+			defaultColDef: {
+				resizable: true,
+				sortable: true,
+				tooltipComponent: CustomTooltip,
+			},
+			animateRows: true,
+			columnDefs: columnDefs,
+			getDetailRowData: params => {
+				params.successCallback(params.data.callRecords);
+			},
+			// debug: true,
+			tooltipShowDelay: 210,
+			tooltipHideDelay: 2000,
+			localeText: AG_GRID_LOCALE_RU,
+			rowData: [{image: "{% static 'images/покемон1.png' %}", barcode: 1254236345, brand: 'bla bla', size: 0, position: 4523, skuVn: 2154326, sku: 12532532, orders: 5, ordersSum: 765478, }],
+			// suppressDragLeaveHidesColumns: true,
+			// onFirstDataRendered: onFirstDataRendered,
+		};
+
+		var eGridDiv = document.getElementById("table");
+		var gridPhrases = new agGrid.Grid(eGridDiv, gridOptions);
+	</script>
+	<!-- Chart || copied from template "charts.html" -->
+	<script>
+		function reverseString(str) {
+			return str.split("").reverse().join("");
+		}
+		// Mixed chart
+		var ctx7 = document.getElementById("mixed-chart").getContext("2d");
+		var ctx7_2 = document.getElementById("mixed-chart-1").getContext("2d");
+
+		const labels = ["10 сен.", "12 сен.", "14 сен.", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+		var gradientStroke1 = ctx7.createLinearGradient(0, 230, 0, 50);
+
+		gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.4)');
+		gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+		gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)');
+
+		var chart1 = new Chart(ctx7, {
+			data: {
+				labels: labels,
+				datasets: [{
+						type: "line",
+						label: "Прибыль",
+						tension: 0.4,
+						borderWidth: 0,
+						pointRadius: 0,
+						pointBackgroundColor: "#cb0c9f",
+						borderColor: "#cb0c9f",
+						borderWidth: 3,
+						backgroundColor: gradientStroke1,
+						data: [3340, 9750, 47650, 14750, 25790, 29080, 43340, 22430, 40530],
+						fill: true,
+					},
+					{
+						type: "bar",
+						label: "Заказы",
+						weight: 5,
+						tension: 0.4,
+						borderWidth: 0,
+						pointBackgroundColor: "#3A416F",
+						borderColor: "#3A416F",
+						backgroundColor: '#3A416F',
+						borderRadius: 4,
+						// borderSkipped: false,
+						data: [59801, 40653, 30045, 26420, 50080, 22350, 23800, 23750, 87500],
+						// maxBarThickness: 10,
+						barPercentage: 1,
+					},
+					{
+						type: "bar",
+						label: "Продажи",
+						weight: 5,
+						tension: 0.4,
+						borderWidth: 0,
+						pointBackgroundColor: "#039be5",
+						borderColor: "#039be5",
+						backgroundColor: '#039be5',
+						borderRadius: 4,
+						// borderSkipped: false,
+						data: [89780, 17900, 37598, 28095, 58950, 25530, 44350, 25433, 58042],
+						// maxBarThickness: 10,
+						barPercentage: 1,
+					},
+					{
+						type: "bar",
+						label: "Самовыкупы",
+						weight: 5,
+						tension: 0.4,
+						borderWidth: 0,
+						pointBackgroundColor: "#f95a26",
+						borderColor: "#f95a26",
+						backgroundColor: '#f95a26',
+						borderRadius: 4,
+						// borderSkipped: false,
+						data: [89780, 17900, 37598, 28095, 58950, 25530, 44350, 25433, 58042],
+						// maxBarThickness: 10,
+						barPercentage: 1,
+					},
+				],
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					tooltip: {
+						callbacks: {
+							label: function(context) {
+								let label = context.dataset.label || '';
+
+								if (label) {
+									label += ': ';
+								}
+								if (context.parsed.y !== null) {
+									label += context.parsed.y.toLocaleString('ru') + ' руб.';
+								}
+								return label;
+							}
+						}
+					},
+					legend: {
+						labels: {
+							generateLabels: function(chart) {
+								var data = chart.data;
+								if (data.labels.length && data.datasets.length) {
+									return data.datasets.map(function(label, i) {
+										var ds = label;
+										var fill = label.backgroundColor
+										var stroke = label.pointBackgroundColor
+										var bw = label.borderColor
+										return {
+										// And finally : 
+											text: label['label'] + ' руб.',
+											fillStyle: fill,
+											strokeStyle: stroke,
+											lineWidth: bw,
+											datasetIndex: i,
+											lineCap: "butt",
+											lineDash: [],
+											lineDashOffset: 2,
+											lineJoin: "miter",
+											lineWidth: 1,
+											hidden: chart.isDatasetVisible(i) ? false : true,
+											pointStyle: 'rectRot'
+										};
+									});
+								}
+								return [];
+							},
+							usePointStyle: true,
+						},
+					onClick: function(e, legendItem, legend) {
+							const index = legendItem.datasetIndex;
+							const ci = legend.chart;
+							console.log(ci);
+							console.log(legendItem);
+
+							if (ci.isDatasetVisible(index)) {
+								ci.hide(index);
+								legendItem.hidden = true;
+								legendItem.backgroundColor = '#000'
+							} else {
+								ci.show(index);
+								legendItem.hidden = false;
+							}
+							console.log(legendItem);
+						}
+					},
+ 
+				},
+				interaction: {
+					intersect: false,
+					mode: 'index',
+				},
+
+				scales: {
+					y: {
+						grid: {
+							drawBorder: false,
+							display: true,
+							drawOnChartArea: true,
+							drawTicks: false,
+							borderDash: [5, 5]
+						},
+						ticks: {
+							display: true,
+							padding: 10,
+							color: '#b2b9bf',
+							font: {
+								size: 11,
+								family: "Open Sans",
+								style: 'normal',
+								lineHeight: 2
+							},
+							callback: function(value, index, ticks) {
+								// console.log(value, index, ticks);
+								return reverseString(reverseString(String(value)).replace(/000/g, 'к')).replace(/([0-9])([0-9])00/, `$1.$2к`);
+							}
+						}
+					},
+					x: {
+						grid: {
+							drawBorder: false,
+							display: true,
+							drawOnChartArea: true,
+							drawTicks: true,
+							borderDash: [5, 5]
+						},
+						ticks: {
+							display: true,
+							color: '#b2b9bf',
+							padding: 10,
+							font: {
+								size: 11,
+								family: "Open Sans",
+								style: 'normal',
+								lineHeight: 2
+							},
+						}
+					},
+				},
+			},
+		});
+
+		var chart2 = new Chart(ctx7_2, {
+			data: {
+				labels: labels,
+				datasets: [
+					{
+						type: "bar",
+						label: "Заказы",
+						weight: 5,
+						tension: 0.4,
+						borderWidth: 0,
+						pointBackgroundColor: "#3A416F",
+						borderColor: "#3A416F",
+						backgroundColor: '#3A416F',
+						borderRadius: 4,
+						// borderSkipped: false,
+						data: [555, 432, 543, 40, 12, 400, 120, 400, 70],
+						// maxBarThickness: 10,
+						barPercentage: 1,
+					},
+					{
+						type: "bar",
+						label: "Продажи",
+						weight: 5,
+						tension: 0.4,
+						borderWidth: 0,
+						pointBackgroundColor: "#039be5",
+						borderColor: "#039be5",
+						backgroundColor: '#039be5',
+						borderRadius: 4,
+						// borderSkipped: false,
+						data: [89, 179, 375, 280, 589, 230, 443, 2, 580],
+						// maxBarThickness: 10,
+						barPercentage: 1,
+					},
+					{
+						type: "bar",
+						label: "Самовыкупы",
+						weight: 5,
+						tension: 0.4,
+						borderWidth: 0,
+						pointBackgroundColor: "#f95a26",
+						borderColor: "#f95a26",
+						backgroundColor: '#f95a26',
+						borderRadius: 4,
+						// borderSkipped: false,
+						data: [8, 17, 37, 28, 589, 255, 44, 254, 580],
+						// maxBarThickness: 10,
+						barPercentage: 1,
+					},
+				],
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					tooltip: {
+						callbacks: {
+							label: function(context) {
+								let label = context.dataset.label || '';
+
+								if (label) {
+									label += ': ';
+								}
+								if (context.parsed.y !== null) {
+									label += context.parsed.y.toLocaleString('ru') + ' шт.';
+								}
+								return label;
+							}
+						}
+					},
+					legend: {
+						labels: {
+							generateLabels: function(chart) {
+								console.log(chart);
+								var data = chart.data;
+								if (data.labels.length && data.datasets.length) {
+									return data.datasets.map(function(label, i) {
+										var ds = label;
+										var fill = label.backgroundColor
+										var stroke = label.pointBackgroundColor
+										var bw = label.borderColor
+										return {
+										// And finally : 
+											text: label['label'] + ' шт.',
+											fillStyle: fill,
+											strokeStyle: stroke,
+											lineWidth: bw,
+											datasetIndex: i,
+											index: i,
+											lineCap: "butt",
+											lineDash: [],
+											lineDashOffset: 2,
+											lineJoin: "miter",
+											lineWidth: 1,
+											borderRadius: 10,
+											hidden: chart.isDatasetVisible(i) ? false : true,
+											pointStyle: 'rectRot'
+
+										};
+									});
+								}
+								return [];
+							},
+							usePointStyle: true,
+						},
+					onClick: function(e, legendItem, legend) {
+							const index = legendItem.datasetIndex;
+							const ci = legend.chart;
+							console.log(ci);
+							console.log(legendItem);
+
+							if (ci.isDatasetVisible(index)) {
+								ci.hide(index);
+								legendItem.hidden = true;
+								legendItem.backgroundColor = '#000'
+							} else {
+								ci.show(index);
+								legendItem.hidden = false;
+							}
+							console.log(legendItem);
+						}
+					},
+ 
+				},
+				interaction: {
+					intersect: false,
+					mode: 'index',
+				},
+
+				scales: {
+					y: {
+						grid: {
+							drawBorder: false,
+							display: true,
+							drawOnChartArea: true,
+							drawTicks: false,
+							borderDash: [5, 5]
+						},
+						ticks: {
+							display: true,
+							padding: 10,
+							color: '#b2b9bf',
+							font: {
+								size: 11,
+								family: "Open Sans",
+								style: 'normal',
+								lineHeight: 2
+							},
+							callback: function(value, index, ticks) {
+								console.log(`value = ${value}, index = ${index}, tricks = `, ticks);
+								return reverseString(reverseString(String(value)).replace(/000/g, 'к')).replace(/([0-9])([0-9])00/, `$1.$2к`);
+							}
+						}
+					},
+					x: {
+						grid: {
+							drawBorder: false,
+							display: true,
+							drawOnChartArea: true,
+							drawTicks: true,
+							borderDash: [5, 5]
+						},
+						ticks: {
+							display: true,
+							color: '#b2b9bf',
+							padding: 10,
+							font: {
+								size: 11,
+								family: "Open Sans",
+								style: 'normal',
+								lineHeight: 2
+							},
+						}
+					},
+				},
+			},
+		});
+	</script>
+	<!-- Checkbox change -->
+	<script>
+		$('#rub').change(function() {
+			console.log(this.checked)
+			const rub = $('.checkbox.rub')
+			const count = $('.checkbox.count')
+			const titleSwitch = $('.title-switch')
+			const mixedChart = $('#rub-chart')
+			const mixedChart1 = $('#num-chart')
+
+
+			if (this.checked) {
+				rub.removeClass('checked')
+				count.addClass('checked')
+				titleSwitch.addClass('checked')
+				mixedChart.removeClass('show active')
+				mixedChart1.addClass('show active')
+			}
+			else {
+				rub.addClass('checked')
+				count.removeClass('checked')
+				titleSwitch.removeClass('checked')
+				mixedChart.addClass('show active')
+				mixedChart1.removeClass('show active')
+			}
+		})
+	</script>
+	
+	<!-- DatePicker | func getDates | func formatDate -->
+	<script src="{% static 'js/data-range-initialize.js' %}"></script>
+
+	<!-- filter data collection  -->
+	<script>
+		function collData() {
+			var dates = $("#date-range").val().split('-')
+			var date_start_raw = dates[0].trim().split('.').reverse().join('-')
+			var date_end_raw = dates[1].trim().split('.').reverse().join('-')
+
+			return {
+				"buyouts": $("#buyouts").prop('checked'),
+				"date-range": {"date-start": date_start_raw, "date-end": date_end_raw},
+				"brands": selBrands.dataChecked,
+				'api': selApi.dataChecked
+			}
+
+		}
+	</script>
+	<!-- Func change all data -->
+	<script src="https://cdn.jsdelivr.net/lodash/4.17.4/lodash.min.js"></script>
+	<script>
+		var dataChange = {
+			"charts": {
+				"chart1": {
+					"salesData": [124, 413, 5432 ,52],
+					"ordersData": [124, 413, 5432 ,52],
+					"profitData": [124, 413, 5432 ,52],
+					"labels": ['12 окт.', '13 окт.', '14 окт.', '15 окт.']
+				},
+				"chart2": {
+					"ordersData": [124, 413, 5432 ,52],
+					"profitData": [124, 413, 5432 ,52],
+					"labels": ['12 окт.', '13 окт.', '14 окт.', '15 окт.']
+				},
+			},
+			"table": {
+				"data": [{"image": "/static/images/%D0%BF%D0%BE%D0%BA%D0%B5%D0%BC%D0%BE%D0%BD1.png", "barcode": 1254236345, "brand": 'bla bla', "size": 0, "position": 4523, "skuVn": 2154326, "sku": 12532532, "orders": 5, "ordersSum": 765478, "selling": 14321, "sellingSum": 125325, "cost": 4132, "profit": 4324, "logistics": 6363, "commission": 43252, "ransom": 25, "roi":63}]
+			},
+			"grid": {
+				"numbers": {
+					"avCheck1": 1,
+					"buyouts1": 1,
+					"buyouts2": 1,
+					"com&pen1": 1,
+					"com&pen2": 1,
+					"cost1": 1,
+					"logistics1": 1,
+					"logistics2": 1,
+					"orders1": 1,
+					"orders2": 1,
+					"profit1": 1,
+					"profitability1": 1,
+					"redemption1": 1,
+					"refunds1": 1,
+					"refunds2": 1,
+					"roi1": 1,
+					"sale1": 1,
+					"sale2": 1
+				},
+				"difference": {
+					"avCheckDif1": 1,
+					"buyoutsDif1": 1,
+					"buyoutsDif2": 1,
+					"com&penDif1": 1,
+					"com&penDif2": 1,
+					"costDif1": 1,
+					"logisticsDif1": 1,
+					"logisticsDif2": 1,
+					"ordersDif1": 1,
+					"ordersDif2": 1,
+					"profitDif1": 1,
+					"profitabilityDif1": 1,
+					"redemptionDif1": 1,
+					"refundsDif1": 1,
+					"refundsDif2": 1,
+					"roiDif1": 1,
+					"saleDif1": 1,
+					"saleDif2": 1
+				}
+			}
+		}
+		function changeData(dataa) {
+			var allNumbersId = $(".indicator-numbers").map((id, el) => {
+				console.log($(el).attr("id"));
+				dataChange.grid.numbers[$(el).attr("id")] = 1
+				return $(el).attr("id")
+			})
+			var allDiffrenceId = $(".indicator-diffrence").map((id, el) => {
+				console.log($(el).attr("id"));
+				dataChange.grid.difference[$(el).attr("id")] = 1
+				return $(el).attr("id")
+			})
+			console.log(allNumbersId, allDiffrenceId);
+
+			chart1.data.datasets.map(el => {
+				el.data = _.shuffle(_.range(1,111001)).slice(0,chart1.data.labels.length) // temporary data
+			})
+			chart1.update()
+			chart2.data.datasets.map(el => {
+				el.data = _.shuffle(_.range(1,111001)).slice(0,chart2.data.labels.length) // temporary data
+			})
+			chart2.update()
+			// gridOptions.api.setRowData() // this change data on table
+		}
+
+	</script>
+	<!-- Send data -->
+	<script>
+		function sendData(data) {
+			console.log({data, 'csrfmiddlewaretoken': '{{ csrf_token }}'});
+			// $.ajax({
+			// 	type: "POST",
+			// 	data: {data, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+			// 	url: '',
+			// 	success: data => {
+			// 		console.log(dates)
+			// 	}
+			// })
+		}
+	</script>
+	<!-- Select with checkbox || filters brands and api -->
+	<script>
+		var selBrands = $('.checkselect.brands').checkselect(['брендов', 'бренды'], {allChecked: true,});
+		var selApi = $('.checkselect.api').checkselect(['API', 'API'], {allChecked: true,});
+
+	</script>
+	<!-- Events for send -->
+	<script>
+		$('#date-range').on("apply.daterangepicker", (ev, picker) => {
+			sendData(collData())
+		})
+		selBrands.on('checkselect:close', event => {
+			if (JSON.stringify(event.detail.temporaryData) != JSON.stringify(event.detail.dataChecked)) {
+				sendData(collData())
+			}
+			
+		})
+		selApi.on('checkselect:close', event => {
+			if (JSON.stringify(event.detail.temporaryData) != JSON.stringify(event.detail.dataChecked)) {
+				sendData(collData())
+			}
+		})
+		$("#buyouts").on('change', event => {
+			sendData(collData())
+		})
+	</script>
+{% endblock javascripts %}

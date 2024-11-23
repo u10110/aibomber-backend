@@ -1,0 +1,160 @@
+{% extends 'layouts/base.html' %} {% load static %} {% block title %} Ecommerce
+Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<style>
+  .seo-group {
+    max-width: 80%;
+    margin: 0 auto;
+  }
+  @media (max-width: 950px) {
+    .seo-group {
+      max-width: 100%;
+    }
+  }
+  .seo-group__title {
+    font-size: 1.5em;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .seo-group__fields {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+  }
+  .seo-group__groupA,
+  .seo-group__groupB {
+    width: 100%;
+  }
+  .seo-group__groupA textarea,
+  .seo-group__groupB textarea {
+    height: 130px;
+  }
+  .seo-group__tip {
+    font-size: 0.75em;
+    color: #a6a784;
+    margin-top: 10px;
+  }
+  .seo-group__button {
+    margin-top: 20px;
+    text-align: center;
+  }
+  .seo-group__button button {
+    margin: 0;
+  }
+  .example {
+		border-bottom: 1px dashed #344767;
+		cursor: pointer;
+	}
+	.example:hover {
+		border-bottom: none;
+	}
+</style>
+
+{% endblock stylesheets %} {% block body_class %} g-sidenav-show bg-gray-100 {% endblock %} {% block content %}
+
+<div class="container-fluid py-4">
+  <div class="seo-group" style="padding-bottom: 50px">
+    <div class="card">
+      <div class="card-body">
+        <div class="seo-group__header">
+          <div class="seo-group__title">
+            Проверка пересечений ключевых фраз между группами SKU
+          </div>
+          <div class="seo-group__sub-title">
+            Быстрый способ наглядно увидеть сходства и различия между множеством
+            ключевых фраз в группах SKU
+          </div>
+        </div>
+        <form action="/seo-group-result/" method="post">
+			  {% csrf_token %}
+          <div class="seo-group__fields mt-5">
+            <div class="seo-group__groupA">
+              <label for="groupA" class="seo-group__groupA_title"
+                >Группа A</label
+              >
+              <div class="seo-group__groupA_field seo-group__field">
+                <textarea
+                  name="groupA"
+                  id="groupA"
+                  class="form-control seo-group__field_textarea"
+                  required
+                ></textarea>
+              </div>
+            </div>
+            <div class="seo-group__groupB">
+              <label for="groupB" class="seo-group__groupB_title"
+                >Группа B</label
+              >
+              <div class="seo-group__groupB_field seo-group__field">
+                <textarea
+                  name="groupB"
+                  id="groupB"
+                  class="form-control seo-group__field_textarea"
+                  required
+                ></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="mt-1 mb-2">
+							Введите <span class="example" id="link-example" data-example_a="https://www.wildberries.ru/catalog/6541734/detail.aspx\nhttps://www.wildberries.ru/catalog/48423214/detail.aspx\nhttps://www.wildberries.ru/catalog/27888035/detail.aspx\nhttps://www.wildberries.ru/catalog/17414722/detail.aspx\nhttps://www.wildberries.ru/catalog/47406504/detail.aspx\nhttps://www.wildberries.ru/catalog/12243309/detail.aspx\nhttps://www.wildberries.ru/catalog/45411050/detail.aspx\nhttps://www.wildberries.ru/catalog/32840623/detail.aspx" data-example_b="https://www.wildberries.ru/catalog/50681401/detail.aspx\nhttps://www.wildberries.ru/catalog/15619842/detail.aspx\nhttps://www.wildberries.ru/catalog/14722393/detail.aspx\nhttps://www.wildberries.ru/catalog/42280248/detail.aspx\nhttps://www.wildberries.ru/catalog/17922594/detail.aspx\nhttps://www.wildberries.ru/catalog/10410915/detail.aspx\nhttps://www.wildberries.ru/catalog/21647114/detail.aspx\nhttps://www.wildberries.ru/catalog/4430217/detail.aspx">ссылки на товарные позиции WB</span> или их <span class="example" id="sku-example" data-example_a='6541734\n48423214\n27888035\n17414722\n47406504\n12243309\n45411050\n32840623' data-example_b='50681401\n15619842\n14722393\n42280248\n17922594\n10410915\n21647114\n4430217'>SKU</span>.
+						</div>
+          <div class="seo-group__tip" style="margin-top: -5px">
+            * поддерживается разделение через запятую, пробел и новую строку.
+          </div>
+          <div class="seo-group__button">
+            <button type="submit"
+              class="btn btn-primary bg-gradient-primary"
+              id="checkGroups"
+            >
+              Проверить
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+
+<script>
+  if (!String.prototype.startsWith) {
+    // Если нету метода startsWith, мы его создаём.
+    Object.defineProperty(String.prototype, "startsWith", {
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: function (searchString, position) {
+        position = position || 0;
+        return this.indexOf(searchString, position) === position;
+      },
+    });
+  }
+  $("#link-example, #sku-example").on('click', e => {
+    $('#groupA').val(e.target.dataset.example_a.replace(/\\n/g,"\n"));
+    $('#groupB').val(e.target.dataset.example_b.replace(/\\n/g,"\n"));
+  })
+  $('form').submit( e => {
+    var groupA = $("#groupA").val($("#groupA").val().split(/[\s\n,]+/).filter(el => el != '').map(el => {
+      if (el.startsWith('http') || el.startsWith('www.') || el.startsWith("wildberries")) {
+        return el.match(/catalog\/(\d+)\//)[1]
+      } else {
+        return el
+      } 
+    }).join('\n'))
+    var groupB = $("#groupB").val($("#groupB").val().split(/[\s\n,]+/).filter(el => el != '').map(el => {
+      if (el.startsWith('http') || el.startsWith('www.') || el.startsWith("wildberries")) {
+        return el.match(/catalog\/(\d+)\//)[1]
+      } else {
+        return el
+      } 
+    }).join('\n'))
+  })
+</script>
+{% endblock javascripts %}

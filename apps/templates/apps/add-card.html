@@ -1,0 +1,543 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load limits_bar %}
+
+{% block title %} Ecommerce Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<style>
+	.raz::-webkit-inner-spin-button { 
+		display: none;
+	}
+	.nounderline{
+		text-decoration: none !important;
+	}
+	.frame_blc{
+		overflow:hidden;
+		position:relative;
+		padding-bottom:56.25%;
+		padding-top:30px;
+		height:0;
+		margin-top: 10%;
+	}
+	.frame_blc iframe {
+		position:absolute;
+		height:80%;
+		width:100%;
+		left:0;
+		top:0;
+	}
+	.custom-active {
+		background-color: #fff;
+		border-radius: 0.5rem;
+		box-shadow: 0px 1px 5px 1px #ddd;
+	}
+</style>
+
+<link rel='stylesheet' href="{% static 'css/add-card-style.css' %}"></link>
+
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+	<div class="col-12 card">
+		<div class='m-4'>
+			<h5>Карты </h5>
+			<p class="text-sm mb-0">В данном разделе вы можете добавить карты для использования метода “Автооплата“ в  выкупах группы.</p>
+		</div>
+	</div>
+
+	<div class="row mt-4">
+		<div class="col-lg-5">
+			<div class="card mb-4">
+				<div class="card-body">
+					
+					<h5 class="font-weight-bolder">Добавить новую карту для оплаты</h5>
+					<p class="text-sm mb-0">Вы можете добавить карты банков Тинькофф, Qiwi, Точка, Альфа и Сбер</p>
+					<form action="/add-card/" method="post">
+						<div class="col-12 mt-3">
+								{% csrf_token %}
+										</div>
+										<div class="card-body">
+												<div class="row">
+												<div class="col-auto">
+														<label>Номер карты</label>
+														<input placeholder="0000 0000 0000 0000" id="number" name="number" class="form-control raz" type="text" inputmode="numeric" maxlength="19" minlength="13" />
+												</div>
+												</div>
+												<div class="row">
+												<div class="col-4 col-sm-3 col-md-4">
+														<label class="mt-4">Месяц</label>
+														<input placeholder="ММ" id="month" name="month" class="form-control raz col-auto" type="text" inputmode="numeric" pattern="^0[1-9]|1[0-2]$" maxlength="2" minlength="2"/>
+												</div>
+												<div class="col-4 col-sm-3 col-md-4">
+														<label class="mt-4">Год</label>
+														<input placeholder="ГГ" id="year" name="year"  class="form-control raz" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" minlength="2"  />
+												</div>
+												<div class="col-4 col-sm-3 col-md-4">
+														<label class="mt-4">CVC</label>
+														<input placeholder="CVV/CVC" id="cvc" name="cvc"  class="form-control raz" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" minlength="3"  />
+												</div>
+												</div>
+										</div>
+								<div class="row">
+								</div>
+								<div class="d-flex justify-content-end mt-4">
+									<button  type="submit"  class="btn bg-gradient-primary m-0 ms-2" >Добавить</button>
+								</div>
+					</form>
+				</div>
+			</div>
+			<div class="col-lg-12 col-12 mt-4 mt-lg-0">
+				<div class="card h-100">
+					<!-- <div class="card-header pb-0 p-3">
+						<h6 class="mb-0">{% comment %} Выберете с {% endcomment %}Способ перехвата смс</h6>
+						<ul class="nav nav-fill nav-custom p-1">
+							<li class="nav-item col-12 col-sm-3">
+								<a class="nav-link mb-0 px-0 py-1   custom-active  " href="#" role="tab" aria-selected="true" id='app'>
+									Точка Банк
+								</a>
+							</li>
+							<li class="nav-item col-12 col-sm-3">
+								<a class="collapse show nav-link mb-0 px-0 py-1 " href="#" role="tab" aria-selected="false" id='tg'>
+									Telegram Bot
+								</a>
+							</li>
+						</ul>
+					</div> -->
+					<div class="nav-wrapper position-relative z-index-2 w-90 mx-auto mt-2">
+						<ul class="nav nav-pills nav-fill flex-row p-1" id="methodPay" role="tablist">
+							<li class="nav-item">
+									Telegram Bot
+								</a>
+							</li>
+						</ul>
+					</div>
+					<div class="tab-content" id="myTabContent">
+						<div class="tab-pane fade show active " id="telegramPay" role="tabpanel" aria-labelledby="telegramPay">
+							<div class="block-tg">
+								{% get_tg_token request.user as tg_token %}
+								{% comment %} Telegram API Token: {{ tg_token }} {% endcomment %}
+								<div class="card-header pb-0 p-3">
+									<h6 class="mb-0">Перехват смс через Telegram </h6>
+								</div>
+								
+								<br>
+								<div class="card-footer pt-0 p-3 align-items-center">
+									<label>Ваш Telegram API Token:</label>
+									<label>{{ tg_token }}</label>
+								</div>
+								<div class="card-footer pt-0 p-3 align-items-center">
+									{% is_tg_active request.user as tg_active %}
+									<label>
+										Статус: 
+											{% if tg_active %}
+												<span class='text-success'>Активирован</span>
+											{% else %}
+												<span class="text-danger">Не активирован</span> 
+											{% endif %}
+									</label>
+								</div>
+								
+								
+								<div class="card-footer pt-0 p-3 d-flex align-items-center">
+									<div class="w-60">
+										<p class="text-sm">
+											Для использования автооплаты TelegramСБП и получения уведомлении об оплате товара, необходимо перейти в телеграм бот <a href="https://t.me/mplabio_bot" target="_blank">https://t.me/mplabio_bot</a>
+										</p>
+										{% comment %} <p class="text-sm">
+											Инструкцию по добавлению карт и настройке приложения вы можете найти в документации среди пунктов меню.
+										</p> {% endcomment %}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-7">
+			<div class="col-12">
+				<div class="card mb-4">
+					<!-- Card header -->
+					<div class="card-header pb-0">
+						<div class="d-xl-flex">
+							<div class='col-xl-6'>
+								<h5 class="mb-0">Добавленные карты</h5>
+								<p class="text-sm mb-0">
+									Здесь отображаются карты с которых будут совершаться выкупы.
+								</p>
+							</div>
+							<div class="ms-auto my-auto mt-lg-0 mt-4">
+								<div class="ms-auto my-auto">
+									
+									</button>
+								
+									<button class="btn btn-outline-primary btn-sm export mb-0 mt-sm-0 mt-1" data-type="csv" type="button" name="button">Экспорт</button>
+									<button id='guide' class="btn border border-dark btn-sm mb-0 mt-sm-0 mt-1 " type="button" name="button"><i class="fa fa-play m-1 mw-5 d-inline-block" aria-hidden="true"></i>Инструкция</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="card-body px-0 pb-0">
+						<div class="table-responsive">
+							<table class="table table-flush" id="products-list">
+								<thead class="thead-light">
+									<tr>
+										<th>Номер карты</th>
+										<th>Месяц</th>
+										<th>Год</th>
+										<th>Статус</th>
+										{% comment %} <th>CVC</th> {% endcomment %}
+									</tr>
+								</thead>
+								<tbody>
+									{% for object in objects%}
+									<tr>
+										<td class="text-sm">{{object.number}}</td>
+										<td class="text-sm">{{object.month}}</td>
+										<td class="text-sm">{{object.year}}</td>
+										<td class="text-sm">
+											{% if object.status == 'active' or object.status == 'work' %}
+												<span class="badge badge-success">Активная карта</span>
+											{% else %}
+												<span class="badge badge-danger">Карта заблокирована</span>
+											{% endif %}
+										</td>
+										<td class="text-sm">
+												</a>
+												<a href="{% url 'card-delete' object.id %}" data-bs-toggle="tooltip" data-bs-original-title="Удалить">
+													<i class="fas fa-trash text-secondary"></i>
+												</a>
+											</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+								<tfoot>
+									<tr>
+										<th>Продукт</th>
+										<th>Дата</th>
+										<th>Цена</th>
+										<th>SKU</th>
+										<th>Количество</th>
+										<th>Action</th>
+									</tr>
+								</tfoot>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			{% comment %}
+			<!-- YOOMONEY -->
+			<div class="col-lg-12 col-12 mt-4 mt-lg-0">
+				<div class="card h-100">
+					<div class="card-header">
+						<h3 class="yoomoney-title">YooMoney <img class='new-style' src="{% static 'images/new.png' %}" alt=""></h3>
+						<p class="yoomoney-subtitle">
+							Привяжите кошелёк и оплачивайте выкупы автоматически.
+						</p>
+					</div>
+					<div class="card-body">
+						<div class="yoomoney-wallets">
+							<div class="yoomoney-wallet" data-id=1>
+								<div class="yoomoney-wallet__header">
+									<h5>Кошелёк № <span class="yoomoney-id">1</span></h5>
+									<a onclick='deleteWallet(1)' data-bs-toggle="tooltip" data-bs-original-title="Удалить кошелёк">
+										<i class="fas fa-trash"></i>
+									</a>
+								</div>
+								<div class="yoomoney-wallet__body">
+									<div class="yoomoney-wallet__name">
+										Имя: <span class="yoomoney-name yoomoney-values" data-id=1>Безымянный</span>
+									</div>
+									<div class="yoomoney-wallet__number">
+										Номер: <span class="yoomoney-number yoomoney-values" data-id=1>543543324423452</span>
+									</div>
+									<hr>
+									<div class="yoomoney-wallet__type">
+										Статус: <span class="yoomoney-type yoomoney-values" data-id=1>Анонимный</span>
+									</div>
+									<div class="yoomoney-wallet__limits">
+										Лимит: <span class="yoomoney-values"><span class="yoomoney-limits__current" data-id=1>0</span> ₽ / <span class="yoomoney-limits__from" data-id=1>15000</span> ₽</span>
+									</div>
+									<hr>
+								</div>
+								<div class="yoomoney-wallet__footer">
+									<div class="yoomoney-wallet__balance d-flex justify-content-center py-3">
+										<h5 class="yoomoney-balance" data-id=1>323 </h5> ₽
+									</div>
+								</div>
+							</div>
+							<div class="yoomoney-wallet add-wallet">
+								<div class="add-wallet-wrapper">
+									<div class="yoomoney-wallet__body">
+										<div class="d-flex justify-content-center align-items-center flex-column" style="height: 100%;">
+											<span class="add-wallet__text">
+												Добавить кошелёк
+											</span>
+											<span class="add-wallet__icon"><svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><rect height="256" width="256"/><circle cx="128" cy="128" r="96"/><circle cx="128" cy="128" r="96" stroke-miterlimit="10" stroke-width="16"/><line stroke-linecap="round" stroke-linejoin="round" stroke-width="16" x1="88" x2="168" y1="128" y2="128"/><line stroke-linecap="round" stroke-linejoin="round" stroke-width="16" x1="128" x2="128" y1="88" y2="168"/></svg></span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- YOOMONEY -->
+			{% endcomment %}
+		</div>
+
+	</div>
+	
+</div>
+<div id="myModal" class="modal">
+
+	<!-- Modal content -->
+	<div class="modal-content d-block">
+		<h5>Добавить кошелёк</h5>
+		<p class="modal-p p-hint">Введите телефон и почту:</p>
+		<input type="text" class="form-control" placeholder="Телефон или почта">
+		<p class="modal-p" style="margin-top: 5px;"><svg id="modal-svgLock" viewBox="0 0 512 512"><path d="M256 0c4.6 0 9.2 1 13.4 2.9L457.7 82.8c22 9.3 38.4 31 38.3 57.2c-.5 99.2-41.3 280.7-213.7 363.2c-16.7 8-36.1 8-52.8 0C57.3 420.7 16.5 239.2 16 140c-.1-26.2 16.3-47.9 38.3-57.2L242.7 2.9C246.8 1 251.4 0 256 0zm0 66.8V444.8C394 378 431.1 230.1 432 141.4L256 66.8l0 0z"/></svg>  Гарантируем безопасность ваших данных</p>
+		<div class="modal-btnDiv">
+			<button class="btn btn-outline-danger close">Закрыть</button>
+			<button class="btn btn-info next-btn">Дальше</button>
+		</div>
+	</div>
+
+</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+<script src="/static/assets/js/jquery.js"></script>
+<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+<script>
+
+	var cc = document.querySelectorAll('#number')[0],
+		events  = ['input', 'change', 'blur', 'keyup'];
+		for (var i in events) {
+				cc.addEventListener(events[i], formatCardCode, false);
+		}
+		function formatCardCode() {
+				var cardCode = this.value.replace(/[^\d]/g, '').substring(0,16);
+				cardCode = cardCode !== '' ? cardCode.match(/.{1,4}/g).join(' ') : '';
+				this.value = cardCode;
+		}
+
+
+	$('#guide').click(function(){
+		Swal.fire({
+			{% comment %} title: '<strong>HTML <u>example</u></strong>', {% endcomment %}
+			html:
+				'<div class="frame_blc"><iframe src="https://www.youtube.com/embed/ZTwQWJs1BRI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>',
+			showCloseButton: true,
+			showCancelButton: false,
+			focusConfirm: false,
+			showConfirmButton: false,
+			width: '50%',
+		})
+	})
+	$('#guide1').click(function(){
+		Swal.fire({
+			{% comment %} title: '<strong>HTML <u>example</u></strong>', {% endcomment %}
+			html:
+				'<div class="frame_blc"><iframe src="https://www.youtube.com/embed/qMh-C6PyyIw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>',
+			showCloseButton: true,
+			showCancelButton: false,
+			focusConfirm: false,
+			showConfirmButton: false,
+			width: '50%',
+		})
+	})
+		if ("{{error}}" == "True"){
+			Swal.fire('{{ error_message }}');
+			}
+	</script>
+	<script src="/static/assets/js/datatables.js"></script>
+	<script>
+		if (document.getElementById('products-list')) {
+			const dataTableSearch = new simpleDatatables.DataTable("#products-list", {
+				searchable: true,
+				fixedHeight: false,
+				perPage: 7
+			});
+
+			document.querySelectorAll(".export").forEach(function(el) {
+				el.addEventListener("click", function(e) {
+					var type = el.dataset.type;
+
+					var data = {
+						type: type,
+						filename: "soft-ui-" + type,
+					};
+
+					if (type === "csv") {
+						data.columnDelimiter = "|";
+					}
+
+					dataTableSearch.export(data);
+				});
+			});
+		};
+	</script>
+
+	{% comment %}
+	<!-- YOOMONEY -->
+	<script>
+
+		function addWallet(walletId = 0, walletName = '', walletNumber = 0, walletType = '', walletLimits = [0, 0], walletBalance = 0) {
+			let template = $(`<div class="yoomoney-wallet" data-id=${walletId}>
+											<div class="yoomoney-wallet__header">
+												<h5>Кошелёк № <span class="yoomoney-id">${walletId}</span></h5>
+												<a onclick='deleteWallet(${walletId})' data-bs-toggle="tooltip" data-bs-original-title="Удалить кошелёк">
+													<i class="fas fa-trash"></i>
+												</a>
+											</div>
+											<div class="yoomoney-wallet__body">
+												<div class="yoomoney-wallet__name">
+													Имя: <span class="yoomoney-name yoomoney-values" data-id=${walletId}>${walletName}</span>
+												</div>
+												<div class="yoomoney-wallet__number">
+													Номер: <span class="yoomoney-number yoomoney-values" data-id=${walletId}>${walletNumber}</span>
+												</div>
+												<hr>
+												<div class="yoomoney-wallet__type">
+													Статус: <span class="yoomoney-type yoomoney-values" data-id=${walletId}>${walletType}</span>
+												</div>
+												<div class="yoomoney-wallet__limits">
+													Лимит: <span class="yoomoney-values"><span class="yoomoney-limits__current" data-id=${walletId}>${walletLimits[0]}</span> ₽ / <span class="yoomoney-limits__from" data-id=${walletId}>${walletLimits[1]}</span> ₽</span>
+												</div>
+												<hr>
+											</div>
+											<div class="yoomoney-wallet__footer">
+												<div class="yoomoney-wallet__balance d-flex justify-content-center py-3">
+													<h5 class="yoomoney-balance" data-id=${walletId}>${walletBalance} </h5> ₽
+												</div>
+											</div>
+										</div>`)
+			$(".yoomoney-wallet.add-wallet").before(template)
+			var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+			var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+				return new bootstrap.Tooltip(tooltipTriggerEl)
+			})
+		}
+		function deleteWallet(walletId) {
+			Swal.fire({
+				icon: 'warning',
+				title: `Вы действительно хотите удалить кошелёк номер ${walletId}?`,
+				showCloseButton: true,
+				confirmButtonText: 'Удалить',
+			}).then((result) => {
+
+				if (result.isConfirmed) {
+					$(`.yoomoney-wallet[data-id=${walletId}]`).remove()
+				}
+
+			})
+		}
+	</script>
+	
+<!-- Modal window to add wallet -->
+<script>
+	const WRONGMAIL = 'wrongMail'
+	const PASSWORD = 'password'
+	const CONFIRMATION = 'confirmation'
+
+	function openModal() {
+		$('#myModal').css('display', 'block')
+	}
+	$(".yoomoney-wallet.add-wallet").on('click', openModal)
+
+	function setModalState(state) {
+		const modalContent = $('.modal-content')
+		const modalInput = $('.modal-content input')
+
+		modalContent.addClass('changingStatus')
+		
+		if (state === "mail") {
+			setTimeout(() => {
+				$('#pError').remove()
+				$('.p-hint').text('Введите телефон и почту:')
+				modalInput.attr('placeholder', 'Телефон или почта')
+				modalInput.attr('type', 'text')
+				modalInput.val('')
+			}, 250)
+			setTimeout(() => {
+				modalContent.removeClass('changingStatus')
+			}, 500)
+		} else if (state === 'wrongMail') {
+			setTimeout(() => {
+				if (!$('#pError').length) modalInput.before('<p id="pError">Аккаунт с такой почтой или номер телефона не найден.</p>')
+			}, 250)
+			setTimeout(() => {
+				modalContent.removeClass('changingStatus')
+			}, 500)
+		}
+		else if (state === 'password') {
+			setTimeout(() => {
+				$('#pError').remove()
+				$('.p-hint').text('Введите пароль:')
+				modalInput.attr('placeholder', 'Пароль')
+				modalInput.attr('type', 'password')
+				modalInput.val('')
+			}, 250)
+			setTimeout(() => {
+				modalContent.removeClass('changingStatus')
+			}, 500)
+		}
+		else if (state === 'confirmation') {
+			setTimeout(() => {
+				$('.p-hint').text('Введите код подтверждения:')
+				modalInput.attr('placeholder', 'Код подтверждения')
+				modalInput.attr('type', 'text')
+				modalInput.val('')
+			}, 250)
+			setTimeout(() => {
+				modalContent.removeClass('changingStatus')
+			}, 500)
+
+		}
+	}
+
+	function btnLoading(bool) {
+		const btn = $('.next-btn')
+		if (bool) {
+			btn.attr('disabled', true).css('color', '#fefefe')
+			btn.append( '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="check-refresh"><path d="M256 0c-17.7 0-32 14.3-32 32s14.3 32 32 32V0zM422.3 352c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7L422.3 352zM256 64c106 0 192 86 192 192h64C512 114.6 397.4 0 256 0V64zM448 256c0 35-9.4 67.8-25.7 96L477.7 384c21.8-37.7 34.3-81.5 34.3-128H448z"></path></svg>')
+		}
+		else {
+			$('.next-btn').attr('disabled', false)
+			$('.check-refresh').remove()
+		}
+	}
+
+	$('.next-btn').on('click', () => {
+		btnLoading(true)
+	})
+
+	$('#myModal .close').click(function() {
+		setModalState('mail')
+		$('#myModal').css('display', 'none')
+	})
+
+	
+	document.querySelector('.modal-content').addEventListener('click', event => {
+		event.stopPropagation()
+	})
+	$('#myModal').click(function() {
+		$('#myModal .close').addClass('animate')
+		setTimeout(() => $('#myModal .close').removeClass('animate'), 750)
+	})
+</script>
+	<!-- YOOMONEY -->
+	{% endcomment %}
+
+{% endblock javascripts %}

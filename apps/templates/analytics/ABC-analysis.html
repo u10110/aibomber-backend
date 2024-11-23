@@ -1,0 +1,623 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} ABC Анализ {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<script src="https://unpkg.com/ag-grid-enterprise/dist/ag-grid-enterprise.min.noStyle.js"></script>
+
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+
+ <link rel="stylesheet"
+	 href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/>
+<link rel="stylesheet"
+	 href="https://unpkg.com/ag-grid-community/styles/ag-theme-material.css"/>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<link rel="stylesheet" href="{% static 'analytics/css/ABC-analysis-style.css' %}">
+
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+	<div class="container-fluid py-4">
+		<div class="card mb-4">
+			<div class="card-body">
+				<div class="filters">
+					<div class="filters-item">
+						<div class="form-check form-switch">
+							<input class="form-check-input mt-2" type="checkbox" id="buyouts" name="buyouts" value="0">
+							<label class="form-check-label" for="buyouts" style="transform: translate(0, 5px)">
+								<h6>
+									Самовыкупы
+								</h6>
+							</label>
+						</div>
+					</div>
+					<div class="filters-item">
+						<div class="d-flex position-relative"><input type="text" class="form-control" id="date-range"><svg xmlns="http://www.w3.org/2000/svg" onclick="$('#date-range').click()" style="width: 20px;position: absolute;right: 7px;top: 9px;cursor: pointer;" viewBox="0 0 448 512"><path fill="#848ea3" d="M160 32V64H288V32C288 14.33 302.3 0 320 0C337.7 0 352 14.33 352 32V64H400C426.5 64 448 85.49 448 112V160H0V112C0 85.49 21.49 64 48 64H96V32C96 14.33 110.3 0 128 0C145.7 0 160 14.33 160 32zM0 192H448V464C448 490.5 426.5 512 400 512H48C21.49 512 0 490.5 0 464V192zM64 304C64 312.8 71.16 320 80 320H112C120.8 320 128 312.8 128 304V272C128 263.2 120.8 256 112 256H80C71.16 256 64 263.2 64 272V304zM192 304C192 312.8 199.2 320 208 320H240C248.8 320 256 312.8 256 304V272C256 263.2 248.8 256 240 256H208C199.2 256 192 263.2 192 272V304zM336 256C327.2 256 320 263.2 320 272V304C320 312.8 327.2 320 336 320H368C376.8 320 384 312.8 384 304V272C384 263.2 376.8 256 368 256H336zM64 432C64 440.8 71.16 448 80 448H112C120.8 448 128 440.8 128 432V400C128 391.2 120.8 384 112 384H80C71.16 384 64 391.2 64 400V432zM208 384C199.2 384 192 391.2 192 400V432C192 440.8 199.2 448 208 448H240C248.8 448 256 440.8 256 432V400C256 391.2 248.8 384 240 384H208zM320 432C320 440.8 327.2 448 336 448H368C376.8 448 384 440.8 384 432V400C384 391.2 376.8 384 368 384H336C327.2 384 320 391.2 320 400V432z"/></svg></div>
+					</div>
+					<div class="filter-item">
+						<div class="checkselect brands">
+							<label><input type="checkbox" name="brands[]" value="all"> Всё</label>
+							<label><input type="checkbox" name="brands[]" value="2"> Apple Inc.</label>
+							<label><input type="checkbox" name="brands[]" value="3"> Microsoft</label>
+							<label><input type="checkbox" name="brands[]" value="4"> Facebook</label>
+							<label><input type="checkbox" name="brands[]" value="5"> Amazon</label>
+							<label><input type="checkbox" name="brands[]" value="6"> Verizon</label>
+						</div>
+					</div>
+					<div class="filter-item">
+						<div class="checkselect api">
+							<label><input type="checkbox" name="api[]" value="all"> Всё</label>
+							<label><input type="checkbox" name="api[]" value="2">api1</label>
+							<label><input type="checkbox" name="api[]" value="3">api2</label>
+							<label><input type="checkbox" name="api[]" value="4">api3</label>
+							<label><input type="checkbox" name="api[]" value="5">api4</label>
+							<label><input type="checkbox" name="api[]" value="6">api5</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card mb-4">
+			<div class="card-body">
+				<div class="grid-display">
+					<div class="table-wrapper">
+						<div class="table ag-theme-material" id="table"></div>
+					</div>
+					<div class="chart-wrapper">
+						<div class="chartWrapper">
+							<canvas class="chart" id="chart" width="1200"></canvas>
+						</div>
+						<canvas id="myChartAxis"></canvas>
+					</div>
+					<div class="table-wrapper">
+						<div class="table-2 ag-theme-material" id="table-2"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+	<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+	<script src="/static/assets/js/plugins/chartjs.min.js"></script>
+	<script src="{% static 'js/select-with-checkbox.js' %}"></script>
+	<!-- <script src="/static/assets/js/plugins/moment.js"></script>  -->
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+	<script src="/static/assets/js/plugins/moment-with-locales.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+	
+	<script src="{% static 'assets/js/ag-grid_locale.ru.js' %}"></script>
+	<!-- ConvertColor -->
+	<script>
+		function convertColor(color, maxValue, value) {
+			const colorsArr = color.split(/\D+/)
+			return `rgba(${colorsArr[1]}, ${colorsArr[2]}, ${colorsArr[3]}, ${value / maxValue})`
+		}
+		function convertColorBW(maxValue, value) {
+			let color = value / maxValue * 255 >= 127.5 ? 255 : 0
+			return `rgb(${color}, ${color}, ${color})`
+		}
+	</script>
+	<!-- Table Tooltips --> 
+	<script>
+		class CustomTooltip {
+			init(params) {
+				const eGui = (this.eGui = document.createElement('div'));
+				const color = params.color || '#eee';
+				const data = params.api.getDisplayedRowAtIndex(params.rowIndex).data;
+
+				eGui.classList.add('custom-tooltip');
+				//@ts-ignore
+				eGui.style['background-color'] = color;
+				eGui.style['border-radius'] = '15px'
+				eGui.innerHTML = `
+					<div class='width-custom-tooltip'> <img src="${data.image}" alt="" style='height: 150px'></div>
+				`;
+			}
+
+			getGui() {
+				return this.eGui;
+			}
+		}
+	</script>
+	<!-- Table -->
+	<script>
+		agGrid.LicenseManager.setLicenseKey("CompanyName=MPLAB,LicensedApplication=MPLAB,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=1,LicensedProductionInstancesCount=0,AssetReference=AG-034191,SupportServicesEnd=23_October_2023_[v2]_MTY5ODAxNTYwMDAwMA==3b4ce1e31fc57311e3399877777ff001");
+		function renderDataImg(params) {
+			return params.value ? `<img src="${params.value}" style='height: 100%'>` : '—'
+		}
+		function renderDataNumbers(params) {
+			return params.value == undefined ? '—' : params.value.toLocaleString('ru')
+		}
+		function renderDataPercentage(params) {
+			return params.value == undefined ? '—' : params.value + ' %'
+		}
+		// function cellStyle(params) {
+		// 	let color = ''
+		// 	if (params.value == 1) {
+		// 		color = "rgba(233,249,238,.5)"
+		// 	} else if (params.value == 0) {
+		// 		color = "rgba(229,245,255,.5)"
+		// 	}
+		// 	return {
+		// 		backgroundColor: color,
+		// 	};
+		// }
+		var mainColumn = [
+			{
+				field: 'image',
+				headerName: 'Фото',
+				width: 150,
+				cellRenderer: renderDataImg,
+				// tooltipComponent: CustomTooltip,
+				tooltipField: 'image'
+			},
+			{
+				field: 'sku',
+				width: 120,
+				headerName: 'SKU',
+			},
+			{
+				field: 'barcode', 
+				width: 120, 
+				headerName: 'Штрихкод', 
+			},
+			{
+				field: 'selling',
+				width: 120,
+				headerName: 'Продажи, руб.',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'profit', 
+				headerName: 'Прибыль, руб.',
+				// restricts agg functions to be: `sum`, `min` and `max`
+				cellRenderer: params => {
+					console.log('cellRenderer: ', params)
+					var allDataGroup = params.node.parent.allLeafChildren.map(el => el.data.profit)
+					var allDataGroupMax = Math.max(...allDataGroup)
+					console.log('allDataGroup: ', allDataGroup, params.data.profit, params.data.profit / allDataGroupMax * 100)
+					return `<div style='width: ${params.data.profit / allDataGroupMax * 100}%; background-color: #eee '>${params.data.profit} ₽</div>`
+				}
+			},
+			{
+				field: 'abcSelling',
+				width: 120,
+				headerName: 'ABC - продажи',
+				cellRenderer: renderDataNumbers,
+			},
+			{
+				field: 'abcProfit',
+				width: 120,
+				headerName: 'ABC - прибыль',
+				cellRenderer: renderDataNumbers,
+			},
+		]
+		var columnDefs = [
+			...mainColumn,
+		];
+
+
+
+		function deselect(){
+				gridOptions.api.deselectAll()
+		}
+		const gridOptions = {
+			defaultColDef: {
+				resizable: true,
+				sortable: true,
+				tooltipComponent: CustomTooltip,
+			},
+			animateRows: true,
+			columnDefs: columnDefs,
+			getDetailRowData: params => {
+				params.successCallback(params.data.callRecords);
+			},
+			// debug: true,
+			tooltipShowDelay: 210,
+			tooltipHideDelay: 2000,
+			localeText: AG_GRID_LOCALE_RU,
+			rowData: [{image: "{% static 'images/покемон1.png' %}", barcode: 1254236345, brand: 'bla bla',sku: 12532532, profit: 145321}, {image: "{% static 'images/покемон1.png' %}", barcode: 1254236345, brand: 'bla bla',sku: 12532532, profit: 365633}, {image: "{% static 'images/покемон1.png' %}", barcode: 1254236345, brand: 'bla bla',sku: 12532532, profit: 323421}],
+			// suppressDragLeaveHidesColumns: true,
+			// onFirstDataRendered: onFirstDataRendered,
+		};
+
+		var eGridDiv = document.getElementById("table");
+		var gridPhrases = new agGrid.Grid(eGridDiv, gridOptions);
+
+
+		// table ABC
+
+		var mainColumnABC = [
+			{ 
+				field: 'country',
+				rowGroup: true, 
+				enableRowGroup: true, 
+				hide: true 
+			},
+			{
+				field: 'gold',
+				aggFunc: 'sum',
+				// restricts agg functions to be: `sum`, `min` and `max`
+				cellRenderer: params => {
+					console.log('cellRenderer: ', params)
+					if (params.node.parent.field == 'country') {
+						var allDataGroup = params.node.parent.allLeafChildren.map(el => el.data.gold)
+						var allDataGroupMax = Math.max(...allDataGroup)
+						console.log('allDataGroup: ', allDataGroup, params.data.gold, params.data.gold / allDataGroupMax * 100)
+						return `<div style='width: ${params.data.gold / allDataGroupMax * 100}%; background-color: #eee '>${params.data.gold}</div>`
+					}
+					return params.value
+				}
+			},
+			{ 
+				field: 'silver', 
+				aggFunc: 'sum', 
+				cellRenderer: params => {
+					console.log('cellRenderer: ', params)
+					
+					if (params.node.parent.field == 'country') {
+						var allDataGroup = params.node.parent.allLeafChildren.map(el => el.data.silver)
+						var allDataGroupMax = Math.max(...allDataGroup)
+						console.log('allDataGroup: ', allDataGroup, params.data.silver, params.data.silver / allDataGroupMax * 100)
+						return `<div style='background-color: ${convertColor('rgb(56, 108, 156)', allDataGroupMax, params.data.silver)}; color: ${convertColorBW(allDataGroupMax, params.data.silver)}'>${params.data.silver}</div>`
+					}
+					return params.value
+				}
+			},
+		]
+		var columnDefsABC = [
+			...mainColumnABC,
+		];
+		const gridOptionsABC = {
+			defaultColDef: {
+				flex: 1,
+				sortable: true,
+				resizable: true,
+			},
+			autoGroupColumnDef: {
+				// enabled sorting on Row Group Columns only 
+				sortable: true,
+			},
+			rowHeight: 30,
+			animateRows: true,
+			aggFuncs: {
+				'average': params => {
+					let sum = 0
+					params.values.forEach(value => sum += value)
+
+					return (sum / params.values.length).toFixed(2)
+				}
+			},
+			columnDefs: columnDefsABC,
+			autoGroupColumnDef: {
+				minWidth: 180,
+			},
+			localeText: AG_GRID_LOCALE_RU,
+		};
+			// setup the grid after the page has finished loading
+			var gridDivABC = document.querySelector('#table-2');
+			new agGrid.Grid(gridDivABC, gridOptionsABC);
+
+			fetch('https://www.ag-grid.com/example-assets/olympic-winners.json')
+				.then((response) => response.json())
+					.then((data) => {gridOptionsABC.api.setRowData(data)});
+
+	</script>
+	
+	<!-- Chart || copied from template "charts.html" -->
+	<script>
+		function dataOnParetto(data) {
+			let totalSum = data.reduce((sum, datapoint) => sum + datapoint, 0)
+			
+			let cumulativeSum = (sum => datapoint => sum += datapoint)(0)
+			let cumulativeDatapoints = data.map(cumulativeSum)
+
+			let percentageDatapoints = cumulativeDatapoints.map(value => parseFloat(value / totalSum * 100).toFixed(1))
+			return percentageDatapoints
+		}
+		function reverseString(str) {
+			return str.split("").reverse().join("");
+		}
+		// Mixed chart
+		var ctx7 = document.getElementById("chart").getContext("2d");
+
+		var labels = ["10 сен.", "12 сен.", "14 сен.", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "10 сен.", "12 сен.", "14 сен.", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "10 сен.", "12 сен.", "14 сен.", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+		var dataPoints = [89780, 17900, 37598, 28095, 58950, 25530, 44350, 25433, 58042, 89780, 17900, 37598, 28095, 58950, 25530, 44350, 25433, 58042, 89780, 17900, 37598, 28095, 58950, 25530, 44350, 25433, 58042]
+
+		var totalSum
+
+		var gradientStroke1 = ctx7.createLinearGradient(0, 230, 0, 50);
+
+		gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.4)');
+		gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+		gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)');
+
+		var chart1 = new Chart(ctx7, {
+			data: {
+				labels: labels,
+				datasets: [{
+						type: "line",
+						label: "Паретто продажи",
+						// tension: 0.4,
+						borderWidth: 0,
+						pointRadius: 0,
+						pointBackgroundColor: "#cb0c9f",
+						borderColor: "#cb0c9f",
+						borderWidth: 3,
+						backgroundColor: gradientStroke1,
+						data: dataOnParetto(dataPoints),// [32, 100, 53, 13, 63, 91, 42, 31, 81],
+						// fill: true,
+						yAxisID: 'percentageParetto'
+					},
+					{
+						type: "bar",
+						label: "Продажи",
+						weight: 5,
+						tension: 0.4,
+						borderWidth: 1,
+						pointBackgroundColor: "#039be5",
+						borderColor: "#039be5",
+						backgroundColor: '#039be533',
+						borderRadius: 4,
+						// borderSkipped: false,
+						data: dataPoints,
+						// maxBarThickness: 10,
+						barPercentage: 1,
+						categoryPercentage: 1,
+					},
+				],
+			},
+			options: {
+				 animation: {
+					onComplete: function(animation) {
+						console.log(this);
+
+						var sourceCanvas = this.canvas;
+						var copyWidth = this.scale.xScalePaddingLeft - 5;
+						// the +5 is so that the bottommost y axis label is not clipped off
+						// we could factor this in using measureText if we wanted to be generic
+						var copyHeight = this.scale.endPoint + 5;
+						var targetCtx = document.getElementById("myChartAxis").getContext("2d");
+						targetCtx.canvas.width = copyWidth;
+						targetCtx.drawImage(sourceCanvas, 0, 0, copyWidth, copyHeight, 0, 0, copyWidth, copyHeight);
+					}
+				},
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					tooltip: {
+						callbacks: {
+							label: function(context) {
+								let label = context.dataset.type == 'line' ? 'Процент прибыли с товара' : context.dataset.label || '';
+
+								if (label) {
+									label += ': ';
+								}
+								// console.log(context, context.parsed);
+								if (context.parsed.y !== null && context.dataset.type != 'line') {
+									label += context.parsed.y.toLocaleString('ru') + ' руб.';
+								} else if (context.parsed.y !== null) {
+									label += (context.dataIndex === 0 ? context.dataset.data[context.dataIndex] : (parseFloat(context.dataset.data[context.dataIndex]) - parseFloat(context.dataset.data[context.dataIndex - 1])).toFixed(2)) + '%'
+								}
+								return label;
+							}
+						}
+					},
+					legend: {
+						labels: {
+							generateLabels: function(chart) {
+								var data = chart.data;
+								if (data.labels.length && data.datasets.length) {
+									return data.datasets.map(function(label, i) {
+										var ds = label;
+										var fill = label.backgroundColor
+										var stroke = label.pointBackgroundColor
+										var bw = label.borderColor
+										return {
+										// And finally : 
+											text: label['label'] + ' руб.',
+											fillStyle: fill,
+											strokeStyle: stroke,
+											lineWidth: bw,
+											datasetIndex: i,
+											lineCap: "butt",
+											lineDash: [],
+											lineDashOffset: 2,
+											lineJoin: "miter",
+											lineWidth: 1,
+											hidden: chart.isDatasetVisible(i) ? false : true,
+											pointStyle: 'rectRot'
+										};
+									});
+								}
+								return [];
+							},
+							usePointStyle: true,
+						},
+					onClick: function(e, legendItem, legend) {
+							const index = legendItem.datasetIndex;
+							const ci = legend.chart;
+							console.log(ci);
+							console.log(legendItem);
+
+							if (ci.isDatasetVisible(index)) {
+								ci.hide(index);
+								legendItem.hidden = true;
+								legendItem.backgroundColor = '#000'
+							} else {
+								ci.show(index);
+								legendItem.hidden = false;
+							}
+							console.log(legendItem);
+						}
+					},
+ 
+				},
+				interaction: {
+					intersect: false,
+					mode: 'index',
+				},
+
+				scales: {
+					y: {
+						grid: {
+							drawBorder: false,
+							display: false,
+							beginAtZero: true
+						},
+						ticks: {
+							display: true,
+							padding: 10,
+							color: '#b2b9bf',
+							font: {
+								size: 11,
+								family: "Open Sans",
+								style: 'normal',
+								lineHeight: 2
+							},
+							callback: function(value, index, ticks) {
+								// console.log(value, index, ticks);
+								return reverseString(reverseString(String(value)).replace(/000/g, 'к')).replace(/([0-9])([0-9])00/, `$1.$2к`);
+							}
+						}
+					},
+					percentageParetto: {
+						type: 'linear',
+						position: 'right',
+						min: 0,
+						max: 100,
+						beginAtZero: true,
+						ticks: {
+							color: '#b2b9bf',
+							font: {
+								size: 11,
+								family: "Open Sans",
+								style: 'normal',
+							},
+							callback: function(value, index, ticks) {
+								// console.log(value, index, ticks);
+								return value + '%'
+							}
+						}
+					},
+					x: {
+						grid: {
+							drawBorder: false,
+							display: true,
+							drawOnChartArea: true,
+							drawTicks: true,
+							borderDash: [5, 5]
+						},
+						ticks: {
+							display: true,
+							color: '#b2b9bf',
+							padding: 10,
+							font: {
+								size: 11,
+								family: "Open Sans",
+								style: 'normal',
+								lineHeight: 2
+							},
+						}
+					},
+				},
+			},
+		});
+	</script>
+
+	<!-- DatePicker | func getDates | func formatDate -->
+	<script src="{% static 'js/data-range-initialize.js' %}"></script>
+
+	<!-- filter data collection  -->
+	<script>
+		function collData() {
+			var dates = $("#date-range").val().split('-')
+			var date_start_raw = dates[0].trim().split('.').reverse().join('-')
+			var date_end_raw = dates[1].trim().split('.').reverse().join('-')
+
+			return {
+				// "buyouts": $("#buyouts").prop('checked'),
+				"date-range": {"date-start": date_start_raw, "date-end": date_end_raw},
+				"brands": selBrands.dataChecked,
+				'api': selApi.dataChecked
+			}
+
+		}
+	</script>
+	<!-- Func change all data -->
+	<script>
+		function changeData(dataa) {
+			var allNumbersId = $(".indicator-numbers").map((id, el) => {
+				console.log($(el).attr("id"));
+				dataChange.grid.numbers[$(el).attr("id")] = 1
+				return $(el).attr("id")
+			})
+			var allDiffrenceId = $(".indicator-diffrence").map((id, el) => {
+				console.log($(el).attr("id"));
+				dataChange.grid.difference[$(el).attr("id")] = 1
+				return $(el).attr("id")
+			})
+			console.log(allNumbersId, allDiffrenceId);
+
+			chart1.data.datasets.map(el => {
+				el.data = _.shuffle(_.range(1,111001)).slice(0,chart1.data.labels.length) // temporary data
+			})
+			chart1.update()
+			chart2.data.datasets.map(el => {
+				el.data = _.shuffle(_.range(1,111001)).slice(0,chart2.data.labels.length) // temporary data
+			})
+			chart2.update()
+			// gridOptions.api.setRowData() // this change data on table
+		}
+
+	</script>
+	<!-- Send data -->
+	<script>
+		function sendData(data) {
+			console.log({data, 'csrfmiddlewaretoken': '{{ csrf_token }}'});
+			// $.ajax({
+			// 	type: "POST",
+			// 	data: {data, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+			// 	url: '',
+			// 	success: data => {
+			// 		console.log(dates)
+			// 	}
+			// })
+		}
+	</script>
+	<!-- Select with checkbox || filters brands and api -->
+	<script>
+		var selBrands = $('.checkselect.brands').checkselect(['брендов', 'бренды'], {allChecked: true,});
+		var selApi = $('.checkselect.api').checkselect(['API', 'API'], {allChecked: true,});
+
+	</script>
+	<!-- Events for send -->
+	<script>
+		$('#date-range').on("apply.daterangepicker", (ev, picker) => {
+			sendData(collData())
+		})
+		selBrands.on('checkselect:close', event => {
+			if (JSON.stringify(event.detail.temporaryData) != JSON.stringify(event.detail.dataChecked)) {
+				sendData(collData())
+			}
+			
+		})
+		selApi.on('checkselect:close', event => {
+			if (JSON.stringify(event.detail.temporaryData) != JSON.stringify(event.detail.dataChecked)) {
+				sendData(collData())
+			}
+		})
+		$("#buyouts").on('change', event => {
+			sendData(collData())
+		})
+	</script>
+{% endblock javascripts %}

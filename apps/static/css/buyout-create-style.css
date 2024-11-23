@@ -1,0 +1,297 @@
+
+    @keyframes loading { 
+      form { 
+      transform: rotate(0deg); 
+      } 
+      to { 
+      transform: rotate(360deg); 
+      } 
+    } 
+    .loader-svg { 
+      animation: loading 1.5s linear 0ms infinite normal backwards; 
+      width: 20px; 
+      margin-left: 3px; 
+      fill: #aaa;
+    } 
+    @keyframes loading { 
+      form { 
+       transform: rotate(0deg); 
+      } 
+      to { 
+       transform: rotate(360deg); 
+      } 
+      } 
+      .swal2-confirm { 
+       display: flex; 
+       align-items: center; 
+      } 
+      .loader-in-confirm { 
+       animation: loading 1.5s linear 0ms infinite normal backwards; 
+       width: 20px; 
+       margin-left: 5px; 
+       fill: #fff; 
+      }
+    .swal2-styled.swal2-confirm:hover { 
+      background-image: linear-gradient(310deg, #1c44d4, #20bee2) !important; 
+    }
+
+    .swal2-styled.swal2-deny { 
+      padding: 0.75rem 1.5rem; 
+      font-size: 0.75rem; 
+      border-radius: 0.5rem; 
+    }
+    .swal2-container  
+{
+    z-index: 100000000000 !important;     
+}
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        /* display: none; <- Crashes Chrome on hover */
+        -webkit-appearance: none;
+        margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+    }
+    .hasTime{
+      width: 10%;
+      
+    }
+    .flatpickr-calendar.open{
+      margin-left: 0;
+    }
+    .cell{
+      vertical-align: middle;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: -.2px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 0 !important;
+      padding-right: 25px !important;
+    }
+    .table > thead > tr > th{
+      padding-left:0;
+      font-weight: 700;
+      font-size: 11px;
+      border-bottom: 0;
+    }
+    .title_product{
+      overflow: hidden;
+      max-width: 150px;
+      text-overflow: ellipsis;
+    }
+    .count_product{
+      max-width: 150px;
+    }
+    .img_product > img{
+      width: 70px;
+      border-radius: 10px;
+    }
+    .raz::-webkit-inner-spin-button { 
+      display: none;
+    }
+    .add_button{
+      vertical-align: middle;
+      display: block;
+      padding-top: 0;
+    }
+    .add_button > a{
+      height: 100%;
+      background-color: transparent;
+      text-decoration: none;
+      border: 0;
+      float: right;
+      vertical-align: middle;
+      color: black;
+      padding-top: 0.5rem;
+    }
+    .add_button > a:hover{
+      color: black;
+    }
+    .key_phrase-box{
+      border: 1px solid #d2d6da;
+      border-radius: 0.5rem;
+      margin-left: 0;
+    }
+    .key-key_phrase{
+      margin-left: 0;
+    }
+    .key-key_phrase > input{
+      border: 0;
+      margin-left: 0;
+      padding-left: 0;
+      background-color: white !important;
+    }
+    .key-key_phrase > input:focus{
+      border: 0;
+      box-shadow: none;
+      
+    }
+    .list-group-item{
+      padding: 5px 10px;
+      background-color: #f0f0f3;
+      border: 0;
+      margin: 1px;
+      border-radius: 0.5rem;
+      white-space: nowrap;
+    }
+    .list-group-item > span{
+      font-size: 12px;
+    }
+    .list-group-item > a{
+      font-size: 12px;
+      background-color: transparent;
+      border: 0;
+      color: black;
+      margin: 5px;
+      padding-top: 0.5rem;
+    }
+    .list-group-item > a:hover{
+      color: black;
+    }
+    .list-group{
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    
+    .switch input {display:none;}
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+      width: 60px;
+      height: 34px;
+      border-radius: 34px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    .toogle-slider:checked + .slider {
+      background-color: #2196F3;
+    }
+    
+    .toogle-slider:focus + .slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+    
+    .toogle-slider:checked + .slider:before {
+      -webkit-transform: translateX(26px);
+      -ms-transform: translateX(26px);
+      transform: translateX(26px);
+    }
+    
+
+    .address {
+      width: 485px;
+      margin: 40px auto 0;
+      padding: 40px 40px 30px;
+      border: 2px solid #e1e1e1;
+      background-color: #f7f7f7;
+      box-shadow: rgba(0, 0, 0, 0.075) 1px 1px 5px;
+  }
+  
+  .address h1 {
+      margin: 0;
+      padding: 0;
+      font-size: 20px;
+      padding-bottom: 40px;
+      text-align: center;
+  }
+  
+  .field {
+      margin-bottom: 10px;
+      padding: 0;
+  }
+  
+  .field .group-name {
+      margin-top: 25px;
+      margin-bottom: 5px;
+  }
+  
+  .field input {
+      height: 2em;
+      width: 470px;
+      border: 1px solid #d8d8d8;
+      padding: 0 7px;
+      color: #666;
+  }
+  
+  .field [type="radio"] {
+      height: 1.5em;
+      width: 20px;
+      vertical-align: middle;
+  }
+  .active-add-phrase{
+    border: 1px solid #7928CA;
+    border-radius: 10px;
+    color: #000000;
+  }
+  .active-add-phrase:hover{
+    background-color: #E1DADA;
+  }
+  .button-to-add{
+
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  .modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 10000; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal Content */
+  .modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 60%;
+
+  }
+  
+  /* The Close Button */
+  .close {
+    color: #aaaaaa;
+    display: flex;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+  }

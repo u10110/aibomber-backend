@@ -1,0 +1,357 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Ecommerce Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+  <link rel="stylesheet" href="{% static 'css/reviews-style.css' %}">
+  <link rel="stylesheet" href="{% static 'css/bootstrap-tooltip.css' %}">
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" integrity="sha512-kq3FES+RuuGoBW3a9R2ELYKRywUEQv0wvPTItv3DSGqjpbNtGWVdvT8qwdKkqvPzT93jp8tSF4+oN4IeTEIlQA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+
+  <div class="container-fluid mt-4">
+    <div class="row align-items-center">
+      <div class="col-lg-6 col-sm-10 col-md-10 col-12">
+        <div class="nav-wrapper position-relative end-0">
+          <ul class="nav nav-fill nav-custom p-1">
+            <li class="nav-item col-12 col-sm-3 available-reviews">
+              <a class="nav-link mb-0 px-0 py-1 {% if request.GET.status == 'active' %} custom-active {% endif %} " href="{% url 'reviews' %}?status=active" role="tab" aria-selected="true">
+                Доступные
+              </a>
+            </li>
+            <li class="nav-item col-12 col-sm-3 planned-reviews">
+              <a class="nav-link mb-0 px-0 py-1 {% if request.GET.status == 'plan' %} custom-active {% endif %}" href="{% url 'reviews' %}?status=plan" role="tab" aria-selected="false">
+                Запланированные
+              </a>
+            </li>
+            <li class="nav-item col-12 col-sm-3">
+              <a class="nav-link mb-0 px-0 py-1 {% if request.GET.status == 'done' %} custom-active {% endif %}"  href="{% url 'reviews' %}?status=done" role="tab" aria-selected="false">
+                Опубликованные
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid py-4" style="overflow: hidden;">
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <!-- Card header -->
+          <div class="card-header pb-0">
+            <div class="d-lg-flex">
+              <div>
+                <h5 class="mb-0">Отзывы</h5>
+                <p class="text-sm mb-0">
+                  {% if request.GET.status == 'active' %}
+                  Формируйте план отзывов доступных к публикации. Отзывы будут опубликованы в указанную вами дату.
+                  {% elif request.GET.status == 'plan' %}
+                  В данном разделе вы можете контролировать поставленные задачи к публикации отзывов, вносить в них правки, а также оставить нужный отзыв сейчас.
+                  {% elif request.GET.status == 'done' %}
+                  Все раннее оставленные отзывы находятся в данном разделе. 
+                  {% endif %}
+                </p>
+              </div>
+              <div class="ms-auto my-auto mt-lg-0 mt-4">
+                <div class="ms-auto my-auto">
+
+                  <div class="dropdown download" style="margin-right: 5px;">
+                    <button class="btn btn-outline-primary btn-sm mb-0 mt-sm-0 mt-1" data-bs-toggle="dropdown" type="button" name="button" aria-haspopup="true" aria-expanded="false" id="download">Экспорт</button>
+                    
+                    <div class="dropdown-menu mt-0" aria-labelledby="download" >
+                      <a class="dropdown-item export"  data-type="xlsx">Скачать XLSX</a>
+                      <a class="dropdown-item export"  data-type="csv">Скачать CSV</a>
+                    </div>
+                  </div>
+                  {% comment %} <div class='d-inline mb-0 mt-sm-0 mt-1 border border-dark rounded btn-outline-dark btn-sm mb-0 mt-sm-0 mt-1 d-inline'>
+                    <a href='#' id='guide' class="nounderline">
+                      <p class='d-inline-block'><i class="fa fa-play m-1 mw-5 d-inline-block" aria-hidden="true"></i>Гайд</p>
+                    </a>
+                    
+                  </div> {% endcomment %}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body px-0 pb-0">
+            <div class="table-responsive">
+              <table class="table table-flush" id="products-list">
+                <thead class="thead-light">
+                  <tr>
+                    <th>Продукт</th>
+                    <th>SKU</th>
+                    <th>{% if request.GET.status == 'active' %} Дата выкупа {% else %} Дата отзыва {% endif %}</th>
+                    {% if request.GET.status == 'active' or request.GET.status == 'plan' %}<th>Информция о ПВЗ</th>{% else %}{% endif %}
+                    <th>Пол</th>
+                    <th>Размер</th>
+                    {% if  request.GET.status == 'done' %}
+                    <th>Текст</th>
+                    <th>Статус</th>
+                    {% endif %}
+                    {% comment %} <th>Статус</th> {% endcomment %}
+                    {% if request.GET.status == 'plan' %}
+                      {% if request.GET.status == 'plan' %}
+                      <th>Действия</th>{% endif %}<th>Удалить</th>
+                      <th></th>
+                    {%endif%} 
+                    {% if request.GET.status == 'active' %}
+                      <th></th>
+                      <th></th>
+                    {% endif %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for object in objects%}
+                  <tr>
+                    <td>
+                      <div class="d-flex">
+                        <img class="img-product ms-1" src={% if request.GET.status == 'active' %}{{object.product.cover}}{% else %}{{object.buyout.product.cover}}{%endif%} alt="hoodie">
+                        <a class="text-sm p-text"  title="{{object.product.title}}" href="https://www.wildberries.ru/catalog/{{object.product.sku}}/detail.aspx?" target='_blank'><h6 class="text-sm p-text">{% if request.GET.status == 'active' %}{{object.product.title}}{% else %}{{object.buyout.product.title}}{%endif%} </h6></a>
+                      </div>
+                    </td>
+                    <td class="text-sm">{% if request.GET.status == 'active' %}{{object.product.sku}}{% else %}{{object.buyout.product.sku}}{%endif%}</td>
+                    <td class="text-sm" data-order="{% if request.GET.status == 'active' %}{{object.buyout_date|date:"U"}}{% elif request.GET.status == 'plan' or request.GET.status == 'done' %}{{ object.review_date|date:"U" }}{% else %}{{object.buyout.buyout_date |date:"U"}}{%endif%}">{% if request.GET.status == 'active' %}{{object.buyout_date}}{% elif request.GET.status == 'plan' or request.GET.status == 'done' %}{{ object.review_date }}{% else %}{{object.buyout.buyout_date}}{%endif%} </td>
+                    
+                    {% if request.GET.status == 'active' or request.GET.status == 'plan' %}<td class="text-sm" data-bs-toggle="tooltip" data-bs-trigger="hover" title="{{object.buyout.pvz.address}}">{{object.buyout.pvz.address|truncatechars:40}} </td>{% else %}{% endif %}
+                    
+                    <td class="text-sm">{% if request.GET.status == 'active' %}{% if object.sex == '1' %}Мужской{% else %}Женский{% endif %}{% else %}{% if object.buyout.sex == '1' %}Мужской{% else %}Женский{% endif %}{%endif%} </td>
+                    <td class="text-sm">{% if request.GET.status == 'active' %}{{ object.size  }}{% else %}{{ object.buyout.size }}{%endif%} </td>
+                    <td class="text-sm" data-bs-toggle="tooltip" data-bs-trigger="hover" title="{{object.text}}">{% if request.GET.status == 'done' %}{{object.text|truncatechars:40}}{% endif %} </td>
+                    {% if request.GET.status == 'done' %}
+                      {% if object.status == 'done' %}
+                      <td class="text-sm"><span class="badge badge-info badge-sm">Опубликован</span></td>
+                      {% elif object.status == 'error' %}
+                        <td class="text-sm"><span class="badge badge-danger badge-sm">Ошибка</span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle mx-2" viewBox="0 0 16 16" rel="tooltip" title="{{ object.status_description }}">
+                          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                          <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                        </svg>
+                        </td>
+                          
+
+                      {% elif object.status == 'excluded' %}
+                        <td class="text-sm"><span class="badge badge-warning badge-sm">Исключен</span></td>
+                      {% endif %}
+                    {% endif %}
+                    {% if request.GET.status == 'active' %}
+                    <td class="text-sm add-reviews">
+                      <a href="{% url 'add-review' object.id %}" data-bs-toggle="tooltip" data-bs-original-title="запланируйте свой новый отзыв на товар">
+                        <button class="btn bg-gradient-primary btn-sm mb-0 me-2" type="button" name="button">написать отзыв</button>
+                      </a>
+                    </td>
+                    {% elif request.GET.status == 'plan' %}
+                    <td class="text-sm">
+                      <a class="btn border btn-sm mb-0 me-2" href={% url 'edit-review' object.id %}>изменить</a>
+                      <button class="btn bg-gradient-primary btn-sm mb-0 me-2" onclick='send_review("{{object.id}}");'>отправить сейчас</button>
+                    </td>
+                    <td class="text-sm">
+                      </a>
+                      <a onclick="delete_task({{ object.id }});" data-bs-toggle="tooltip" data-bs-original-title="Удалить">
+                        <i class="fas fa-trash text-secondary"></i>
+                      </a>
+                    </td>
+                    {% comment %} {% elif request.GET.status == 'done' and object.status == 'delete' %}
+                    <td class="text-sm">
+                    </a>
+                    <a href="{% url 'review-delete-excluded' object.id %}" data-bs-toggle="tooltip" data-bs-original-title="Удалить">
+                      <i class="fas fa-trash text-secondary"></i>
+                    </a>
+                  </td> {% endcomment %}
+                    {% else %}{%endif%} 
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% include "includes/footer.html" %}
+    
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+
+  <script src="/static/assets/js/jquery.js"></script>
+	<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+<script>
+  function delete_task(id) {
+      const delSwal = Swal.mixin({
+        customClass: {
+          cancelButton: 'btn btn-info mr-1',
+          confirmButton: 'btn btn-danger',
+        },
+        buttonsStyling: false
+      })
+      
+      delSwal.fire({
+        title: 'Вы действительно хотите это удалить?',
+        showCancelButton: true,
+        cancelButtonText: 'Отмена',
+        confirmButtonText: 'Удалить',
+        reverseButtons: true
+      }).then((result) => {
+
+        if (result.isConfirmed) {
+          $.get(`{% url 'review-delete' 1 %}`.replace('/1/', `/${id}/`), function(data){
+            $('#buyout-'+id).remove();
+            $('body>.tooltip').remove();
+            window.location.reload();
+          })
+        }
+
+      })
+    };
+</script>
+  <script>
+    var introReviews = introJs()
+introReviews.setOptions({
+	steps:[
+	{element: document.querySelector('.guide6'),
+		title: 'Отзывы',
+		intro: 'Вы находитесь в разделе “Отзывы”. Здесь вы можете формировать план отзывов доступных к публикации. Отзывы будут опубликованы в указанную вами дату',
+		position: 'right'
+	},
+	{element: document.querySelector('.available-reviews'),
+		title: 'Доступные',
+		intro: 'Здесь отображаются выкупы, которые были успешно забраны с ПВЗ и наних можно оставить отзыв',
+		position: 'bottom'
+	},
+		{
+		title: 'Создание отзыва',
+		intro: 'Чтобы бы создать отзыв необходимо нажать на кнопку <strong>“Написать отзыв”</strong>',
+		position: 'left'
+	},
+		{
+		title: 'Заполнение полей',
+		intro: '<strong>“Напишите отзыв”</strong> - здесь вы вводите текст будущего отзыва, несколько положительных слов о вашем товаре. Рекомендации по написанию отзыва вы можете найти в разделе FAQ на странице нашего приложения.',
+		position: 'left'
+	},
+		{
+		title: 'Завершение создания отзыва',
+		intro: 'Также вы указываете количество звезд, оценивающих товар на который оставляется отзыв.<br><strong>“Дата отправки отзыва“</strong>- вы указываете удобную для вас дату публикации данного отзыва.<br><strong>“Загрузить фото к отзыву”</strong> - возможность дополнить отзыв фото, тем самым сделать его более привлекательным.<br>После заполнения всех пунктов необходимо нажать на кнопку <strong>“Запланировать отзыв”</strong>.<br><br>После создания отзыва его можно увидеть в разделе <strong>“Запланированные отзывы”</strong>.',
+		position: 'left'
+	},
+	{element: document.querySelector('.planned-reviews'),
+		title: 'Запланированные отзывы',
+		intro: 'В данном разделе вы можете контролировать поставленные задачи к публикации отзывов, вносить в них правки, а также оставить нужный отзыв сейчас, раньше указанной даты, нажав на кнопку <strong>“Отправить сейчас”</strong>. После того, как настанет дата публикации, отзыв перейдет в раздел <strong>“Опубликованные”</strong>, а вы сможете его увидеть на странице вашего товара Wildberries.',
+		position: 'bottom'
+	},
+	],
+	nextLabel: 'Далее',
+	prevLabel: 'Назад',
+	doneLabel: 'Завершить',
+});
+
+var searchString = new URLSearchParams(window.location.search);
+
+if (document.querySelector('#start-guide4')) {
+	document.querySelector('#start-guide4').addEventListener('click', event => {
+		event.preventDefault()
+		introReviews.start()
+	})
+}
+if (searchString.get('tips') == 'show'){
+	introReviews.start()
+}
+
+    $(document).ready(function(){
+      $("[rel=tooltip]").tooltip({ placement: 'right'});
+  });
+
+    function send_review(reveiw_id){
+      $.ajax({
+        type: 'POST',
+        url: '{% url "review_add" %}',
+        data: JSON.stringify({
+          'id': reveiw_id,
+        }),
+        success: function(response){
+
+          Swal.fire('Готово!', 'Отправляем', 'success');
+        },
+        error: function (xhr, status, error){
+          Swal.fire('Ошибка', 'Что-то пошло не так', 'error');
+          
+        },
+      });
+    };
+
+    $('#guide').click(function(){
+      Swal.fire({
+        {% comment %} title: '<strong>HTML <u>example</u></strong>', {% endcomment %}
+        html:
+          '<div class="frame_blc"><iframe src="https://www.youtube.com/embed/uja_udAckuI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>',
+        showCloseButton: true,
+        showCancelButton: false,
+        focusConfirm: false,
+        showConfirmButton: false,
+        width: '50%',
+      })
+    })
+    function getGet(name) {
+    var s = window.location.search;
+    s = s.match(new RegExp(name + '=([^&=]+)'));
+    return s ? s[1] : false;
+    }
+    if (document.getElementById('products-list')) {
+      var dataTableSearch = $('.table').DataTable({
+        language: {
+          info: "Показано от _START_ до _END_ из _TOTAL_",
+          search: "Поиск:",
+          lengthMenu: "Показывать сразу _MENU_",
+          paginate: {
+            first: "Первый",
+            last: "Последний",
+            next: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l370.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"/></svg>',
+            previous: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M109.3 288L480 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-370.7 0 73.4-73.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-128 128c-12.5 12.5-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 288z"/></svg>',
+          },
+          infoEmpty: "Показано 0 из 0 из _MAX_",
+          infoFiltered: "",
+          zeroRecords: "Ничего не найдено"
+        },
+
+        perPage: 20,
+        pageLength: 20,
+        "lengthMenu": [ [5, 10, 15, 20, 25, 30, 50, 100, -1], [5, 10, 15, 20, 25, 30, 50, 100, "Все"] ]
+      });
+
+			{% if not objects %}
+				$(".dataTables_scrollHeadInner").css('width', '100%')
+				$(".table-flush").css('width', '100%')
+			{% endif %}
+			var dataTablesLength = $('.dataTables_length > label > select').select2({
+				theme: "bootstrap",
+				minimumResultsForSearch: Infinity,
+			});
+
+      document.querySelectorAll(".export").forEach(function(el) {
+        el.addEventListener("click", function(e) {
+          var type = el.dataset.type;
+          window.location.href = '/export_reviews' + '?status=' + getGet('status') + '&type=' + type;
+        });
+      });
+    };
+  </script>
+  <script>
+    if (innerWidth <= 990) {
+      $('.download').removeClass("dropdown").addClass('dropup')
+    }
+  </script>
+{% endblock javascripts %}

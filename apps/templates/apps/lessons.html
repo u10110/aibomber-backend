@@ -1,0 +1,198 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Ecommerce Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modal-video@2.4.8/css/modal-video.min.css">
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.0.0/ag-grid-community.min.js" integrity="sha512-7VPz1NAYcuVu1/eQooUfDUcG2sGRdmy2P9sa6ZgtXOpAVY66bN4u+cDXPcmhrVKA44LdznEEZwMabZ3qO8HB6A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+   <!-- Include the core CSS, this is needed by the grid -->
+	<link rel="stylesheet"
+		 href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/>
+   <!-- Include the theme CSS, only need to import the theme you are going to use -->
+   <link rel="stylesheet"
+	 href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"/>
+	 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+	 <style>
+		.lessons {
+			max-width: 100%;
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr;
+			grid-gap: 15px;
+		}
+		.lesson {
+			max-width: 100%;
+			box-shadow: 0 0 15px -5px #999;
+			border-radius: 15px;
+			padding: 10px;
+		}
+		.lesson__preview img{
+			width: 100%;
+			
+		}
+		.lesson__title {
+			font-size: 1.2em;
+			font-weight: 700;
+			line-height: 1.2;
+			margin-top: 20px;
+		}
+		.lesson__button {
+			text-align: right;
+			margin-top: 10px;
+		}
+		.card-header {
+			font-size: 1.5em;
+			font-weight: 900;
+		}
+		.lesson__description {
+			margin-top: 15px;
+		}
+		.lesson__preview {
+			position: relative;
+			cursor: pointer;
+
+		}
+		.lesson__preview:hover .play-button{
+			opacity: 0.7;
+		}
+		:root {
+			--size: 80px;
+		}
+		@media (max-width: 950px) {
+			.lessons {
+				grid-template-columns: 1fr 1fr;
+			}
+			:root {
+				--size: 60px;
+			}
+		}
+		@media (max-width: 600px) {
+			:root {
+				--size: 50px;
+			}
+			.lesson__title {
+				font-size: 1em;
+				font-weight: 700;
+				line-height: 1.2;
+				margin-top: 20px;
+			}
+			.lesson__button a {
+				font-size: 0.65em
+			}
+		}
+		@media (max-width: 500px) {
+			:root {
+				--size: 50px;
+			}
+			.lesson__button a {
+				font-size: 0.7em
+			}
+			.lessons {
+				grid-template-columns: 1fr;
+			}
+		}
+		.play-button {
+			position: absolute;
+			left: calc(50% - var(--size) / 2);
+			top: calc(50% - var(--size) / 2);
+			transition: all 0.4s ease;
+		}
+		.play-button svg {
+			width: var(--size);
+			height: var(--size);
+		}
+	 </style>
+	{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+	<div class="container-fluid py-4">
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-header">
+						Обучающие уроки
+					</div>
+					<div class="card-body mt-3">
+						<div class="lessons">
+							<div class="lesson">
+								<div class="lesson__preview" {% if is_tariff == 'true'%} data-video-id="NQLvVT89Prg" {% else %} {% endif %}> <!-- Если есть тариф, оставляем значение в атрибуте data-video-id, иначе пустое  -->
+									<img src="{% static "images/preview-lesson1.jpg" %}"/>
+									<div class="play-button">
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#f01010" d="M512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256zM176 168V344C176 352.7 180.7 360.7 188.3 364.9C195.8 369.2 205.1 369 212.5 364.5L356.5 276.5C363.6 272.1 368 264.4 368 256C368 247.6 363.6 239.9 356.5 235.5L212.5 147.5C205.1 142.1 195.8 142.8 188.3 147.1C180.7 151.3 176 159.3 176 168V168z"/></svg>
+									</div>
+								</div>
+								
+								<div class="lesson__title">Урок 1. Что такое автовыкупы и как они работают?</div>
+								<div class="lesson__description">Здесь вы узнаете о том, что такое автовыкуп, а также принцип их работы. Научитесь работать с выкупами и узнаете какие существуют инструменты для этого</div>
+							</div>
+							<div class="lesson">
+								<div class="lesson__preview" {% if is_tariff == 'true'%} data-video-id="dKOoc4Wfsqs" {% else %} {% endif %}> <!-- Если есть тариф, оставляем значение в атрибуте data-video-id, иначе пустое  -->
+									<img src="{% static "images/preview-lesson2.jpg" %}">
+									<div class="play-button">
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#f01010" d="M512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256zM176 168V344C176 352.7 180.7 360.7 188.3 364.9C195.8 369.2 205.1 369 212.5 364.5L356.5 276.5C363.6 272.1 368 264.4 368 256C368 247.6 363.6 239.9 356.5 235.5L212.5 147.5C205.1 142.1 195.8 142.8 188.3 147.1C180.7 151.3 176 159.3 176 168V168z"/></svg>
+									</div>
+								</div>
+								<div class="lesson__title">Урок 2. Секреты автовыкупов. Как рассчитать стратегию?</div>
+								<div class="lesson__description">В данном уроке вы узнаете о принципах автовыкупов, а также научитесь расчитывать эффективную стратегию<br>
+									<div class="lesson__button"> <!-- ЕСЛИ НЕТ ТАРИФА УБИРАЕМ СНИЗУ СОБЫТИЕ onclick СО ЗНАЧЕНЕИМ И ВМЕСТО НЕГО СТАВИМ disabled -->
+										<button class="btn bg-gradient-primary" {% if is_tariff == 'true'%}onclick="window.open('https://docs.google.com/spreadsheets/d/1sYBq8TvE3unaRL5RWJsce4_ym0Y8vGkzqwzQ1erSbDA/edit?usp=sharing', '_blank')" {% else %} disabled {% endif %}>
+											Шаблон стратегии
+										</button>
+									</div>
+								</div>
+							</div>
+							<div class="lesson">
+								<div class="lesson__preview" {% if is_tariff == 'true'%} data-video-id="YvuBKbg9xtM" {% else %} {% endif %}>  <!-- Если есть тариф, оставляем значение в атрибуте data-video-id, иначе пустое  -->
+									<img src="{% static "images/preview-lesson3.jpg" %}">
+									<div class="play-button">
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#f01010" d="M512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256zM176 168V344C176 352.7 180.7 360.7 188.3 364.9C195.8 369.2 205.1 369 212.5 364.5L356.5 276.5C363.6 272.1 368 264.4 368 256C368 247.6 363.6 239.9 356.5 235.5L212.5 147.5C205.1 142.1 195.8 142.8 188.3 147.1C180.7 151.3 176 159.3 176 168V168z"/></svg>
+									</div>
+								</div>
+								<div class="lesson__title">Урок 3. Как работать с платформой MP LAB?</div>
+								<div class="lesson__description">На этом уроке вы узнаете как работать с платформой MP LAB, ознакомитесь с функционалом сервиса с  разбором каждого раздела</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		{% include "includes/footer.html" %}
+		
+	</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+
+	<script src="/static/assets/js/jquery.js"></script>
+	<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+	<script src="/static/assets/js/plugins/bootstrap.min.js"></script>
+	
+	{% comment %} <script src="/static/assets/js/plugins/sweetalert.min.js"></script> {% endcomment %}
+	<!-- <script src="https://cdn.jsdelivr.net/npm/modal-video@2.4.8/js/modal-video.min.js"></script> -->
+	<script src="https://cdn.jsdelivr.net/npm/modal-video@2.4.8/js/jquery-modal-video.min.js"></script>
+
+	<script>
+		var tarif = JSON.parse({{is_tariff|safe}});
+		if (tarif) {
+			$(".lesson__preview").modalVideo();
+		} else {
+			Swal.fire('','Для просмотра видеоуроков вам необходимо <a href="/pricing" style="font-weight:600;display:inline;">приобрести тариф</a>','warning')
+			$(".lesson__preview").on('click', () => {Swal.fire('','Для просмотра видеоуроков вам необходимо <a href="/pricing" style="font-weight:600;display:inline;">приобрести тариф</a>','warning')})
+		}
+
+	</script>
+
+
+{% endblock javascripts %}
+
+
+
+

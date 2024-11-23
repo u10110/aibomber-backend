@@ -1,0 +1,270 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Ecommerce Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+  <link rel="stylesheet" href="{% static 'css/positions-style.css' %}">
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+
+  <div class="container-fluid py-4">
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <!-- Card header -->
+          <div class="card-header pb-0">
+            <div class="d-lg-flex">
+              <div class="col-lg-6 col-12">
+                <h5 class="mb-0">Позиции</h5>
+                <p class="text-sm mb-0">
+                  <!-- Т
+                  Е
+                  К
+                  С
+                  Т -->
+              </div>
+              <div class="ms-auto my-auto mt-6">
+                <div class="ms-auto my-auto d-inline-block">
+                  {% comment %} <div class="dropdown download" style="margin-right: 5px;">
+										<button class="btn btn-outline-primary btn-sm mb-0 mt-sm-0 mt-1" data-bs-toggle="dropdown" type="button" name="button" aria-haspopup="true" aria-expanded="false" id="download">Экспорт</button>
+										<div class="dropdown-menu mt-0" aria-labelledby="download" >
+											<a class="dropdown-item export" onclick="export_data('xlsx');" data-type="xlsx">Скачать XLSX</a>
+											<a class="dropdown-item export" onclick="export_data('csv');" data-type="csv">Скачать CSV</a>
+										</div>
+									</div> {% endcomment %}
+                  {% comment %} <button class="btn btn-outline-primary btn-sm export mb-0 mt-sm-0 mt-1" data-type="csv" type="button" name="button">Экспорт</button> {% endcomment %}
+                  <button id='guide' class="btn border border-dark btn-sm mb-0 mt-sm-0 mt-1 " type="button" name="button"><i class="fa fa-play m-1 mw-5 d-inline-block" aria-hidden="true"></i>Инструкция</button>
+                </div>
+              </div>
+            </div>
+            <form action="/positions/" method="post">
+              {% csrf_token %}
+            <div style='display:flex; align-items: baseline;'>
+              <span class="text-danger">{{ form.url.errors }}</span>
+              <input id="sku" type="number" name="sku" class="form-control delete_arrows" placeholder="Введите артикул" />
+                <button  type="submit"  class="btn bg-gradient-primary btn-sm mb-0 mt-3 add-redemptions"  >+&nbsp; Добавить артикул</button>
+              </a>
+            </div>
+            </form>
+          </div>
+          <div class="card-body px-0 pb-0">
+            <div class="table-responsive">
+              <table class="table dataTable " style='margin-left:30px;'>
+                <thead>
+                  <tr>
+                    <th >Товары</th>
+                    {% comment %} <th >Проверка позиций</th> {% endcomment %}
+                    <th style="padding: 12px 30px 12px 0;">Видимость</th>
+                    <th style="padding: 12px 30px 12px 0;">Ср.позиция</th>
+                    <th >Динамика</th>
+                    <th >Топ 10/11-50/51+</th>
+                    <th ></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for object in objects%}
+                  <tr>
+                    <td class="cell">
+                        <div class="slideshow-container border">
+
+                            <div class="mySlides mySlides-1">
+                                <a target="_blank" href='https://www.wildberries.ru/catalog/{{object.product.sku}}/detail.aspx?targetUrl=XS'>
+                                    <img class="ms-1" title="тайтл" src={{object.product.cover}} >
+                                    <p>{{object.product.title}}</p>
+                                    <label style='font-weight: 600;'>Арт: {{object.product.sku}}</label>
+                                </a>
+                            </div>
+                          </div>
+                          
+
+                    </td>
+                    {% comment %} <td class="cell">
+                        <div class="update-positions">
+                          <div class="update-positions__icon"><div class="fa-solid fa-arrows-rotate"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="padding: 8px;"><!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path fill="#fff" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"/></svg></div></div>
+                          <div class="update-positions__last">
+                            {{object.updated_at}} <br> 
+                          </div>
+                        </div>
+                    </td> {% endcomment %}
+                    
+                    <td class="cell">{% if object.parse_status == 'done' %}{{object.visibility_today}}{% else%}В{% endif %}</td>
+                    <td class="cell">{% if object.parse_status == 'done' %}{{object.average_position_today}}{% else%}ПРОЦЕССЕ{% endif %}</td>
+                    <td class="cell">{% if object.parse_status == 'done' %}{{object.position_increased}}<sup class="arrow-up__turquoise" style="margin-right: 8px;">↑</sup>  {{object.position_nochanged}}<sup style="margin-right: 8px;">=</sup>  {{object.position_decreased}}<sup class="arrow-down__red">↓</sup>{% else%}СБОРА{% endif %}</td> 
+                    <td class="cell">{% if object.parse_status == 'done' %}<span id="top__1" class="top__num" style="margin-right: 8px;"><span>{{object.le10}}</span></span>  <span id="top__2" class="top__num" style="margin-right: 8px;"><span>{{object.g11le50}}</span></span>  <span id="top__3" class="top__num"><span>{{object.ge51le100}}</span></span>{% else%}ИНФОРМАЦИИ{% endif %}</td> 
+                    <td class="cell"><a href="{% url 'position-details' object.id %}" class='btn btn-primary' style='background-color:#007bff; margin-bottom: 0px;'>Подробнее</a></td>
+                    <td class="cell" style='font-size: 25px;'>
+                    <a href="{% url 'position-delete' object.id %}" data-bs-toggle="tooltip" data-bs-original-title="Удалить задачу">
+                      <i class="fas fa-trash text-secondary"></i>
+                  </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+
+    {% include "includes/footer.html" %}
+    
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+
+  <script src="/static/assets/js/jquery.js"></script>
+  <script src="/static/assets/js/plugins/datatables.min.js"></script>
+  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+  <script src="/static/assets/js/plugins/moment.js"></script>
+  <script src="/static/assets/js/plugins/moment-with-locales.js"></script>
+  <script src="/static/assets/js/plugins/bootstrap.min.js"></script>
+  <script src='//cdn.datatables.net/plug-ins/1.11.5/sorting/formatted-numbers.js'></script>
+  <script>
+		if ("{{error}}" == "False"){
+			Swal.fire(
+			'Ошибка',
+			'{{ error_message }}',
+			'error'
+		)
+			}
+      {% if messages %}
+        {% for message in messages %}
+        Swal.fire(
+			'Ошибка',
+			'{{ message  }}',
+			'error')
+        {% endfor %}
+      {% endif %}
+	</script>
+  {% comment %} <script src="/static/assets/js/plugins/sweetalert.min.js"></script> {% endcomment %}
+  <script>
+    var allNumbers = Array.from(document.querySelectorAll(".top__num>span"))
+    var sumNumbers = allNumbers.reduce(
+      (previousValue, currentValue) => previousValue + parseInt(currentValue.innerHTML),
+      0
+    );
+    document.querySelector("#top__1").style.setProperty('--width1', (parseInt(allNumbers[0].innerHTML) / sumNumbers * 100) + "%")
+    document.querySelector("#top__2").style.setProperty('--width2', (parseInt(allNumbers[1].innerHTML) / sumNumbers * 100) + "%")
+    document.querySelector("#top__3").style.setProperty('--width3', (parseInt(allNumbers[2].innerHTML) / sumNumbers * 100) + "%")
+
+
+    var slideIndex = 1;
+    {% for i in data %}
+    showSlides(slideIndex, '{{i}}');
+    {% endfor %}
+    {% comment %} showSlides(slideIndex, '2');
+    showSlides(slideIndex, '1');
+     {% endcomment %}
+    function plusSlides(n, index) {
+      showSlides(slideIndex += n, index);
+    }
+    
+    
+    function showSlides(n, index) {
+        console.log(this);
+      var i;
+      var slides = document.getElementsByClassName("mySlides"+'-'+index);
+      {% comment %} var dots = document.getElementsByClassName("dot"+'-'+index); {% endcomment %}
+      if (n > slides.length) {slideIndex = 1}
+        if (n < 1) {slideIndex = slides.length}
+        for (i = 0; i < slides.length; i++) {
+          slides[i].style.display = "none";
+        }
+        {% comment %} for (i = 0; i < dots.length; i++) {
+          dots[i].className = dots[i].className.replace(" active", "");
+        } {% endcomment %}
+      slides[slideIndex-1].style.display = "block";
+      {% comment %} dots[slideIndex-1].className += " active"; {% endcomment %}
+    }
+
+
+
+    $('#guide').click(function(){
+      Swal.fire({
+        {% comment %} title: '<strong>HTML <u>example</u></strong>', {% endcomment %}
+        html:
+          '<div class="frame_blc"><iframe src="https://www.youtube.com/embed/OAlxAHQIeyI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>',
+        showCloseButton: true,
+        showCancelButton: false,
+        focusConfirm: false,
+        showConfirmButton: false,
+        width: '50%',
+      })
+    })
+    function getGet(name) {
+    var s = window.location.search;
+    s = s.match(new RegExp(name + '=([^&=]+)'));
+    return s ? s[1] : false;
+    }
+        $(document).ready(function(){
+            $('table').DataTable({
+              
+              "paging": false,
+              "searching": false,
+              'bInfo': false,
+              "language": {
+                "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/ru.json"
+              },
+              columnDefs: [
+                { type: 'formatted-num', targets: 0 }
+              ],
+              "order": [[ 0, "desc" ]],
+            });
+            {% comment %} $("[rel=tooltip]").tooltip({ placement: 'right'}); {% endcomment %}
+        });
+
+      {% comment %} document.querySelectorAll(".export").forEach(function(el) {
+        el.addEventListener("click", function(e) {
+          window.location.href = '/export_buyout' + '?status=' + getGet('status') + '&group=all';
+        });
+      }); {% endcomment %}
+
+
+
+
+      {% comment %} if (document.getElementById('products-list')) {
+        const dataTableSearch = new simpleDatatables.DataTable("#products-list", {
+          searchable: true,
+          fixedHeight: false,
+          perPage: 7
+        })
+        dataTableSearch.columns().sort(3, 'asc');; {% endcomment %}
+  
+        document.querySelectorAll(".export").forEach(function(el) {
+          el.addEventListener("click", function(e) {
+            var type = el.dataset.type;
+  
+            // var data = {
+            //   type: type,
+            //   filename: "Выгрузка доставок -" + type,
+            //   charset: 'UTF-8',
+            // };
+  
+            // if (type === "csv") {
+            //   data.columnDelimiter = ";";
+            // }
+  
+            // dataTableSearch.export(data);
+  
+            window.location.href = '/export_positions' + '&type=' + type;
+          });
+        });
+      {% comment %} }; {% endcomment %}
+  </script>
+
+{% endblock javascripts %}
+
+
+
+

@@ -1,0 +1,798 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Новый отзыв {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+  <link rel="stylesheet" href="{% static 'css/reviews-create-style.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.2.1/air-datepicker.css">
+  <style>
+    .form-control:disabled, .form-control[readonly] {
+        background-color: inherit;
+    }
+  </style>
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid py-4">
+      <div class="col-lg-9 col-12 mx-auto">
+        <form method="POST" enctype="multipart/form-data" id="usrform" >
+          <!-- {% csrf_token %} -->
+          <div class="card card-body mt-4">
+            <div class="row gx-4">
+              <div class="col-auto">
+                <div class="avatar avatar-xl position-relative">
+                  {% comment %} <img src="/static/assets/img/bruce-mars.jpg" alt="profile_image" class="w-100 border-radius-lg shadow-sm"> {% endcomment %}
+                  <img src={{object.product.cover}} alt="profile_image" class="w-100 border-radius-lg shadow-sm">
+                </div>
+              </div>
+              <div class="col-auto my-auto">
+                <div class="h-100">
+                  <h6 class="mb-0">
+                    {{object.product.title}}
+                  </h6>
+                  <p class="text-sm mb-0">
+                    {{object.product.sku}}
+                  </p>
+                </div>
+              </div>
+          </div>
+          
+            <hr class="horizontal dark my-3">
+            <div class="col-12 mt-3">
+              <label>Напишите отзыв</label>
+              <div class="d-flex" style='justify-content: space-between;align-items: baseline;'>
+                <p class="form-text text-muted text-xs ms-1">
+                  Вот как другие узнают о товаре, так что делайте его хорошо!
+                </p>
+                <button class="btn btn-primary bg-gradient-primary" style="margin-left: 10px;" id="open-gen">Сгенерировать</button>
+              </div>
+              <textarea minlength="10" maxlength="1000" id="text" name="text" class="multisteps-form__textarea form-control" rows="5" placeholder="Скажите несколько слов о том, как вам нравится этот товар.">{{ review.text }}</textarea>
+              {% comment %} <input id="text" type="text" name="text" class="multisteps-form__input form-control" placeholder="кожанный кошелек" /> {% endcomment %}
+              {% comment %} <textarea rows="4" cols="50"  id="text" name="text" form="usrform"> Enter text here...</textarea> {% endcomment %}
+            </div>
+            <div class="col-4">
+              <label>Звезд <i class="fas fa-star"></i></label>
+              <select id="star" name="star" class="form-control">
+                <option value="5" {% if review.star > 0 %}{% else %}selected=""{%endif%}>5</i></option>
+                <option value="4" {% if review.star == 4 %}selected=""{%endif%}>4</option>
+                <option value="3" {% if review.star == 3 %}selected=""{%endif%}>3</option>
+                <option value="2" {% if review.star == 2 %}selected=""{%endif%}>2</option>
+                <option value="1" {% if review.star == 1 %}selected=""{%endif%}>1</option>
+              </select>
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <label class="form-label">Дата отправки отзыва</label>
+                <input autocomplete="off" id="review_date" name="review_date" class="form-control datetimepicker" type="text" placeholder="Пожалуйста укажите дату публикации" value='{{ review.review_date|date:"Y-m-d H:i"}}' data-input required readonly>
+                <div class="form-check form-switch">
+                    <h6>
+                      Опубликовать в указанное время
+                    </h6>
+                  </label>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" style="margin-left: 5px;margin-top: 8px;" viewBox="0 0 16 16" data-bs-toggle="tooltip" title="" data-bs-html="true" data-bs-original-title="Данный переключатель дает возможность сформировать задачу на отзыв к определенному дню и <b>времени</b>!">
+												<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path>
+												<path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path>
+											</svg>
+                </div>
+              </div>
+            </div>
+            <label class="mt-4 form-label">Загрузить фото к отзыву</label>
+              {% comment %} <form action="/file-upload" class="form-control dropzone" id="dropzone">
+                <div class="fallback">
+                  <input id="photo" name="photo" name="upload" type="file" accept=".png, .jpg" />
+                </div>
+              </form>{% endcomment %}
+              {% comment %} <div  class="form-control dropzone"> {% endcomment %}
+              <!-- <div  class="form-control dropzone dz-clickable" id="dropzone"> -->
+                <!-- <form enctype='multipart/form-data' action="upload/" method='POST' class="form-control dropzone dz-clickable" id="dropzone" >
+                  {% csrf_token %}
+                <div class="fallback">
+                  <input id="photo" name="photo" type="file" accept=".png, .jpg" multiple />
+                </div>
+                </form> -->
+                <div enctype='multipart/form-data' class="form-control dropzone dz-clickable dz" id="my-dropzone" >
+                  {% csrf_token %}
+                  <div class="dz-message" data-dz-message><span>Поместите файлы сюда для загрузки</span></div>
+                  <div class="fallback">
+                    <input name="file" type="file" multiple />
+                  </div>
+                </div>
+              
+              
+            </div>
+          {% comment %} <input id="star" name="star" action="/file-upload" class="form-control dropzone">
+            <div class="fallback">
+              <input name="file" type="file" multiple />
+            </div>
+          </input> {% endcomment %}
+          <div class="d-flex justify-content-end mt-4">
+            <button type="submit" id="sub"  class="btn bg-gradient-primary m-0 ms-2">Запланировать отзыв</button>
+          </div>
+        </form>
+        </div>
+      </div>
+    </div>
+
+    {% include "includes/footer.html" %}
+    <div id="gen" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content d-block">
+    <span class="close justify-content-end">&times;</span>
+    <h3>Сгенерировать текст</h3>
+    <div class='col-12 mt-4'>
+      <form id='generation-text'>
+        {% csrf_token %}
+      <div class="mb-3">
+        <label>
+          Описание товара:
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" style="margin-left: 5px;" viewBox="0 0 16 16" data-bs-toggle="tooltip" title="Примеры: платье, айфон 12 про, кромочки">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path>
+            <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path>
+          </svg>
+        </label>
+        <input id='desk' name='desk' class='form-control' />
+      </div>
+      <div class="mb-3">
+        <label>Ключевые фразы:</label>
+        <input id='keywords' name='keywords' class='form-control keywords' />
+        <p style="font-size: 0.8em;color: #a6a784;">* разделение через Enter или запятую</p>
+      </div>
+      <div class="mb-3" id="text-gen-wait" style='display: none;'>
+        <p>Происходит генерация, подождите</p>
+      </div>
+      <div class="mb-3" id="result">
+        <label>Сгенерированный текст:</label>
+        <textarea name="text" id="text-gen" class="form-control"></textarea>
+      </div>
+      <div class="justify-content-end d-flex bp-400">
+        <button type='button' class='btn btn-primary' id="edit-text" style="margin-right: 10px;background: #039be5;">использовать</button>
+        <button type='button' class='btn btn-primary' id="generation">сгенерировать</button>
+      </div>
+      </form>
+    </div>
+    
+    </div>
+  
+  </div>
+    
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+
+  <script src="/static/assets/js/plugins/choices.min.js"></script>
+  <script src="/static/assets/js/plugins/quill.min.js"></script>
+ {% comment %}  <script src="/static/assets/js/plugins/flatpickr.min.js"></script> {% endcomment %}
+  <script src="/static/assets/js/plugins/dropzone.min.js"></script>
+  <script src="/static/assets/js/jquery.js"></script>
+  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js" integrity="sha512-6UofPqm0QupIL0kzS/UIzekR73/luZdC6i/kXDbWnLOJoqwklBK6519iUnShaYceJ0y4FaiPtX/hRnV/X/xlUQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha512-z4OUqw38qNLpn1libAN9BsoDx6nbNFio5lA6CuTp9NlK83b89hgyCVq+N5FdBJptINztxn1Z3SaKSKUS5UP60Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.2.1/air-datepicker.min.js"></script>
+  {% comment %} <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script> {% endcomment %}
+  {% comment %} <script type="text/javascript" src="/static/assets/js/csrf.js"></script> {% endcomment %}
+
+  <script>
+    $("#edit-text").on("click", event => {
+      $("#text").val($("#text-gen").val())
+      $("#gen").css("display", "none")
+    })
+
+  </script>
+
+<script>
+  $("#generation").on("click", event => { // СОБЫТИЕ КЛИКА НА ГЕНЕРАЦИЮ, СЮДА АЯК ЗАПРОС.
+    event.preventDefault();
+    if (tagInput1.arr.length < 3) {
+      $(".tags-input-wrapper").addClass("error__input") 
+      $(".tags-input-wrapper").after("<div class='error__input_text'>Не менее 3 фраз</div>")
+      setTimeout(() => {
+        $(".tags-input-wrapper").removeClass("error__input")
+        $(".error__input_text").remove()
+      }, 1500)
+      return
+    } else if ($("#desk").val().length > 70){
+      $("#desk").addClass("error__input")
+      $("#desk").after("<div class='error__input_text'>Не более 70 символов</div>")
+      setTimeout(() => {
+        $("#desk").removeClass("error__input")
+        $(".error__input_text").remove()
+      }, 1500)
+      return
+    } else if ($("#desk").val().length == 0){
+      $("#desk").addClass("error__input")
+      $("#desk").after("<div class='error__input_text'>Обязательное поле.</div>")
+      setTimeout(() => {
+        $("#desk").removeClass("error__input")
+        $(".error__input_text").remove()
+      }, 1500)
+      return
+    }
+    $("#result").css("display", "none")
+    $("#text-gen-wait").css("display", "block")
+    $.ajax({
+      type: "POST",
+      url: "{% url 'generate-text-review' %}",
+      data: {'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'keywords': tagInput1.getInputString(),
+            'desc': $("#desk").val()},
+      success: function(data)
+      {   
+          if ('resp' in data){
+            $("#text-gen-wait > p").text("Ошибка, попробуйте снова")
+          }
+          $("#edit-text").css("display", "block")
+          $("#result").css("display", "block")
+          $("#generation").text("перегенерировать")
+          $("#text-gen-wait").css("display", "none")
+          console.log(tagInput1.getInputString()) // КЛЮЧЕВЫЕ ФРАЗЫ.
+          console.log($("#desk").val()) // ОПИСАНИЕ.
+          $("#text-gen").text(data["text"])
+
+          
+        }
+    })
+    });
+
+</script>
+
+  <script>
+    var span = document.getElementsByClassName("close")[0];
+
+    $($(".close")[0]).on('click', event => {
+      $("#gen").css("display", "none")
+    }) 
+    $("#open-gen").on("click", event => {
+      event.preventDefault()
+      $("#gen").css("display", "block")
+    })
+    $(window).on('mousedown', event => {
+      if (event.target == document.querySelector("#gen")) {
+        $("#gen").css("display", "none")
+      }
+    })
+  </script>
+
+  <script>
+    (function(){
+
+    "use strict"
+
+    
+    // Plugin Constructor
+    var TagsInput = function(opts){
+        this.options = Object.assign(TagsInput.defaults , opts);
+        this.init();
+    }
+
+    // Initialize the plugin
+    TagsInput.prototype.init = function(opts){
+        this.options = opts ? Object.assign(this.options, opts) : this.options;
+
+        if(this.initialized)
+            this.destroy();
+            
+        if(!(this.orignal_input = document.getElementById(this.options.selector)) ){
+            console.error("tags-input couldn't find an element with the specified ID");
+            return this;
+        }
+
+        this.arr = [];
+        this.wrapper = document.createElement('div');
+        this.input = document.createElement('input');
+        init(this);
+        initEvents(this);
+
+        this.initialized =  true;
+        return this;
+    }
+
+    // Add Tags
+    TagsInput.prototype.addTag = function(string){
+
+        if(this.anyErrors(string))
+            return ;
+
+        this.arr.push(string);
+        var tagInput = this;
+
+        var tag = document.createElement('span');
+        tag.className = this.options.tagClass;
+        tag.innerText = string;
+
+        var closeIcon = document.createElement('a');
+        closeIcon.innerHTML = '&times;';
+        
+        // delete the tag when icon is clicked
+        closeIcon.addEventListener('click' , function(e){
+            e.preventDefault();
+            var tag = this.parentNode;
+
+            for(var i =0 ;i < tagInput.wrapper.childNodes.length ; i++){
+                if(tagInput.wrapper.childNodes[i] == tag)
+                    tagInput.deleteTag(tag , i);
+            }
+        })
+
+
+        tag.appendChild(closeIcon);
+        this.wrapper.insertBefore(tag , this.input);
+        this.orignal_input.value = this.arr.join(',');
+
+        return this;
+    }
+
+    // Delete Tags
+    TagsInput.prototype.deleteTag = function(tag , i){
+        tag.remove();
+        this.arr.splice( i , 1);
+        this.orignal_input.value =  this.arr.join(',');
+        return this;
+    }
+
+    // Make sure input string have no error with the plugin
+    TagsInput.prototype.anyErrors = function(string){
+        if( this.options.max != null && this.arr.length >= this.options.max ){
+            console.log('max tags limit reached');
+            return true;
+        }
+        
+        if(!this.options.duplicate && this.arr.indexOf(string) != -1 ){
+            console.log('duplicate found " '+string+' " ')
+            return true;
+        }
+
+        return false;
+    }
+
+    // Add tags programmatically 
+    TagsInput.prototype.addData = function(array){
+        var plugin = this;
+        
+        array.forEach(function(string){
+            plugin.addTag(string);
+        })
+        return this;
+    }
+
+    // Get the Input String
+    TagsInput.prototype.getInputString = function(){
+        return this.arr.join(',');
+    }
+
+
+    // destroy the plugin
+    TagsInput.prototype.destroy = function(){
+        this.orignal_input.removeAttribute('hidden');
+
+        delete this.orignal_input;
+        var self = this;
+        
+        Object.keys(this).forEach(function(key){
+            if(self[key] instanceof HTMLElement)
+                self[key].remove();
+            
+            if(key != 'options')
+                delete self[key];
+        });
+
+        this.initialized = false;
+    }
+
+    // Private function to initialize the tag input plugin
+    function init(tags){
+        tags.wrapper.append(tags.input);
+        tags.wrapper.classList.add(tags.options.wrapperClass);
+        tags.orignal_input.setAttribute('hidden' , 'true');
+        tags.orignal_input.parentNode.insertBefore(tags.wrapper , tags.orignal_input);
+    }
+
+    // initialize the Events
+    function initEvents(tags){
+        tags.wrapper.addEventListener('click' ,function(){
+            tags.input.focus();           
+        });
+        
+
+        tags.input.addEventListener('keydown' , function(e){
+            var str = tags.input.value.trim(); 
+
+            if( !!(~["Enter", ","].indexOf( e.key ))  )
+            {
+                e.preventDefault();
+                tags.input.value = "";
+                if(str != "")
+                    tags.addTag(str);
+            }
+
+        });
+    }
+
+
+    // Set All the Default Values
+    TagsInput.defaults = {
+        selector : '',
+        wrapperClass : 'tags-input-wrapper',
+        tagClass : 'tag',
+        max : null,
+        duplicate: false
+    }
+
+    window.TagsInput = TagsInput;
+
+})();
+
+ var tagInput1 = new TagsInput({
+            selector: 'keywords',
+            duplicate : false,
+            max : 7
+        });
+  </script>
+  <script>
+    {% comment %} var csrftoken = Cookies.get('csrftoken'); {% endcomment %}
+    {% comment %} {var csrftoken = Cookies.get('csrftoken')} {% endcomment %}
+    {% comment %} var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+    formData.append('csrfmiddlewaretoken', csrftoken); {% endcomment %}
+    
+    {% comment %} $(function() {
+      $.ajaxSetup({
+          headers: {
+            "X-CSRFToken": $('[name=csrfmiddlewaretoken]').val()
+          }
+      })
+   }); {% endcomment %}
+
+    if (document.getElementById('editor')) {
+      var quill = new Quill('#editor', {
+        theme: 'snow' // Specify theme in configuration
+      });
+    }
+
+
+    if (document.getElementById('choices-multiple-remove-button')) {
+      var element = document.getElementById('choices-multiple-remove-button');
+      
+      const example = new Choices(element, {
+        removeItemButton: true
+      });
+
+      example.setChoices(
+        [{
+            value: 'One',
+            label: 'Label One',
+            disabled: true
+          },
+          {
+            value: 'Two',
+            label: 'Label Two',
+            selected: true
+          },
+          {
+            value: 'Three',
+            label: 'Label Three'
+          },
+        ],
+        'value',
+        'label',
+        false,
+      );
+    }
+
+    if (document.querySelector('.datetimepicker')) {
+      var date = new AirDatepicker('.datetimepicker', {
+				dateFormat: 'yyyy-MM-dd',
+         timepicker: true,
+				position({$datepicker, $target, $pointer, isViewChange, done}) {
+					let popper = Popper.createPopper($target, $datepicker, {
+							placement: 'bottom',
+							onFirstUpdate: state => {
+									!isViewChange && anime.remove($datepicker);
+
+									$datepicker.style.transformOrigin = 'center top';
+
+									!isViewChange && anime({
+											targets: $datepicker,
+											opacity: [0, 1],
+											rotateX: [-90, 0],
+											easing: 'spring(1.3, 80, 5, 0)',
+									})
+
+							},
+							modifiers: [
+									{
+											name: 'offset',
+											options: {
+												offset: [0, 10]
+											}
+									},
+									{
+										name: 'arrow',
+										options: {
+											element: $pointer,
+										}
+									},
+									{
+                    name: 'computeStyles',
+                    options: {
+                      gpuAcceleration: false,
+                    },
+									},
+							]
+					});
+
+					return () => {
+							anime({
+									targets: $datepicker,
+									opacity: 0,
+									rotateX: -90,
+									duration: 300,
+									easing: 'easeOutCubic'
+							}).finished.then(() => {
+									popper.destroy();
+									done();
+							})
+					}}
+			}) // air
+    }
+
+    // mulival return
+    var formData = new FormData();
+    Dropzone.autoDiscover=false;
+    Dropzone.prototype.defaultOptions.dictRemoveFile = "Удалить файл";
+    const myDropzone= new Dropzone('#my-dropzone',{
+      url:  `{% if review %}{% url 'edit-review' review.id %}{% else %}{% url 'add-review' object.id %}{% endif %}`,
+      maxFiles: 5,
+    parallelUploads: 5,
+    acceptedFiles: 'image/jpg,image/png,image/jpeg',
+    uploadMultiple: true,
+    autoProcessQueue: false,
+    paramName: "file",
+    addRemoveLinks: true,
+        // headers: {
+        //     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        // },
+        init: function(){
+        //     //everytime a file is uploaded, save the file object
+        //     //for later use
+            var that = this
+            this.on("addedfile", function(file)
+            {
+              console.log(file.type);
+              if (file.type != "image/jpeg" && file.type != "image/png" && file.type != "image/jpg") {
+                Swal.fire(
+                      'Ошибка',
+                      // '<p>Допустимые форматы:</p><ul><li>.jpg</li><li>.jpeg</li><li>.png</li></ul></ul>',
+                      '<p>Допустимые форматы:</p><p>.jpg&nbsp;&nbsp;&nbsp;.jpeg&nbsp;&nbsp;&nbsp;.png</p>',
+                      'error'
+                    )
+                that.removeFile(file)
+            }
+                console.log(document.querySelector(".dz-progress"))
+                Array.from(document.querySelectorAll(".dz-progress")).forEach(e => {
+                  e.remove()
+                })
+                console.log(myDropzone.files)
+                if (myDropzone.files.length > 5) {
+                  Swal.fire(
+                      'Ошибка',
+                      'Изображений должно быть не больше 5',
+                      'error'
+                    )
+                }
+            }
+            
+            )
+          }
+    })
+    function dataURItoBlob(dataURI) {
+      'use strict'
+      var byteString, 
+          mimestring 
+  
+      if(dataURI.split(',')[0].indexOf('base64') !== -1 ) {
+          byteString = atob(dataURI.split(',')[1])
+      } else {
+          byteString = decodeURI(dataURI.split(',')[1])
+      }
+  
+      mimestring = dataURI.split(',')[0].split(':')[1].split(';')[0]
+  
+      var content = new Array();
+      for (var i = 0; i < byteString.length; i++) {
+          content[i] = byteString.charCodeAt(i)
+      }
+  
+      return new Blob([new Uint8Array(content)], {type: mimestring});
+  }
+
+function preView(url, name){
+    console.log(url);
+    let reader    = new FileReader();
+ 
+    getImageBlob( url , function(blob){
+        reader.readAsDataURL(blob);
+    });
+ 
+    reader.onload = function(e) {
+        console.log('DataURL:', e.target.result);
+        file1 = dataURItoBlob(e.target.result);
+        file1.name = name;
+        myDropzone.emit("addedfile", file1);
+        myDropzone.emit("thumbnail", file1, url);
+        myDropzone.emit("complete", file1);
+        myDropzone.files.push(file1);
+    }
+}
+function getImageBlob(url, cb) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.responseType = "blob";
+    xhr.onload  = function() {
+        if (this.status == 200) {
+            if(cb) cb(this.response);
+        }
+    };
+    xhr.send();
+}
+  {% for image in images %}
+    {% comment %} var file = {
+      name: '{{ image.name }}',
+      size: '{{ image.size }}',
+      dataURL: 'https://{{ request.META.HTTP_HOST }}{{ image.path }}',
+    }; {% endcomment %}
+    // var request = new XMLHttpRequest();
+    // request.open('GET', "{{ request.scheme }}://{{ request.META.HTTP_HOST }}{{ image.path }}", true);
+    // request.responseType = 'blob';
+    // request.onload = function() {
+    //   var file = new FileReader();
+    //   var file1;
+    //   file.onloadend =  function(e){
+    //       console.log('DataURL:', e.target.result);
+    //       file1 = dataURItoBlob(e.target.result);
+    //       file1.name = '{{ image.name }}';
+    //       myDropzone.emit("addedfile", file1);
+    //       myDropzone.emit("thumbnail", file1, '{{ request.scheme }}://{{ request.META.HTTP_HOST }}{{ image.path }}');
+    //       myDropzone.emit("complete", file1);
+    //       myDropzone.files.push(file1);
+    //   };
+    //   console.log(request.response)
+    //   file.readAsDataURL(request.response)
+    // };
+    // request.send();
+    preView("https://{{ request.META.HTTP_HOST }}{{ image.path }}", '{{ image.name }}')
+    {% comment %} var file = new File("{{ request.scheme }}://{{ request.META.HTTP_HOST }}{{ image.path }}"); {% endcomment %}
+  {% endfor %}
+    // $.ajaxSetup({
+    //     data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+    //   });
+      $("#sub").click(function (e) {
+            e.preventDefault();
+            formData.append("text", $("#text").val());
+            if ($("#text").val().length < 10 || $("#text").val().length > 1000){
+              Swal.fire(
+                'Ошибка',
+                'Текст отзыва должен быть от 10 до 1000 символов',
+                'error'
+              )
+            } else if ($("#review_date").val() == '') {
+              Swal.fire(
+                'Ошибка',
+                'Выберите дату',
+                'error'
+              )
+              
+            } else{
+              formData.append("star", $("#star").val());
+            formData.append("review_date", $("#review_date").val());
+            console.log(myDropzone.files);
+            for(i=0;i<myDropzone.files.length && i < 5;i++)
+            {
+                formData.append('image'+(i+1), myDropzone.files[i]);
+            }
+            var request = new XMLHttpRequest();
+            var link = `{% if review %}{% url 'edit-review' review.id %}{% else %}{% url 'add-review' object.id %}{% endif %}`;
+            request.open("POST", link); //config your post url here
+            request.setRequestHeader("X-CSRFToken", document.querySelector('[name=csrfmiddlewaretoken]').value);
+            request.send(formData);
+            console.log(request.response);
+            request.onreadystatechange = function() {
+              if (request.readyState === 4) {
+                  if (request.status === 200) {
+                    window.location.href = '/reviews?status=active';
+                    $(e.target).attr('disabled', true)
+                    $(e.target).addClass('disabled')
+                  } else {
+                    Swal.fire(
+                      'Ошибка',
+                      'Что-то пошло не так',
+                      'error'
+                    ).then(function() {
+                window.location = "/reviews?status=active";
+            });
+                  }
+              }
+            }
+            {% comment %} e.stopPropagation(); {% endcomment %}
+
+
+            {% comment %} window.location.href = '/reviews?status=active'; {% endcomment %}
+            // request.addEventListener("load", transferComplete);
+            // request.addEventListener("error", transferFailed);
+        
+            }
+            }); 
+      console.log('{{ error }}');
+      if('{{ error }}' == 'True'){
+        Swal.fire(
+          'Ошибка',
+          'Исчерпан лимит на отзывы по тарифу',
+          'error'
+        ).then(function() {
+    window.location = "/reviews?status=active";
+});
+      }
+
+      // function transferComplete(evt) {
+      //     console.log("The transfer is complete.");
+      //     window.location.href = '/reviews?status=active';
+      //     // Do something
+      // }
+
+// var submitButton = document.querySelector("#submit-all");
+// var wrapperThis = this;
+
+// submitButton.addEventListener("click", function () {
+//     wrapperThis.processQueue();
+// });
+
+// this.on("addedfile", function (file) {
+
+//     // Create the remove button
+//     var removeButton = Dropzone.createElement("<button class='btn btn-lg dark'>Remove File</button>");
+
+//     // Listen to the click event
+//     removeButton.addEventListener("click", function (e) {
+//         // Make sure the button click doesn't submit the form:
+//         e.preventDefault();
+//         e.stopPropagation();
+
+//         // Remove the file preview.
+//         wrapperThis.removeFile(file);
+//         // If you want to the delete the file on the server as well,
+//         // you can do the AJAX request here.
+//     });
+
+//     // Add the button to the file preview element.
+//     file.previewElement.appendChild(removeButton);
+// });
+
+// this.on('sendingmultiple', function (data, xhr, formData) {
+//     formData.append("text", $("#text").val());
+//     formData.append("star", $("#star").val());
+//     formData.append("review_date", $("#review_date").val());
+
+// });
+// $("#sub").click(function (e) {
+//             // e.preventDefault();
+//             // e.stopPropagation();
+//             myDropzone.processQueue();
+//         }); 
+// }
+        
+        
+//     })
+//     $('#sub').on('click', function () {
+//     myDropzone.processQueue();
+// });
+     
+  </script>
+
+{% endblock javascripts %}

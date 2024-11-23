@@ -1,0 +1,717 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Новый отзыв {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+  <link rel="stylesheet" href="{% static 'css/buyout-create-style.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.2.1/air-datepicker.css">
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid py-4">
+      <div class="col-lg-11 col-12 mx-auto">
+        <div class="card card-body mt-4">
+          <div class="row gx-4">
+            <div class="col-auto">
+            </div>
+            <div class="col-auto my-auto mt-2">
+               <div class="h-100">
+                <h3 class="mb-0">
+                  Добавление выкупов
+                </h6>
+              </div> 
+            </div>
+        </div>
+
+
+        <hr class="horizontal dark my-3">
+        <div class='row'>
+          
+          <div class='col-auto'>
+            <input id="sku-to-add" type="text" name="sku-to-add" class="multisteps-form__input form-control col-3" placeholder="Введите артикул">
+          </div>
+          <div class='col-auto '>
+            <button id='buyout-add-sku' class="btn bg-gradient-dark text-white m-0 ms-2">Добавить</button>
+          </div>
+          {% comment %} <div class='col-auto' style='margin-left: auto;'>
+            <button id='buyout-select-pay' class="btn text-white m-0 ms-2" style='background-color: #007bff;'>Включить автооплату</button>
+          </div> {% endcomment %}
+          
+
+        </div>
+        <div>
+          <div style="overflow: auto; mt-15">
+            <table class="table" style='display: none;'>
+              <thead>
+                <tr>
+                  <th scope="col">Фото</th>
+                  <th scope="col">Артикул</th>
+                  <th scope="col">Цена</th>
+                  <th scope="col">Название</th>
+                  <th scope="col">Количество</th>
+                  <th scope="col">Размер</th>
+                  <th scope="col">Пол</th>
+                  <th scope="col">Ключевая фраза</th>
+                  <th scope="col">Дата выкупа - начало</th>
+                  <th scope="col">Дата выкупа - конец</th>
+                  <th scope="col">Адрес</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+            
+          </div>
+          <div class="d-flex justify-content-end mt-4">
+            <button class="btn bg-gradient-primary m-0 ms-2" style='display:none;' id='products-submit'>Добавить выкупы</button>
+          </div>
+        </div>
+      
+        </div>
+      </div>
+      <div class="container-fluid py-4">
+
+      </div>
+      </div>
+    </div>
+    {% include "includes/footer.html" %}
+  </div>
+  <div id="myModal_pvz" class="modal">
+    <div class="modal-content d-block">
+      <span class="close justify-content-end">&times;</span>
+      <h3>Выберете ПВЗ из списка</h3>
+      <div style="display: flex;justify-content: start;margin-top: 25px;margin-bottom: -25px;">
+        <button class="btn bg-gradient-primary" id="reset_pvz">очистить выбор</button>
+      </div>
+      
+      <div class='col-12 mt-4'>
+        <ul class="list-group list-group-flush d-contents" style='flex-wrap: inherit;'>
+        {% for pvz in good_pvz %}
+        <li class="list-group-item">
+          <div class="form-check mx-3" >
+          <input class="form-check-input" style='font-size: 1rem;' type="checkbox" value="" id="pvz-{{ pvz.0 }}" checked>
+          <label class="form-check-label" style='font-size: 1rem;' for="pvz-{{ pvz.0 }}">
+            {{ pvz.1 }}
+          </label>
+        </div>
+        </li>
+        
+        {% endfor %}
+      </ul>
+        <div class="justify-content-end d-flex">
+          <button class='btn btn-success col-auto justify-content-end d-flex' id="pvz-selection">Подтвердить</button>
+        </div>
+      </div>
+      </div>
+
+      
+    </div>
+  
+  </div>
+
+
+  <div id="modal_type_payment" class="modal">
+    <div class="modal-content d-block">
+      <span class="close justify-content-end">&times;</span>
+      <h3>Выберете тип перехвата СМС для автооплаты</h3>
+      <div class='col-12 mt-4'>
+        <select class="form-control w-50" id="payment_type" name="payment_type">
+          <option value="no">Не выбрано</option>
+          <option value="app">Приложение</option>
+          <option value="tg">Telegram</option>
+        </select>
+        <div class="tg-time" style='display: none;'>
+          <div class="start-time">
+            <label>Выберите начало временного диапазона</label>
+            <div class="col-3">
+              <input autocomplete="off" class="form-control timepicker" type="date" placeholder="Укажите дату начала выкупов" id='buyout_date_start_tg' name="buyout_date_start_tg">
+            </div>
+            
+          </div>
+          <div class="end-time">
+            <label>Выберите конец временного диапазона</label>
+            <div class="col-3">
+              <input autocomplete="off" class="form-control timepicker" type="date" placeholder="Укажите дату окончания выкупов" id='buyout_date_end_tg' name="buyout_date_end_tg" >
+            </div>
+            
+          </div>
+          
+          
+        </div>
+        <div class="justify-content-end d-flex">
+          <button class='btn btn-success col-auto justify-content-end d-flex' id="sms-choice-done">Подтвердить</button>
+        </div>
+      </div>
+      </div>
+
+      
+    </div>
+  
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+  
+  <script src="/static/assets/js/jquery.js"></script>
+  <script src="/static/assets/js/plugins/datatables.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="/static/assets/css/datatables.min.css"></link>
+  <script src='//cdn.datatables.net/plug-ins/1.11.5/sorting/formatted-numbers.js'></script>
+  <script src="/static/assets/js/plugins/choices.min.js"></script>
+  <script src="/static/assets/js/plugins/quill.min.js"></script>
+  <script src="/static/assets/js/plugins/flatpickr.min.js"></script>
+  <script src="/static/assets/js/plugins/dropzone.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.2.1/air-datepicker.min.js"></script>
+
+
+  <script>
+  function initializeDatePicker(elClass, parametrs = {}) {
+      var date = new AirDatepicker('#' + elClass, Object.assign({
+              dateFormat: 'dd.MM.yyyy',
+              position({$datepicker, $target, $pointer, isViewChange, done}) {
+                let popper = Popper.createPopper($target, $datepicker, {
+                    placement: 'bottom',
+                    onFirstUpdate: state => {
+                        !isViewChange && anime.remove($datepicker);
+      
+                        $datepicker.style.transformOrigin = 'center top';
+      
+                        !isViewChange && anime({
+                            targets: $datepicker,
+                            opacity: [0, 1],
+                            rotateX: [-90, 0],
+                            easing: 'spring(1.3, 80, 5, 0)',
+                        })
+      
+                    },
+                    modifiers: [
+                        {
+                            name: 'offset',
+                            options: {
+                                offset: [0, 10]
+                            }
+                        },
+                        {
+                          name: 'arrow',
+                          options: {
+                              element: $pointer,
+                          }
+                        },
+                        {
+                            name: 'computeStyles',
+                            options: {
+                                gpuAcceleration: false,
+                            },
+                        },
+                    ]
+                });
+      
+                return () => {
+                    anime({
+                        targets: $datepicker,
+                        opacity: 0,
+                        rotateX: -90,
+                        duration: 300,
+                        easing: 'easeOutCubic'
+                    }).finished.then(() => {
+                        popper.destroy();
+                        done();
+                    })
+                }}
+            }, parametrs)
+            ) // air
+    }
+</script>
+
+  <script>
+    $('#payment_type').change(function() {
+        var val = $("#payment_type option:selected").val();
+        if (val == 'tg'){
+          $(".timepicker").attr("readonly", false);
+          $('.tg-time').show();
+        }
+        else{
+          $('#buyout_date_start_tg').val('');
+          $('#buyout_date_end_tg').val('');
+          $('.tg-time').hide();
+        }
+
+    });
+    $('#buyout-add-sku').click(function(){
+      var sku_val = $('#sku-to-add').val();
+      $.ajax({
+        type: 'POST',
+        url: '{% url "sku-to-buyout" %}',
+        data: {
+          'sku': sku_val,
+          'csrfmiddlewaretoken': '{{ csrf_token }}',
+        },
+        success: function(response){
+
+          if ($('table').css("display") == 'none'){
+            $('table').show();
+          }
+          if ($('#products-submit').css("display") == 'none'){
+            $('#products-submit').show();
+          }
+          const element = document.getElementsByTagName("tbody")[0];
+          element.innerHTML += response['resp'];
+          $('#sku-to-add').val('');
+          {% comment %} $('tbody').append(response['resp']); {% endcomment %}
+          if (document.querySelector('.datetimepicker')) {
+            $('.datetimepicker').each((ind, el) => {
+              initializeDatePicker($(el).attr('id'))
+            }) // airpicker
+
+          }
+        },
+        error: function (xhr, status, error){
+          var message = JSON.parse(xhr.responseText)['resp']
+          if (message == 'stock'){
+            Swal.fire('Ошибка', 'Товара нет в наличии', 'error');
+          } else if (message == 'tarif'){
+            Swal.fire('Ошибка', 'Необходимо приобрести тариф', 'error');
+          } else if (message == 'pvz'){
+            Swal.fire('Ошибка', 'Прежде чем начать создавать группу выкупов, необходимо <a href="{% url "pvz" %}" style="font-weight:600">настроить список ПВЗ</a>', 'error');
+          } else if (message == 'pvz_limit'){
+            Swal.fire('Ошибка', 'У Вас закончились свободные ПВЗ, посетите <a href="{% url "pvz" %}" style="font-weight:600">страницу ПВЗ</a>, чтобы добавить новые.', 'error');
+          }
+          else{
+            Swal.fire('Ошибка', 'SKU не найден', 'error');
+            console.log(message);
+          }
+          
+        }
+      })
+    })
+
+    $(document).ready(function(){
+      $('#products').DataTable({
+        "language": {
+          "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/ru.json"
+      }
+      });
+      $("[rel=tooltip]").tooltip({ placement: 'right'});
+  });
+  </script>
+
+
+  <script>
+
+    {% comment %} var ps_b = document.getElementById('products-submit');
+    ps_b.addEventListener('click', event => { {% endcomment %}
+    $('#products-submit').click(function(){
+      if ("{{ is_more_card }}" == "True") {
+        Swal.fire({
+          text: 'Для использования автооплаты мы рекомендуем добавить больше карт',
+          title: 'Обратите внимание!',
+          icon: 'warning',
+          {% comment %} showDenyButton: true, {% endcomment %}
+          denyButtonText: 'Игнорировать',
+          confirmButtonText: 'Продолжить',
+          denyButtonColor: '#dae100',
+          {% comment %} confirmButtonColor: '#18c535' {% endcomment %}
+        }).then((result) => {
+          if (result.isConfirmed) {
+            $(".swal2-confirm").html('Продолжить <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="loader-in-confirm"><path d="M105.1 202.6c7.7-21.8 20.2-42.3 37.8-59.8c62.5-62.5 163.8-62.5 226.3 0L386.3 160H336c-17.7 0-32 14.3-32 32s14.3 32 32 32H463.5c0 0 0 0 0 0h.4c17.7 0 32-14.3 32-32V64c0-17.7-14.3-32-32-32s-32 14.3-32 32v51.2L414.4 97.6c-87.5-87.5-229.3-87.5-316.8 0C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5zM39 289.3c-5 1.5-9.8 4.2-13.7 8.2c-4 4-6.7 8.8-8.1 14c-.3 1.2-.6 2.5-.8 3.8c-.3 1.7-.4 3.4-.4 5.1V448c0 17.7 14.3 32 32 32s32-14.3 32-32V396.9l17.6 17.5 0 0c87.5 87.4 229.3 87.4 316.7 0c24.4-24.4 42.1-53.1 52.9-83.7c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.5 62.5-163.8 62.5-226.3 0l-.1-.1L125.6 352H176c17.7 0 32-14.3 32-32s-14.3-32-32-32H48.4c-1.6 0-3.2 .1-4.8 .3s-3.1 .5-4.6 1z"/></svg>')
+            $(".swal2-confirm").css('opacity', '0.7')
+            console.log(result);
+            addProducts()
+          }
+        })
+      } else {
+         addProducts()
+      }
+      
+    })
+    function addProducts() {
+      var forms = document.getElementsByTagName("FORM");
+      var current_form, date_s, date_e, date_diff;
+      var has_errors = true;
+      
+      for (var i=0; i<forms.length; i++){
+        current_form = forms[i];
+        console.log($('#buyout_date_start'+'-id-'+current_form.id).val());
+        {% comment %} current_form = forms[i];
+        console.log(current_form);
+        console.log(current_form.id);
+        for (var j=0; j<forms[i].length; j++) {
+          console.log(forms[i][j]);
+        }
+        console.log($('#buyout_date_start'+'-id-'+current_form.id).val());
+        console.log(current_form['buyout_date_start']); {% endcomment %}
+        date_s = Date.parse($('#buyout_date_start'+'-id-'+current_form.id).val());
+        date_e = Date.parse($('#buyout_date_end'+'-id-'+current_form.id).val());
+        if (date_s == date_e){
+          date_diff = 1;
+        }
+        else{
+          date_diff = Math.ceil((date_e - date_s) / (1000 * 60 * 60 * 24));
+            date_diff += 1;
+          
+        }
+
+        if ($('#count_item'+'-id-'+current_form.id).val() <= 0){
+          Swal.fire(
+            'Ошибка',
+            'Количество выкупов должно быть больше 0',
+            'error'
+          )
+          has_errors = false;
+        }
+        else if ($('#key_phrase'+'-id-'+current_form.id).val() == ''){
+          Swal.fire(
+            'Ошибка',
+            'Введите ключевую фразу',
+            'error'
+          )
+          has_errors = false;
+        }
+        else if ($('#buyout_date_start'+'-id-'+current_form.id).val() == '' || $('#buyout_date_end'+'-id-'+current_form.id).val() == ''){
+          Swal.fire(
+            'Ошибка',
+            'Укажите дату начала и окончания выкупов',
+            'error'
+          )
+          has_errors = false;
+        }
+        else if (date_diff > $('#count_item'+'-id-'+current_form.id).val()){
+          Swal.fire(
+            'Ошибка',
+            'Измените количество выкупов или даты для совершения выкупа',
+            'error'
+          )
+          has_errors = false;
+        }
+        else if ($('#pvz_selected'+'-id-'+current_form.id).val().split(',').length == 1){
+          Swal.fire(
+            'Ошибка',
+            'Добавьте ПВЗ',
+            'error'
+          )
+          has_errors = false;
+        }
+          
+      }
+      if (has_errors){
+        var latest_group = 1;
+        $.ajax({
+          headers: { "X-CSRFToken": '{{ csrf_token }}' },
+          type: 'POST',
+          async:false, 
+          url: '{% url "get-latest-group" %}',
+          success: function(response){
+            console.log(response);
+            latest_group = response['resp']+1;
+          },
+        });
+        console.log(latest_group);
+        for (var i=0; i<forms.length; i++) {
+          {% comment %} forms[i].submit(); {% endcomment %}
+          {% comment %} $.ajax(forms[i].submit()); {% endcomment %}
+          {% comment %} var results = {};
+          for (var j=0; j<forms[i].length; j++) {
+              results[.push($(forms[i][j]).serialize())];
+          }; {% endcomment %}
+          current_form = forms[i];
+          var elements_form = {
+            'marketplace': $('#marketplace'+'-id-'+current_form.id).val(),
+            'sku': $('#sku'+'-id-'+current_form.id).val(),
+            'size': $('#size'+'-id-'+current_form.id).val(),
+            'sex': $('#sex'+'-id-'+current_form.id).val(),
+            'key_phrase': $('#key_phrase'+'-id-'+current_form.id).val(),
+            'count_item': $('#count_item'+'-id-'+current_form.id).val(),
+            'buyout_date_start': $('#buyout_date_start'+'-id-'+current_form.id).val(),
+            'buyout_date_end':  $('#buyout_date_end'+'-id-'+current_form.id).val(),
+            'is_dbs': $('#is_dbs'+'-id-'+current_form.id).val(),
+            'pvz_selected': $('#pvz_selected'+'-id-'+current_form.id).val(),
+            'group_num': latest_group,
+            'pay_type': 'no',
+            'tg_start_date': $('#buyout_date_start_tg').val(),
+            'tg_end_date': $('#buyout_date_end_tg').val()
+
+          }
+          $.ajax({
+            'headers': { "X-CSRFToken": '{{ csrf_token }}' },
+            'url': '{% url "buyout_create" %}',
+            'method': 'POST',
+            'async':false, 
+            'data': elements_form,
+            'dataType': 'html',
+            'success': function (data) {
+                 console.log(data);
+                console.log('good');
+            }
+        });
+        }
+        Swal.fire(
+        'Готово!',
+        'Выкупы добавлены',
+        'success'
+      ).then(function() {
+        window.location = "{% url 'buyout' %}?status=active&group="+latest_group.toString();
+        })
+      }
+    }
+    $('#buyout-select-pay').click(function(){
+      modal_pay.style.display = "block";
+    })
+
+
+    var modal = document.getElementById("myModal_pvz");
+    var span = document.getElementsByClassName("close")[0];
+    span.onclick = function() {
+      modal.style.display = "none";
+    }
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+  }
+  function is_good_sms_type(){
+    var sms_type = $("#payment_type option:selected").val();
+    if (sms_type == 'tg'){
+
+      var tg_start = $('#buyout_date_start_tg').val();
+      var tg_end = $('#buyout_date_end_tg').val();
+      console.log('{{ is_tg_connect }}');
+      if ('{{ is_tg_connect }}' == 'None'){
+        Swal.fire('Ошибка', `У вас не подлючен Telegram Bot. Для того чтобы  подключить - перейдите на страницу <a href="{% url 'add-card' %}">Настройка оплаты</a>`, 'error');
+        return false
+      }
+      else if (tg_start == '' && tg_end == ''){
+        Swal.fire('Ошибка', 'Заполните временной диапазон для типа перехвата СМС по Telegram', 'error');
+        return false
+      }
+      else if (tg_start == tg_end){
+        Swal.fire('Ошибка', 'Время начала не может равняться времени окончания', 'error');
+        return false
+      }
+    }
+    else if ( sms_type == 'app'){
+      if ('{{ is_app_connect }}' == ''){
+        Swal.fire('Ошибка', `У вас не подлючено приложение для перехвата СМС. Для того чтобы  подключить - перейдите на страницу <a href="{% url 'add-card' %}">Настройка оплаты</a>`, 'error');
+        return false
+      }
+    }
+    return true
+  }
+  var modal_pay = document.getElementById("modal_type_payment");
+    var span_pay = document.getElementsByClassName("close")[1];
+    var sms_close = document.getElementById('sms-choice-done');
+
+    sms_close.onclick = function() {
+      if (is_good_sms_type() == true){
+        modal_pay.style.display = "none";
+      }
+    }
+    span_pay.onclick = function() {
+      if (is_good_sms_type() == true){
+        modal_pay.style.display = "none";
+      }
+      
+    }
+    window.onclick = function(event) {
+      if (event.target == modal_pay) {
+        if (is_good_sms_type() == true){
+          modal_pay.style.display = "none";
+        }
+        
+      }
+  }
+    function pvz_show_product(product){
+      console.log(product);
+      $('.form-check-input').removeAttr('checked').prop('checked', false);
+      var pvz_checked = $('.pvz_selected'+'-'+product).val().split(',');
+      pvz_checked.forEach((element) => {
+        console.log(element);
+        console.log($('#pvz-'+element));
+        $('#pvz-'+element).attr('checked', '').prop('checked', true);
+      });
+      console.log(pvz_checked);
+      $('#pvz-selection').attr('product', product);
+      modal.style.display = "block";
+
+    } 
+    {% comment %} $('.btn-pvz-choice').click(function(){
+      modal.style.display = "block";
+    }) {% endcomment %}
+    {% for pvz in good_pvz %}
+    $('#pvz-{{ pvz.0 }}').click(function(){
+      if ($(this).is(':checked')) {
+        $('#pvz-{{ pvz.0 }}').attr('checked', 'checked');
+      }
+      else{
+        $('#pvz-{{ pvz.0 }}').attr('checked');
+        $('#pvz-{{ pvz.0 }}').removeAttr('checked');
+      }
+      {% comment %} $('#pvz-{{ pvz.0 }}').removeAttr('checked'); {% endcomment %}
+    })
+        
+    {% endfor %}
+    
+    $('#pvz-selection').click(function(){
+      var product_id = $('#pvz-selection').attr('product');
+      console.log(product_id);
+      var pvz_list = $('.form-check-input');
+      var counter_pvz = 0;
+      var pvz_selected = $('.pvz_selected'+'-'+product_id);
+      pvz_selected.val('');
+      Array.from(pvz_list).forEach((element) => {
+        console.log(element);
+        if (element.getAttribute('checked') == 'checked'){
+          console.log(element.id);
+          $('.pvz_selected'+'-'+product_id).val($('.pvz_selected'+'-'+product_id).val()+ element.id.split('-')[1] + ',');
+          counter_pvz += 1;
+
+        }
+      });
+      modal.style.display = "none";
+      $('#count_selected_pvz'+'-'+product_id).text(counter_pvz);
+    })
+    
+
+
+    if (document.querySelector('.datetimepicker')) {
+      $('.datetimepicker').each((ind, el) => {
+        initializeDatePicker($(el).attr('id'))
+      }) // airpicker
+    }
+    if (document.querySelector('.timepicker')) {
+      flatpickr('.timepicker', {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true
+      }); // flatpickr
+    }
+
+    var keys = [];
+      $('.add_key').click(function(){
+        var count_key = $(this).parentEmelement.getElementsByClassName('key-list')[0].children.length;
+        var key_phrase = $(this).parentEmelement.getElementById('key_phrase_input').value;
+        console.log($(this));
+        if ((count_key < 3) && (key_phrase != '')){
+          
+          $('.key-list').append(`<li class="list-group-item"><span>${key_phrase}</span><a href="#" onclick="delete_phrase('${key_phrase}')" id="delete_phrase"><span>X</span></a></li>`);
+          $('#key_phrase_input').val('');
+          $(this).parentEmelement.getElementById('key_phrase').value += key_phrase + ','
+        }
+
+        
+      });
+
+    function delete_phrase(key) {
+      $.each($('.list-group-item'), function (index, value) 
+          {
+             if (value.getElementsByTagName('span')[0].textContent == key) 
+            {
+              value.remove();
+              document.getElementById('key_phrase').value = document.getElementById('key_phrase').value.replace(key+',', '');
+              
+              
+            }
+          });
+    }
+    
+
+
+  </script>
+
+  <script type="text/javascript">
+    function outputUpdate(vol) {
+      var output = document.querySelector('#volume');
+      output.value = vol;
+      output.style.left = vol - 20 + 'px';
+      if(output.value > 9) {
+        output.style.left = vol - 30 + 'px';
+      }
+      if(output.value > 99) {
+        output.style.left = vol - 40 + 'px';
+      }
+      if(output.value > 240) {
+        output.style.left = vol - 45 + 'px';
+      }
+      if(output.value > 430) {
+        output.style.left = vol - 50 + 'px';
+      }
+      if(output.value > 470) {
+        output.style.left = vol - 55 + 'px';
+      }
+    }
+  </script>
+
+  <script>
+    var resetButton = document.querySelector("#reset_pvz")
+    resetButton.addEventListener('click', () => {
+      var inputs = Array.from(document.querySelectorAll(".list-group input[type=checkbox]"))
+      inputs.forEach((el) => {
+        $(el).removeAttr('checked').prop('checked', false);
+      })
+    })
+  </script>
+  <script> 
+    var anyway
+    function copyProduct(sku, tr, elem) { 
+      $.ajax({ 
+        type: 'POST', 
+        url: '{% url "sku-to-buyout" %}', 
+        data: { 
+          'sku': sku, 
+          'csrfmiddlewaretoken': '{{ csrf_token }}', 
+          'count': $('input[name=count_item]', $(tr)).val(), 
+          'sex': $('input[type=range]', $(tr)).val(), 
+          'size': $('select option:selected', $(tr)).text(), 
+          'phrase': $('input[name=key_phrase]', $(tr)).val(), 
+          'date-start': $('input[name=buyout_date_start]', $(tr)).val(), 
+          'date-end': $('input[name=buyout_date_end]', $(tr)).val(), 
+          'pvz_selected': $('input[name=pvz_selected]', $(tr)).val(), 
+        }, 
+        beforeSend: function() { 
+          $('span', $("#clip-" + elem)).html(`<svg xmlns="http://www.w3.org/2000/svg" style="width: 15px" viewBox="0 0 512 512" class="loader-svg"><path d="M256 0c-17.7 0-32 14.3-32 32s14.3 32 32 32V0zM422.3 352c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7L422.3 352zM256 64c106 0 192 86 192 192h64C512 114.6 397.4 0 256 0V64zM448 256c0 35-9.4 67.8-25.7 96L477.7 384c21.8-37.7 34.3-81.5 34.3-128H448z"></path></svg>`) 
+        }, 
+        success: function(response){ 
+          const element = document.getElementsByTagName("tbody")[0]
+          element.innerHTML += response['resp']
+          {% comment %} $('tbody').append(response['resp']); {% endcomment %}
+          if (document.querySelector('.datetimepicker')) {
+            $('.datetimepicker').each((ind, el) => {
+              initializeDatePicker($(el).attr('id'))
+            }) // airpicker
+ 
+          } 
+        }, 
+ 
+        error: function (xhr, status, error){ 
+          var message = JSON.parse(xhr.responseText)['resp'] 
+          if (message == 'stock'){ 
+            Swal.fire('Ошибка', 'Товара нет в наличии', 'error'); 
+          } else if (message == 'tarif'){ 
+            Swal.fire('Ошибка', 'Необходимо приобрести тариф', 'error'); 
+          } else if (message == 'pvz'){ 
+            Swal.fire('Ошибка', 'Прежде чем начать создавать группу выкупов, необходимо <a href="{% url "pvz" %}" style="font-weight:600">настроить список ПВЗ</a>', 'error'); 
+          } else if (message == 'pvz_limit'){ 
+            Swal.fire('Ошибка', 'У Вас закончились свободные ПВЗ, посетите <a href="{% url "pvz" %}" style="font-weight:600">страницу ПВЗ</a>, чтобы добавить новые.', 'error'); 
+          } 
+          else{ 
+            Swal.fire('Ошибка', 'SKU не найден', 'error'); 
+            console.log(message); 
+          }
+          },
+        complete: function() { 
+          $('span', $("#clip-" + elem)).html(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="fill: #999;width:15px"><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"></path></svg>`) 
+        },
+      })
+    } 
+  </script>
+{% endblock javascripts %}

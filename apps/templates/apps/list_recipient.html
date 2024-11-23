@@ -1,0 +1,222 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Ecommerce Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="row">
+    <div class="col-12 card">
+      <div class='m-3'>
+        <h5>Списки получателей </h5>
+        <p class="text-sm mb-0">Добавьте кому рассылать.</p>
+      </div>
+      
+    </div>
+  </div>
+  <div class="row mt-4">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 >Добавить Список</h5>
+          <p class="text-sm mb-0">Укажите ссылку на товар или бренд и нажмите кнопку “Добавить“.</p>
+          <div class="col-12 col-sm-10 col-md-12 mt-3">
+              <form action="/add-to-favorite/" method="post">
+                {% csrf_token %}
+                {% comment %} <label>Выберите источник (соц сеть)</label>
+              <select id="marketplace" type="text" name="marketplace" class="form-control" name="choices-sizes" id="choices-currency-edit">
+                <option value="Wildberries" selected="">Wildberries</i></option>
+                <option value="Ozon">Ozon</option>
+              </select> {% endcomment %}
+              <div class="col-12">
+                <label>Введите название</label>
+        <span class="text-danger">{{ form.url.errors }}</span>
+                <input id="url" type="text" name="url" class="multisteps-form__input form-control" placeholder="Мой первый список" />
+              </div>
+              <label>Выберите тип</label>
+              <select id="marketplace" type="text" name="marketplace" class="form-control" name="choices-sizes" id="choices-currency-edit">
+                <option value="Wildberries" selected="">Белый список</i></option>
+                <option value="Ozon">Черный список</option>
+              </select>
+              {% comment %} <div class="col-12 col-sm-6">
+                <label>Количество лайков</label>
+                <input id="count" type="number" name="count" class="multisteps-form__input form-control" placeholder="1" />
+              </div> {% endcomment %}
+              <div class="col-12">
+                <label>Введите ID</label>
+                <textarea id="id-list" name="id_list" class="multisteps-form__input form-control" rows="5" placeholder="Введите ID через запятую или в столбик"></textarea>
+            </div>
+            </div>
+            {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+          {% endif %}
+            <div class="row">
+            </div>
+            <div class="d-flex justify-content-end mt-4">
+              <button  type="submit"  class="btn bg-gradient-primary m-0 ms-2"  >Добавить</button>
+              {% comment %} <button  type="subbmit"  class="btn bg-gradient-primary m-0 ms-2" >Не доступно</button> {% endcomment %}
+            </div>
+          </form>
+        </div>
+      </div>
+      
+    </div>
+    <div class="col-md-8 mt-sm-0 mt-4">
+      <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <!-- Card header -->
+              <div class="card-header pb-0">
+                <div class="d-lg-flex">
+                  <div>
+                    <h5 class="mb-0">Добавленные Списки</h5>
+                    <p class="text-sm mb-0">
+                      Здесь отображаются активные и завершенные списки.
+                    </p>
+                  </div>
+                  <div class="ms-auto my-auto mt-lg-0 mt-4">
+                    <div class="ms-auto my-auto">
+                      
+                      </button>
+                      <div class="modal fade" id="import" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog mt-lg-10">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="ModalLabel">Import CSV</h5>
+                              <i class="fas fa-upload ms-3"></i>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                              <p>You can browse your computer for a file.</p>
+                              <input type="text" placeholder="Browse file..." class="form-control mb-3">
+                              <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="importCheck" checked="">
+                                <label class="custom-control-label" for="importCheck">I accept the terms and conditions</label>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn bg-gradient-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                              <button type="button" class="btn bg-gradient-primary btn-sm">Upload</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {% comment %} <button class="btn btn-outline-primary btn-sm export mb-0 mt-sm-0 mt-1" data-type="csv" type="button" name="button">Экспорт</button> {% endcomment %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body px-0 pb-0">
+                <div class="table-responsive">
+                  <table class="table table-flush" id="products-list">
+                    <thead class="thead-light">
+                      <tr>
+                        <th>Название</th>
+                        <th>Тип списка</th>
+                        <th>Используется в</th>
+                        <th>Действие</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for object in objects%}
+                      <tr>
+                        <td class="text-sm">{{object.marketplace.name}}</td>
+                        
+                        <td class="text-sm">{{object.url}}</td>
+                        <td class="text-sm">{{object.count}}</td>
+                        <td class="text-sm">{{object.count_done}}</td>
+                        <td class="text-sm">
+                            </a>
+                            
+                            <a href="{% url 'favorite-delete' object.id %}" data-bs-toggle="tooltip" data-bs-original-title="Удалить задачу">
+                              <i class="fas fa-trash text-secondary"></i>
+                            </a>
+                          </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th>Продукт</th>
+                        <th>Дата</th>
+                        <th>Цена</th>
+                        <th>Ссылка</th>
+                        <th>Количество</th>
+                        <th>Action</th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="container-fluid py-4">
+  </div>
+  {% include "includes/footer.html" %}
+
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+  <script>
+    if ("{{error}}" == "False"){
+      Swal.fire(
+      'Ошибка',
+      '{{ error_message }}',
+      'error'
+    )
+      }
+      
+  </script>
+  <script src="/static/assets/js/datatables.js"></script>
+  <script>
+    if (document.getElementById('products-list')) {
+      const dataTableSearch = new simpleDatatables.DataTable("#products-list", {
+        searchable: true,
+        fixedHeight: false,
+        perPage: 7
+      });
+
+      document.querySelectorAll(".export").forEach(function(el) {
+        el.addEventListener("click", function(e) {
+          var type = el.dataset.type;
+
+          var data = {
+            type: type,
+            filename: "soft-ui-" + type,
+          };
+
+          if (type === "csv") {
+            data.columnDelimiter = "|";
+          }
+
+          dataTableSearch.export(data);
+        });
+      });
+    };
+    document.getElementById("id-list").addEventListener("input", function (event) {
+      let input = event.target.value;
+      // Заменяем запятые и пробелы на переносы строки
+      event.target.value = input.replace(/,|\s+/g, '\n').trim();
+  });
+  
+  </script>
+  
+  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+{% endblock javascripts %}

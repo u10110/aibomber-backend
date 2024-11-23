@@ -1,0 +1,180 @@
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 10000; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 40%;
+}
+
+/* The Close Button */
+.close {
+    color: #aaaaaa;
+    display: flex;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+@media (max-width: 1000px) {
+    .modal-content {
+        width: 60%;
+    }
+}
+@media (max-width: 800px) {
+    .modal-content h3{
+        font-size: 1.3em;
+    }
+}
+@media (max-width: 480px) {
+    .modal-content {
+        width: 80%;
+    }
+}
+@media (max-width: 350px) {
+    .modal-content {
+        width: 90%
+    }
+}
+
+
+.venntooltip {
+    position: absolute;
+    text-align: center;
+    width: 188px;
+    height: 26px;
+    background: #333;
+    color: #ddd;
+    padding: 2px;
+    border: 0px;
+    border-radius: 8px;
+    opacity: 0;
+    font-size: 0.78em;
+}
+
+
+.seo-group__fields {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+.seo-group__groupA, .seo-group__groupB {
+    width: 100%;
+}
+.seo-group__groupA textarea, .seo-group__groupB textarea {
+    height: 130px;
+}
+.seo-group__tip {
+    font-size: 0.75em;
+    color: #a6a784;
+    margin-top: 10px;
+}
+.seo-group__button {
+    margin-top: 20px;
+    text-align: center;
+}
+.seo-group__button button {
+    margin: 0;
+}
+.example {
+    border-bottom: 1px dashed #344767;
+    cursor: pointer;
+}
+.example:hover {
+    border-bottom: none;
+}
+
+
+.group-diagram__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.group-diagram__title {
+    font-size: 1.2em;
+}
+@media (max-width: 1200px) {
+    .group-diagram__content {
+        width: 100%;
+        display: block
+    }
+    .group-diagram__diagram {
+        width: 100%;
+        padding: 0;
+    }
+    .group-diagram__table {
+        width: 100%;
+        height: 400px !important;
+        padding: 0;
+    }
+}
+[data-venn-sets="A"]   { fill: #f30487b8; fill-opacity: 0.25;}
+[data-venn-sets="B"]   { fill: #7e26c7; fill-opacity: 0.25;}
+[data-venn-sets="A_B"] { fill-opacity: 0;}
+
+
+/* СТИЛИ ПОДСКАЗОК*/
+.img-tooltip {
+    width: 60%;
+}
+    
+.bs-tooltip-top .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="top"] .tooltip-arrow::before {
+    border-top-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+}
+.bs-tooltip-end .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="right"] .tooltip-arrow::before {
+    border-right-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+}
+.bs-tooltip-bottom .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="bottom"] .tooltip-arrow::before {
+    border-bottom-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+}
+.bs-tooltip-start .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="left"] .tooltip-arrow::before {
+    border-left-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+}
+.tooltip-inner {
+    max-width: 25vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+    color: #666; /* цвет шрифта */
+    background: #fff; /* цвет фона (по умолчанию #000) */
+    border: 1px solid #d7d7d7;
+    box-shadow: 0 0px 15px -7px rgb(0 0 0); 
+    border-radius: 15px; /* радиус скругдения углов */
+    
+}
+.tooltip.show{
+    opacity: 1 !important;
+}
+@media (max-width: 600px) {
+    .tooltip-inner {
+        max-width: 45vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+    }
+}
+
+
+.table-filters {
+    display: inline-flex;
+    flex-wrap: wrap;
+}
+.table-filter {
+    margin-left: 10px;
+}
+.form-check-input:checked[type="radio"] {
+    background-image: linear-gradient(310deg, #c58ff3 0%, #ffa9d8 100%);
+}

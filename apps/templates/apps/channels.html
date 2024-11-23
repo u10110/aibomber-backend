@@ -1,0 +1,116 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Chat Page {% endblock title %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <!-- Left Side: Filters and Users List -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#filters" aria-expanded="false" aria-controls="filters">
+          <h5>Фильтры</h5>
+          <i id="filter-icon" class="fas fa-chevron-down"></i> <!-- Иконка стрелочки вниз -->
+        </div>
+        <div id="filters" class="collapse card-body">
+          <form method="GET" action="/filter-chat/">
+            <div class="row">
+              <div class="col-6 mb-1">
+                <label for="status-filter" class="form-label small">Статус</label>
+                <select id="status-filter" name="status" class="form-control form-control-sm">
+                  <option value="">Все</option>
+                  <option value="success">Успех</option>
+                  <option value="error">Ошибка</option>
+                </select>
+              </div>
+              <div class="col-6 mb-1">
+                <label for="task-filter" class="form-label small">Выбор задачи</label>
+                <select id="task-filter" name="task" class="form-control form-control-sm">
+                  <option value="">Все</option>
+                  <option value="task1">1 задача</option>
+                  <option value="task2">2 задача</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-1">
+              <label for="search" class="form-label small">Поиск</label>
+              <input type="text" id="search" name="search" class="form-control form-control-sm" placeholder="Искать сообщения...">
+            </div>
+            <button type="submit" class="btn btn-sm bg-gradient-primary w-100">Применить</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card mt-3">
+        <div class="card-header">
+          <h5>Пользователи</h5>
+          <p class="text-sm mb-0">Список доступных пользователей</p>
+        </div>
+        <div class="card-body p-2">
+          <ul class="list-group">
+            {% for user in users %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ user.name }}</span>
+                <span class="badge bg-gradient-primary rounded-circle"></span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side: Chat -->
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h5>Чат</h5>
+          <p class="text-sm mb-0">Начните общение с выбранным пользователем</p>
+        </div>
+        <div class="card-body chat-window" style="height: 500px; overflow-y: auto;">
+          {% for message in messages %}
+            <div class="message {% if message.user_id == current_user.id %}text-end{% endif %}">
+              <p class="bg-gradient-light p-2 rounded {% if message.user_id == current_user.id %}bg-primary text-white{% endif %}">
+                {{ message.content }}
+              </p>
+              <small class="text-muted">{{ message.timestamp }}</small>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="card-footer">
+          <form action="/send-message/" method="post">
+            {% csrf_token %}
+            <div class="input-group">
+              <input type="text" name="message" class="form-control" placeholder="Введите сообщение..." style="max-height: 40px;">
+              <button type="submit" class="btn bg-gradient-primary">Отправить</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+  // Скрипт для автоматической прокрутки чата вниз
+  document.addEventListener("DOMContentLoaded", function() {
+    const chatWindow = document.querySelector('.chat-window');
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  });
+
+  // Скрипт для смены иконки при открытии/закрытии панели фильтров
+  document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function() {
+    const icon = document.getElementById('filter-icon');
+    if (icon.classList.contains('fa-chevron-down')) {
+      icon.classList.remove('fa-chevron-down');
+      icon.classList.add('fa-chevron-up'); // Меняем стрелку на вверх
+    } else {
+      icon.classList.remove('fa-chevron-up');
+      icon.classList.add('fa-chevron-down'); // Меняем стрелку на вниз
+    }
+  });
+</script>
+{% endblock javascripts %}

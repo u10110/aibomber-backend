@@ -1,0 +1,31 @@
+/* СТИЛИ ПОДСКАЗОК*/
+        .bs-tooltip-top .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="top"] .tooltip-arrow::before {
+        border-top-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+    }
+    .bs-tooltip-end .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="right"] .tooltip-arrow::before {
+        border-right-color: #aaa; /* цвет стрелочки (по умолчанию #000)*/
+    }
+    .bs-tooltip-bottom .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="bottom"] .tooltip-arrow::before {
+        border-bottom-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+    }
+    .bs-tooltip-start .tooltip-arrow::before, .bs-tooltip-auto[x-placement^="left"] .tooltip-arrow::before {
+        border-left-color: #aaa; /* цвет стрелочки (по умолчанию #000) */
+    }
+    .tooltip-inner {
+        max-width: 25vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+        color: #666; /* цвет шрифта */
+        background: #fff; /* цвет фона (по умолчанию #000) */
+        border: 1px solid #d7d7d7;
+        border-radius: 30px;
+        box-shadow: 0 0px 15px -7px rgb(0 0 0); 
+        border-radius: 15px; /* радиус скругдения углов */
+        
+    }
+    .tooltip.show{
+        opacity: 1 !important;
+    }
+    @media (max-width: 600px) {
+        .tooltip-inner {
+            max-width: 45vw; /* максимальная ширина подсказки (по умолчанию 200px) */
+        }
+    }

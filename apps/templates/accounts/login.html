@@ -1,0 +1,467 @@
+{% extends 'layouts/base-fullscreen.html' %}
+
+{% block title %} Auth SignIN Illustration {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<style>
+
+  .password {
+    margin: 15px auto;
+    position: relative;
+  }
+  .password-control {
+    position: absolute;
+    top: 11px;
+    right: 16px;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url(https://snipp.ru/demo/495/view.svg) 0 0 no-repeat;
+  }
+  .password-control.view {
+    background: url(https://snipp.ru/demo/495/no-view.svg) 0 0 no-repeat;
+  }
+  .modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal Content */
+  .modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    max-width: 450px;
+    width: 80%;
+  }
+  
+  @media (max-width: 753px) {
+    #activate {
+      margin-left: 0 !important;
+    }
+    #activate_reset {
+      margin-left: 0 !important;
+    }
+  }
+  @media (max-width: 753px) {
+    #activate {
+      margin-left: 0 !important;
+    }
+  }
+   #myModal_phone .col-12 {
+    margin-bottom: 20px;
+  }
+  @media (max-width: 1000px) {
+    .modal-content h3{
+        font-size: 1.6em;
+    }
+    .modal-content {
+      width: 60%;
+    }
+  }
+  @media (max-width: 800px) {
+    #myModal_reset_password .col-8{
+      width: 100%
+    }
+    .modal-content h3{
+        font-size: 1.3em;
+    }
+  }
+  @media (max-width: 700px) {
+    #myModal_phone .col-6 {
+      width: 100%;
+    }
+    .modal-content h3{
+        font-size: 1.3em;
+    }
+  }
+  @media (max-width: 480px) {
+    .modal-content {
+      width: 80%;
+    }
+    .modal-content h3{
+        font-size: 1.1em;
+    }
+  }
+  @media (max-width: 350px) {
+    .modal-content {
+      width: 90%
+    }
+  }
+
+  /* The Close Button */
+  .close {
+    color: #aaaaaa;
+    display: flex;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+  }
+</style>
+{% endblock stylesheets %}
+{% block content %}
+
+  {% comment %} <div class="container position-sticky z-index-sticky top-0">
+    <div class="row">
+      <div class="col-12">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg blur blur-rounded top-0 z-index-3 shadow position-absolute my-3 py-2 start-0 end-0 mx-4">
+          {% include "includes/navigation-auth.html" %}
+        </nav>
+        <!-- End Navbar -->
+      </div>
+    </div>
+  </div> {% endcomment %}
+
+  <main class="main-content  mt-0">
+    <section>
+      <div class="page-header min-vh-100">
+        <div class="container">
+          <div class="row">
+            <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
+              <div class="card card-plain">
+                <div class="card-header pb-0 text-start">
+                  {% if msg %}
+                      {{ msg | safe }}
+                  {% else %}
+                  {% comment %} Добавьте свои учетные данные {% endcomment %}
+                {% endif %}
+                  <h4 class="font-weight-bolder">Войти</h4>
+                  <p class="mb-0">Введите логин и пароль, чтобы войти</p>
+                </div>
+                <div class="card-body">
+                  <form role="form" class="text-start" method="post" id="login_form" action="">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                      {{ form.phone }}
+                    </div>
+                    <div class="password mb-3">
+                      {{ form.password }}
+                      <a href="#" class="password-control" onclick="return show_hide_password(this);"></a>
+                    </div>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="rememberMe">
+                      <label class="form-check-label" for="rememberMe">Запомнить меня</label>
+                    </div>
+                    <div class="text-center">
+                      {% comment %} {% autoescape off %} {{ auth_url_to_handle_telegram }} {% endautoescape %} {% endcomment %}
+                      <button type="submit" class="btn btn-lg bg-gradient-primary btn-lg w-100 mt-4 mb-0">Войти</button>
+                    </div>
+                  </form>
+                </div>
+                <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                <div style="
+                    padding: 10px 0;
+                "><a class="btn text-gradient text-primary " style="
+                    padding: 12px 26px;
+                    color: #fff;
+                    text-align: center;
+                    letter-spacing: 1.5px;
+                    border: 1px solid;
+                    " href="https://t.me/eliment_test12312312312_bot?start=">
+                    Регистрация через telegram
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 20px;margin-left: 10px;">
+                      <style>
+                          path {
+                              fill:url(#MyGradient)
+                          }
+                      </style>
+                      <defs>
+                        <linearGradient id="MyGradient">
+                          <stop offset="35%" stop-color="#FF0080"></stop>
+                          <stop offset="95%" stop-color="#7928CA"></stop>
+                        </linearGradient>
+                      </defs>
+                      <path d="M511.6 36.86l-64 415.1c-1.5 9.734-7.375 18.22-15.97 23.05c-4.844 2.719-10.27 4.097-15.68 4.097c-4.188 0-8.319-.8154-12.29-2.472l-122.6-51.1l-50.86 76.29C226.3 508.5 219.8 512 212.8 512C201.3 512 192 502.7 192 491.2v-96.18c0-7.115 2.372-14.03 6.742-19.64L416 96l-293.7 264.3L19.69 317.5C8.438 312.8 .8125 302.2 .0625 289.1s5.469-23.72 16.06-29.77l448-255.1c10.69-6.109 23.88-5.547 34 1.406S513.5 24.72 511.6 36.86z" style="fill: linear-gradient(310deg, #7928CA, #FF0080);background: linear-gradient(310deg, #7928CA, #FF0080);"></path></svg>
+                    </a>
+                </div>
+                  <p class="mb-4 text-sm mx-auto">
+                    Нет учетной записи?
+                    <a href="{% url 'register' %}" class="text-primary text-gradient font-weight-bold">Зарегистрироваться</a>
+                  </p>
+                  <p class="mb-4 text-sm mx-auto">
+                    Забыли пароль?
+                    <a href="#" id='reset_password' class="text-primary text-gradient font-weight-bold">Восстановить</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 d-lg-flex d-none h-100 my-auto pe-0 position-absolute top-0 end-0 text-center justify-content-center flex-column">
+              <div class="position-relative bg-gradient-primary h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center">
+                <img src="/static/assets/img/shapes/pattern-lines.svg" alt="pattern-lines" class="position-absolute opacity-4 start-0">
+                <div class="position-relative">
+                  <img class="max-width-500 w-100 position-relative z-index-2" src="/static/assets/img/illustrations/rocket-white.png" alt="rocket">
+                </div>
+                <h4 class="mt-5 text-white font-weight-bolder">Поднимит2е свой товар в топ Wb с помощью самых эффективных инструментов работы с репутацией!</h4>
+                <p class="text-white">Автовыкуп по ключевому запросу, оставление отзывов с фото, лайк на бренд и на SKU.</p>
+                <div class="countdown styled"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div id="myModal_phone" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content d-block">
+      <span class="close justify-content-end">&times;</span>
+      <h3>Введите номер телефона</h3>
+      <div class='col-12 mt-4'>
+        <input data-tel-input id='phone_reset_field' autocapitalize="off" class="form-control d-block mx-auto" placeholder="" type="text" >
+      </div>
+      <div class="justify-content-end d-flex">
+        <button class='btn btn-success col-auto justify-content-end d-flex' id="phone-reset-btn">Подтвердить</button>
+      </div>
+      
+    </div>
+  
+  </div>
+
+  <div id="myModal_code" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content d-block">
+      <span class="close justify-content-end">&times;</span>
+      <h3>Введите код, отправленный в смс</h3>
+      <div class='col-12 mt-4'>
+        <input id='code' autocapitalize="off" class="form-control d-block mx-auto" placeholder="" type="text" >
+      </div>
+      
+      <div id="send-again-timer"><p>Для повторного получения СМС кода подождите 60 секунд</p></div>
+      <div class="d-flex justify-content-between align-items-center flex-wrap mt-4">
+        <button class="btn btn-info" style='display: none' id="sms_repeat">Выслать код повторно</button>
+        <button class="btn btn-success" style="margin-left: auto;" id="activate">Подтвердить</button>
+      </div>
+      
+    </div>
+  
+  </div>
+
+  <div id="myModal_reset_password" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content px-5">
+      <span class="close justify-content-end">&times;</span>
+      <h3>Установите новый пароль</h3>
+      <div class='col-8 mt-4'>
+        <input id='reset_password_field1' autocapitalize="off" class="form-control d-block mx-auto" placeholder="введите пароль" type="password" >
+        <input id='reset_password_field2' autocapitalize="off" class="form-control d-block mx-auto mt-4" placeholder="подтвердите пароль" type="password" >
+      </div>
+      
+      <div class="d-flex justify-content-between align-items-center flex-wrap mt-4">
+        <button class="btn btn-info" style='display: none' id="sms_repeat">Выслать код повторно</button>
+        <button class="btn btn-success" style="margin-left: auto;" id="activate_reset">Подтвердить</button>
+      </div>
+      
+      
+    </div>
+  
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}
+<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+<script src="/static/assets/js/jquery.js"></script>
+<script src="/static/assets/js/plugins/phone_valid.js"></script>
+<script>
+  var modal_phone = document.getElementById("myModal_phone");
+  var modal_code = document.getElementById("myModal_code");
+  var modal_reset = document.getElementById("myModal_reset_password");
+  var span = document.getElementsByClassName("close")[0];
+  var span_code = document.getElementsByClassName("close")[1];
+  var span_reset = document.getElementsByClassName("close")[2];
+  var phone;
+  span.onclick = function() {
+    modal_phone.style.display = "none";
+  }
+  span_code.onclick = function() {
+    modal_code.style.display = "none";
+  }
+  span_reset.onclick = function() {
+    modal_reset.style.display = "none";
+  }
+  window.onclick = function(event) {
+    if (event.target == modal_phone) {
+      modal_phone.style.display = "none";
+    }
+    if (event.target == modal_code) {
+      modal_code.style.display = "none";
+  }
+}
+
+const timerVal = document.querySelector('#send-again-timer');
+
+
+// Позже можно остановить наблюдение
+function initTimer() {
+  let seconds = parseInt(timerVal.textContent.match(/(\d+)/)[0]);
+  const timer = setInterval(() => {
+    if(seconds < 1) {
+      {% comment %} console.log(timerVal.textContent) {% endcomment %}
+      timerVal.style.display = 'none';
+      $('#sms_repeat').css("display", "block");
+      clearInterval(timer);
+      
+    }
+    timerVal.textContent = `Для повторного получения СМС кода подождите ${seconds} секунд`;
+    seconds -= 1;
+  }, 1000);
+}
+$('#sms_repeat').click(function(){
+  $.get( `{% url 'send-sms-reset' %}`, { 'phone': phone.slice(1) } );
+  timerVal.style.display = 'block';
+  document.querySelector('#send-again-timer').textContent = 'Для повторного получения СМС кода подождите 60 секунд';
+  $('#sms_repeat').css("display", "none");
+  initTimer();
+
+
+})
+
+
+  $('#reset_password').click(function(){
+    modal_phone.style.display = "block";
+    $('#phone-reset-btn').click(function(){
+      phone = document.querySelector('#phone_reset_field').value;
+      $.get( `{% url 'send-sms-reset' %}`, { 'phone': phone.slice(1) } )
+      .done(function( data ) {
+        modal_phone.style.display = "none";
+        modal_code.style.display = "block";
+        initTimer();
+      })
+      .fail(function() {
+        Swal.fire('Ошибка', 'Номер не зарегистрирован', 'error');
+      });
+
+  })
+})
+
+
+  function show_hide_password(target){
+    var input = document.getElementById('id_password');
+    if (input.getAttribute('type') == 'password') {
+      target.classList.add('view');
+      input.setAttribute('type', 'text');
+    } else {
+      target.classList.remove('view');
+      input.setAttribute('type', 'password');
+    }
+    return false;
+  }
+  var win = navigator.platform.indexOf('Win') > -1;
+  if (win && document.querySelector('#sidenav-scrollbar')) {
+    var options = {
+      damping: '0.5'
+    }
+    Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+  }
+
+
+  $('#activate').click(function(){
+    var sms_code = document.querySelector('#code').value;
+  
+    $.ajax({
+      type: "POST",
+      // contentType: "application/json; charset=UTF-8",
+      data: {
+        'phone': phone,
+      },
+      url: '/reset_password/'+sms_code+'/',
+      // dataType: 'json', // in ,my case the absence of this was the cause of failure
+    })
+    // in case of successfully understood ajax response
+      .done(function (myAjaxJsonResponse) {
+        modal_code.style.display = 'none';
+        modal_reset.style.display = "block";
+        $('#activate_reset').click(function(){
+          console.log('')
+          $.ajax({
+            type: 'POST',
+            url: "{% url 'reset_password_done' %}",
+            data: {
+              'phone': phone,
+              'password1': document.querySelector('#reset_password_field1').value,
+              'password2': document.querySelector('#reset_password_field2').value,
+              'csrfmiddlewaretoken': '{{ csrf_token }}',
+
+            },
+            success: function (response) {
+              modal_reset.style.display = "none";
+                Swal.fire(
+        "Готово!",
+        "Пароль успешно изменен",
+        "success"
+      ).then(function() {
+    window.location = "{% url 'login' %}";
+    })
+          
+              },
+              error: function (response) {
+                
+                Swal.fire('Ошибка', 'Пароли не совпадают', 'error');
+                  }
+  })
+        })
+
+      })
+      .fail(function (erordata) {
+        // console.log(erordata);
+        Swal.fire('Ошибка', 'Неверный код', 'error');
+      })
+  })
+
+
+  $("#login_form").submit(function (e) {
+        // preventing from page reload and default actions
+        e.preventDefault();
+        // serialize the data for sending the form data.
+        var serializedData = $(this).serialize();
+        // make POST ajax call
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'login' %}",
+            data: serializedData,
+            success: function (response) {
+              if (response['instance'] == 'redirect'){
+                window.location = "{% url 'home' %}";
+              }
+              },
+              error: function (xhr, status, error) {
+                var err = JSON.parse(xhr.responseText)['instance'];
+                console.log(err);
+                if (err == 'not_reg'){
+                  Swal.fire('Ошибка', 'Номер не зарегистрирован', 'error');
+                }
+                else{
+                  Swal.fire('Ошибка', 'Неправильный номер или пароль', 'error');
+                }
+                
+                  }
+  })})
+</script>
+<script type="text/javascript">
+  function onTelegramAuth(user) {
+      alert('Logged in as ' + user.first_name + ' ' + user.last_name + '!');
+  }
+</script>
+{% endblock javascripts %}

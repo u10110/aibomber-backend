@@ -1,0 +1,267 @@
+{% load static %}
+{% load limits_bar %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <link rel="apple-touch-icon" sizes="76x76" href="/static/assets/img/apple-icon.png">
+  <link rel="icon" type="image/png" href="/static/assets/img/favicon3.png">
+  <link href="/static/assets/css/introjs.css" rel="stylesheet">
+
+  <title>
+    MP LAB – сервис эффективного продвижения и автоматизации для Wb и Ozon
+  </title>
+
+  <!--     Fonts and icons     -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+  <!-- Nucleo Icons -->
+  <link href="/static/assets/css/nucleo-icons.css" rel="stylesheet" />
+  <link href="/static/assets/css/nucleo-svg.css" rel="stylesheet" />
+  <!-- Font Awesome Icons -->
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <link href="/static/assets/css/nucleo-svg.css" rel="stylesheet" />
+  <!-- CSS Files -->
+  <link id="pagestyle" href="/static/assets/css/soft-ui-dashboard.css?v=1.0.5" rel="stylesheet" />
+  <link href="/static/assets/css/sidebar.css" rel="stylesheet" />
+  <link href="/static/css/style.css" rel="stylesheet" />
+
+  <!-- Specific CSS goes HERE -->
+  {% block stylesheets %}
+  {% endblock stylesheets %}
+  <style>
+    .swal2-container {
+      z-index: 9999;
+    }
+    .tips-popup-tip:hover {
+      text-decoration: underline;
+  }
+  </style>
+</head> 
+<body class="{% block body_class %}{% endblock %}">
+
+  {% include "includes/sidebar.html" %}
+
+  {% comment %} <main class="main-content max-height-vh-100 h-100"> {% endcomment %}
+    <main class="main-content h-100">
+
+    {% include "includes/navigation.html" %}
+
+    {% block content %}{% endblock content %}
+    <div class="tips">
+	
+      <div class="tips-popup">
+        <div class="tips-popup__dark exit__tips-popup"></div>
+          <div class="tips-popup__window">
+            <div class="tips-popup__header">
+              <div class="tips-popup__title">Подсказки по системе</div>
+              <div class="tips-popup__exit exit__tips-popup">×</div>
+            </div>
+            <div class="tips-popup__content">
+              <div class="tips-popup__text">Тут вы можете пройти обучение на нашей платформе по таким разделам как:</div>
+              <div class="tips-popup__img"><img src="/static/images/покемон1.png" alt=""></div>
+            </div>
+            <div class="tips-popup__tips">
+              <div class="tips-popup-tip"><a href="#" id='start-guide'>Как работать с платформой</a></div>
+              <div class="tips-popup-tip"><a href="{% url 'questions' %}?status=active&tips=show">Как создавать вопросы</a></div>
+              <div class="tips-popup-tip"><a href="{% url 'reviews' %}?status=active&tips=show">Как оставлять отзывы</a></div>
+              <div class="tips-popup-tip"><a href="{% url 'group-buyouts' %}?status=active&tips=show">Как совершать выкупы</a></div>
+            </div>
+          </div>
+      </div>
+    </div>
+
+  </main>
+
+  {% include "includes/fixed-plugin.html" %}
+
+  {% include "includes/scripts.html" %}
+  
+  <script>
+    $('#NotificationButton').click(function(){
+      if ($(".unread-notifications-circle-nav")[0]){
+        $.get("{% url 'read-notifications' %}", function(data, status){
+            $('.unread-notifications-circle-nav').hide();
+          });
+      }
+  })
+  </script>
+
+
+  <script src="/static/assets/js/plugins/intro.js"></script>
+  <script>
+    let a = document.querySelector('#start-guide-all')
+	let b = document.querySelector('.tips')
+	let c = document.querySelectorAll('.exit__tips-popup')
+	let aa = document.querySelectorAll('.tips-popup-tip')
+	a.addEventListener('click',() => {
+		b.classList.add('show__tips-popup')
+	}) 
+	c.forEach(el => {
+		el.addEventListener('click',() => {
+			b.classList.remove('show__tips-popup')
+		}) 
+	})
+	aa.forEach(el => {
+		el.addEventListener('click',() => {
+			b.classList.remove('show__tips-popup')
+		}) 
+	})
+    $('#start-guide').click(function(){
+      console.log('set');
+      introJs().setOptions({
+        steps:[
+          {title: 'Обучение',
+          intro: 'Добро пожаловать на сервис продвижения и аналитики<br><br>Пройдите тур по платформе  чтобы узнать про все инструменты увеличения прибыли.',
+        },
+          {element: document.querySelector('.guide2'),
+          title: 'Задайте удобный ПВЗ для получения выкупа товара.',
+          intro: 'Прежде чем начать совершать успешно выкупы в MP.LAB, необходимо настроить список пунктов выдачи заказов (ПВЗ)<br><br><strong>Список ПВЗ</strong> - данный раздел поможет быстро сформировать список ПВЗ на которых вам будет удобно забирать свои выкупы.',
+          position: 'right'
+        },
+        {element: document.querySelector('.guide3'),
+          intro: '<strong>Настройка оплаты</strong> - раздел, позволяющий вам с легкостью добавить карты для использования метода “Автооплата“ в выкупах группы. Вы можете добавить карты банков Тинькофф, Qiwi, Точка, Альфа и Сбер. <strong>Автооплата</strong> - возможность совершать выкупы быстро, без ручного ввода банковской карты. В настоящее время возможна автооплата через “Телеграм бот”',
+          position: 'right'
+        },
+        {element: document.getElementById('guide4'),
+          title: 'Формируйте задания для последующего выкупа товара',
+          intro: 'При создании выкупа вы указываете артикул нужного товара, также корректируете его количество и выбираете удобный ПВЗ, а также указываете диапазон времени для совершения выкупа . Созданную группу выкупов можно сразу оплатить с помощью QR-код или картой. После успешной оплаты, вы можете отслеживать выполнение выкупа в разделах “Активные“ и “Завершенные“, а также в счетчиках групп.',
+          position: 'right'
+        },
+        {element: document.querySelector('.guide5'),
+          title: 'Отслеживайте свои выкупы',
+          intro: '<strong>Доставки</strong> - возможность проверить все заказы по которым у вас были оплаты и доставки, а также получить полную информацию о выкупе, его количестве, ФИО совершившего выкуп и статусе.<br><br><strong>Готовы к получению</strong> - отображаются готовые к выдаче выкупы, а также QR-код для получения в указанном ПВЗ.<br><br><strong>В пути на ПВЗ</strong> - здесь есть возможность проверить доставки которые на сборке, прибыли в сортировочный центр или идут на пункт выдачи.<br><br><strong>Завершенные</strong> -  вы можете отслеживать статус по забранные или отмененным заказам. Отмененные заказы - это когда вы не забрали товар с ПВЗ и он уехал обратно или когда Wildberries сам сделал отмену доставки.',
+          position: 'right'
+        },
+        {element: document.querySelector('.guide6'),
+          title: 'Оставляйте отзывы на свой товар',
+          intro: '<strong>Отзывы</strong> - формируйте план отзывов доступных к публикации. Отзывы будут опубликованы в указанную вами дату. В данном разделе после того, как вы забрали свой выкуп с ПВЗ появится возможность оставить отзыв на товар.  Также здесь удобно отслеживать статус отзыва.<br><br><strong>Доступные</strong> - отображаются все ваши товары на которые возможно оставить отзыв.<br><br><strong>Запланированные</strong> - вы можете контролировать поставленные задачи к публикации отзывов, вносить в них правки, а также оставить нужный отзыв сейчас.<br><br><strong>Опубликованные</strong> -  все раннее оставленные отзывы находятся в данном разделе, а также их статус.',
+          position: 'right'
+          
+        },
+        {element: document.querySelector('.guide7'),
+          title: 'Задавайте вопросы к своему товару',
+          intro: 'Вопросы - раздел позволяющий задать интересный вопрос к вашему товару и указать время его отправки. После этого, в указанное вами время, он отобразится в вашем личном кабинете Wildberries и вы сможете на него ответить.  Для создания вопроса нажмите кнопку “Добавить вопрос“ и сформируйте задание с отложенной публикацией.<br><br><strong>Завершенные</strong> - Все раннее оставленные вопросы находятся в данном разделе',
+          position: 'right'
+          
+        },
+        {element: document.querySelector('.guide8'),
+          title: 'Повышайте репутацию вашего брэнда',
+          intro: '<strong>Накрутка</strong> - оставляйте лайки на товар и добавляйте брэнд в избранное, а также создавайте задания на добавление лайков и дизлайков на отзывы.<br><br><strong>Избранное</strong> - здесь вы добавляете ссылку на бренд или товар, а также указываете количество лайков, которые хотите поставить. После этого здесь можно отслеживать активные и завершенные задачи.<br><br><strong>Лайки на отзывы</strong> -  тут отображаются созданные задания на добавление лайков и дизлайков на отзывы. Для формирования задания нажмите кнопку “Добавить задачу“, укажите SKU нужного товара, нажмите “Показать отзывы“, выберите количество лайков или дизлайков на предложенные данные и нажмите “Создать задание“.',
+          position: 'right'
+        },
+        ],
+        nextLabel: 'Далее',
+        prevLabel: 'Назад',
+        doneLabel: 'Завершить',
+        tooltipClass: 'customCenter'
+      }).start();
+    });
+      
+  </script>
+  {% block javascripts %}
+  
+  
+  {% endblock javascripts %}
+
+    {% comment %} <script src="/static/assets/js/jquery.js"></script> {% endcomment %}
+    
+    
+    <!-- Navbar --> 
+    <!-- <script type="text/javascript">
+        $(document).ready(function () {
+          
+
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar, #content').toggleClass('active');
+                $('.collapse.in').toggleClass('in');
+                $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+            });
+        });
+    </script> -->
+
+    <!-- Github buttons -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+    <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
+    <script src="/static/assets/js/soft-ui-dashboard.min.js?v=1.0.5"></script>
+
+    
+
+    <script>if(!window._teletypeWidget){window._teletypeWidget = window._teletypeWidget || {};!function(){var t = document.getElementsByTagName("app-teletype-root");if (t.length > 0 && _teletypeWidget.init)return;var d = new Date().getTime();var n = document.createElement("script");n.id = "teletype-widget-embed",n.src = "https://widget.teletype.app/init.js?_=" + d,n.async = !0,n.setAttribute("data-embed-version", "0.1");document.body.append(n);}();document.addEventListener("teletype.ready", function(){console.log("Teletype ready")});window.teletypeExternalId = "XguEFU-Ry7xQx_iJzUbMjLHOK54N-UR-ponc_gofTXt6cgFwwq8EKy7yePqHLaYD";}</script>
+    <script>
+      window.addEventListener('teletype.ready', function() {
+        _teletypeWidget.setPersonData({
+            email: '{{ request.user.email }}',
+            name: '{{ request.user.first_name }}',
+            phone: '{{ request.user.phone }}'
+        });
+    });
+    </script>
+    <script>
+    // We pre-filled your app ID in the widget URL: 'https://widget.intercom.io/widget/xz8qsyqd'
+    (function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/xz8qsyqd';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();
+    </script>
+    <!-- Yandex.Metrika counter -->
+  <script type="text/javascript" >
+    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+    m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+    (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+    ym(87940143, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true,
+        webvisor:true
+    });
+  </script>
+
+  <script>
+		function load() {
+			if (innerWidth >= 1200){
+				document.body.classList.add("g-sidenav-pinned");
+				document.body.classList.remove("g-sidenav-hidden");
+			}
+			else{
+				document.body.classList.remove("g-sidenav-pinned");
+				document.body.classList.add("g-sidenav-hidden");
+			}
+		};
+		document.addEventListener("DOMContentLoaded", load);
+		// var win = navigator.platform.indexOf('Win') > -1;
+		// if (win && document.querySelector('#sidenav-scrollbar')) {
+		// 	var options = {
+		// 		damping: '0.5'
+		// 	}
+		// 	Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+		// }
+	</script>
+  <!-- _________________КРЕСТИК ДЛЯ ЗАКРЫТИЯ САЙДБАРА______________________ -->
+  <script>
+    var hiddenSidenav = document.querySelector(".exit-sidenav-mobile");
+    hiddenSidenav.addEventListener("click", () => {
+      document.body.classList.remove("g-sidenav-pinned");
+      document.body.classList.add("g-sidenav-hidden");
+    })
+  </script>
+  <!-- _________________КРЕСТИК ДЛЯ ЗАКРЫТИЯ САЙДБАРА______________________ -->
+
+<script>
+    var limits = Array.from(document.querySelectorAll(".limit"))
+    setTimeout(() => {
+      limits.forEach((el) => {
+        let num = parseInt(el.querySelector(".limit-left").innerHTML) / parseInt(el.querySelector(".limit-max").innerHTML) * 100 
+        el.querySelector(".limit-progressbar__filled").style.width = (num > 100 ? 100 : num) + '%'
+    })
+    }, 300)
+    
+  </script>
+<noscript><div><img src="https://mc.yandex.ru/watch/87940143" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+
+
+</body>
+</html>

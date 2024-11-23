@@ -1,0 +1,255 @@
+{% load notification_tag %}
+{% load static %}
+{% load i18n %}
+<style>
+  @media (max-width: 1024px) {
+    .anim-img {
+      display: none;
+    }
+    .anim-img.img-mobile {
+      display: block;
+    }
+  }
+  .navbar-banner {
+    width: 85%;
+    border-radius: 10px;
+  }
+  @media (max-width: 1150px) {
+    .navbar-banner {
+      width: 95%
+    }
+  }
+  .anim-img:hover {
+    transform: scale(1.05)
+  }
+  .notification {
+    min-width: 30vw;
+    white-space: normal;
+  }
+  @media (max-width: 800px) {
+    .notification {
+      min-width: 40vw
+    }
+  }
+  @media (max-width: 600px) {
+    .notification {
+      min-width: 50vw
+    }
+  }
+  .dropdown-menu {
+    z-index: 100
+  }
+</style>
+    <nav class="navbar navbar-main navbar-expand mt-4 top-1 px-0 mx-4 shadow-none border-radius-xl z-index-sticky" id="navbarBlur" data-scroll="true">
+      <div class="container-fluid py-1 px-3">
+
+        <div class="sidenav-toggler sidenav-toggler-inner d-block ">
+          <a href="javascript:;" class="nav-link text-body p-0">
+            <div class="sidenav-toggler-inner">
+              <i class="sidenav-toggler-line"></i>
+              <i class="sidenav-toggler-line"></i>
+              <i class="sidenav-toggler-line"></i>
+            </div>
+          </a>
+        </div>
+        <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4 px-lg-8 px-md-4 px-2 mx-auto" id="navbar" style="width: 10%;padding-left: 5px !important;padding-right: 5px !important;">
+          {% comment %}
+          <a href="https://t.me/+lygorZzTeFdmYjVi" target="_blank" class="navbar-banner" style="margin: 0 auto;overflow: hidden">
+            <img src="{% static 'images/banner7.png' %}" class="anim-img" alt="" style="width: 100%;transition: all 0.4s ease;cursor: pointer;">
+          </a> {% endcomment %}
+          {% comment %} <div class="alert alert-success mx-auto" style='background-image: none;' role="alert">
+            Рады сообщить что уже доступный новый метод автооплаты. Смотрите инструкцию по работе с данным методом в разделе “Настройка оплаты”
+          </div>  {% endcomment %}
+
+ 
+          {% comment %} <div class="ms-md-auto pe-md-3 d-flex align-items-center"> {% endcomment %}
+            {% comment %} was search field {% endcomment %}
+            
+            {% comment %} </div> {% endcomment %}
+            
+          </div>
+         
+          <ul class="navbar-nav  justify-content-end">
+            {% get_notifaications request.user as notifications %}
+            {% has_new_notifications request.user as has_NN %}
+            <li class="nav-item dropdown pe-3 d-flex align-items-center">
+              <a href="javascript:;" class="nav-link text-body p-0" id="NotificationButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-bell cursor-pointer" style='width: 16px; height: 16px;' aria-hidden="true"></i>
+                {% if has_NN %}
+                  <div class="unread-notifications-circle-nav"></div>
+                {% endif %}
+              </a>
+              
+              <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="NotificationButton">
+                {% if notifications %}
+                {% for notification in notifications %}
+                  <li class="mb-3">
+                    <div class="dropdown-item border-radius-md" {% if notification.is_read == False %}style='background-color: #e9ecef;'{% endif %} href="javascript:;">
+                      <div class="notification">
+                        {{ notification.message | safe }}
+                          <p class="text-xs text-secondary mb-0 ">
+                            <i class="fa fa-clock me-1" aria-hidden="true"></i>
+                            {{ notification.created_at  }}
+                          </p>
+                      </div>
+                    </div>
+                    {% comment %} {% if notification.is_read == False %}
+                      <div class="unread-notifications-circle-item"></div>
+                    {% endif %} {% endcomment %}
+                  </li>
+                {% endfor %}
+                {% else %}
+                <li class="mb-3">
+                  <a class="dropdown-item" style="white-space: normal;">
+                 У вас нет новых уведомлений
+                  </a>
+                </li>
+              {% endif %}
+              </ul>
+              
+            </li>
+            <li class="nav-item d-flex align-items-center">
+              <!-- Плашка с балансом -->
+              <div class="balance-badge me-2">
+                <span class="badge bg-success">Баланс 500</span>
+              </div>
+            </li>
+            
+            
+            <li class="nav-item d-flex align-items-center">
+              
+              <!-- <a href="{% url 'logout' %}" 
+                 class="nav-link text-body font-weight-bold px-0">
+                <i class="fa fa-user me-sm-1"></i>
+                <span class="d-sm-inline d-none">Выйти</span>
+              </a> -->
+              <div class="dropdown show">
+                <a href="{% url 'personal-room' %}" 
+                 class="nav-link text-body font-weight-bold px-0" role="button" >
+                <i class="fa fa-user me-sm-1"></i>
+                <span class="d-sm-inline d-none">Личный кабинет</span>
+              </a>
+              {% comment %} <div class="dropdown-menu" style="position: absolute;" aria-labelledby="dropdownMenuLink">
+                <a class="dropdown-item" href="{% url 'account' %}">Аккаунт</a>
+                <a class="dropdown-item" href="{% url 'bill' %}">Тариф</a>
+                <a class="dropdown-item" href="{% url 'api-tokens' %}">Мои API токены</a>
+                <a class="dropdown-item" href="{% url 'logout' %}">Выйти</a>
+              </div> {% endcomment %}
+              </div>
+              
+
+            </li>
+            <li class="nav-item d-flex align-items-center mx-2">
+              <div class="dropdown">
+                <a href="#" 
+                class="nav-link text-body font-weight-bold px-0" role="button" id="helper" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                  </svg>
+                </a>
+              <div class="dropdown-menu mt-0" style='right: 0; left: auto; position: absolute;' aria-labelledby="helper" data-bs-popper='right'>
+                <a class="dropdown-item guide1" href="#" id='start-guide-all'>Включить подсказки</a>
+                
+                
+                <a class="dropdown-item" href="{% url 'faq' %}">FAQ</a>
+              </div> 
+              </div>
+            </li>
+           
+
+
+            {% comment %} <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
+              <a href="javascript:;" class="nav-link" id="iconNavbarSidenav">
+                <div class="sidenav-toggler-inner">
+                  <i class="sidenav-toggler-line"></i>
+                  <i class="sidenav-toggler-line"></i>
+                  <i class="sidenav-toggler-line"></i>
+                </div>
+              </a>
+            </li>
+            <li class="nav-item px-3 d-flex align-items-center">
+              <a href="javascript:;" class="nav-link text-body p-0">
+                <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
+              </a>
+            </li> {% endcomment %}
+
+
+
+            {% comment %} <li class="nav-item dropdown pe-2 d-flex align-items-center">
+              <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-bell cursor-pointer"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
+                <li class="mb-2">
+                  <a class="dropdown-item border-radius-md" href="javascript:;">
+                    <div class="d-flex py-1">
+                      <div class="my-auto">
+                        <img src="/static/assets/img/team-2.jpg" class="avatar avatar-sm  me-3 " alt="user image">
+                      </div>
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="text-sm font-weight-normal mb-1">
+                          <span class="font-weight-bold">New message</span> from Laur
+                        </h6>
+                        <p class="text-xs text-secondary mb-0">
+                          <i class="fa fa-clock me-1"></i>
+                          13 minutes ago
+                        </p>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+                <li class="mb-2">
+                  <a class="dropdown-item border-radius-md" href="javascript:;">
+                    <div class="d-flex py-1">
+                      <div class="my-auto">
+                        <img src="/static/assets/img/small-logos/logo-spotify.svg" class="avatar avatar-sm bg-gradient-dark  me-3 " alt="logo spotify">
+                      </div>
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="text-sm font-weight-normal mb-1">
+                          <span class="font-weight-bold">New album</span> by Travis Scott
+                        </h6>
+                        <p class="text-xs text-secondary mb-0">
+                          <i class="fa fa-clock me-1"></i>
+                          1 day
+                        </p>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item border-radius-md" href="javascript:;">
+                    <div class="d-flex py-1">
+                      <div class="avatar avatar-sm bg-gradient-secondary  me-3  my-auto">
+                        <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                          <title>credit-card</title>
+                          <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                            <g transform="translate(-2169.000000, -745.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                              <g transform="translate(1716.000000, 291.000000)">
+                                <g transform="translate(453.000000, 454.000000)">
+                                  <path class="color-background" d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z" opacity="0.593633743"></path>
+                                  <path class="color-background" d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z"></path>
+                                </g>
+                              </g>
+                            </g>
+                          </g>
+                        </svg>
+                      </div>
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="text-sm font-weight-normal mb-1">
+                          Payment successfully completed
+                        </h6>
+                        <p class="text-xs text-secondary mb-0">
+                          <i class="fa fa-clock me-1"></i>
+                          2 days
+                        </p>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </li> {% endcomment %}
+          </ul>
+        </div>
+      </div>
+    </nav>
