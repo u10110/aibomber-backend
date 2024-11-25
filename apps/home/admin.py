@@ -5,16 +5,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-from import_export.admin import ExportActionMixin
 
 from .models import *
-from .services.filters import (
-    ActionCountFilter,
-    DevErrCountFilter,
-    StatusCountByDateFilter,
-    StatusCountByDatetimeFilter,
-    StatusCountWithoutDateFilter,
-)
+
 from .services.UI import create_ui_instance
 
 admin.site.site_header = "Администрирование MPLAB"
@@ -82,73 +75,6 @@ def make_active(modeladmin, request, queryset):
     queryset.update(status="active")
 
 
-class ProductBuyoutAdmin(admin.ModelAdmin):
-    actions = [make_done, make_not_payed, make_ready, make_delivery, make_active]
-    list_display = (
-        "id",
-        "get_client_phone",
-        "client",
-        "product",
-        "buyout_date",
-        "status",
-        "payment_status",
-        "pay_type",
-        "phone",
-        "full_name",
-        "code",
-        "size",
-        "updated_at",
-        "pvz",
-        "dev_err",
-        "pay_method",
-        "price_buy",
-        "delivery_description",
-        "tg_start_date",
-        "tg_end_date",
-        "created_at"
-        # "qr",
-    )
-    search_fields = (
-        "id",
-        "client__id",
-        "client__phone",
-        "phone",
-        "status",
-        "product__sku",
-        "pvz__address",
-    )
-    # TODO clean and add DevErrCountFilter
-    list_filter = (
-        StatusCountByDatetimeFilter,
-        "payment_status",
-        "pay_type",
-        "pay_method",
-        "buyout_date",
-    )  # DevErrCountFilter
-    title = "active - в плане на выкуп, delivery - в доставке, ready - готов к получению, done - забран, error - ошибка при попытки выкупа, mp_error - товар был заказн, но пропал из аккаунта"
-    fieldsets = (
-        (
-            title,
-            {"fields": ("status", "phone", "full_name", "payment_status", "size")},
-        ),
-    )
-
-    change_form_template = "admin/browser.html"
-
-    @admin.display(ordering="get_client_phone", description="client phone")
-    def get_client_phone(self, obj, description="client phone"):
-        return obj.client.phone
-
-    def response_change(self, request, obj):
-        if "_get_selenium_url" in request.POST:
-            phone = request.POST["phone"]
-            print(phone)
-            selenium_link = create_ui_instance(phone)
-            print(selenium_link)
-            return HttpResponseRedirect(selenium_link)
-        # return super().response_change(request, obj)
-        return HttpResponseRedirect("/dev-admin8/home/productbuyout/")
-
 
 @admin.action(description="Status - done")
 def make_done_review(modeladmin, request, queryset):
@@ -158,45 +84,6 @@ def make_done_review(modeladmin, request, queryset):
 @admin.action(description="Status - plan")
 def make_plan_review(modeladmin, request, queryset):
     queryset.update(status="plan")
-
-
-class AddingReviewAdmin(admin.ModelAdmin):
-    actions = [make_done_review, make_plan_review]
-    list_display = (
-        "id",
-        "client_id",
-        "client",
-        "status",
-        "get_account",
-        "buyout_id",
-        "get_product",
-        "review_date",
-        "star",
-        "status_description",
-        "text",
-        "image1",
-        "image2",
-        "updated_at",
-    )
-    search_fields = (
-        "id",
-        "client__phone",
-        "client__id",
-        "buyout__product__sku",
-        "text",
-    )
-
-    list_filter = ("star", "review_date", "status", "status_description")
-
-    fields = ("status", "review_date", "text")
-
-    @admin.display(ordering="get_product", description="Sku")
-    def get_product(self, obj, description="Sku"):
-        return obj.buyout.product.sku
-
-    @admin.display(ordering="get_account", description="Account")
-    def get_account(self, obj, description="Account"):
-        return obj.buyout.phone
 
 
 class ClientSettingsAdmin(admin.ModelAdmin):
@@ -251,7 +138,6 @@ class BoostQuestionAdmin(admin.ModelAdmin):
         "client__id",
     )
     list_filter = (
-        StatusCountByDatetimeFilter,
         "question_date",
     )
     fields = ("status",)
@@ -260,55 +146,11 @@ class BoostQuestionAdmin(admin.ModelAdmin):
         return obj.client.phone
 
 
-class BoostLikeAdmin(admin.ModelAdmin):
-    list_display = (
-        "id",
-        "client_id",
-        "client",
-        "status",
-        "url_type",
-        "url",
-        "updated_at",
-    )
-    search_fields = ("id", "client__phone", "client__id")
-    list_filter = (StatusCountWithoutDateFilter, "url_type")
-    fields = ("status",)
 
 
 class ClientCardAdmin(CustomModelAdmin):
     search_fields = ("client__phone",)
 
-
-class BoostLikeReviewAdmin(admin.ModelAdmin):
-    list_display = (
-        "id",
-        "client_id",
-        "client",
-        "status",
-        "action",
-        "product",
-        "url",
-        "sender_name",
-        "id_sender",
-        "account_id",
-        "account",
-        "created_at",
-    )
-    search_fields = (
-        "id",
-        "client__phone",
-        "url",
-        "status",
-        "sender_name",
-        "product__sku",
-        "account__number",
-        "client__id",
-    )
-    list_filter = (
-        "action",
-        "status",
-    )  # TODO add ActionCountFilter - don't working searching by filter
-    fields = ("status",)
 
 
 class ProxyAdmin(CustomModelAdmin):
@@ -316,42 +158,13 @@ class ProxyAdmin(CustomModelAdmin):
     # search_fields = ('client__phone',)
 
 
-class DBSAdmin(CustomModelAdmin):
-    pass
-
-
-class ClientCardAdmin(CustomModelAdmin):
-    pass
-
-
-class ProductReviewAdmin(CustomModelAdmin):
-    pass
-
 
 class BoostExpectationAdmin(CustomModelAdmin):
     pass
 
 
-class BoostBasketAdmin(CustomModelAdmin):
-    pass
 
 
-class ClientPvzAdmin(admin.ModelAdmin):
-    list_display = (
-        "client_id",
-        "client",
-        "marketplace",
-        "get_pvz_address",
-        "sms_cloud",
-        "count_ordered",
-        "updated_at",
-    )
-    search_fields = ("client__phone", "client__id")
-    list_filter = ("marketplace",)
-
-    @admin.display(ordering="get_pvz_address", description="address")
-    def get_pvz_address(self, obj):
-        return obj.pvz.address
 
 
 class ReferralLinksAdmin(admin.ModelAdmin):
@@ -434,24 +247,42 @@ class ClientPhraseAdmin(admin.ModelAdmin):
         return obj.client.phone
 
 
-admin.site.register(Account, AccountAdmin)
-# admin.site.register(ClientProduct, ClientProductAdmin)
-# admin.site.register(DBS, DBSAdmin)
-admin.site.register(ProductBuyout, ProductBuyoutAdmin)
-admin.site.register(AddingReview, AddingReviewAdmin)
+
+
+
+class ChatAdmin(admin.ModelAdmin):
+    pass
+    # list_display = (
+    #     "id",
+    #     "value",
+    #     "es_id",
+    #     "frequency",
+    #     "updated_at",
+    #     "created_at",
+    # # )
+    # search_fields = ("id",)
+    # list_filter = ("updated_at",)
+
+
+class ProjectAdmin(admin.ModelAdmin):
+    pass
+    # list_display = (
+    #     "id",
+    #     "value",
+    #     "es_id",
+    #     "frequency",
+    #     "updated_at",
+    #     "created_at",
+    # )
+    # search_fields = ("id",)
+    # list_filter = ("updated_at",)
+
+
+
+
+admin.site.register(Chat, ChatAdmin)
+admin.site.register(Project, ProjectAdmin)
 admin.site.register(ClientSettings, ClientSettingsAdmin)
-# admin.site.register(Pvz, PvzAdmin)
-admin.site.register(BoostLike, BoostLikeAdmin)
-admin.site.register(BoostQuestion, BoostQuestionAdmin)
-admin.site.register(BoostLikeReview, BoostLikeReviewAdmin)
 admin.site.register(Proxy, ProxyAdmin)
-admin.site.register(ClientPvz, ClientPvzAdmin)
 admin.site.register(ReferralLinks, ReferralLinksAdmin)
 admin.site.register(ReferralUsers, ReferralUsersAdmin)
-admin.site.register(ClientPhrase, ClientPhraseAdmin)
-admin.site.register(Phrase, PhraseAdmin)
-# admin.site.register(ClientCard, ClientCardAdmin)
-# admin.site.register(BoostExpectation, BoostExpectationAdmin)
-# admin.site.register(BoostBasket, BoostBasketAdmin)
-# admin.site.register(BoostReview, BoostReviewAdmin) # TRASH?
-# admin.site.register(ProductReview, ProductReviewAdmin) # TRASH?

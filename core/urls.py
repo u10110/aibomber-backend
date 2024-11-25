@@ -22,13 +22,8 @@ urlpatterns = [
     path("api/", include("apps.alert.urls")),  # UI Kits Html files
     path("i18n/", include("django.conf.urls.i18n")),
     path("", include("apps.authentication.urls")),  # Auth routes - login / register
-    path("", include("apps.marketing.urls")),  # Marketing urls
-    path("", include("apps.wb_data.urls")),  # Wb relation urls
     path("", include("apps.home.urls")),  # UI Kits Html files
-    path("", include("apps.seo.urls")),  # UI Kits Html files
-    path("", include("apps.review_analysis.urls")),
     path("", include("apps.telegram.urls")),
-    path("", include("apps.autoanswers.urls")),
     path("", include("apps.amocrm.urls")),  # UI Kits Html files
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

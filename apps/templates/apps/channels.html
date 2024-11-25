@@ -1,116 +1,234 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %} Chat Page {% endblock title %}
+{% block title %} Ecommerce Products List {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
 
 {% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
+
   <div class="row">
-    <!-- Left Side: Filters and Users List -->
+    <div class="col-12 card">
+      <div class='m-3'>
+        <h5>Проекты </h5>
+        <p class="text-sm mb-0">Управление проектами.</p>
+      </div>
+      
+    </div>
+  </div>
+  <div class="row mt-4">
     <div class="col-md-4">
       <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#filters" aria-expanded="false" aria-controls="filters">
-          <h5>Фильтры</h5>
-          <i id="filter-icon" class="fas fa-chevron-down"></i> <!-- Иконка стрелочки вниз -->
-        </div>
-        <div id="filters" class="collapse card-body">
-          <form method="GET" action="/filter-chat/">
-            <div class="row">
-              <div class="col-6 mb-1">
-                <label for="status-filter" class="form-label small">Статус</label>
-                <select id="status-filter" name="status" class="form-control form-control-sm">
-                  <option value="">Все</option>
-                  <option value="success">Успех</option>
-                  <option value="error">Ошибка</option>
-                </select>
-              </div>
-              <div class="col-6 mb-1">
-                <label for="task-filter" class="form-label small">Выбор задачи</label>
-                <select id="task-filter" name="task" class="form-control form-control-sm">
-                  <option value="">Все</option>
-                  <option value="task1">1 задача</option>
-                  <option value="task2">2 задача</option>
-                </select>
-              </div>
+        <div class="card-body">
+            <h5>Создать Проект</h5>
+            <p class="text-sm mb-0">Заполните поля формы, выберите нужные параметры и нажмите кнопку “Создать“.</p>
+            <div class="col-12 col-sm-10 col-md-12 mt-3">
+                <form action="/project-create/" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {% comment %} <div class="col-12 mb-3">
+                        <label for="client">Клиент</label>
+                        {{ form.client }}
+                    </div> {% endcomment %}
+                    
+                    <div class="col-12 mb-3">
+                        <label for="title">Название проекта</label>
+                        {{ form.title }}
+                    </div>
+                    
+                    {% comment %} <div class="col-12 mb-3">
+                        <label for="status">Статус</label>
+                        {{ form.status }}
+                    </div> {% endcomment %}
+                    
+                    <div class="col-12 mb-3">
+                        <label for="work_option">Опции работы</label>
+                        {{ form.work_option }}
+                    </div>
+                    
+                    <div class="col-12 mb-3">
+                        <label for="gpt_version">Версия GPT</label>
+                        {{ form.gpt_version }}
+                    </div>
+                    
+                    <div class="col-12 mb-3">
+                        <label for="prompt">Описание (Prompt)</label>
+                        {{ form.prompt }}
+                    </div>
+                    
+                    {% comment %} <div class="col-12 mb-3">
+                        <label for="file">Загрузить файл</label>
+                        {{ form.file }}
+                    </div> {% endcomment %}
+    
+                    {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn bg-gradient-primary m-0 ms-2">Создать проект</button>
+                    </div>
+                </form>
             </div>
-            <div class="mb-1">
-              <label for="search" class="form-label small">Поиск</label>
-              <input type="text" id="search" name="search" class="form-control form-control-sm" placeholder="Искать сообщения...">
-            </div>
-            <button type="submit" class="btn btn-sm bg-gradient-primary w-100">Применить</button>
-          </form>
         </div>
-      </div>
-
-      <div class="card mt-3">
-        <div class="card-header">
-          <h5>Пользователи</h5>
-          <p class="text-sm mb-0">Список доступных пользователей</p>
-        </div>
-        <div class="card-body p-2">
-          <ul class="list-group">
-            {% for user in users %}
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>{{ user.name }}</span>
-                <span class="badge bg-gradient-primary rounded-circle"></span>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      </div>
     </div>
-
-    <!-- Right Side: Chat -->
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-header">
-          <h5>Чат</h5>
-          <p class="text-sm mb-0">Начните общение с выбранным пользователем</p>
-        </div>
-        <div class="card-body chat-window" style="height: 500px; overflow-y: auto;">
-          {% for message in messages %}
-            <div class="message {% if message.user_id == current_user.id %}text-end{% endif %}">
-              <p class="bg-gradient-light p-2 rounded {% if message.user_id == current_user.id %}bg-primary text-white{% endif %}">
-                {{ message.content }}
-              </p>
-              <small class="text-muted">{{ message.timestamp }}</small>
+    
+      
+    </div>
+    <div class="col-md-8 mt-sm-0 mt-4">
+      <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <!-- Card header -->
+              <div class="card-header pb-0">
+                <div class="d-lg-flex">
+                  <div>
+                    <h5 class="mb-0">Добавленные Списки</h5>
+                    <p class="text-sm mb-0">
+                      Здесь отображаются активные и завершенные списки.
+                    </p>
+                  </div>
+                  <div class="ms-auto my-auto mt-lg-0 mt-4">
+                    <div class="ms-auto my-auto">
+                      
+                      </button>
+                      <div class="modal fade" id="import" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog mt-lg-10">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="ModalLabel">Import CSV</h5>
+                              <i class="fas fa-upload ms-3"></i>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                              <p>You can browse your computer for a file.</p>
+                              <input type="text" placeholder="Browse file..." class="form-control mb-3">
+                              <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="importCheck" checked="">
+                                <label class="custom-control-label" for="importCheck">I accept the terms and conditions</label>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn bg-gradient-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                              <button type="button" class="btn bg-gradient-primary btn-sm">Upload</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {% comment %} <button class="btn btn-outline-primary btn-sm export mb-0 mt-sm-0 mt-1" data-type="csv" type="button" name="button">Экспорт</button> {% endcomment %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body px-0 pb-0">
+                <div class="table-responsive">
+                  <table class="table table-flush" id="products-list">
+                    <thead class="thead-light">
+                      <tr>
+                        <th>Название</th>
+                        <th>Тип списка</th>
+                        <th>Используется в</th>
+                        <th>Действие</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for object in objects%}
+                      <tr>
+                        <td class="text-sm">{{object.marketplace.name}}</td>
+                        
+                        <td class="text-sm">{{object.url}}</td>
+                        <td class="text-sm">{{object.count}}</td>
+                        <td class="text-sm">{{object.count_done}}</td>
+                        <td class="text-sm">
+                            </a>
+                            
+                            <a href="{% url 'favorite-delete' object.id %}" data-bs-toggle="tooltip" data-bs-original-title="Удалить задачу">
+                              <i class="fas fa-trash text-secondary"></i>
+                            </a>
+                          </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th>Продукт</th>
+                        <th>Дата</th>
+                        <th>Цена</th>
+                        <th>Ссылка</th>
+                        <th>Количество</th>
+                        <th>Action</th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
             </div>
-          {% endfor %}
-        </div>
-        <div class="card-footer">
-          <form action="/send-message/" method="post">
-            {% csrf_token %}
-            <div class="input-group">
-              <input type="text" name="message" class="form-control" placeholder="Введите сообщение..." style="max-height: 40px;">
-              <button type="submit" class="btn bg-gradient-primary">Отправить</button>
-            </div>
-          </form>
-        </div>
+          </div>
       </div>
     </div>
   </div>
+
 </div>
+<div class="container-fluid py-4">
+  </div>
+  {% include "includes/footer.html" %}
+
+
 {% endblock content %}
 
-{% block javascripts %}
-<script>
-  // Скрипт для автоматической прокрутки чата вниз
-  document.addEventListener("DOMContentLoaded", function() {
-    const chatWindow = document.querySelector('.chat-window');
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-  });
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
+  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+  <script>
+    if ("{{error}}" == "False"){
+      Swal.fire(
+      'Ошибка',
+      '{{ error_message }}',
+      'error'
+    )
+      }
+      
+  </script>
+  <script src="/static/assets/js/datatables.js"></script>
+  <script>
+    if (document.getElementById('products-list')) {
+      const dataTableSearch = new simpleDatatables.DataTable("#products-list", {
+        searchable: true,
+        fixedHeight: false,
+        perPage: 7
+      });
 
-  // Скрипт для смены иконки при открытии/закрытии панели фильтров
-  document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function() {
-    const icon = document.getElementById('filter-icon');
-    if (icon.classList.contains('fa-chevron-down')) {
-      icon.classList.remove('fa-chevron-down');
-      icon.classList.add('fa-chevron-up'); // Меняем стрелку на вверх
-    } else {
-      icon.classList.remove('fa-chevron-up');
-      icon.classList.add('fa-chevron-down'); // Меняем стрелку на вниз
-    }
+      document.querySelectorAll(".export").forEach(function(el) {
+        el.addEventListener("click", function(e) {
+          var type = el.dataset.type;
+
+          var data = {
+            type: type,
+            filename: "soft-ui-" + type,
+          };
+
+          if (type === "csv") {
+            data.columnDelimiter = "|";
+          }
+
+          dataTableSearch.export(data);
+        });
+      });
+    };
+    document.getElementById("id-list").addEventListener("input", function (event) {
+      let input = event.target.value;
+      // Заменяем запятые и пробелы на переносы строки
+      event.target.value = input.replace(/,|\s+/g, '\n').trim();
   });
-</script>
+  
+  </script>
+  
+  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
 {% endblock javascripts %}

@@ -234,18 +234,18 @@
             <span class="nav-link-text ms-1">Чаты</span>
           </a>
         </li>
-        <li class="nav-item guide7">
+        {% comment %} <li class="nav-item guide7">
           <a class="nav-link {% if request.path == "/questions" %} active {% endif %}" href="{% url 'questions' %}?status=active">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               {% comment %} <i class="bi bi-question-lg text-dark text-gradient text-sm top-0" aria-hidden="true" id="sidenavCardIcon"></i> {% endcomment %}
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="19" fill="currentColor" class="bi bi-question-lg text-dark text-gradient text-sm top-0">
+              {% comment %} <svg xmlns="http://www.w3.org/2000/svg" width="12" height="19" fill="currentColor" class="bi bi-question-lg text-dark text-gradient text-sm top-0">
                 <path fill-rule="evenodd" d="M4.475 5.458c-.284 0-.514-.237-.47-.517C4.28 3.24 5.576 2 7.825 2c2.25 0 3.767 1.36 3.767 3.215 0 1.344-.665 2.288-1.79 2.973-1.1.659-1.414 1.118-1.414 2.01v.03a.5.5 0 0 1-.5.5h-.77a.5.5 0 0 1-.5-.495l-.003-.2c-.043-1.221.477-2.001 1.645-2.712 1.03-.632 1.397-1.135 1.397-2.028 0-.979-.758-1.698-1.926-1.698-1.009 0-1.71.529-1.938 1.402-.066.254-.278.461-.54.461h-.777ZM7.496 14c.622 0 1.095-.474 1.095-1.09 0-.618-.473-1.092-1.095-1.092-.606 0-1.087.474-1.087 1.091S6.89 14 7.496 14Z"/>
-              </svg>
+              </svg> {% endcomment %}
                {% comment %} <i class="fas fa-pen-alt text-dark text-gradient text-sm top-0" aria-hidden="true" 
       
       id="sidenavCardIcon"></i> {% endcomment %}
       {% comment %} <svg width="12px" height="12px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> {% endcomment %}
-                <title>office</title>
+                {% comment %} <title>office</title>
                 <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                   <g transform="translate(-1869.000000, -293.000000)" fill="#FFFFFF" fill-rule="nonzero">
                     <g transform="translate(1716.000000, 291.000000)">
@@ -256,7 +256,7 @@
                     </g>
                   </g>
                 </g>
-              {% comment %} </svg> {% endcomment %}
+              </svg>
             </div>
             <span class="nav-link-text ms-1">Вопросы</span>
           </a>
@@ -274,7 +274,7 @@
       
       id="sidenavCardIcon"></i>
               {% comment %} <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> {% endcomment %}
-                <title>shop </title>
+                {% comment %} <title>shop </title>
                 <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                   <g transform="translate(-1716.000000, -439.000000)" fill="#FFFFFF" fill-rule="nonzero">
                     <g transform="translate(1716.000000, 291.000000)">
@@ -348,8 +348,8 @@
               </li>
             </ul>
           </div>
-        </li>
-        <li class="nav-item">
+        </li> {% endcomment %}
+        {% comment %} <li class="nav-item">
           <a data-bs-toggle="collapse" href="#SEO" 
 
              class="nav-link {% if active_menu == 'wrapping' %} active {% endif %}" 
@@ -368,14 +368,14 @@
                   <span class="sidenav-mini-icon"> D </span>
                   <span class="sidenav-normal"> Позиции </span>
                 </a>
-              </li>
+              </li> {% endcomment %}
 <!--              <li class="nav-item">-->
 <!--                <a class="nav-link {% if request.get_full_path == "/search-promotion/" %} active {% endif %}" href="{% url 'search-promotion' %}">-->
 <!--                  <span class="sidenav-mini-icon"> C </span>-->
 <!--                  <span class="sidenav-normal" style="white-space: normal;"> Поисковое продвижение </span>-->
 <!--                </a>-->
 <!--              </li>-->
-              <li class="nav-item">
+              {% comment %} <li class="nav-item">
                 <a class="nav-link {% if request.get_full_path == "/seo-group-search/" %} active {% endif %}" href="{% url 'seo-group-search' %}">
                   <span class="sidenav-mini-icon"> C </span>
                   <span class="sidenav-normal" style="white-space: normal;"> Сравнение групп SKU </span>
@@ -409,7 +409,7 @@
       id="sidenavCardIcon"></i>
               
               {% comment %} <svg width="12px" height="12px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> {% endcomment %}
-                <title>office</title>
+                {% comment %} <title>office</title>
                 <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                   <g transform="translate(-1869.000000, -293.000000)" fill="#FFFFFF" fill-rule="nonzero">
                     <g transform="translate(1716.000000, 291.000000)">
@@ -424,7 +424,7 @@
             </div>
             <span class="nav-link-text ms-1">Список ПВЗ</span>
           </a>
-        </li>
+        </li> {% endcomment %}
         {% comment %} <li class="nav-item">
           <a class="nav-link {% if request.get_full_path == "/dbs/" %} active {% endif %}" href="/dbs/">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -448,7 +448,7 @@
             <span class="nav-link-text ms-1">Список адресов</span>
           </a>
         </li> {% endcomment %}
-        <li class="nav-item guide3">
+        {% comment %} <li class="nav-item guide3">
           <a class="nav-link {% if request.get_full_path == "/add-card/" %} active {% endif %}" href="/add-card/">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
               
@@ -456,7 +456,7 @@
       
       id="sidenavCardIcon"></i>
               {% comment %} <svg width="12px" height="12px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> {% endcomment %}
-                <title>office</title>
+                {% comment %} <title>office</title>
                 <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                   <g transform="translate(-1869.000000, -293.000000)" fill="#FFFFFF" fill-rule="nonzero">
                     <g transform="translate(1716.000000, 291.000000)">
@@ -471,7 +471,7 @@
             </div>
             <span class="nav-link-text ms-1">Настройка оплаты</span>
           </a>
-        </li>
+        </li> {% endcomment %} 
         
          {% comment %} <li class="nav-item">
           <hr class="horizontal dark" />
@@ -1217,11 +1217,11 @@
             <div class="icon icon-shape icon-sm bg-white shadow text-center mb-3 d-flex align-items-center justify-content-center border-radius-md" style='float: left;'>
               <i class="fab fa-telegram-plane text-dark text-gradient text-lg top-0" aria-hidden="true" id="sidenavCardIcon"></i>
             </div>
-            <p class="text-xs font-weight-bold text-center" style='color: #FFFFFF; margin-top: 0.5rem;'>MPLAB Channel</p>
+            <p class="text-xs font-weight-bold text-center" style='color: #FFFFFF; margin-top: 0.5rem;'>Eliment Channel</p>
 
           
           <div class="docs-info">
-            <a href="https://t.me/mplabio" 
+            <a href="https://t.me/eliment_ai_bot" 
                target="_blank" class="btn btn-white btn-sm w-100 mb-0">Перейти</a>
           </div>
         </div>

@@ -4,7 +4,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
 from apps.alert.models import TgMessage
-from apps.telegram.handlers import statistic_handler
 from apps.telegram.models import PeriodicAlerts
 from apps.telegram.permissions import StatisticPermission, KeywordPermission
 from apps.telegram.serializers import InputStatisticSerializer, OutputStatisticSerializer, \
@@ -19,8 +18,6 @@ class GetStatisticView(APIView):
         serializer = InputStatisticSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            result = statistic_handler(serializer)
-            serializer = OutputStatisticSerializer(data=result)
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
                 return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)

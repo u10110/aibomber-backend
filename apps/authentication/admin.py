@@ -9,12 +9,6 @@ from import_export.fields import Field
 from .services.filters import ReferralFilter
 from apps.home.models import ReferralUsers
 
-# from apps.home.models import ProductBuyout
-
-
-# class CustomUserAdminnline(admin.StackedInline):
-# model = ProductBuyout
-
 class CustomUserResource(ModelResource):
     is_referral = Field(column_name="is_referral")
 

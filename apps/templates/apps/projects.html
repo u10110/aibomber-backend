@@ -1,303 +1,216 @@
 {% extends 'layouts/base.html' %}
-{% load static %}
 
 {% block title %} Ecommerce Products List {% endblock title %}
 
 <!-- Specific CSS goes HERE -->
-{% block stylesheets %}
-	<link rel="stylesheet" href="{% static 'css/delivery-style.css' %}">
-	<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
-	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" integrity="sha512-kq3FES+RuuGoBW3a9R2ELYKRywUEQv0wvPTItv3DSGqjpbNtGWVdvT8qwdKkqvPzT93jp8tSF4+oN4IeTEIlQA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-{% endblock stylesheets %}
+{% block stylesheets %}{% endblock stylesheets %}
 
 {% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
 
 {% block content %}
-	<div class="container-fluid py-4" style="overflow:hidden">
+<div class="container-fluid py-4">
+
+  <div class="row">
+    <div class="col-12 card">
+      <div class='m-3'>
+        <h5>Проекты </h5>
+        <p class="text-sm mb-0">Управление проектами.</p>
+      </div>
+      
+    </div>
+  </div>
+  <div class="row mt-4">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+            <h5>Создать Проект</h5>
+            <p class="text-sm mb-0">Заполните поля формы, выберите нужные параметры и нажмите кнопку “Создать“.</p>
+            <div class="col-12 col-sm-10 col-md-12 mt-3">
+                <form action="/projects/" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {% comment %} <div class="col-12 mb-3">
+                        <label for="client">Клиент</label>
+                        {{ form.client }}
+                    </div> {% endcomment %}
+                    
+                    <div class="col-12 mb-3">
+                        <label for="title">Название проекта</label>
+                        {{ form.title }}
+                    </div>
+                    
+                    {% comment %} <div class="col-12 mb-3">
+                        <label for="status">Статус</label>
+                        {{ form.status }}
+                    </div> {% endcomment %}
+                    
+                    <div class="col-12 mb-3">
+                        <label for="work_option">Опции работы</label>
+                        {{ form.work_option }}
+                    </div>
+                    
+                    <div class="col-12 mb-3">
+                        <label for="gpt_version">Версия GPT</label>
+                        {{ form.gpt_version }}
+                    </div>
+                    
+                    <div class="col-12 mb-3">
+                        <label for="prompt">Описание (Prompt)</label>
+                        {{ form.prompt }}
+                    </div>
+                    
+                    {% comment %} <div class="col-12 mb-3">
+                        <label for="file">Загрузить файл</label>
+                        {{ form.file }}
+                    </div> {% endcomment %}
+    
+                    {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn bg-gradient-primary m-0 ms-2">Создать проект</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+      
+    </div>
+    <div class="col-md-8 mt-sm-0 mt-4">
 		<div class="row">
 			<div class="col-12">
-				<div class="card mb-4">
+				<div class="card">
 					<!-- Card header -->
 					<div class="card-header pb-0">
 						<div class="d-lg-flex">
 							<div>
-								<h5 class="mb-0">Проекты</h5>
-								
+								<h5 class="mb-0">Добавленные Проекты</h5>
+								<p class="text-sm mb-0">
+									Здесь отображаются активные и завершенные проекты.
+								</p>
 							</div>
-							<div class="ms-auto my-auto mt-lg-0 mt-4">
-								<div class="ms-auto my-auto">
-									{% comment %}
-									<button class="btn btn-outline-primary btn-sm export mb-0 mt-sm-0 mt-1" data-type="csv" type="button" name="button">Экспорт</button>
-									{% endcomment %}
-									{% comment %} <div class="dropdown download" style="margin-right: 5px;">
-										<button class="btn btn-outline-primary btn-sm mb-0 mt-sm-0 mt-1" data-bs-toggle="dropdown" type="button" name="button" aria-haspopup="true" aria-expanded="false" id="download">Экспорт</button>
-										
-										<div class="dropdown-menu mt-0" aria-labelledby="download" >
-											<a class="dropdown-item export" onclick="export_data('xlsx');" data-type="xlsx">Скачать XLSX</a>
-											<a class="dropdown-item export" onclick="export_data('csv');" data-type="csv">Скачать CSV</a>
-										</div>
-									</div> {% endcomment %}
-									{% comment %} <div class='d-inline mb-0 mt-sm-0 mt-1 border border-dark rounded btn-outline-dark btn-sm mb-0 mt-sm-0 mt-1 d-inline'>
-										<a href='#' id='guide' class="nounderline">
-											<p class='d-inline-block'><i class="fa fa-play m-1 mw-5 d-inline-block" aria-hidden="true"></i>Гайд</p>
-										</a>
-										
-									</div> {% endcomment %}
-									
-								</div>
-							</div>
-							
 						</div>
-						<a href="/project-create/" class="btn bg-gradient-primary btn-sm mb-0 mt-3 add-redemptions" target="_blank">+&nbsp; Создать проект</a>
 					</div>
 					<div class="card-body px-0 pb-0">
 						<div class="table-responsive">
-							<table class="table table-flush" id="products-list">
+							<table class="table table-flush" id="projects-list">
 								<thead class="thead-light">
 									<tr>
-										{% comment %} <th>Группа выкупов №</th>
-										{% if request.get_full_path == '/delivery?status=ready' %}
-											<th>QR</th>
-										{% endif %}
-										<th>Продукт</th>
-										<th>ПВЗ / адрес</th>
-										{% if request.get_full_path != '/delivery?status=delivery' and request.get_full_path != '/delivery?status=all' %}
-											<th>Код</th>
-										{% endif %}
+										<th>ID</th>
+										<th>Название</th>
+										<th>Опции работы</th>
 										<th>Статус</th>
-										{% if request.get_full_path != '/delivery?status=delivery' and request.get_full_path != '/delivery?status=all' %}
-											<th>ФИО</th>
-											<th>Телефон</th>
-										{% endif %} {% endcomment %}
-										
-										
-										<th>Название проекта</th>
-										<th>Тип агента</th>
-										<th>Статус</th>
-										{% comment %} {% if request.GET.status == 'done' %}
-                      						<th>Дата получения товара</th>
-                    					{% endif %} {% endcomment %}
-										{% comment %}<th>Оплачено</th>{% endcomment %}
-										<th>Активность</th>
-										
-										
-										
+										<th>Дата создания</th>
+										<th>Дата обновления</th>
+										<th>Действия</th>
 									</tr>
 								</thead>
 								<tbody>
-									{% for object in objects%}
+									{% for project in projects %}
 									<tr>
-										<td>№ {{ object.num_group }}</td>
-										{% comment %} {% if request.get_full_path == '/delivery?status=ready' %}
-												<td class="text-sm"><a class='btn mb-0' onclick='showqr("{{ object.qr }}");'>Показать QR</a></td>
-										{% endif %} {% endcomment %}
-										<td>
-											<div class="d-flex">
-												{% comment %} <div class="form-check my-auto">
-													<input class="form-check-input" type="checkbox" id="customCheck1" checked>
-												</div> {% endcomment %}
-												<img class="ms-1 img-product" src={{object.product.cover}} alt="hoodie">
-												<a class="text-sm p-text"  title="{{object.product.title}}" href="https://www.wildberries.ru/catalog/{{object.product.sku}}/detail.aspx?" target='_blank'><h6 class="text-sm p-text">{{object.product.title}}</h6></a>
-												{% comment %} <a class="text-xs text-secondary mb-0"
-													>{{ object.Pvz.city }}, {{ object.Pvz.address }}</a
-												> {% endcomment %}
-											</div>
-										</td>
-										<td class="text-sm adress-text">{% if object.dev_err and object.status == "ready" %}{{ object.dev_err }}{% else %}{{ object.pvz.address }}{{ object.dbs_address.address }}{% endif %}</td>
-										{% if request.get_full_path != '/delivery?status=delivery' and request.get_full_path != '/delivery?status=all' %}
-										<td class="text-sm">{{object.code}}</td>
-										{% endif %}
-										<td>
-											{% if object.status == "ready" %}
-												<span class="badge badge-success badge-sm">{% if object.delivery_description %}{{object.delivery_description}}{% else %}Готов к выдаче{% endif %} </span>
-											{% elif object.status == "delivery" %}
-												<span class="badge badge-info badge-sm">{% if object.delivery_description %}{{object.delivery_description}}{% else %}Доставляется{% endif %}</span>
-											{% elif object.status == "return" %}
-												<span class="badge badge-warning badge-sm">{% if object.delivery_description %}{{object.delivery_description}}{% else %}Возврат{% endif %}</span>
-											{% elif object.status == "done" %}
-												<span class="badge badge-success badge-sm">Получен</span>
-												{% endif %}
-											</td>
-											{% if request.get_full_path != '/delivery?status=delivery' and request.get_full_path != '/delivery?status=all' %}
-											<td class="text-sm">{{object.full_name}}</td>
-											<td class="text-sm">{{object.phone}}</td>
-											{% endif %}
-											
-											<td class="text-sm">{{object.product.sku}}</td>
-											<td class="text-sm">{% if object.size != "0" %}{{object.size}}{% else %}{% endif %}</td>
-											
-											<td class="text-sm" data-order="{{ object.buyout_date|date:"U" }}">{{ object.buyout_date }}</td>
-											{% if request.GET.status == 'done' %}
-											<td class="text-sm" data-order="{{ object.date_done|date:"U" }}">
-										{% if object.date_done %} {{ object.date_done }} {% else %} - {% endif %} </td>
-											{% endif %}
-											{% comment %}<td>{% if object.is_paid %}<span class="badge badge-success badge-sm">Оплачено </span>{% else %}<span class="badge badge-danger badge-sm">Не оплачено </span>{% endif %}</td>{% endcomment %}
-											<td class="text-sm">{{object.price_buy|default_if_none:"-"}}</td>
-											<td class="text-sm">
-												{% if object.is_dbs %}
-												<div class=" type-icon icon icon-shape icon-sm mx-2 w-70 border border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-													DBS
-												</div>
-											{% else %}
-											<div class=" type-icon icon icon-shape icon-sm mx-2 w-70 border border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-												FBO
-											</div>
+										<td class="text-sm">{{ project.id }}</td>
+										<td class="text-sm">{{ project.title }}</td>
+										<td class="text-sm">
+											{% if project.work_option == 1 %}
+											Входящие
+											{% elif project.work_option == 2 %}
+											Входящие и исходящие
 											{% endif %}
 										</td>
-										<td class="text-sm ">{% if object.pay_check %}<a class="type-icon icon icon-shape icon-sm mx-2 w-70 border border-radius-md text-center me-2 d-flex align-items-center justify-content-center btn-primary" style="color: #fff; padding-right: 12px; padding-left: 12px;" href="{{object.pay_check}}" style="margin-bottom: 0;">ЧЕК</a>{% endif %}</td>
-										
-										
-										{% comment %} <td class="text-sm">{%if object.status == "delivery" %}Ожидает получения до 13 февраля {% else %}{% endif %}</td> {% endcomment %}
-									
-										
+										<td class="text-sm">{{ project.status }}</td>
+										<td class="text-sm">{{ project.created_at }}</td>
+										<td class="text-sm">{{ project.updated_at }}</td>
+										<td class="text-sm">
+											<!-- Запуск -->
+											<a href="{% url 'project-start' project.id %}" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Запуск">
+												Запуск
+											</a>
+											<!-- Остановка -->
+											<a href="{% url 'project-stop' project.id %}" class="btn btn-warning btn-sm" data-bs-toggle="tooltip" title="Остановка">
+												Остановка
+											</a>
+											<!-- Удаление -->
+											<a href="{% url 'project-delete' project.id %}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Удаление">
+												Удалить
+											</a>
+										</td>
+									</tr>
+									{% empty %}
+									<tr>
+										<td colspan="8" class="text-center">Нет доступных проектов</td>
 									</tr>
 									{% endfor %}
 								</tbody>
-								<!-- <tfoot>
-									<tr>
-										<th>Продукт</th>
-										<th>SKU</th>
-										<th>Дата выкупа</th>
-										<th>Цена выкупа</th>
-										<th>ПВЗ</th>
-										<th>ФИО</th>
-										<th>Телефон</th>
-										<th>Код</th>
-										<th>Статус</th>
-									</tr>
-								</tfoot> -->
 							</table>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-
-		{% include "includes/footer.html" %}
-		
 	</div>
-	<div id="myModal" class="modal">
-
-		<!-- Modal content -->
-		<div class="modal-content">
-			<span class="close justify-content-end">&times;</span>
-			<div class='mx-auto'  id="qr">
-
-			</div>
-			
-		</div>
 	
-	</div>
+  </div>
+
+</div>
+<div class="container-fluid py-4">
+  </div>
+  {% include "includes/footer.html" %}
+
 
 {% endblock content %}
 
 <!-- Specific JS goes HERE --> 
 {% block javascripts %} 
+  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+  <script>
+    if ("{{error}}" == "False"){
+      Swal.fire(
+      'Ошибка',
+      '{{ error_message }}',
+      'error'
+    )
+      }
+      
+  </script>
+  <script src="/static/assets/js/datatables.js"></script>
+  <script>
+    if (document.getElementById('products-list')) {
+      const dataTableSearch = new simpleDatatables.DataTable("#products-list", {
+        searchable: true,
+        fixedHeight: false,
+        perPage: 7
+      });
 
-	<script src="/static/assets/js/datatables.js"></script>
-	<script src="/static/assets/js/jquery.js"></script>
-	<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
-	<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-	<script>
-		var modal = document.getElementById("myModal");
-		var span = document.getElementsByClassName("close")[0];
-		const avail_count = document.querySelector('#send-again-timer');
-		span.onclick = function() {
-			modal.style.display = "none";
-		};
-		window.onclick = function(event) {
-			if (event.target == modal) {
-				modal.style.display = "none";
-			}
-		};
-		function showqr(qr_str) {
-			modal.style.display = "block";
-			$('#qr').empty();
-			var image = new Image();
-			image.src = qr_str;
-			image.className = 'w-100';
-			$('#qr').append(image);
-			
-		};
-		$('#guide').click(function(){
-			Swal.fire({
-				{% comment %} title: '<strong>HTML <u>example</u></strong>', {% endcomment %}
-				html:
-					'<div class="frame_blc"><iframe src="https://www.youtube.com/embed/9eraW6NcR9Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>',
-				showCloseButton: true,
-				showCancelButton: false,
-				focusConfirm: false,
-				showConfirmButton: false,
-				width: '50%',
-			})
-		})
+      document.querySelectorAll(".export").forEach(function(el) {
+        el.addEventListener("click", function(e) {
+          var type = el.dataset.type;
 
-		function getGet(name) {
-			var s = window.location.search;
-			s = s.match(new RegExp(name + '=([^&=]+)'));
-			return s ? s[1] : false;
-		}
-		
-		if (document.getElementById('products-list')) {
-			var dataTableSearch = $('#products-list').DataTable({
-				scrollX: true,
-				searchable: true,
-				fixedHeight: false,
-				autoWidth: false,
-				perPage: 7,
-				order: [[3, 'desc']],
-				language: {
-					searchPlaceholder: 'Поиск',
-					search: '<svg id="dataTableSearch" viewBox="0 0 512 512"><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg>',
-					info: "Показано от _START_ до _END_ из _TOTAL_",
-					lengthMenu: "Показывать сразу _MENU_",
-					paginate: {
-						first: "Первый",
-						last: "Последний",
-						next: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l370.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"/></svg>',
-						previous: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M109.3 288L480 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-370.7 0 73.4-73.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-128 128c-12.5 12.5-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 288z"/></svg>',
-					},
-					infoEmpty: "Показано 0 из 0 из _MAX_",
-					infoFiltered: "",
-					zeroRecords: "Ничего не найдено"
-				},
-			})
-			$('div.dataTables_filter input').addClass('form-control').addClass('form-control__custom')
-			dataTableSearch.columns.adjust()
-			window.addEventListener('resize', () => dataTableSearch.columns.adjust())
-			{% comment %} {% if not objects %}
-				$(".dataTables_scrollHeadInner").css('width', '100%')
-				$(".table-flush").css('width', '100%')
-			{% endif %} {% endcomment %}
-			var dataTablesLength = $('.dataTables_length > label > select').select2({
-				theme: "bootstrap",
-				minimumResultsForSearch: Infinity,
-			});
-			document.querySelectorAll(".export").forEach(function(el) {
-				el.addEventListener("click", function(e) {
-					var type = el.dataset.type;
+          var data = {
+            type: type,
+            filename: "soft-ui-" + type,
+          };
 
-					// var data = {
-					//   type: type,
-					//   filename: "Выгрузка доставок -" + type,
-					//   charset: 'UTF-8',
-					// };
+          if (type === "csv") {
+            data.columnDelimiter = "|";
+          }
 
-					// if (type === "csv") {
-					//   data.columnDelimiter = ";";
-					// }
-
-					// dataTableSearch.export(data);
-					window.location.href = '/export_delivery' + '?status=' + getGet('status') + '&type=' + type;
-				});
-			});
-		};
-	</script>
-	<script>
-		if (innerWidth <= 990) {
-			$('.download').removeClass("dropdown").addClass('dropup')
-		}
-	</script>
+          dataTableSearch.export(data);
+        });
+      });
+    };
+    document.getElementById("id-list").addEventListener("input", function (event) {
+      let input = event.target.value;
+      // Заменяем запятые и пробелы на переносы строки
+      event.target.value = input.replace(/,|\s+/g, '\n').trim();
+  });
+  
+  </script>
+  
+  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
 {% endblock javascripts %}
