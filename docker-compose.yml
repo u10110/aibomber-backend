@@ -5,7 +5,7 @@ services:
     #build: .
     image: registry.mplab.io/eliment-web:latest
     restart: always
-    env_file: ${ENV_PROD}
+    env_file: .env
     networks:
       - web_network
     volumes:
