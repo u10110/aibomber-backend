@@ -1,4 +1,4 @@
-FROM registry.eliment.ai/python3.9:latest
+FROM registry.mplab.io/python3.9:latest
 
 LABEL maintainer="Kirill Loginov"
 COPY . .
