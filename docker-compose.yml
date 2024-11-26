@@ -10,8 +10,8 @@ services:
       - web_network
     volumes:
       - /mnt/media/images:/app/apps/media/images
-    expose:
-      - "80"
+    ports:
+      - "80:80"
 
 networks:
   web_network:
