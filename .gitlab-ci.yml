@@ -1,6 +1,5 @@
 stages:
     - build
-    - dev
     - prod
 
 variables:
@@ -25,14 +24,6 @@ build:
   - docker push ${CONTAINER_IMAGE_LATEST}
   - docker system prune -f -a
 
-dev:
-  allow_failure: true
-  stage: dev
-  script:
-    - docker network create web_network || true
-    - docker-compose -f docker-compose.dev down --timeout 10
-    - docker-compose -f docker-compose.dev up -d
-    - docker system prune -f -a
 
 prod:
   stage: prod
