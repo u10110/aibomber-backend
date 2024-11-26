@@ -39,6 +39,8 @@ CSRF_TRUSTED_ORIGINS = ["https://app.eliment.ai", "https://eliment.ai", "https:/
 ALLOWED_HOSTS = [
     'eliment.ai',
     'www.eliment.ai',
+    "49.13.104.130",
+    "dc1-ea-app-01.app.eliment.ai",
     "127.0.0.1",
     "localhost",
     "192.168.122.200",
