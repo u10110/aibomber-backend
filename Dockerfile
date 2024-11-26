@@ -43,7 +43,7 @@ COPY . .
 # RUN python manage.py migrate --fake sessions
 # RUN python manage.py migrate --fake-initial
 # RUN python manage.py migrate
-RUN python manage.py collectstatic --no-input --clear
+# RUN python manage.py collectstatic --no-input --clear
 
 # gunicorn
 CMD ["gunicorn", "--config", "gunicorn-cfg.py", "core.wsgi", "--workers", "12", "--threads", "12", "--timeout", "300", "--graceful-timeout", "300", "--max-requests", "1000", "--max-requests-jitter", "50"]
