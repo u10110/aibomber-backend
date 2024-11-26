@@ -37,6 +37,8 @@ DEBUG = config("DEBUG", default=True, cast=bool)
 CSRF_TRUSTED_ORIGINS = ["https://app.eliment.ai", "https://dev.eliment.ai"]
 # load production server from .env
 ALLOWED_HOSTS = [
+    'eliment.ai',
+    'www.eliment.ai',
     "127.0.0.1",
     "localhost",
     "192.168.122.200",
@@ -47,6 +49,7 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
