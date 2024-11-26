@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   appseed-app:
-    image: registry.mplab.io/mplab-web:latest
+    image: registry.mplab.io/eliment-web:latest
     container_name: appseed_app
     restart: always
     env_file: ${ENV_DEV}
