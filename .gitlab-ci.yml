@@ -27,7 +27,7 @@ build:
 
 prod:
   stage: prod
-  tags: [prod, app-ea]
+  tags: [app-ea]
   when: manual
   image:
     name: docker/compose
