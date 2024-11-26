@@ -113,7 +113,7 @@ def general_information_update(request):
 
         user_info.save()
         r = requests.post(
-            "https://app.mplab.io/amotest/",
+            "https://eliment.ai/amotest/",
             json={"client_id": request.user, "type_deal": "user_d_add"},
             timeout=10,
         )

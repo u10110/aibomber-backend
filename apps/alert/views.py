@@ -221,7 +221,7 @@ def refresh_tg_amo(request):
             "client_secret": "hypFpnGHcX9b3QWaPdoQlOEH55l4Zlxvk1xHMJiooqU0OZ2Dr9w7oY8iehk0yBEX",
             "grant_type": "authorization_code",
             "code": data["code"],
-            "redirect_uri": "https://app.mplab.io/",
+            "redirect_uri": "https://eliment.ai/",
         }
 
         url = "https://mplabio.amocrm.ru/oauth2/access_token"
@@ -246,7 +246,7 @@ def refresh_website_amo(request):
             "client_secret": "2Uh5f7oThcQ8AtOYCc4NU2KxJo0qqBp6Zq0q65C8tOUHuoOYaJTP5DDmZCD6H6WJ",
             "grant_type": "authorization_code",
             "code": data["code"],
-            "redirect_uri": "https://app.mplab.io/",
+            "redirect_uri": "https://eliment.ai/",
         }
 
         url = "https://mplabio.amocrm.ru/oauth2/access_token"
@@ -273,7 +273,7 @@ def check_amo_tokens(request):
             "client_secret": "2Uh5f7oThcQ8AtOYCc4NU2KxJo0qqBp6Zq0q65C8tOUHuoOYaJTP5DDmZCD6H6WJ",
             "grant_type": "refresh_token",
             "refresh_token": amo.website["refresh_token"],
-            "redirect_uri": "https://app.mplab.io/",
+            "redirect_uri": "https://eliment.ai/",
         }
 
         url = "https://mplabio.amocrm.ru/oauth2/access_token"
@@ -290,7 +290,7 @@ def check_amo_tokens(request):
             "client_secret": "hypFpnGHcX9b3QWaPdoQlOEH55l4Zlxvk1xHMJiooqU0OZ2Dr9w7oY8iehk0yBEX",
             "grant_type": "refresh_token",
             "refresh_token": amo.tg["refresh_token"],
-            "redirect_uri": "https://app.mplab.io/",
+            "redirect_uri": "https://eliment.ai/",
         }
         r = requests.post(url, data=data)
         if "access_token" not in r.json():

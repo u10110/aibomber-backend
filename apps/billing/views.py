@@ -409,7 +409,7 @@ def bill_ok(request):
                 if order_check and order_check.latest("created_at").is_prolongation:
                     print("request to amo pay")
                     r = requests.post(
-                        "https://app.mplab.io/amotest/",
+                        "https://eliment.ai/amotest/",
                         json={
                             "client_id": request.user.id,
                             "type_deal": "pay",
@@ -421,7 +421,7 @@ def bill_ok(request):
                 elif len(order_check) == 1:
                     print("request to amo pay_first")
                     r = requests.post(
-                        "https://app.mplab.io/amotest/",
+                        "https://eliment.ai/amotest/",
                         json={
                             "client_id": request.user.id,
                             "type_deal": "pay_first",
@@ -434,7 +434,7 @@ def bill_ok(request):
                     # TODO: это и не продление и не первая покупка (заменить)
                     print("request to amo pay")
                     r = requests.post(
-                        "https://app.mplab.io/amotest/",
+                        "https://eliment.ai/amotest/",
                         json={"client_id": request.user.id, "type_deal": "pay"},
                         timeout=10,
                     )
@@ -491,7 +491,7 @@ def bill_ok(request):
         if order_check and order_check.latest("created_at").is_prolongation:
             print("request to amo pay")
             r = requests.post(
-                "https://app.mplab.io/amotest/",
+                "https://eliment.ai/amotest/",
                 json={
                     "client_id": request.user.id,
                     "type_deal": "pay",
@@ -503,7 +503,7 @@ def bill_ok(request):
         elif len(order_check) == 1:
             print("request to amo pay_first")
             r = requests.post(
-                "https://app.mplab.io/amotest/",
+                "https://eliment.ai/amotest/",
                 json={"client_id": request.user.id, "type_deal": "pay_first"},
                 timeout=10,
             )
@@ -513,7 +513,7 @@ def bill_ok(request):
             # TODO: это и не продление и не первая покупка (заменить)
             print("request to amo pay")
             r = requests.post(
-                "https://app.mplab.io/amotest/",
+                "https://eliment.ai/amotest/",
                 json={"client_id": request.user.id, "type_deal": "pay"},
                 timeout=10,
             )
@@ -531,7 +531,7 @@ def bill_bad(request):
         if order_check and order_check.latest("created_at").is_prolongation:
             print("request to amo pay")
             r = requests.post(
-                "https://app.mplab.io/amotest/",
+                "https://eliment.ai/amotest/",
                 json={"client_id": request.user.id, "type_deal": "unscc_pay"},
                 timeout=10,
             )
@@ -541,7 +541,7 @@ def bill_bad(request):
         elif len(order_check) == 1:
             print("request to amo pay_first")
             r = requests.post(
-                "https://app.mplab.io/amotest/",
+                "https://eliment.ai/amotest/",
                 json={"client_id": request.user.id, "type_deal": "unscc_pay_first"},
                 timeout=10,
             )
@@ -552,7 +552,7 @@ def bill_bad(request):
             # TODO: это и не продление и не первая покупка (заменить)
             print("request to amo unscc_pay")
             r = requests.post(
-                "https://app.mplab.io/amotest/",
+                "https://eliment.ai/amotest/",
                 json={"client_id": request.user.id, "type_deal": "unscc_pay"},
                 timeout=10,
             )

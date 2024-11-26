@@ -394,7 +394,7 @@ def activate(request, code):
             user.save()
             try:
                 r = requests.post(
-                    "https://app.mplab.io/amotest/",
+                    "https://eliment.ai/amotest/",
                     json={"client_id": user.id, "type_deal": "register"},
                 )
             except:

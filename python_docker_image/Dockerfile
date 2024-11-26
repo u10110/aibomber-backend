@@ -8,8 +8,8 @@ ENV PYTHONUNBUFFERED 1
 
 ENV DEBUG=True
 ENV SECRET_KEY=S3cr3t_K#Key
-ENV CSRF_TRUSTED_ORIGINS=https://dev.mplab.io
-ENV SERVER=dev.mplab.io
+ENV CSRF_TRUSTED_ORIGINS=https://dev.eliment.ai
+ENV SERVER=dev.eliment.ai
 
 ENV PG_NAME=postgres
 ENV PG_USER=dev

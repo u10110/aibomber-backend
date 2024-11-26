@@ -33,7 +33,7 @@ class Deal:
             "client_secret": "2Uh5f7oThcQ8AtOYCc4NU2KxJo0qqBp6Zq0q65C8tOUHuoOYaJTP5DDmZCD6H6WJ",
             "grant_type": "refresh_token",
             "refresh_token": self.amo.website["refresh_token"],
-            "redirect_uri": "https://app.mplab.io/"
+            "redirect_uri": "https://eliment.ai/"
         }
 
         url = 'https://mplabio.amocrm.ru/oauth2/access_token'
@@ -51,7 +51,7 @@ class Deal:
             "client_secret": "hypFpnGHcX9b3QWaPdoQlOEH55l4Zlxvk1xHMJiooqU0OZ2Dr9w7oY8iehk0yBEX",
             "grant_type": "refresh_token",
             "refresh_token": self.amo.tg["refresh_token"],
-            "redirect_uri": "https://app.mplab.io/"
+            "redirect_uri": "https://eliment.ai/"
         }
 
         url = 'https://mplabio.amocrm.ru/oauth2/access_token'
