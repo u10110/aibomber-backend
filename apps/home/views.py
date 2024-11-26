@@ -702,7 +702,7 @@ def list_recipient_delete(request, pk):
 def chat(request):
     # Получаем все чаты, аннотируя их последним сообщением и временем последнего сообщения
 
-    chats = Chat.objects.annotate(
+    chats = Chat.objects.filter(client_id=request.user.id).annotate(
         last_message_time=Subquery(
             Chat.objects.filter(user_id=OuterRef('user_id'))
             .order_by('-created_at')
