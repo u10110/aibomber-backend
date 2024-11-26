@@ -11,7 +11,7 @@ services:
     volumes:
       - /mnt/media/images:/app/apps/media/images
     expose:
-      - "5005"
+      - "80"
 
 networks:
   web_network:
