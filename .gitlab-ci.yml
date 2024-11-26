@@ -34,8 +34,8 @@ prod:
     entrypoint: ["/bin/sh", "-c"]
   script:
     - docker network create web_network || true
-    - docker-compose -f docker-compose.yml down
-    - docker-compose -f docker-compose.yml pull
-    - docker-compose -f docker-compose.yml up -d
+    - docker compose -f docker-compose.yml down
+    - docker compose -f docker-compose.yml pull
+    - docker compose -f docker-compose.yml up -d
     - docker builder prune -f
     - docker image prune -a -f
