@@ -34,7 +34,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
 # prod
-CSRF_TRUSTED_ORIGINS = ["https://app.eliment.ai", "https://dev.eliment.ai"]
+CSRF_TRUSTED_ORIGINS = ["https://app.eliment.ai", "https://eliment.ai", "https://dev.eliment.ai"]
 # load production server from .env
 ALLOWED_HOSTS = [
     'eliment.ai',
