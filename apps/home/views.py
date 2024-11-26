@@ -589,7 +589,7 @@ def projects(request):
         form = ProjectForm()
 
     # Получаем все проекты из модели
-    projects = Project.objects.all()
+    projects = Project.objects.filter(client=request.user)
 
     # Передаем данные в шаблон
     context = {
@@ -600,10 +600,9 @@ def projects(request):
     # return render(request, 'apps/projects.html', {'form': form})
 
 def project_edit(request, id):
-    project = get_object_or_404(Project, id=id)
+    project = get_object_or_404(Project, id=id, client=request.user)
     if request.method == 'POST':
         form = ProjectForm(request.POST, instance=project)
-        print(222222222222)
         if form.is_valid():
             print(form)
             form.save()
@@ -616,37 +615,37 @@ def project_edit(request, id):
 
 
 def project_start(request, pk):
-    project = get_object_or_404(Project, pk=pk)
+    project = get_object_or_404(Project, pk=pk, client=request.user)
     project.status = "active"  # Укажите соответствующее значение
     project.save()
     return redirect('projects')
 
 def project_stop(request, pk):
-    project = get_object_or_404(Project, pk=pk)
+    project = get_object_or_404(Project, pk=pk, client=request.user)
     project.status = "stopped"  # Укажите соответствующее значение
     project.save()
     return redirect('projects')
 
 def project_delete(request, pk):
-    project = get_object_or_404(Project, pk=pk)
+    project = get_object_or_404(Project, pk=pk, client=request.user)
     project.delete()
     return redirect('projects')
 
 
 def channel_start(request, pk):
-    project = get_object_or_404(Channel, pk=pk)
+    project = get_object_or_404(Channel, pk=pk, client=request.user)
     project.status = "active"  # Укажите соответствующее значение
     project.save()
     return redirect('channels')
 
 def channel_stop(request, pk):
-    project = get_object_or_404(Channel, pk=pk)
+    project = get_object_or_404(Channel, pk=pk, client=request.user)
     project.status = "stopped"  # Укажите соответствующее значение
     project.save()
     return redirect('channels')
 
 def channel_delete(request, pk):
-    project = get_object_or_404(Channel, pk=pk)
+    project = get_object_or_404(Channel, pk=pk, client=request.user)
     project.delete()
     return redirect('channels')
 
@@ -668,7 +667,7 @@ def list_recipient(request):
         form = RecipientForm()
 
     # Получаем все проекты из модели
-    projects = Recipient.objects.all()
+    projects = Recipient.objects.filter(client=request.user)
 
     # Передаем данные в шаблон
     context = {
@@ -695,7 +694,7 @@ def save_recipients(request):
 
 
 def list_recipient_delete(request, pk):
-    list_recipient = get_object_or_404(Project, pk=pk)
+    list_recipient = get_object_or_404(Project, pk=pk, client=request.user)
     list_recipient.delete()
     return redirect('projects')
 
@@ -795,7 +794,7 @@ def channels(request):
         form = ChannelForm()
 
     # Получаем все проекты из модели
-    projects = Channel.objects.all()
+    projects = Channel.objects.filter(client=request.user)
 
     # Передаем данные в шаблон
     context = {
