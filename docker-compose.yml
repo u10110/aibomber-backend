@@ -4,7 +4,7 @@ services:
   appseed-app:
     container_name: appseed_app
     #build: .
-    image: registry.mplab.io/mplab-web:latest
+    image: registry.mplab.io/eliment-web:latest
     restart: always
     env_file: ${ENV_PROD}
     networks:

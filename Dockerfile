@@ -13,7 +13,9 @@ ENV PYTHONUNBUFFERED 1
 RUN pip3 install python-dateutil
 
 # copy poetry files
-COPY poetry.lock pyproject.toml ./
+# Docker Desktop - Hyper-V not enabled
+# Hyper-V is disabled. Enable Hyper-V, restart your machine, and then start Docker Desktop.
+# COPY poetry.lock pyproject.toml ./
 
 # resolve cryptography and lxml dependencies
 USER root
