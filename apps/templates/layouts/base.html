@@ -65,9 +65,9 @@
             </div>
             <div class="tips-popup__tips">
               <div class="tips-popup-tip"><a href="#" id='start-guide'>Как работать с платформой</a></div>
-              <div class="tips-popup-tip"><a href="{% url 'questions' %}?status=active&tips=show">Как создавать вопросы</a></div>
+              {% comment %} <div class="tips-popup-tip"><a href="{% url 'questions' %}?status=active&tips=show">Как создавать вопросы</a></div>
               <div class="tips-popup-tip"><a href="{% url 'reviews' %}?status=active&tips=show">Как оставлять отзывы</a></div>
-              <div class="tips-popup-tip"><a href="{% url 'group-buyouts' %}?status=active&tips=show">Как совершать выкупы</a></div>
+              <div class="tips-popup-tip"><a href="{% url 'group-buyouts' %}?status=active&tips=show">Как совершать выкупы</a></div> {% endcomment %}
             </div>
           </div>
       </div>
@@ -260,7 +260,7 @@
   </script>
 <noscript><div><img src="https://mc.yandex.ru/watch/87940143" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
 
 </body>

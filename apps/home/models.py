@@ -28,6 +28,7 @@ class ClientSettings(models.Model):
     )
     tg_chat_id = models.TextField(null=True, blank=True)
     tg_token = models.TextField(null=True, blank=True)
+    balance = models.IntegerField(max_length=55, default=0)
     # wb_token = models.TextField(null=True, blank=True)
     updated_at = models.DateTimeField(null=True, auto_now_add=True)
     # tochka_number = models.ForeignKey(
@@ -93,20 +94,78 @@ class Project(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 
+class Recipient(models.Model):
+    class Meta:
+        verbose_name = "Получатели"
+        verbose_name_plural = "Получатели"
+
+
+    OPTIONS = [
+        (1, 'Белый список'),
+        (2, 'Черный список'),
+    ]
+
+    client = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=1000)
+    status = models.CharField(max_length=55, default="active")
+    work_option = models.IntegerField(choices=OPTIONS, default=1)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    tg_id = models.BigIntegerField()
+
+class TgID(models.Model):
+    recipient = models.ForeignKey(
+        Recipient,
+        related_name='tg_id_set',
+        on_delete=models.CASCADE
+    )
+    tg_id = models.CharField(max_length=255)
+
+
+class Channel(models.Model):
+    class Meta:
+        verbose_name = "Канал"
+        verbose_name_plural = "Каналы"
+    STATUS_CHOICES = [
+            ('unauthorized', 'Не авторизован'),
+            ('authorized', 'Авторизован'),
+        ]
+
+    client = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=1000)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='unauthorized',
+    )
+    phone = models.CharField(max_length=55,)
+    qr = models.TextField(null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+
 class Chat(models.Model):
     class Meta:
         verbose_name = "Чаты"
         verbose_name_plural = "Чаты"
 
+    MESSAGE_TYPE = [
+            ('anwser', 'Наше сообщение'),
+            ('message', 'Сообщение пользователя'),
+        ]
+
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     user_id = models.CharField(max_length=1000)
+    message_type = models.CharField(
+        max_length=20,
+        choices=MESSAGE_TYPE,
+        default='message',
+    )
+    is_auto_active = models.BooleanField(default=True)
     status = models.CharField(max_length=55, default="active")
-    user_name = models.CharField(max_length=55, default="active")
-    user_message = models.CharField(max_length=55, default="active")
-    user_anwser = models.CharField(max_length=55, default="active")
+    user_name = models.CharField(max_length=55, )
+    user_message = models.CharField(max_length=555, )
     sex = models.IntegerField(null=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
-    # question_date = models.DateTimeField()
 

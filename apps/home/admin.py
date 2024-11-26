@@ -91,6 +91,7 @@ class ClientSettingsAdmin(admin.ModelAdmin):
         "id",
         "client_id",
         "client",
+        "balance",
         "tg_chat_id",
         "tg_token",
         "updated_at",
@@ -101,7 +102,7 @@ class ClientSettingsAdmin(admin.ModelAdmin):
     fieldsets = (
         (
             title,
-            {"fields": ("tg_chat_id", "tg_token")},
+            {"fields": ("tg_chat_id", "tg_token", "balance")},
         ),
     )
 
@@ -277,12 +278,26 @@ class ProjectAdmin(admin.ModelAdmin):
     # search_fields = ("id",)
     # list_filter = ("updated_at",)
 
+class ChannelAdmin(admin.ModelAdmin):
+    pass
+    # list_display = (
+    #     "id",
+    #     "value",
+    #     "es_id",
+    #     "frequency",
+    #     "updated_at",
+    #     "created_at",
+    # )
+    # search_fields = ("id",)
+    # list_filter = ("updated_at",)
+
 
 
 
 admin.site.register(Chat, ChatAdmin)
 admin.site.register(Project, ProjectAdmin)
+admin.site.register(Channel, ChannelAdmin)
 admin.site.register(ClientSettings, ClientSettingsAdmin)
 admin.site.register(Proxy, ProxyAdmin)
-admin.site.register(ReferralLinks, ReferralLinksAdmin)
-admin.site.register(ReferralUsers, ReferralUsersAdmin)
+# admin.site.register(ReferralLinks, ReferralLinksAdmin)
+# admin.site.register(ReferralUsers, ReferralUsersAdmin)

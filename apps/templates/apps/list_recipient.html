@@ -9,214 +9,223 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-
-  <div class="row">
-    <div class="col-12 card">
-      <div class='m-3'>
-        <h5>Списки получателей </h5>
-        <p class="text-sm mb-0">Добавьте кому рассылать.</p>
-      </div>
-      
-    </div>
-  </div>
-  <div class="row mt-4">
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 >Добавить Список</h5>
-          <p class="text-sm mb-0">Укажите ссылку на товар или бренд и нажмите кнопку “Добавить“.</p>
-          <div class="col-12 col-sm-10 col-md-12 mt-3">
-              <form action="/add-to-favorite/" method="post">
-                {% csrf_token %}
-                {% comment %} <label>Выберите источник (соц сеть)</label>
-              <select id="marketplace" type="text" name="marketplace" class="form-control" name="choices-sizes" id="choices-currency-edit">
-                <option value="Wildberries" selected="">Wildberries</i></option>
-                <option value="Ozon">Ozon</option>
-              </select> {% endcomment %}
-              <div class="col-12">
-                <label>Введите название</label>
-        <span class="text-danger">{{ form.url.errors }}</span>
-                <input id="url" type="text" name="url" class="multisteps-form__input form-control" placeholder="Мой первый список" />
-              </div>
-              <label>Выберите тип</label>
-              <select id="marketplace" type="text" name="marketplace" class="form-control" name="choices-sizes" id="choices-currency-edit">
-                <option value="Wildberries" selected="">Белый список</i></option>
-                <option value="Ozon">Черный список</option>
-              </select>
-              {% comment %} <div class="col-12 col-sm-6">
-                <label>Количество лайков</label>
-                <input id="count" type="number" name="count" class="multisteps-form__input form-control" placeholder="1" />
-              </div> {% endcomment %}
-              <div class="col-12">
-                <label>Введите ID</label>
-                <textarea id="id-list" name="id_list" class="multisteps-form__input form-control" rows="5" placeholder="Введите ID через запятую или в столбик"></textarea>
+    <div class="row">
+        <div class="col-12 card">
+            <div class='m-3'>
+                <h5>Списки получателей</h5>
+                <p class="text-sm mb-0">Добавьте кому рассылать.</p>
             </div>
-            </div>
-            {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                {% endfor %}
-            </ul>
-          {% endif %}
-            <div class="row">
-            </div>
-            <div class="d-flex justify-content-end mt-4">
-              <button  type="submit"  class="btn bg-gradient-primary m-0 ms-2"  >Добавить</button>
-              {% comment %} <button  type="subbmit"  class="btn bg-gradient-primary m-0 ms-2" >Не доступно</button> {% endcomment %}
-            </div>
-          </form>
         </div>
-      </div>
-      
     </div>
-    <div class="col-md-8 mt-sm-0 mt-4">
-      <div class="row">
-          <div class="col-12">
+
+    <div class="row mt-4">
+        <div class="col-md-4">
             <div class="card">
-              <!-- Card header -->
-              <div class="card-header pb-0">
-                <div class="d-lg-flex">
-                  <div>
-                    <h5 class="mb-0">Добавленные Списки</h5>
-                    <p class="text-sm mb-0">
-                      Здесь отображаются активные и завершенные списки.
-                    </p>
-                  </div>
-                  <div class="ms-auto my-auto mt-lg-0 mt-4">
-                    <div class="ms-auto my-auto">
-                      
-                      </button>
-                      <div class="modal fade" id="import" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog mt-lg-10">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h5 class="modal-title" id="ModalLabel">Import CSV</h5>
-                              <i class="fas fa-upload ms-3"></i>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="card-body">
+                    <h5>Добавить Список</h5>
+                    <p class="text-sm mb-0">Заполните поля формы, выберите нужные параметры и нажмите кнопку "Добавить".</p>
+                    <div class="col-12 col-sm-10 col-md-12 mt-3">
+                        <form action="/list-recipient/" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {% comment %} {{ form.as_p }} {% endcomment %}
+                            <div class="col-12 mb-3">
+                                <label for="title">Введите название</label>
+                                {{ form.title }}
                             </div>
-                            <div class="modal-body">
-                              <p>You can browse your computer for a file.</p>
-                              <input type="text" placeholder="Browse file..." class="form-control mb-3">
-                              <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="importCheck" checked="">
-                                <label class="custom-control-label" for="importCheck">I accept the terms and conditions</label>
-                              </div>
+                            <div class="col-12 mb-3">
+                                <label for="work_option">Веберите тип</label>
+                                {{ form.work_option }}
                             </div>
-                            <div class="modal-footer">
-                              <button type="button" class="btn bg-gradient-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                              <button type="button" class="btn bg-gradient-primary btn-sm">Upload</button>
+                            {% comment %} <div class="col-12 mb-3">
+                                <label for="gpt_version">Версия GPT</label>
+                                {{ form.gpt_version }}
+                            </div> {% endcomment %}
+                             <div class="col-12 mb-3">
+                                <label for="prompt">ТГ ИД список</label>
+                                {{ form.tg_id_input }}
                             </div>
-                          </div>
-                        </div>
-                      </div>
-                      {% comment %} <button class="btn btn-outline-primary btn-sm export mb-0 mt-sm-0 mt-1" data-type="csv" type="button" name="button">Экспорт</button> {% endcomment %}
+                            {% if messages %}
+                            <ul class="messages">
+                                {% for message in messages %}
+                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="submit" class="btn bg-gradient-primary m-0 ms-2">Создать список</button>
+                            </div>
+                        </form>
                     </div>
-                  </div>
                 </div>
-              </div>
-              <div class="card-body px-0 pb-0">
-                <div class="table-responsive">
-                  <table class="table table-flush" id="products-list">
-                    <thead class="thead-light">
-                      <tr>
-                        <th>Название</th>
-                        <th>Тип списка</th>
-                        <th>Используется в</th>
-                        <th>Действие</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for object in objects%}
-                      <tr>
-                        <td class="text-sm">{{object.marketplace.name}}</td>
-                        
-                        <td class="text-sm">{{object.url}}</td>
-                        <td class="text-sm">{{object.count}}</td>
-                        <td class="text-sm">{{object.count_done}}</td>
-                        <td class="text-sm">
-                            </a>
-                            
-                            <a href="{% url 'favorite-delete' object.id %}" data-bs-toggle="tooltip" data-bs-original-title="Удалить задачу">
-                              <i class="fas fa-trash text-secondary"></i>
-                            </a>
-                          </td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <th>Продукт</th>
-                        <th>Дата</th>
-                        <th>Цена</th>
-                        <th>Ссылка</th>
-                        <th>Количество</th>
-                        <th>Action</th>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </div>
             </div>
-          </div>
-      </div>
-    </div>
-  </div>
+        </div>
 
-</div>
-<div class="container-fluid py-4">
-  </div>
-  {% include "includes/footer.html" %}
+		<div class="col-md-8 mt-sm-0 mt-4">
+			<div class="row">
+				<div class="col-12">
+					<div class="card">
+						<!-- Card header -->
+						<div class="card-header pb-0">
+							<div class="d-lg-flex">
+								<div>
+									<h5 class="mb-0">Добавленные Проекты</h5>
+									<p class="text-sm mb-0">Здесь отображаются активные и завершенные проекты.</p>
+								</div>
+		
+								<!-- Search, Sorting and Records per page controls -->
+								<div class="ms-auto d-flex">
+									{% comment %} <form class="d-flex me-3" method="get" action="">
+										<input class="form-control" type="search" name="q" placeholder="Поиск по проектам" value="{{ request.GET.q }}">
+										<button type="submit" class="btn btn-link text-secondary">
+											<i class="fas fa-search"></i>
+										</button>
+									</form> {% endcomment %}
+									
+									{% comment %} <div class="d-flex align-items-center">
+										<label for="records-per-page" class="text-sm mb-0 me-2">Записей на странице:</label>
+										<select id="records-per-page" class="form-select form-select-sm" onchange="location = this.value;">
+											<option value="?page=1&q={{ request.GET.q }}&per_page=10" {% if per_page == 10 %}selected{% endif %}>10</option>
+											<option value="?page=1&q={{ request.GET.q }}&per_page=20" {% if per_page == 20 %}selected{% endif %}>20</option>
+											<option value="?page=1&q={{ request.GET.q }}&per_page=50" {% if per_page == 50 %}selected{% endif %}>50</option>
+											<option value="?page=1&q={{ request.GET.q }}&per_page=100" {% if per_page == 100 %}selected{% endif %}>100</option>
+										</select>
+									</div> {% endcomment %}
+								</div>
+							</div>
+						</div>
+		
+						<div class="card-body px-0 pb-0">
+							<div class="dataTable-container">
+								<table class="table table-flush dataTable-table" id="projects-list">
+									<thead class="thead-light">
+										<tr>
+											<th>
+												<a href="?sort_by=title&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
+													Название {% if request.GET.sort_by == 'title' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+												</a>
+											</th>
+											<th>
+												<a href="?sort_by=work_option&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
+													Опции работы {% if request.GET.sort_by == 'work_option' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+												</a>
+											</th>
+											<th>
+												<a href="?sort_by=status&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
+													Статус {% if request.GET.sort_by == 'status' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+												</a>
+											</th>
+											<th>
+												<a href="?sort_by=created_at&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
+													Дата создания {% if request.GET.sort_by == 'created_at' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+												</a>
+											</th>
+											<th>
+												<a href="?sort_by=updated_at&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
+													Дата обновления {% if request.GET.sort_by == 'updated_at' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+												</a>
+											</th>
+											<th>Действия</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for project in projects %}
+										<tr>
+											<td class="text-sm">{{ project.title }}</td>
+											<td class="text-sm">
+												{% if project.work_option == 1 %} Входящие {% elif project.work_option == 2 %} Входящие и исходящие {% endif %}
+											</td>
+											<td class="text-sm">{{ project.status }}</td>
+											<td class="text-sm">{{ project.created_at }}</td>
+											<td class="text-sm">{{ project.updated_at }}</td>
+											<td class="text-sm">
+												<a href="{% url 'project-start' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Запуск">
+													<i class="fas fa-play"></i>
+												</a>
+												<a href="{% url 'project-stop' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Остановка">
+													<i class="fas fa-stop"></i>
+												</a>
+												<a href="{% url 'project-delete' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Удаление">
+													<i class="fas fa-trash-alt"></i>
+												</a>
+												<a href="javascript:void(0);" class="btn btn-link text-secondary" data-bs-toggle="modal" data-bs-target="#editProjectModal{{ project.id }}" title="Изменить">
+													<i class="fas fa-edit"></i>
+												</a>
+											</td>
+										</tr>
+		
+										<!-- Modal for editing project -->
+										<div class="modal fade" id="editProjectModal{{ project.id }}" tabindex="-1" aria-labelledby="editProjectModalLabel{{ project.id }}" aria-hidden="true">
+											<div class="modal-dialog">
+												<div class="modal-content">
+													<div class="modal-header">
+														<h5 class="modal-title" id="editProjectModalLabel{{ project.id }}">Редактировать проект</h5>
+														<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+													</div>
+													<div class="modal-body">
+														<form action="{% url 'project-edit' project.id %}" method="POST">
+															{% csrf_token %}
+															{{ form.as_p }}
+		
+															<div class="d-flex justify-content-end">
+																<button type="submit" class="btn btn-primary">Сохранить</button>
+															</div>
+														</form>
+													</div>
+												</div>
+											</div>
+										</div>
+										{% empty %}
+										<tr>
+											<td colspan="6" class="text-center">Нет доступных проектов</td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+		
+							<!-- Pagination controls -->
+							<div class="d-flex justify-content-between align-items-center">
+								<div>
+									<p class="text-sm">Показано {{ projects.paginator.page_range.start }}-{{ projects.paginator.page_range.end }} из {{ projects.paginator.count }} записей</p>
+								</div>
+								<div>
+									<ul class="pagination justify-content-end">
+										{% for page_num in projects.paginator.page_range %}
+											<li class="page-item{% if projects.number == page_num %} active{% endif %}">
+												<a class="page-link" href="?page={{ page_num }}&q={{ request.GET.q }}&per_page={{ per_page }}">{{ page_num }}</a>
+											</li>
+										{% endfor %}
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
 
+
+{% include "includes/footer.html" %}
 
 {% endblock content %}
 
-<!-- Specific JS goes HERE --> 
-{% block javascripts %} 
-  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
-  <script>
-    if ("{{error}}" == "False"){
-      Swal.fire(
-      'Ошибка',
-      '{{ error_message }}',
-      'error'
-    )
-      }
-      
-  </script>
-  <script src="/static/assets/js/datatables.js"></script>
-  <script>
-    if (document.getElementById('products-list')) {
-      const dataTableSearch = new simpleDatatables.DataTable("#products-list", {
-        searchable: true,
-        fixedHeight: false,
-        perPage: 7
-      });
-
-      document.querySelectorAll(".export").forEach(function(el) {
-        el.addEventListener("click", function(e) {
-          var type = el.dataset.type;
-
-          var data = {
-            type: type,
-            filename: "soft-ui-" + type,
-          };
-
-          if (type === "csv") {
-            data.columnDelimiter = "|";
-          }
-
-          dataTableSearch.export(data);
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modalTriggers = document.querySelectorAll('[data-bs-toggle="modal"]');
+        modalTriggers.forEach(trigger => {
+            const modalId = trigger.getAttribute('data-bs-target');
+            const modalElement = document.querySelector(modalId);
+            if (modalElement) {
+                trigger.addEventListener('click', () => {
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                });
+            }
         });
-      });
-    };
-    document.getElementById("id-list").addEventListener("input", function (event) {
-      let input = event.target.value;
-      // Заменяем запятые и пробелы на переносы строки
-      event.target.value = input.replace(/,|\s+/g, '\n').trim();
-  });
-  
-  </script>
-  
-  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+    });
+</script>
 {% endblock javascripts %}

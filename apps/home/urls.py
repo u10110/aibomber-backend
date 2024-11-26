@@ -85,14 +85,31 @@ urlpatterns = [
     
     
     path("projects/", views.projects, name="projects"),
+    path('project-edit/<int:id>/', views.project_edit, name='project-edit'),
+
     path('project-start/<int:pk>/', views.project_start, name='project-start'),
     path('project-stop/<int:pk>/', views.project_stop, name='project-stop'),
     path('project-delete/<int:pk>/', views.project_delete, name='project-delete'),
-
-    path("project-create/", views.project_create, name="project-create"),
+    
+    # path("project-create/", views.project_create, name="project-create"),
+    
     path("list-recipient/", views.list_recipient, name="list-recipient"),
-    path("chat/", views.chat, name="chat"),
+    path('list-recipient/<int:pk>/', views.list_recipient_delete, name='list-recipient-delete'),
+    path('save-recipients/', views.save_recipients, name='save_recipients'),
+
     path("channels/", views.channels, name="channels"),
+    path('channel-start/<int:pk>/', views.channel_start, name='channel-start'),
+    path('channel-stop/<int:pk>/', views.channel_stop, name='channel-stop'),
+    path('channel-delete/<int:pk>/', views.channel_delete, name='channel-delete'),
+    # path('channel-edit/<int:id>/', views.channel_edit, name='channel-edit'),
+
+    
+    
+    path("chat/", views.chat, name="chat"),
+    path('messages/', views.chat_messages, name='messages'),
+
+
+
     path("get-tochka-phone/", views.get_tochka_phone, name="get-tochka-phone"),
 
     

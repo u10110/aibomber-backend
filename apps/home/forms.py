@@ -10,8 +10,8 @@ from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.forms import fields
 from django import forms
-from .models import Project
-
+from .models import Project, Recipient, TgID, Channel
+from django.core.exceptions import ValidationError
 
 class Account(forms.Form):
     first_name = forms.CharField(
@@ -91,13 +91,11 @@ class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = [
-            'client',
             'title',
-            'status',
             'work_option',
             'gpt_version',
             'prompt',
-            'file',
+            # 'file',
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название проекта'}),
@@ -112,6 +110,70 @@ class ProjectForm(forms.ModelForm):
             'status': 'Статус',
             'work_option': 'Опции работы',
             'gpt_version': 'Версия GPT',
-            'prompt': 'Промпт',
+            'prompt': 'Список ID',
             'file': 'Файл',
         }
+
+
+
+class ChannelForm(forms.ModelForm):
+    class Meta:
+        model = Channel
+        fields = [
+            'title',
+            'phone',
+        ]
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название проекта'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите телефон'}),
+        }
+        labels = {
+            'title': 'Название проекта',
+            'phone': 'Телефон',
+        }
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        if not phone:
+            raise ValidationError("Поле телефона обязательно для заполнения.")
+        
+        # Проверка формата: должен начинаться с "+" и содержать только цифры после
+        if not re.match(r'^\+\d+$', phone):
+            raise ValidationError("Введите номер телефона в международном формате, начиная с '+', например, +1234567890.")
+        
+        return phone
+
+
+class RecipientForm(forms.ModelForm):
+    
+    tg_ids = forms.CharField(widget=forms.Textarea, label="Telegram IDs")
+
+    def clean_tg_ids(self):
+        ids = self.cleaned_data['tg_ids']
+        return [int(id.strip()) for id in ids.split(',') if id.strip().isdigit()]
+
+    class Meta:
+        
+        model = Recipient
+        fields = [
+            'title',
+            'work_option',
+            'tg_id',
+        ]
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название списка'}),
+            'work_option': forms.Select(attrs={'class': 'form-control'}),
+            'tg_id': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Введите тг ид список'}),
+        }
+        labels = {
+            'client': 'Клиент',
+            'title': 'Название проекта',
+            'status': 'Статус',
+            'work_option': 'Опции работы',
+            'tg_id': 'tg id',
+            'prompt': 'Промпт',
+        }
+    
+
+
+

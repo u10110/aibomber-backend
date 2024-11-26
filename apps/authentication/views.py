@@ -119,17 +119,8 @@ def login_view(request):
     form = LoginForm(request.POST or None)
 
     msg = None
-    # auth_widget = create_redirect_login_widget(
-    #     bot_name='eliment_test12312312312_bot',
-    #     size='large',
-    #     corner_radius="10",
-    #     # data-onauth="onTelegramAuth"
-    #     # data-button-title="Войти с Telegram"
-    #     # redirect_url='http://127.0.0.1:8000/telegram/callback/'
-    #     redirect_url='https://fa9f-91-197-106-185.ngrok-free.app/telegram/callback/'
-    # )
     auth_widget = '<script async src="https://telegram.org/js/telegram-widget.js?3" ' \
-              'data-telegram-login="eliment_test12312312312_bot" ' \
+              'data-telegram-login="eliment_ai_bot" ' \
               'data-size="large" ' \
               'data-radius="10" ' \
               'data-auth-url="https://fa9f-91-197-106-185.ngrok-free.app/telegram/callback/" ' \
@@ -284,8 +275,6 @@ def register_tg_user(request):
         else:
             old_signup = False
 
-        # if old_signup and old_signup.is_active == False:
-        #     uid = urlsafe_base64_encode(force_bytes(old_signup.pk))
         if old_signup and old_signup.is_active == True:
             return JsonResponse({"result": "exist"}, status=200)
         else:
@@ -298,15 +287,8 @@ def register_tg_user(request):
                 {"tg_chat_id": tg_id, "tg_token": tg_api_token, "client_id": user.id},
                 client_id=user.id,
             )
+            print({"tg_chat_id": tg_id, "tg_token": tg_api_token, "client_id": user.id})
 
-            try:
-                pass
-                # r = requests.post(
-                #     "https://app.mplab.io/amotest/",
-                #     json={"client_id": user.id, "type_deal": "register"},
-                # )
-            except:
-                pass
 
             if tariff is not None:
 
@@ -340,14 +322,6 @@ def register_tg_user(request):
                         like_review_limit=tariff.like_review_limit,
                         question_limit=tariff.question_limit,
                     )
-                    # obj = ClientSettings.objects.create(
-                    #     client_id=user.id,
-                    #     tg_chat_id=tg_id,
-                    #     tg_token=tg_api_token,
-                    #     unictariff_id=tariff.id,
-                    # )
-
-                    # else:
                     return JsonResponse(
                         {
                             "result": raw_password,

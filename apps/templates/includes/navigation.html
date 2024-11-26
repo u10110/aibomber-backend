@@ -72,15 +72,15 @@
           <ul class="navbar-nav  justify-content-end">
             {% get_notifaications request.user as notifications %}
             {% has_new_notifications request.user as has_NN %}
-            <li class="nav-item dropdown pe-3 d-flex align-items-center">
+            {% comment %} <li class="nav-item dropdown pe-3 d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body p-0" id="NotificationButton" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa fa-bell cursor-pointer" style='width: 16px; height: 16px;' aria-hidden="true"></i>
                 {% if has_NN %}
                   <div class="unread-notifications-circle-nav"></div>
                 {% endif %}
-              </a>
+              </a> {% endcomment %}
               
-              <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="NotificationButton">
+              {% comment %} <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="NotificationButton">
                 {% if notifications %}
                 {% for notification in notifications %}
                   <li class="mb-3">
@@ -96,7 +96,7 @@
                     {% comment %} {% if notification.is_read == False %}
                       <div class="unread-notifications-circle-item"></div>
                     {% endif %} {% endcomment %}
-                  </li>
+                  {% comment %} </li>
                 {% endfor %}
                 {% else %}
                 <li class="mb-3">
@@ -105,41 +105,40 @@
                   </a>
                 </li>
               {% endif %}
-              </ul>
+              </ul> {% endcomment %}
               
             </li>
             <li class="nav-item d-flex align-items-center">
               <!-- Плашка с балансом -->
               <div class="balance-badge me-2">
-                <span class="badge bg-success">Баланс 500</span>
+                <span class="badge bg-success">Баланс {{balance}}</span>
               </div>
             </li>
             
             
-            <li class="nav-item d-flex align-items-center">
-              
-              <!-- <a href="{% url 'logout' %}" 
-                 class="nav-link text-body font-weight-bold px-0">
-                <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Выйти</span>
-              </a> -->
+            {% comment %} <li class="nav-item d-flex align-items-center">
               <div class="dropdown show">
-                <a href="{% url 'personal-room' %}" 
-                 class="nav-link text-body font-weight-bold px-0" role="button" >
-                <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Личный кабинет</span>
-              </a>
-              {% comment %} <div class="dropdown-menu" style="position: absolute;" aria-labelledby="dropdownMenuLink">
-                <a class="dropdown-item" href="{% url 'account' %}">Аккаунт</a>
-                <a class="dropdown-item" href="{% url 'bill' %}">Тариф</a>
-                <a class="dropdown-item" href="{% url 'api-tokens' %}">Мои API токены</a>
-                <a class="dropdown-item" href="{% url 'logout' %}">Выйти</a>
-              </div> {% endcomment %}
+                <a href="{% url 'personal-room' %}" class="nav-link text-body font-weight-bold px-0" role="button" >
+                  <i class="fa fa-user me-sm-1"></i>
+                  <span class="d-sm-inline d-none">Личный кабинет</span>
+                </a>
+                <div class="dropdown-menu" style="position: absolute;" aria-labelledby="dropdownMenuLink">
+                  {% comment %} <a class="dropdown-item" href="{% url 'account' %}">Аккаунт</a> {% endcomment %}
+                  {% comment %} <a class="dropdown-item" href="{% url 'bill' %}">Тариф</a> {% endcomment %}
+                  {% comment %} <a class="dropdown-item" href="{% url 'api-tokens' %}">Мои API токены</a> {% endcomment %}
+                  {% comment %} <a class="dropdown-item" href="{% url 'logout' %}">Выйти</a>
+                </div>
               </div>
-              
-
+            </li> {% endcomment %} 
+            {% comment %} <li class="nav-item d-flex align-items-center ">
+              <a href="{% url 'logout' %}" class="btn btn-danger">Выйти</a>
+            </li> {% endcomment %}
+            <li class="nav-item d-flex align-items-center">
+              <a href="{% url 'logout' %}" class="exit-icon">
+                <i class="fas fa-sign-out-alt"></i> <!-- Иконка выхода -->
+              </a>
             </li>
-            <li class="nav-item d-flex align-items-center mx-2">
+            {% comment %} <li class="nav-item d-flex align-items-center mx-2">
               <div class="dropdown">
                 <a href="#" 
                 class="nav-link text-body font-weight-bold px-0" role="button" id="helper" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
@@ -155,7 +154,7 @@
                 <a class="dropdown-item" href="{% url 'faq' %}">FAQ</a>
               </div> 
               </div>
-            </li>
+            </li> {% endcomment %}
            
 
 

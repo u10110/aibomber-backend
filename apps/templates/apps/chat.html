@@ -1,116 +1,269 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %} Chat Page {% endblock title %}
+{% block title %} Messages {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<style>
+  #chat-list .chat-item {
+      display: flex;
+      justify-content: space-between;
+  }
+
+  #chat-list .ms-auto.text-muted {
+      text-align: right; /* Для правильного выравнивания времени */
+  }
+  #chat-list .chat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#chat-list .ms-auto.text-muted {
+    text-align: right;
+    flex-grow: 1; /* Обеспечивает пространство между именем и временем */
+}
+
+#chat-list .d-flex {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+</style>
+{% endblock stylesheets %}
 
 {% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-  <div class="row">
-    <!-- Left Side: Filters and Users List -->
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#filters" aria-expanded="false" aria-controls="filters">
-          <h5>Фильтры</h5>
-          <i id="filter-icon" class="fas fa-chevron-down"></i> <!-- Иконка стрелочки вниз -->
-        </div>
-        <div id="filters" class="collapse card-body">
-          <form method="GET" action="/filter-chat/">
-            <div class="row">
-              <div class="col-6 mb-1">
-                <label for="status-filter" class="form-label small">Статус</label>
-                <select id="status-filter" name="status" class="form-control form-control-sm">
-                  <option value="">Все</option>
-                  <option value="success">Успех</option>
-                  <option value="error">Ошибка</option>
-                </select>
-              </div>
-              <div class="col-6 mb-1">
-                <label for="task-filter" class="form-label small">Выбор задачи</label>
-                <select id="task-filter" name="task" class="form-control form-control-sm">
-                  <option value="">Все</option>
-                  <option value="task1">1 задача</option>
-                  <option value="task2">2 задача</option>
-                </select>
-              </div>
-            </div>
-            <div class="mb-1">
-              <label for="search" class="form-label small">Поиск</label>
-              <input type="text" id="search" name="search" class="form-control form-control-sm" placeholder="Искать сообщения...">
-            </div>
-            <button type="submit" class="btn btn-sm bg-gradient-primary w-100">Применить</button>
-          </form>
-        </div>
-      </div>
 
-      <div class="card mt-3">
-        <div class="card-header">
-          <h5>Пользователи</h5>
-          <p class="text-sm mb-0">Список доступных пользователей</p>
+<div class="container-fluid py-4">
+
+  <div class="row">
+    <div class="col-4">
+      <div class="card blur shadow-blur max-height-vh-70 overflow-auto overflow-x-hidden mb-5 mb-lg-0">
+        <div class="card-header p-3 d-flex align-items-center justify-content-between">
+          <h6>Юзеры</h6>
+          <div class="d-flex">
+            <input type="text" id="search-filter" class="form-control me-2" placeholder="Search Contact" aria-label="Search Contact">
+            <select id="status-filter" class="form-select w-auto" aria-label="Status Filter">
+              <option value="">Статус</option>
+              <option value="1">Успешные диалоги</option>
+              <option value="2">Диалог закрыт</option>
+              <option value="3">Пользователь ответил</option>
+              <option value="4">Перехвачено оператором</option>
+            </select>
+          </div>
         </div>
         <div class="card-body p-2">
-          <ul class="list-group">
-            {% for user in users %}
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>{{ user.name }}</span>
-                <span class="badge bg-gradient-primary rounded-circle"></span>
-              </li>
+
+          <!-- Контент юзеров -->
+          <div id="chat-list">
+            {% for chat in chats %}
+                <a href="javascript:;" 
+                   class="d-block p-2 border-radius-lg chat-item {% if chat.unread_count > 0 %}bg-gradient-primary{% endif %}" 
+                   onclick="openChat('{{ chat.user_id }}')" 
+                   data-status="{{ chat.status }}">
+                    <div class="d-flex p-2">
+                        <!-- Если используется аватар -->
+                        {% comment %} <img alt="Avatar" src="{{ chat.avatar }}" class="avatar shadow"> {% endcomment %}
+                        <div class="ms-3 flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="{% if chat.unread_count > 0 %}text-white{% else %}text-dark{% endif %} mb-0">
+                                    {{ chat.user_name }}
+                                    {% if chat.unread_count > 0 %}
+                                        <span class="badge badge-success">{{ chat.unread_count }}</span>
+                                    {% endif %}
+                                </h6>
+                                <!-- Время с правого края -->
+                                <div class="text-muted text-sm text-end">
+                                    <span>{{ chat.last_message_time|date:"H:i" }}</span>
+                                </div>
+                            </div>
+                            <!-- Обрезание сообщения до 100 символов с многоточием -->
+                            <p class="{% if chat.unread_count > 0 %}text-white{% else %}text-muted{% endif %} mb-0 text-sm">
+                                {{ chat.last_message|slice:":40" }}{% if chat.last_message|length > 40 %}...{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </a>
             {% endfor %}
-          </ul>
+        </div>
+        
+        
+          
+          
         </div>
       </div>
     </div>
-
-    <!-- Right Side: Chat -->
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-header">
-          <h5>Чат</h5>
-          <p class="text-sm mb-0">Начните общение с выбранным пользователем</p>
-        </div>
-        <div class="card-body chat-window" style="height: 500px; overflow-y: auto;">
-          {% for message in messages %}
-            <div class="message {% if message.user_id == current_user.id %}text-end{% endif %}">
-              <p class="bg-gradient-light p-2 rounded {% if message.user_id == current_user.id %}bg-primary text-white{% endif %}">
-                {{ message.content }}
-              </p>
-              <small class="text-muted">{{ message.timestamp }}</small>
+    <div class="col-8">
+      <div class="card blur shadow-blur max-height-vh-70">
+        <div class="card-header shadow-lg">
+          <div class="row">
+            <div class="col-md-9">
+              <div class="d-flex align-items-center">
+                {% comment %} <img alt="Image" src="/static/assets/img/team-2.jpg" class="avatar"> {% endcomment %}
+                <div class="ms-3">
+                  <h6 class="mb-0 d-block">{{chat.user_name}}</h6>
+                  {% comment %} <span class="text-sm text-dark opacity-8">last seen today at 1:53am</span> {% endcomment %}
+                  {% comment %} <span class="text-sm text-dark opacity-8">last seen today</span> {% endcomment %}
+                </div>
+              </div>
             </div>
-          {% endfor %}
+            <div class="col-3 my-auto d-flex justify-content-end">
+              <button class="btn btn-icon-only shadow-none text-dark mb-0 me-3" type="button" title="Start">
+                <i class="ni ni-button-play"></i>
+              </button>
+              <button class="btn btn-icon-only shadow-none text-dark mb-0 me-3" type="button" title="Stop">
+                <i class="ni ni-button-pause"></i>
+              </button>
+              <div class="dropdown">
+                <button class="btn btn-icon-only shadow-none text-dark mb-0" type="button" data-bs-toggle="dropdown">
+                  <i class="ni ni-settings"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end me-sm-n2 p-2" aria-labelledby="chatmsg">
+                  <li>
+                    <a class="dropdown-item border-radius-md" href="javascript:;">
+                      Успех
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item border-radius-md" href="javascript:;">
+                      Контакт получен
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item border-radius-md" href="javascript:;">
+                      Проявлен интерес
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item border-radius-md" href="javascript:;">
+                      Закрыть диалог
+                    </a>
+                  </li>
+                  <li>
+                    <hr class="dropdown-divider">
+                  </li>
+                  <li>
+                    <a class="dropdown-item border-radius-md text-danger" href="javascript:;">
+                      Удалить диалог
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="card-footer">
-          <form action="/send-message/" method="post">
+        <div class="card-body overflow-auto overflow-x-hidden">
+
+          <div class="chat-container">
+            {% for chat in messages %}
+  {% if chat.message_type == 'answer' %}
+    <div class="message message-answer mb-3">
+      <div class="d-flex justify-content-end">
+        <div class="message-content bg-gradient-primary text-white p-3 rounded">
+          <p class="mb-0">{{ chat.user_message }}</p>
+          <span class="text-sm text-light opacity-8">{{ chat.created_at|date:"H:i" }}</span>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="message message-user mb-3">
+      <div class="d-flex">
+        <div class="message-content bg-light text-dark p-3 rounded">
+          <p class="mb-0">{{ chat.user_message }}</p>
+          <span class="text-sm text-muted opacity-8">{{ chat.created_at|date:"H:i" }}</span>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endfor %}
+          </div>
+          
+          {% comment %} <div class="row justify-content-start mb-4">
+            <div class="col-auto">
+              <div class="card ">
+                <div class="card-body py-2 px-3">
+                  <p class="mb-1">
+                    It contains a lot of good lessons about effective practices
+                  </p>
+                  <div class="d-flex align-items-center text-sm opacity-6">
+                    <i class="ni ni-check-bold text-sm me-1"></i>
+                    <small>3:14am</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-end text-right mb-4">
+            <div class="col-auto">
+              <div class="card bg-gray-200">
+                <div class="card-body py-2 px-3">
+                  <p class="mb-1">
+                    Can it generate daily design links that include essays and data visualizations ?<br>
+                  </p>
+                  <div class="d-flex align-items-center justify-content-end text-sm opacity-6">
+                    <i class="ni ni-check-bold text-sm me-1"></i>
+                    <small>4:42pm</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> {% endcomment %}
+
+        </div>
+        <div class="card-footer d-block">
+          <form method="POST" class="align-items-center">
             {% csrf_token %}
-            <div class="input-group">
-              <input type="text" name="message" class="form-control" placeholder="Введите сообщение..." style="max-height: 40px;">
-              <button type="submit" class="btn bg-gradient-primary">Отправить</button>
+            <div class="d-flex">
+              <div class="input-group">
+                <input type="text" name="user_message" class="form-control" placeholder="Введите сообщение" aria-label="Message example input" required>
+              </div>
+              <button type="submit" class="btn bg-gradient-primary mb-0 ms-2">
+                <i class="ni ni-send"></i>
+              </button>
             </div>
           </form>
         </div>
       </div>
     </div>
   </div>
+
+  {% include "includes/footer.html" %}
+
 </div>
+
 {% endblock content %}
 
+<!-- Specific JS goes HERE -->
 {% block javascripts %}
 <script>
-  // Скрипт для автоматической прокрутки чата вниз
-  document.addEventListener("DOMContentLoaded", function() {
-    const chatWindow = document.querySelector('.chat-window');
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-  });
+  // Фильтрация чатов по статусу и тексту
+  document.getElementById('search-filter').addEventListener('input', filterChats);
+  document.getElementById('status-filter').addEventListener('change', filterChats);
 
-  // Скрипт для смены иконки при открытии/закрытии панели фильтров
-  document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function() {
-    const icon = document.getElementById('filter-icon');
-    if (icon.classList.contains('fa-chevron-down')) {
-      icon.classList.remove('fa-chevron-down');
-      icon.classList.add('fa-chevron-up'); // Меняем стрелку на вверх
-    } else {
-      icon.classList.remove('fa-chevron-up');
-      icon.classList.add('fa-chevron-down'); // Меняем стрелку на вниз
-    }
-  });
+  function filterChats() {
+    let search = document.getElementById('search-filter').value.toLowerCase();
+    let status = document.getElementById('status-filter').value;
+    let chats = document.querySelectorAll('.chat-item');
+
+    chats.forEach(chat => {
+      let userName = chat.querySelector('h6').textContent.toLowerCase();
+      let matchesSearch = userName.includes(search);
+      let matchesStatus = !status || chat.getAttribute('data-status') === status;
+
+      if (matchesSearch && matchesStatus) {
+        chat.style.display = '';
+      } else {
+        chat.style.display = 'none';
+      }
+    });
+  }
+
+  // Открытие чата
+  function openChat(userId) {
+    window.location.href = `/messages?user_id=${userId}`;
+  }
 </script>
 {% endblock javascripts %}

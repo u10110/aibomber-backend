@@ -1,0 +1,39 @@
+<tbody>
+  {% for project in projects %}
+    <tr>
+      <td class="text-sm">{{ project.title }}</td>
+      <td class="text-sm">
+        {% if project.work_option == 1 %}
+          Входящие
+        {% elif project.work_option == 2 %}
+          Входящие и исходящие
+        {% endif %}
+      </td>
+      <td class="text-sm">{{ project.status }}</td>
+      <td class="text-sm">{{ project.created_at }}</td>
+      <td class="text-sm">{{ project.updated_at }}</td>
+      <td class="text-sm">
+        <!-- Запуск -->
+        <a href="{% url 'project-start' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Запуск">
+          <i class="fas fa-play"></i>
+        </a>
+        <!-- Остановка -->
+        <a href="{% url 'project-stop' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Остановка">
+          <i class="fas fa-stop"></i>
+        </a>
+        <!-- Удаление -->
+        <a href="{% url 'project-delete' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Удаление">
+          <i class="fas fa-trash-alt"></i>
+        </a>
+        <!-- Изменить -->
+        <a href="javascript:void(0);" class="btn btn-link text-secondary" data-bs-toggle="modal" data-bs-target="#editProjectModal{{ project.id }}" title="Изменить">
+          <i class="fas fa-edit"></i>
+        </a>
+      </td>
+    </tr>
+  {% empty %}
+    <tr>
+      <td colspan="8" class="text-center">Нет доступных проектов</td>
+    </tr>
+  {% endfor %}
+</tbody>

@@ -527,10 +527,10 @@ class PromocodeAdmin(admin.ModelAdmin):
     list_filter = ("type", "expired_at", "created_at")
 
 
-admin.site.register(Promocode, PromocodeAdmin)
-admin.site.register(Order, OrderAdmin)
-admin.site.register(Paid, PaidAdmin)
-admin.site.register(Limits, LimitsAdmin)
-admin.site.register(UnicTariff, UnicTariffAdmin)
-admin.site.register(TariffCalculated, TariffCalculatedAdmin)
+# admin.site.register(Promocode, PromocodeAdmin)
+# admin.site.register(Order, OrderAdmin)
+# admin.site.register(Paid, PaidAdmin)
+# admin.site.register(Limits, LimitsAdmin)
+# admin.site.register(UnicTariff, UnicTariffAdmin)
+# admin.site.register(TariffCalculated, TariffCalculatedAdmin)
 # admin.site.register(Paid, PaidWithSumAdmin)

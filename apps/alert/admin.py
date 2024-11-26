@@ -54,5 +54,5 @@ class NotificationReadAdmin(admin.ModelAdmin):
 
 
 admin.site.register(TgMessage, TgMessageAdmin)
-admin.site.register(NotificationMessage, NotificationMessageAdmin)
-admin.site.register(NotificationRead, NotificationReadAdmin)
+# admin.site.register(NotificationMessage, NotificationMessageAdmin)
+# admin.site.register(NotificationRead, NotificationReadAdmin)

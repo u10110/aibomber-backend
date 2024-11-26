@@ -47,10 +47,15 @@ from .forms import *
 from .helper import Helper
 from .models import (
     ClientSettings,
+    Channel,
+    Chat
 )
 from .module import *
 from .services.services import MinioService
 from .WB_token import X64ApiClient
+from django.shortcuts import get_object_or_404
+from django.db.models import Max, OuterRef, Subquery
+
 
 
 def error(request):
@@ -575,8 +580,11 @@ def projects(request):
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            return redirect('success_page')  # Замените 'success_page' на нужный URL
+            project = form.save(commit=False)
+            project.client = request.user
+            print(form)
+            project.save()
+            return redirect('/projects/')
     else:
         form = ProjectForm()
 
@@ -590,6 +598,22 @@ def projects(request):
     }
     return render(request, 'apps/projects.html', context)
     # return render(request, 'apps/projects.html', {'form': form})
+
+def project_edit(request, id):
+    project = get_object_or_404(Project, id=id)
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, instance=project)
+        print(222222222222)
+        if form.is_valid():
+            print(form)
+            form.save()
+            return redirect('projects')
+    else:
+        form = ProjectForm(instance=project)
+        print(form)
+    return render(request, 'project_edit.html', {'form': form, 'project': project})
+    # return redirect('projects')
+
 
 def project_start(request, pk):
     project = get_object_or_404(Project, pk=pk)
@@ -608,14 +632,175 @@ def project_delete(request, pk):
     project.delete()
     return redirect('projects')
 
+
+def channel_start(request, pk):
+    project = get_object_or_404(Channel, pk=pk)
+    project.status = "active"  # Укажите соответствующее значение
+    project.save()
+    return redirect('channels')
+
+def channel_stop(request, pk):
+    project = get_object_or_404(Channel, pk=pk)
+    project.status = "stopped"  # Укажите соответствующее значение
+    project.save()
+    return redirect('channels')
+
+def channel_delete(request, pk):
+    project = get_object_or_404(Channel, pk=pk)
+    project.delete()
+    return redirect('channels')
+
+
+def list_recipient(request):
+    if request.method == 'POST':
+        form = RecipientForm(request.POST, request.FILES)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.client = request.user
+            tg_ids = project.many_to_many_field.values_list('tg_ids', flat=True)
+            print(f"Список ID: {list(tg_ids)}")
+
+            project.save()
+            project.save_m2m()
+            print(form)
+            return redirect('/list-recipient/')
+    else:
+        form = RecipientForm()
+
+    # Получаем все проекты из модели
+    projects = Recipient.objects.all()
+
+    # Передаем данные в шаблон
+    context = {
+        'form': form,
+        'projects': projects,
+    }
+    # return render(request, 'apps/projects.html', {'form': form})
+    return render(request, "apps/list_recipient.html", context)
+
+def save_recipients(request):
+    if request.method == 'POST':
+        form = RecipientForm(request.POST)
+        if form.is_valid():
+            tg_ids = form.cleaned_data['tg_ids']
+            recipients = [
+                Recipient(client=request.user, tg_id=tg_id) for tg_id in tg_ids
+            ]
+            Recipient.objects.bulk_create(recipients)  # Эффективно сохраняем список
+            return redirect('/list-recipient/')
+    else:
+        form = RecipientForm()
+
+    return render(request, 'save_recipients.html', {'form': form})
+
+
+def list_recipient_delete(request, pk):
+    list_recipient = get_object_or_404(Project, pk=pk)
+    list_recipient.delete()
+    return redirect('projects')
+
+
+def chat(request):
+    # Получаем все чаты, аннотируя их последним сообщением и временем последнего сообщения
+
+    chats = Chat.objects.annotate(
+        last_message_time=Subquery(
+            Chat.objects.filter(user_id=OuterRef('user_id'))
+            .order_by('-created_at')
+            .values('created_at')[:1]  # Получаем только первое (последнее) сообщение
+        ),
+        last_message=Subquery(
+            Chat.objects.filter(user_id=OuterRef('user_id'))
+            .order_by('-created_at')
+            .values('user_message')[:1]  # Получаем текст последнего сообщения
+        )
+    ).distinct('user_id')
+    
+    # Передаем данные в контекст
+    context = {'chats': chats}
+    return render(request, "apps/chat.html", context)
+
+def chat_messages(request):
+    user_id = request.GET.get('user_id', None)
+    
+    # Обработка отправки сообщения
+    if request.method == "POST":
+        user_message = request.POST.get('user_message')
+        if user_message:
+            # Найти текущий чат пользователя
+            current_chat = Chat.objects.filter(user_id=user_id).first()
+
+            # Создать новое сообщение типа 'answer'
+            Chat.objects.create(
+                user_id=user_id,
+                user_name=current_chat.user_name,
+                client_id=current_chat.client_id,
+                project_id=current_chat.project_id,
+                user_message=user_message,
+                message_type='answer',
+            )
+
+            # Возвращаемся на ту же страницу, чтобы отобразить обновленный чат
+            # return redirect(request.path_info)
+            return redirect(f'{reverse("messages")}?user_id={user_id}')
+
+    chats = Chat.objects.all().order_by('-created_at')
+
+    # Определяем текущий чат
+    current_chat = None
+    if user_id:
+        current_chat = chats.filter(user_id=user_id).first()
+    if not current_chat:
+        current_chat = chats.first()  # Если текущий чат не найден, берем первый из списка
+
+    # Получаем сообщения для текущего чата
+    messages = []
+    if current_chat:
+        messages = chats.filter(user_id=current_chat.user_id).order_by('created_at')
+
+    chats = Chat.objects.annotate(
+        last_message_time=Subquery(
+            Chat.objects.filter(user_id=OuterRef('user_id'))
+            .order_by('-created_at')
+            .values('created_at')[:1]  # Получаем только первое (последнее) сообщение
+        ),
+        last_message=Subquery(
+            Chat.objects.filter(user_id=OuterRef('user_id'))
+            .order_by('-created_at')
+            .values('user_message')[:1]  # Получаем текст последнего сообщения
+        )
+    ).distinct('user_id')
+
+    return render(request, 'apps/chat.html', {
+        'chats': chats,
+        'messages': messages,
+        'chat': current_chat,
+    })
+
 def project_create(request):
     return render(request, "apps/project_create.html")
 
-def list_recipient(request):
-    return render(request, "apps/list_recipient.html")
 
-def chat(request):
-    return render(request, "apps/chat.html")
 
 def channels(request):
-    return render(request, "apps/channels.html")
+    if request.method == 'POST':
+        form = ChannelForm(request.POST, request.FILES)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.client = request.user
+            print(form)
+            project.save()
+            return redirect('/channels/')
+    else:
+        form = ChannelForm()
+
+    # Получаем все проекты из модели
+    projects = Channel.objects.all()
+
+    # Передаем данные в шаблон
+    context = {
+        'form': form,
+        'projects': projects,
+    }
+    return render(request, 'apps/channels.html', context)
+    # return render(request, 'apps/projects.html', {'form': form})
