@@ -1,6 +1,5 @@
 stages:
     - build
-    - dev
     - prod
 
 variables:
@@ -17,8 +16,8 @@ build:
   only:
   - main
   variables:
-    CONTAINER_IMAGE: registry.mplab.io/mplab-web:${CI_COMMIT_SHORT_SHA}
-    CONTAINER_IMAGE_LATEST: registry.mplab.io/mplab-web:latest
+    CONTAINER_IMAGE: registry.mplab.io/eliment-web:${CI_COMMIT_SHORT_SHA}
+    CONTAINER_IMAGE_LATEST: registry.mplab.io/eliment-web:latest
   script:
   - docker build -t ${CONTAINER_IMAGE} .
   - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
