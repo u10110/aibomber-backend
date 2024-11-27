@@ -46,6 +46,9 @@ from core.settings import MEDIA_ROOT
 from .forms import *
 from .helper import Helper
 from .models import (
+    ReferralClickCounter,
+    ReferralUsers,
+    ReferralLinks,
     ClientSettings,
     Channel,
     Chat
