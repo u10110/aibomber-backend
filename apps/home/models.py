@@ -144,6 +144,7 @@ class Channel(models.Model):
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     project_id = models.IntegerField(null=True)
     title = models.CharField(max_length=1000)
+    is_active = models.BooleanField(default=False)
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,

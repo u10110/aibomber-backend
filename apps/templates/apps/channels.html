@@ -1,9 +1,6 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %} Ecommerce Products List {% endblock title %}
-
-<!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block title %} Управление каналами {% endblock title %}
 
 {% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
 
@@ -22,7 +19,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5>Добавиьт канал</h5>
+                    <h5>Добавить канал</h5>
                     <p class="text-sm mb-0">Заполните поля формы, выберите нужные параметры и нажмите кнопку “Создать“.</p>
                     <div class="col-12 col-sm-10 col-md-12 mt-3">
                         <form action="/channels/" method="post" enctype="multipart/form-data">
@@ -32,7 +29,7 @@
                                 {{ form.title }}
                             </div>
                             <div class="col-12 mb-3">
-                                <label for="title">Телефон</label>
+                                <label for="phone">Телефон</label>
                                 {{ form.phone }}
                             </div>
                             {% if messages %}
@@ -51,170 +48,105 @@
             </div>
         </div>
 
-		<div class="col-md-8 mt-sm-0 mt-4">
-			<div class="row">
-				<div class="col-12">
-					<div class="card">
-						<!-- Card header -->
-						<div class="card-header pb-0">
-							<div class="d-lg-flex">
-								<div>
-									<h5 class="mb-0">Добавленные Проекты</h5>
-									<p class="text-sm mb-0">Здесь отображаются активные и завершенные проекты.</p>
-								</div>
-		
-								<!-- Search, Sorting and Records per page controls -->
-								<div class="ms-auto d-flex">
-									{% comment %} <form class="d-flex me-3" method="get" action="">
-										<input class="form-control" type="search" name="q" placeholder="Поиск по проектам" value="{{ request.GET.q }}">
-										<button type="submit" class="btn btn-link text-secondary">
-											<i class="fas fa-search"></i>
-										</button>
-									</form> {% endcomment %}
-									
-									{% comment %} <div class="d-flex align-items-center">
-										<label for="records-per-page" class="text-sm mb-0 me-2">Записей на странице:</label>
-										<select id="records-per-page" class="form-select form-select-sm" onchange="location = this.value;">
-											<option value="?page=1&q={{ request.GET.q }}&per_page=10" {% if per_page == 10 %}selected{% endif %}>10</option>
-											<option value="?page=1&q={{ request.GET.q }}&per_page=20" {% if per_page == 20 %}selected{% endif %}>20</option>
-											<option value="?page=1&q={{ request.GET.q }}&per_page=50" {% if per_page == 50 %}selected{% endif %}>50</option>
-											<option value="?page=1&q={{ request.GET.q }}&per_page=100" {% if per_page == 100 %}selected{% endif %}>100</option>
-										</select>
-									</div> {% endcomment %}
-								</div>
-							</div>
-						</div>
-		
-						<div class="card-body px-0 pb-0">
-							<div class="dataTable-container">
-								<table class="table table-flush dataTable-table" id="projects-list">
-									<thead class="thead-light">
-										<tr>
-											<th>
-												<a href="?sort_by=title&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
-													Название {% if request.GET.sort_by == 'title' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
-												</a>
-											</th>
-											<th>
-												<a href="?sort_by=phone&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
-													Телефон {% if request.GET.sort_by == 'phone' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
-												</a>
-											</th>
-											<th>
-												<a href="?sort_by=status&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
-													Статус {% if request.GET.sort_by == 'status' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
-												</a>
-											</th>
-											{% comment %} <th>
-												<a href="?sort_by=created_at&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
-													Дата создания {% if request.GET.sort_by == 'created_at' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
-												</a>
-											</th>
-											<th>
-												<a href="?sort_by=updated_at&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
-													Дата обновления {% if request.GET.sort_by == 'updated_at' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
-												</a>
-											</th> {% endcomment %}
-											<th>Действия</th>
-										</tr>
-									</thead>
-									<tbody>
-										{% for project in projects %}
-										<tr>
-											<td class="text-sm">{{ project.title }}</td>
-											<td class="text-sm">
-												{{ project.phone }}
-											</td>
-											<td class="text-sm">{{ project.status }}</td>
-											{% comment %} <td class="text-sm">{{ project.created_at }}</td>
-											<td class="text-sm">{{ project.updated_at }}</td> {% endcomment %}
-											<td class="text-sm">
-												<a href="{% url 'channel-start' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Запуск">
-													<i class="fas fa-play"></i>
-												</a>
-												<a href="{% url 'channel-stop' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Остановка">
-													<i class="fas fa-stop"></i>
-												</a>
-												<a href="{% url 'channel-delete' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Удаление">
-													<i class="fas fa-trash-alt"></i>
-												</a>
-												{% comment %} <a href="javascript:void(0);" class="btn btn-link text-secondary" data-bs-toggle="modal" data-bs-target="#editProjectModal{{ project.id }}" title="Изменить">
-													<i class="fas fa-edit"></i>
-												</a> {% endcomment %}
-											</td>
-										</tr>
-		
-										<!-- Modal for editing project -->
-										<div class="modal fade" id="editProjectModal{{ project.id }}" tabindex="-1" aria-labelledby="editProjectModalLabel{{ project.id }}" aria-hidden="true">
-											<div class="modal-dialog">
-												<div class="modal-content">
-													<div class="modal-header">
-														<h5 class="modal-title" id="editProjectModalLabel{{ project.id }}">Редактировать проект</h5>
-														<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-													</div>
-													{% comment %} <div class="modal-body"> {% endcomment %}
-														{% comment %} <form action="{% url 'channel-edit' project.id %}" method="POST">
-															{% csrf_token %}
-															{{ form.as_p }}
-															<div class="d-flex justify-content-end">
-																<button type="submit" class="btn btn-primary">Сохранить</button>
-															</div>
-														</form> {% endcomment %}
-													{% comment %} </div> {% endcomment %}
-												</div>
-											</div>
-										</div>
-										{% empty %}
-										<tr>
-											<td colspan="6" class="text-center">Нет доступных проектов</td>
-										</tr>
-										{% endfor %}
-									</tbody>
-								</table>
-							</div>
-		
-							<!-- Pagination controls -->
-							<div class="d-flex justify-content-between align-items-center">
-								<div>
-									<p class="text-sm">Показано {{ projects.paginator.page_range.start }}-{{ projects.paginator.page_range.end }} из {{ projects.paginator.count }} записей</p>
-								</div>
-								<div>
-									<ul class="pagination justify-content-end">
-										{% for page_num in projects.paginator.page_range %}
-											<li class="page-item{% if projects.number == page_num %} active{% endif %}">
-												<a class="page-link" href="?page={{ page_num }}&q={{ request.GET.q }}&per_page={{ per_page }}">{{ page_num }}</a>
-											</li>
-										{% endfor %}
-									</ul>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
+        <div class="col-md-8 mt-sm-0 mt-4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header pb-0">
+                            <div class="d-lg-flex">
+                                <div>
+                                    <h5 class="mb-0">Список каналов</h5>
+                                    <p class="text-sm mb-0">Здесь отображаются активные и неактивные каналы.</p>
+                                </div>
+                            </div>
+                        </div>
 
-
+                        <div class="card-body px-0 pb-0">
+                            <div class="dataTable-container">
+                                <table class="table table-flush dataTable-table" id="channels-list">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Название</th>
+                                            <th>Телефон</th>
+                                            <th>Статус</th>
+                                            <th>Действия</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for channel in channels %}
+                                        <tr>
+                                            <td class="text-sm">{{ channel.title }}</td>
+                                            <td class="text-sm">{{ channel.phone }}</td>
+                                            <td class="text-sm">
+                                                <div class="form-check form-switch">
+                                                    <input 
+                                                        class="form-check-input channel-toggle" 
+                                                        type="checkbox" 
+                                                        id="toggle-{{ channel.id }}" 
+                                                        data-channel-id="{{ channel.id }}" 
+                                                        {% if channel.is_active %}checked{% endif %}
+                                                    >
+                                                </div>
+                                            </td>
+                                            <td class="text-sm">
+                                                <a href="{% url 'channel-delete' channel.id %}" class="btn btn-link text-secondary" title="Удаление">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center">Нет доступных каналов</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% include "includes/footer.html" %}
-
 {% endblock content %}
 
-<!-- Specific JS goes HERE -->
 {% block javascripts %}
-<script src="/static/assets/js/plugins/sweetalert.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const modalTriggers = document.querySelectorAll('[data-bs-toggle="modal"]');
-        modalTriggers.forEach(trigger => {
-            const modalId = trigger.getAttribute('data-bs-target');
-            const modalElement = document.querySelector(modalId);
-            if (modalElement) {
-                trigger.addEventListener('click', () => {
-                    const modal = new bootstrap.Modal(modalElement);
-                    modal.show();
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggles = document.querySelectorAll('.channel-toggle');
+
+        toggles.forEach(toggle => {
+            toggle.addEventListener('change', function () {
+                const channelId = this.dataset.channelId;
+                const isActive = this.checked;
+
+                // Отправляем состояние на сервер через AJAX
+                fetch(`/channels/toggle-active/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({
+                        channel_id: channelId,
+                        is_active: isActive,
+                    }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка при обновлении состояния канала');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(`Состояние канала ${channelId} обновлено:`, data);
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
                 });
-            }
+            });
         });
     });
 </script>

@@ -92,6 +92,8 @@ urlpatterns = [
     path('project-stop/<int:pk>/', views.project_stop, name='project-stop'),
     path('project-delete/<int:pk>/', views.project_delete, name='project-delete'),
     path('projects/toggle-active/', views.toggle_project_active, name='toggle-project-active'),
+    path('channels/toggle-active/', views.toggle_channel_active, name='toggle-channel-active'),
+
 
     
     # path("project-create/", views.project_create, name="project-create"),

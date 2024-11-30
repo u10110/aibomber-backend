@@ -687,6 +687,22 @@ def channel_delete(request, pk):
     project.delete()
     return redirect('channels')
 
+@csrf_exempt
+def toggle_channel_active(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        channel_id = data.get('channel_id')
+        is_active = data.get('is_active')
+
+        try:
+            channel = Channel.objects.get(id=channel_id)
+            channel.is_active = is_active
+            channel.save()
+            return JsonResponse({'success': True, 'channel_id': channel_id, 'is_active': is_active})
+        except Channel.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Channel not found'}, status=404)
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 def list_recipient(request):
     if request.method == 'POST':
@@ -859,7 +875,7 @@ def channels(request):
     # Передаем данные в шаблон
     context = {
         'form': form,
-        'projects': projects,
+        'channels': projects,
     }
     return render(request, 'apps/channels.html', context)
     # return render(request, 'apps/projects.html', {'form': form})
