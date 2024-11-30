@@ -628,6 +628,24 @@ def project_edit(request, id):
     return render(request, 'project_edit.html', {'form': form, 'project': project})
     # return redirect('projects')
 
+@csrf_exempt
+def toggle_project_active(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            project_id = data.get('project_id')
+            is_active = data.get('is_active')
+
+            project = Project.objects.get(id=project_id, client=request.user)
+            project.is_active = is_active
+            project.save()
+
+            return JsonResponse({'success': True, 'message': 'Состояние обновлено', 'is_active': project.is_active})
+        except Project.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Проект не найден'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Неверный метод запроса'}, status=400)
 
 def project_start(request, pk):
     project = get_object_or_404(Project, pk=pk, client=request.user)

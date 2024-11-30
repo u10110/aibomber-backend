@@ -87,6 +87,7 @@ class Project(models.Model):
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=1000)
     status = models.CharField(max_length=55, default="active")
+    is_active = models.BooleanField(default=False)
     work_option = models.IntegerField(choices=OPTIONS, default=1)
     gpt_version = models.IntegerField(choices=GPT_VERSION_CHOICES, default=1)
     hello_text = models.TextField(null=True)

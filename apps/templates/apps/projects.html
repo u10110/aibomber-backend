@@ -193,15 +193,19 @@
 												{% if project.work_option == 1 %} Входящие {% elif project.work_option == 2 %} Входящие и исходящие {% endif %}
 											</td>
 											<td class="text-sm">{{ project.status }}</td>
-											{% comment %} <td class="text-sm">{{ project.created_at }}</td>
-											<td class="text-sm">{{ project.updated_at }}</td> {% endcomment %}
 											<td class="text-sm">
-												<a href="{% url 'project-start' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Запуск">
-													<i class="fas fa-play"></i>
-												</a>
-												<a href="{% url 'project-stop' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Остановка">
-													<i class="fas fa-stop"></i>
-												</a>
+												<!-- Ползунок для включения/выключения проекта -->
+												<div class="form-check form-switch">
+													<input
+														class="form-check-input project-toggle"
+														type="checkbox"
+														id="toggle-{{ project.id }}"
+														data-project-id="{{ project.id }}"
+														{% if project.is_active %}checked{% endif %}
+													>
+												</div>
+											</td>
+											<td class="text-sm">
 												<a href="{% url 'project-delete' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Удаление">
 													<i class="fas fa-trash-alt"></i>
 												</a>
@@ -210,35 +214,10 @@
 												</a>
 											</td>
 										</tr>
-		
-										<!-- Modal for editing project -->
-										<div class="modal fade" id="editProjectModal{{ project.id }}" tabindex="-1" aria-labelledby="editProjectModalLabel{{ project.id }}" aria-hidden="true">
-											<div class="modal-dialog">
-												<div class="modal-content">
-													<div class="modal-header">
-														<h5 class="modal-title" id="editProjectModalLabel{{ project.id }}">Редактировать проект</h5>
-														<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-													</div>
-													<div class="modal-body">
-														<form action="{% url 'project-edit' project.id %}" method="POST">
-															{% csrf_token %}
-															{{ form.as_p }}
-															
-		
-															<div class="d-flex justify-content-end">
-																<button type="submit" class="btn btn-primary">Сохранить</button>
-															</div>
-														</form>
-													</div>
-												</div>
-											</div>
-										</div>
-										{% empty %}
-										<tr>
-											<td colspan="6" class="text-center">Нет доступных проектов</td>
-										</tr>
 										{% endfor %}
 									</tbody>
+									
+									
 								</table>
 							</div>
 		
@@ -315,6 +294,44 @@
         });
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggles = document.querySelectorAll('.project-toggle');
+
+        toggles.forEach(toggle => {
+            toggle.addEventListener('change', function () {
+                const projectId = this.dataset.projectId;
+                const isActive = this.checked;
+
+                // Отправляем состояние на сервер через AJAX
+                fetch(`/projects/toggle-active/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({
+                        project_id: projectId,
+                        is_active: isActive,
+                    }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка при обновлении состояния');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(`Состояние проекта ${projectId} обновлено:`, data);
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                });
+            });
+        });
+    });
+</script>
+
 
 
 {% endblock javascripts %}
