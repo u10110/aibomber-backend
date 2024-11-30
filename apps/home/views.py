@@ -889,6 +889,13 @@ def channels(request):
 
     # Получаем все проекты из модели
     projects = Channel.objects.filter(client=request.user)
+    
+    project_titles = {project.id: project.title for project in Project.objects.filter(client=request.user)}
+
+    # Добавляем название проекта к каждому каналу
+    for channel in projects:
+        channel.project_title = project_titles.get(channel.project_id, "Не привязан")
+
 
     # Передаем данные в шаблон
     context = {

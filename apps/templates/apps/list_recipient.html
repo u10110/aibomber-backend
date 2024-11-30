@@ -135,9 +135,17 @@
 												{% endif %}
 											</td> {% endcomment %}
 											<td>{{ recipient.contact_count }}</td>
-
-											
-											<td>{{ recipient.status }}</td>
+											<td>
+												{% if recipient.status == 'active' %}
+													В работе
+												{% elif recipient.status == 'completed' %}
+													Завершена
+												{% elif recipient.status == 'error' %}
+													Ошибка
+												{% else %}
+													Неизвестный статус
+												{% endif %}
+											</td>
 											<td>
 												<a href="{% url 'list-recipient-delete' recipient.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Удаление">
 													<i class="fas fa-trash-alt"></i>

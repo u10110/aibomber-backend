@@ -139,12 +139,29 @@ class Channel(models.Model):
     STATUS_CHOICES = [
             ('unauthorized', 'Не авторизован'),
             ('authorized', 'Авторизован'),
+            ('banned', 'Заблокирован'),
         ]
+    SOURCE_CHOICES = [
+        ('telegram', 'Telegram'),
+        ('avito', 'Avito'),
+        ('web_widget', 'Web Widget'),
+        ('vk', 'VK'),
+        ('email', 'E-mail'),
+        ('whatsapp', 'WhatsApp'),
+        ('instagram', 'Instagram'),
+    ]
+
 
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     project_id = models.IntegerField(null=True)
     title = models.CharField(max_length=1000)
     is_active = models.BooleanField(default=False)
+    source = models.CharField(
+        max_length=20,
+        choices=SOURCE_CHOICES,
+        default='telegram',
+        verbose_name="Источник"
+    )
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,

@@ -192,32 +192,41 @@ class ProjectForm(forms.ModelForm):
 
         return project
 
-
 class ChannelForm(forms.ModelForm):
     class Meta:
         model = Channel
         fields = [
             'title',
             'phone',
+            'source',  # Добавлено поле "Источник"
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название проекта'}),
             'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите телефон'}),
+            'source': forms.Select(attrs={'class': 'form-control'}),  # Виджет для выбора источника
         }
         labels = {
             'title': 'Название проекта',
             'phone': 'Телефон',
+            'source': 'Источник',  # Метка для нового поля
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ограничиваем выбор только Telegram
+        choices = [('telegram', 'Telegram')]
+        self.fields['source'].choices = choices
+        self.fields['source'].initial = 'telegram'
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
         if not phone:
             raise ValidationError("Поле телефона обязательно для заполнения.")
-        
+
         # Проверка формата: должен начинаться с "+" и содержать только цифры после
         if not re.match(r'^\+\d+$', phone):
             raise ValidationError("Введите номер телефона в международном формате, начиная с '+', например, +1234567890.")
-        
+
         return phone
 
 

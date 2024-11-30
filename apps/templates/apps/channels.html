@@ -25,11 +25,15 @@
                         <form action="/channels/" method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="col-12 mb-3">
-                                <label for="title">Название канала</label>
+                                <label for="title">Название канала:</label>
                                 {{ form.title }}
                             </div>
+							<div class="col-12 mb-3">
+								{{ form.source.label_tag }}
+								{{ form.source }}
+							</div>
                             <div class="col-12 mb-3">
-                                <label for="phone">Телефон</label>
+                                <label for="phone">Телефон:</label>
                                 {{ form.phone }}
                             </div>
                             {% if messages %}
@@ -67,7 +71,9 @@
                                     <thead class="thead-light">
                                         <tr>
                                             <th>Название</th>
-                                            <th>Телефон</th>
+                                            <th>Источник</th>
+                                            <th>Логин</th>
+                                            <th>Проект</th>
                                             <th>Статус</th>
                                             <th>Активность</th>
                                             <th>Действия</th>
@@ -77,7 +83,25 @@
                                         {% for channel in channels %}
                                         <tr>
                                             <td class="text-sm">{{ channel.title }}</td>
+											<td>
+												{% if channel.source == 'telegram' %}
+													Telegram
+												{% elif channel.source == 'avito' %}
+													Avito
+												{% elif channel.source == 'web_widget' %}
+													Web Widget
+												{% elif channel.source == 'vk' %}
+													VK
+												{% elif channel.source == 'email' %}
+													E-mail
+												{% elif channel.source == 'whatsapp' %}
+													WhatsApp
+												{% elif channel.source == 'instagram' %}
+													Instagram
+												{% endif %}
+											</td>
                                             <td class="text-sm">{{ channel.phone }}</td>
+											<td class="text-sm">{{ channel.project_title }}</td>
                                             <td class="text-sm">{{ channel.status }}</td>
                                             <td class="text-sm">
                                                 <div class="form-check form-switch">
