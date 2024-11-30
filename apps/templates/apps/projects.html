@@ -172,6 +172,11 @@
 													Статус {% if request.GET.sort_by == 'status' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
 												</a>
 											</th>
+											<th>
+												<a href="?sort_by=status&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
+													Активность {% if request.GET.sort_by == 'status' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+												</a>
+											</th>
 											{% comment %} <th>
 												<a href="?sort_by=created_at&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
 													Дата создания {% if request.GET.sort_by == 'created_at' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
