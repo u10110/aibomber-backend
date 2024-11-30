@@ -117,6 +117,15 @@ class ProjectForm(forms.ModelForm):
         }),
         label="Конец времени"
     )
+    hello_text = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите приветственное сообщение',
+        }),
+        label="Приветственное сообщение"
+    )
+
 
     class Meta:
         model = Project
@@ -127,6 +136,7 @@ class ProjectForm(forms.ModelForm):
             'prompt',
             'time_start',
             'time_end',
+            'hello_text',
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название проекта'}),
@@ -141,6 +151,7 @@ class ProjectForm(forms.ModelForm):
             'prompt': 'Описание',
             'time_start': 'Начало времени',
             'time_end': 'Конец времени',
+            'hello_text': 'Приветственное сообщение',
         }
 
 

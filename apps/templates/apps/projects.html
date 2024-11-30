@@ -8,6 +8,18 @@
 .time-input {
     max-width: 200px;
 }
+.form-check-input {
+	width: 50px;
+	height: 25px;
+	background-color: #ddd;
+	border-radius: 25px;
+	cursor: pointer;
+	transition: background-color 0.3s ease-in-out;
+}
+.form-check-input:checked {
+	background-color: #0d6efd;
+}
+
 </style>
 {% endblock stylesheets %}
 
@@ -71,6 +83,20 @@
 								<label for="recipients">Получатели</label>
 								{{ form.recipients }}
 							</div>
+							
+							<div class="col-12 mb-3 d-flex align-items-center">
+								<label class="form-check-label me-3" for="hello-text-toggle">Приветственное сообщение</label>
+								<div class="form-check form-switch">
+									<input class="form-check-input" type="checkbox" id="hello-text-toggle">
+								</div>
+							</div>
+							<div class="col-12 mb-3" id="hello-text-container" style="display: none;">
+								<label for="hello_text">Приветственное сообщение</label>
+								{{ form.hello_text }}
+								<small class="text-danger">{{ form.hello_text.errors }}</small>
+							</div>
+							
+
 							
                             <div class="col-12 mb-3">
                                 <label for="prompt">Описание (Prompt)</label>
@@ -275,5 +301,20 @@
         time_24hr: true,
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleSwitch = document.getElementById('hello-text-toggle');
+        const helloTextContainer = document.getElementById('hello-text-container');
+
+        toggleSwitch.addEventListener('change', function () {
+            if (toggleSwitch.checked) {
+                helloTextContainer.style.display = 'block'; // Показываем поле
+            } else {
+                helloTextContainer.style.display = 'none'; // Скрываем поле
+            }
+        });
+    });
+</script>
+
 
 {% endblock javascripts %}
