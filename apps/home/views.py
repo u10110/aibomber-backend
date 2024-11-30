@@ -58,7 +58,7 @@ from .services.services import MinioService
 from .WB_token import X64ApiClient
 from django.shortcuts import get_object_or_404
 from django.db.models import Max, OuterRef, Subquery
-
+from django.db.models import Count
 
 
 def error(request):
@@ -704,42 +704,60 @@ def toggle_channel_active(request):
 
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
+
 def list_recipient(request):
     if request.method == 'POST':
         form = RecipientForm(request.POST, request.FILES)
         if form.is_valid():
-            # Сохраняем объект Recipient без коммита
             recipient = form.save(commit=False)
-            recipient.client = request.user  # Привязываем к текущему пользователю
-            recipient.save()  # Сохраняем объект Recipient
-            
-            # Получаем TG IDs из связанных объектов
+            recipient.client = request.user
+            recipient.save()
+
             tg_ids = form.cleaned_data.get('tg_ids', [])
-            print(f"Список ID из формы: {tg_ids}")
-            
-            # Удаляем старые TG IDs и добавляем новые
             recipient.tg_id_set.all().delete()
             for tg_id in tg_ids:
                 TgID.objects.create(recipient=recipient, tg_id=tg_id)
-            
-            # Выводим для отладки список связанных TG IDs
-            related_tg_ids = recipient.tg_id_set.values_list('tg_id', flat=True)
-            print(f"Связанные TG IDs после сохранения: {list(related_tg_ids)}")
-            
+
             return redirect('/list-recipient/')
     else:
         form = RecipientForm()
 
-    # Получаем все проекты из модели Recipient, принадлежащие текущему пользователю
-    projects = Recipient.objects.filter(client=request.user)
+    # Получаем словарь project_id -> название проекта
+    project_titles = {project.id: project.title for project in Project.objects.filter(client=request.user)}
 
-    # Передаем данные в шаблон
+    # Аннотация для подсчета количества контактов
+    projects = Recipient.objects.filter(client=request.user).annotate(
+        contact_count=Count('tg_id_set')
+    )
+
+    # Добавляем поле project_title в каждый объект
+    for project in projects:
+        project.project_title = project_titles.get(project.project_id, "Не привязан")
+
     context = {
         'form': form,
-        'projects': projects,
+        'lists': projects,
     }
     return render(request, "apps/list_recipient.html", context)
 
+
+
+
+def list_recipient_edit(request, id):
+    project = get_object_or_404(Project, id=id, client=request.user)
+    print(f"Project ID: {project.id}, Title: {project.title}")  # Отладочная информация
+
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, instance=project, user=request.user)
+        if form.is_valid():
+            print("Форма валидна:", form.cleaned_data)
+            form.save()
+            return redirect('projects')
+    else:
+        form = ProjectForm(instance=project, user=request.user)
+        print("Форма для GET:", form)
+
+    return render(request, 'list_recipient_edit.html', {'form': form, 'project': project})
 
 # def create_recipient(request):
 #     if request.method == 'POST':

@@ -257,7 +257,7 @@ class RecipientForm(forms.ModelForm):
         model = Recipient
         fields = [
             'title',
-            'work_option',
+            # 'work_option',
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название списка'}),
@@ -265,7 +265,7 @@ class RecipientForm(forms.ModelForm):
         }
         labels = {
             'title': 'Название списка',
-            'work_option': 'Опции работы',
+            # 'work_option': 'Опции работы',
         }
 
 
