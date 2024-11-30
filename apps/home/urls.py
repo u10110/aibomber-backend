@@ -94,7 +94,7 @@ urlpatterns = [
     # path("project-create/", views.project_create, name="project-create"),
     
     path("list-recipient/", views.list_recipient, name="list-recipient"),
-    path('list-recipient/<int:pk>/', views.list_recipient_delete, name='list-recipient-delete'),
+    path('list-recipient-delete/<int:pk>/', views.list_recipient_delete, name='list-recipient-delete'),
     path('save-recipients/', views.save_recipients, name='save_recipients'),
 
     path("channels/", views.channels, name="channels"),

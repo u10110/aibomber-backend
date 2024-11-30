@@ -4,6 +4,7 @@ import re
 from calendar import month
 from urllib import request
 
+import datetime
 import requests
 from django import forms
 from django.contrib.auth import get_user_model
@@ -88,6 +89,35 @@ class ClientSettingsForm(forms.Form):
 
 
 class ProjectForm(forms.ModelForm):
+    channel = forms.ModelMultipleChoiceField(
+        queryset=Channel.objects.all(),
+        required=True,  # Делаем выбор каналов обязательным
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+        label="Каналы"
+    )
+    recipients = forms.ModelMultipleChoiceField(
+        queryset=Recipient.objects.all(),
+        required=True,  # Делаем выбор получателей обязательным
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+        label="Получатели"
+    )
+    time_start = forms.TimeField(
+        required=True,
+        widget=forms.TimeInput(attrs={
+            'type': 'time',
+            'class': 'form-control',
+        }),
+        label="Начало времени"
+    )
+    time_end = forms.TimeField(
+        required=True,
+        widget=forms.TimeInput(attrs={
+            'type': 'time',
+            'class': 'form-control',
+        }),
+        label="Конец времени"
+    )
+
     class Meta:
         model = Project
         fields = [
@@ -95,25 +125,57 @@ class ProjectForm(forms.ModelForm):
             'work_option',
             'gpt_version',
             'prompt',
-            # 'file',
+            'time_start',
+            'time_end',
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название проекта'}),
             'work_option': forms.Select(attrs={'class': 'form-control'}),
             'gpt_version': forms.Select(attrs={'class': 'form-control'}),
             'prompt': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Введите промпт'}),
-            'file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
         labels = {
-            'client': 'Клиент',
             'title': 'Название проекта',
-            'status': 'Статус',
             'work_option': 'Опции работы',
             'gpt_version': 'Версия GPT',
-            'prompt': 'Список ID',
-            'file': 'Файл',
+            'prompt': 'Описание',
+            'time_start': 'Начало времени',
+            'time_end': 'Конец времени',
         }
 
+
+    def __init__(self, *args, **kwargs):
+            user = kwargs.pop('user', None)
+            super().__init__(*args, **kwargs)
+
+            if user:
+                # Ограничиваем выбор каналов для текущего пользователя
+                self.fields['channel'].queryset = Channel.objects.filter(client=user, project_id__isnull=True, status='active')
+                # Ограничиваем выбор получателей для текущего пользователя
+                self.fields['recipients'].queryset = Recipient.objects.filter(client=user, project_id__isnull=True, status='active')
+
+            # Устанавливаем значения по умолчанию для time_start и time_end
+            if not self.instance.pk:  # Если объект модели ещё не сохранён
+                self.fields['time_start'].initial = datetime.time(8, 0)
+                self.fields['time_end'].initial = datetime.time(22, 0)
+                
+    def save(self, commit=True):
+        # Сохраняем объект проекта
+        project = super().save(commit=commit)
+
+        # Обновляем поле project_id в связанных каналах
+        channels = self.cleaned_data.get('channel', [])
+        for channel in channels:
+            channel.project_id = project.id
+            channel.save()
+
+        # Обновляем поле project_id в связанных получателях
+        recipients = self.cleaned_data.get('recipients', [])
+        for recipient in recipients:
+            recipient.project_id = project.id
+            recipient.save()
+
+        return project
 
 
 class ChannelForm(forms.ModelForm):
@@ -145,35 +207,51 @@ class ChannelForm(forms.ModelForm):
 
 
 class RecipientForm(forms.ModelForm):
-    
-    tg_ids = forms.CharField(widget=forms.Textarea, label="Telegram IDs")
+    tg_ids = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control', 
+            'rows': 4, 
+            'placeholder': 'Введите список Telegram ID, разделяя их запятыми'
+        }),
+        label="Telegram IDs",
+        required=False
+    )
 
     def clean_tg_ids(self):
-        ids = self.cleaned_data['tg_ids']
-        return [int(id.strip()) for id in ids.split(',') if id.strip().isdigit()]
+        ids = self.cleaned_data.get('tg_ids', '')
+        if not ids:
+            return []
+        tg_ids = [id.strip() for id in ids.split(',') if id.strip().isdigit()]
+        if not tg_ids:
+            raise forms.ValidationError("Введите хотя бы один корректный Telegram ID.")
+        return tg_ids
+
+    def save(self, commit=True):
+        recipient = super().save(commit=commit)
+        tg_ids = self.cleaned_data.get('tg_ids', [])
+        if commit:
+            # Удаляем старые записи, связанные с этим Recipient
+            TgID.objects.filter(recipient=recipient).delete()
+            # Создаем новые записи
+            TgID.objects.bulk_create(
+                [TgID(recipient=recipient, tg_id=tg_id) for tg_id in tg_ids]
+            )
+        return recipient
 
     class Meta:
-        
         model = Recipient
         fields = [
             'title',
             'work_option',
-            'tg_id',
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название списка'}),
             'work_option': forms.Select(attrs={'class': 'form-control'}),
-            'tg_id': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Введите тг ид список'}),
         }
         labels = {
-            'client': 'Клиент',
-            'title': 'Название проекта',
-            'status': 'Статус',
+            'title': 'Название списка',
             'work_option': 'Опции работы',
-            'tg_id': 'tg id',
-            'prompt': 'Промпт',
         }
-    
 
 
 

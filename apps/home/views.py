@@ -581,17 +581,29 @@ def services(request):
 
 def projects(request):
     if request.method == 'POST':
-        form = ProjectForm(request.POST, request.FILES)
+        form = ProjectForm(request.POST, request.FILES, user=request.user)  # Передаём user для фильтрации
         if form.is_valid():
             project = form.save(commit=False)
-            project.client = request.user
-            print(form)
+            project.client = request.user  # Привязываем проект к текущему пользователю
             project.save()
+
+            # Обновляем project_id для связанных каналов
+            channels = form.cleaned_data.get('channel', [])
+            for channel in channels:
+                channel.project_id = project.id
+                channel.save()
+
+            # Обновляем project_id для связанных получателей
+            recipients = form.cleaned_data.get('recipients', [])
+            for recipient in recipients:
+                recipient.project_id = project.id
+                recipient.save()
+
             return redirect('/projects/')
     else:
-        form = ProjectForm()
+        form = ProjectForm(user=request.user)  # Передаём user для фильтрации
 
-    # Получаем все проекты из модели
+    # Получаем все проекты из модели, принадлежащие текущему пользователю
     projects = Project.objects.filter(client=request.user)
 
     # Передаем данные в шаблон
@@ -600,7 +612,7 @@ def projects(request):
         'projects': projects,
     }
     return render(request, 'apps/projects.html', context)
-    # return render(request, 'apps/projects.html', {'form': form})
+
 
 def project_edit(request, id):
     project = get_object_or_404(Project, id=id, client=request.user)
@@ -631,6 +643,8 @@ def project_stop(request, pk):
 
 def project_delete(request, pk):
     project = get_object_or_404(Project, pk=pk, client=request.user)
+    Channel.objects.filter(project_id=project.id).update(project_id=None)
+    Recipient.objects.filter(project_id=project.id).update(project_id=None)
     project.delete()
     return redirect('projects')
 
@@ -657,19 +671,29 @@ def list_recipient(request):
     if request.method == 'POST':
         form = RecipientForm(request.POST, request.FILES)
         if form.is_valid():
-            project = form.save(commit=False)
-            project.client = request.user
-            tg_ids = project.many_to_many_field.values_list('tg_ids', flat=True)
-            print(f"Список ID: {list(tg_ids)}")
-
-            project.save()
-            project.save_m2m()
-            print(form)
+            # Сохраняем объект Recipient без коммита
+            recipient = form.save(commit=False)
+            recipient.client = request.user  # Привязываем к текущему пользователю
+            recipient.save()  # Сохраняем объект Recipient
+            
+            # Получаем TG IDs из связанных объектов
+            tg_ids = form.cleaned_data.get('tg_ids', [])
+            print(f"Список ID из формы: {tg_ids}")
+            
+            # Удаляем старые TG IDs и добавляем новые
+            recipient.tg_id_set.all().delete()
+            for tg_id in tg_ids:
+                TgID.objects.create(recipient=recipient, tg_id=tg_id)
+            
+            # Выводим для отладки список связанных TG IDs
+            related_tg_ids = recipient.tg_id_set.values_list('tg_id', flat=True)
+            print(f"Связанные TG IDs после сохранения: {list(related_tg_ids)}")
+            
             return redirect('/list-recipient/')
     else:
         form = RecipientForm()
 
-    # Получаем все проекты из модели
+    # Получаем все проекты из модели Recipient, принадлежащие текущему пользователю
     projects = Recipient.objects.filter(client=request.user)
 
     # Передаем данные в шаблон
@@ -677,8 +701,19 @@ def list_recipient(request):
         'form': form,
         'projects': projects,
     }
-    # return render(request, 'apps/projects.html', {'form': form})
     return render(request, "apps/list_recipient.html", context)
+
+
+# def create_recipient(request):
+#     if request.method == 'POST':
+#         form = RecipientForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('recipient_list')  # Замените на вашу страницу после сохранения
+#     else:
+#         form = RecipientForm()
+#     return render(request, 'recipient_form.html', {'form': form})
+
 
 def save_recipients(request):
     if request.method == 'POST':
@@ -696,10 +731,11 @@ def save_recipients(request):
     return render(request, 'save_recipients.html', {'form': form})
 
 
+
 def list_recipient_delete(request, pk):
-    list_recipient = get_object_or_404(Project, pk=pk, client=request.user)
+    list_recipient = get_object_or_404(Recipient, pk=pk, client=request.user)
     list_recipient.delete()
-    return redirect('projects')
+    return redirect('list-recipient')
 
 
 def chat(request):

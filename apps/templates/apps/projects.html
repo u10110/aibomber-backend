@@ -3,9 +3,17 @@
 {% block title %} Ecommerce Products List {% endblock title %}
 
 <!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+<style>
+.time-input {
+    max-width: 200px;
+}
+</style>
+{% endblock stylesheets %}
 
 {% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% load widget_tweaks %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -39,6 +47,31 @@
                                 <label for="gpt_version">Версия GPT</label>
                                 {{ form.gpt_version }}
                             </div>
+							
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label for="time_start">Начало времени</label>
+									{{ form.time_start|add_class:"time-input" }}
+									<small class="text-danger">{{ form.time_start.errors }}</small>
+								</div>
+								<div class="col-md-6">
+									<label for="time_end">Конец времени</label>
+									{{ form.time_end|add_class:"time-input" }}
+									<small class="text-danger">{{ form.time_end.errors }}</small>
+								</div>
+							</div>
+							
+							
+							
+                            <div class="col-12 mb-3">
+								<label for="channel">Каналы</label>
+								{{ form.channel }}
+							</div>
+							<div class="col-12 mb-3">
+								<label for="recipients">Получатели</label>
+								{{ form.recipients }}
+							</div>
+							
                             <div class="col-12 mb-3">
                                 <label for="prompt">Описание (Prompt)</label>
                                 {{ form.prompt }}
@@ -113,7 +146,7 @@
 													Статус {% if request.GET.sort_by == 'status' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
 												</a>
 											</th>
-											<th>
+											{% comment %} <th>
 												<a href="?sort_by=created_at&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
 													Дата создания {% if request.GET.sort_by == 'created_at' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
 												</a>
@@ -122,7 +155,7 @@
 												<a href="?sort_by=updated_at&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
 													Дата обновления {% if request.GET.sort_by == 'updated_at' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
 												</a>
-											</th>
+											</th> {% endcomment %}
 											<th>Действия</th>
 										</tr>
 									</thead>
@@ -134,8 +167,8 @@
 												{% if project.work_option == 1 %} Входящие {% elif project.work_option == 2 %} Входящие и исходящие {% endif %}
 											</td>
 											<td class="text-sm">{{ project.status }}</td>
-											<td class="text-sm">{{ project.created_at }}</td>
-											<td class="text-sm">{{ project.updated_at }}</td>
+											{% comment %} <td class="text-sm">{{ project.created_at }}</td>
+											<td class="text-sm">{{ project.updated_at }}</td> {% endcomment %}
 											<td class="text-sm">
 												<a href="{% url 'project-start' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Запуск">
 													<i class="fas fa-play"></i>
@@ -228,4 +261,19 @@
         });
     });
 </script>
+<script>
+    flatpickr("#id_time_start", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+    });
+    flatpickr("#id_time_end", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+    });
+</script>
+
 {% endblock javascripts %}

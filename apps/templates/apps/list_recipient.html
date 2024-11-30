@@ -21,43 +21,44 @@
     <div class="row mt-4">
         <div class="col-md-4">
             <div class="card">
-                <div class="card-body">
-                    <h5>Добавить Список</h5>
-                    <p class="text-sm mb-0">Заполните поля формы, выберите нужные параметры и нажмите кнопку "Добавить".</p>
-                    <div class="col-12 col-sm-10 col-md-12 mt-3">
-                        <form action="/list-recipient/" method="post" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            {% comment %} {{ form.as_p }} {% endcomment %}
-                            <div class="col-12 mb-3">
-                                <label for="title">Введите название</label>
-                                {{ form.title }}
-                            </div>
-                            <div class="col-12 mb-3">
-                                <label for="work_option">Веберите тип</label>
-                                {{ form.work_option }}
-                            </div>
-                            {% comment %} <div class="col-12 mb-3">
-                                <label for="gpt_version">Версия GPT</label>
-                                {{ form.gpt_version }}
-                            </div> {% endcomment %}
-                             <div class="col-12 mb-3">
-                                <label for="prompt">ТГ ИД список</label>
-                                {{ form.tg_id_input }}
-                            </div>
-                            {% if messages %}
-                            <ul class="messages">
-                                {% for message in messages %}
-                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                                {% endfor %}
-                            </ul>
-                            {% endif %}
-                            <div class="d-flex justify-content-end mt-4">
-                                <button type="submit" class="btn bg-gradient-primary m-0 ms-2">Создать список</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+				<div class="card-body">
+					<h5>Добавить Список</h5>
+					<p class="text-sm mb-0">Заполните поля формы, выберите нужные параметры и нажмите кнопку "Добавить".</p>
+					<div class="col-12 col-sm-10 col-md-12 mt-3">
+						<form action="/list-recipient/" method="post" enctype="multipart/form-data">
+							{% csrf_token %}
+							<div class="col-12 mb-3">
+								{{ form.non_field_errors }}
+							</div>
+							<div class="col-12 mb-3">
+								<label for="title">Введите название</label>
+								{{ form.title }}
+								<small class="text-danger">{{ form.title.errors }}</small>
+							</div>
+							<div class="col-12 mb-3">
+								<label for="work_option">Выберите тип</label>
+								{{ form.work_option }}
+								<small class="text-danger">{{ form.work_option.errors }}</small>
+							</div>
+							<div class="col-12 mb-3">
+								<label for="tg_ids">ТГ ИД список</label>
+								{{ form.tg_ids }}
+								<small class="text-danger">{{ form.tg_ids.errors }}</small>
+							</div>
+							{% if messages %}
+							<ul class="messages">
+								{% for message in messages %}
+								<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+								{% endfor %}
+							</ul>
+							{% endif %}
+							<div class="d-flex justify-content-end mt-4">
+								<button type="submit" class="btn bg-gradient-primary m-0 ms-2">Создать список</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>			
         </div>
 
 		<div class="col-md-8 mt-sm-0 mt-4">
@@ -114,7 +115,7 @@
 													Статус {% if request.GET.sort_by == 'status' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
 												</a>
 											</th>
-											<th>
+											{% comment %} <th>
 												<a href="?sort_by=created_at&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
 													Дата создания {% if request.GET.sort_by == 'created_at' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
 												</a>
@@ -123,7 +124,7 @@
 												<a href="?sort_by=updated_at&order={% if request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
 													Дата обновления {% if request.GET.sort_by == 'updated_at' %}{% if request.GET.order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
 												</a>
-											</th>
+											</th> {% endcomment %}
 											<th>Действия</th>
 										</tr>
 									</thead>
@@ -135,16 +136,10 @@
 												{% if project.work_option == 1 %} Входящие {% elif project.work_option == 2 %} Входящие и исходящие {% endif %}
 											</td>
 											<td class="text-sm">{{ project.status }}</td>
-											<td class="text-sm">{{ project.created_at }}</td>
-											<td class="text-sm">{{ project.updated_at }}</td>
+											{% comment %} <td class="text-sm">{{ project.created_at }}</td>
+											<td class="text-sm">{{ project.updated_at }}</td> {% endcomment %}
 											<td class="text-sm">
-												<a href="{% url 'project-start' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Запуск">
-													<i class="fas fa-play"></i>
-												</a>
-												<a href="{% url 'project-stop' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Остановка">
-													<i class="fas fa-stop"></i>
-												</a>
-												<a href="{% url 'project-delete' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Удаление">
+												<a href="{% url 'list-recipient-delete' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Удаление">
 													<i class="fas fa-trash-alt"></i>
 												</a>
 												<a href="javascript:void(0);" class="btn btn-link text-secondary" data-bs-toggle="modal" data-bs-target="#editProjectModal{{ project.id }}" title="Изменить">

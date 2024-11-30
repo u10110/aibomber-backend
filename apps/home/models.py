@@ -3,6 +3,7 @@ from http import client
 from django.db import models
 
 from apps.authentication.models import User
+import datetime
 
 # from sqlalchemy import null
 
@@ -88,8 +89,12 @@ class Project(models.Model):
     status = models.CharField(max_length=55, default="active")
     work_option = models.IntegerField(choices=OPTIONS, default=1)
     gpt_version = models.IntegerField(choices=GPT_VERSION_CHOICES, default=1)
+    hello_text = models.TextField(null=True)
     prompt = models.TextField()
     file = models.ImageField(null=True, upload_to="images/")
+    message_limit = models.IntegerField(default=30)
+    time_start = models.TimeField(default=datetime.time(8, 0))
+    time_end = models.TimeField(default=datetime.time(22, 0))
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
@@ -106,13 +111,17 @@ class Recipient(models.Model):
     ]
 
     client = models.ForeignKey(User, on_delete=models.CASCADE)
+    project_id = models.IntegerField(null=True)
     title = models.CharField(max_length=1000)
     status = models.CharField(max_length=55, default="active")
     work_option = models.IntegerField(choices=OPTIONS, default=1)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
-    tg_id = models.BigIntegerField()
+    tg_id = models.BigIntegerField(null=True, blank=True)
 
+    def __str__(self):
+        return self.title
+    
 class TgID(models.Model):
     recipient = models.ForeignKey(
         Recipient,
@@ -132,17 +141,25 @@ class Channel(models.Model):
         ]
 
     client = models.ForeignKey(User, on_delete=models.CASCADE)
+    project_id = models.IntegerField(null=True)
     title = models.CharField(max_length=1000)
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
         default='unauthorized',
     )
+    max_daily_messages = models.IntegerField(default=50)  # Максимальное количество сообщений в день
+    remaining_messages = models.IntegerField(default=50)
+    last_reset_date = models.DateField(default=datetime.date.today)
     phone = models.CharField(max_length=55,)
+    tg_app_id = models.CharField(max_length=55,null=True)
+    tg_app_hash = models.CharField(max_length=55,null=True)
     qr = models.TextField(null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
+    def __str__(self):
+        return self.title
 
 class Chat(models.Model):
     class Meta:
