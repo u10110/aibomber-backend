@@ -156,19 +156,23 @@ class ProjectForm(forms.ModelForm):
 
 
     def __init__(self, *args, **kwargs):
-            user = kwargs.pop('user', None)
-            super().__init__(*args, **kwargs)
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
 
-            if user:
-                # Ограничиваем выбор каналов для текущего пользователя
-                self.fields['channel'].queryset = Channel.objects.filter(client=user, project_id__isnull=True, status='active')
-                # Ограничиваем выбор получателей для текущего пользователя
-                self.fields['recipients'].queryset = Recipient.objects.filter(client=user, project_id__isnull=True, status='active')
+        if user:
+            self.fields['channel'].queryset = Channel.objects.filter(client=user, project_id__isnull=True, status='active')
+            self.fields['recipients'].queryset = Recipient.objects.filter(client=user, project_id__isnull=True, status='active')
 
-            # Устанавливаем значения по умолчанию для time_start и time_end
-            if not self.instance.pk:  # Если объект модели ещё не сохранён
-                self.fields['time_start'].initial = datetime.time(8, 0)
-                self.fields['time_end'].initial = datetime.time(22, 0)
+        # Устанавливаем значения по умолчанию для time_start и time_end
+        if not self.instance.pk:  # Если объект модели ещё не сохранён
+            self.fields['time_start'].initial = datetime.time(8, 0)
+            self.fields['time_end'].initial = datetime.time(22, 0)
+        else:
+            # Загружаем связанные записи для редактирования
+            self.fields['channel'].initial = Channel.objects.filter(project_id=self.instance.id)
+            self.fields['recipients'].initial = Recipient.objects.filter(project_id=self.instance.id)
+
+
                 
     def save(self, commit=True):
         # Сохраняем объект проекта

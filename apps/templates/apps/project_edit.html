@@ -1,39 +1,86 @@
-<tbody>
-  {% for project in projects %}
-    <tr>
-      <td class="text-sm">{{ project.title }}</td>
-      <td class="text-sm">
-        {% if project.work_option == 1 %}
-          Входящие
-        {% elif project.work_option == 2 %}
-          Входящие и исходящие
-        {% endif %}
-      </td>
-      <td class="text-sm">{{ project.status }}</td>
-      <td class="text-sm">{{ project.created_at }}</td>
-      <td class="text-sm">{{ project.updated_at }}</td>
-      <td class="text-sm">
-        <!-- Запуск -->
-        <a href="{% url 'project-start' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Запуск">
-          <i class="fas fa-play"></i>
-        </a>
-        <!-- Остановка -->
-        <a href="{% url 'project-stop' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Остановка">
-          <i class="fas fa-stop"></i>
-        </a>
-        <!-- Удаление -->
-        <a href="{% url 'project-delete' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Удаление">
-          <i class="fas fa-trash-alt"></i>
-        </a>
-        <!-- Изменить -->
-        <a href="javascript:void(0);" class="btn btn-link text-secondary" data-bs-toggle="modal" data-bs-target="#editProjectModal{{ project.id }}" title="Изменить">
-          <i class="fas fa-edit"></i>
-        </a>
-      </td>
-    </tr>
-  {% empty %}
-    <tr>
-      <td colspan="8" class="text-center">Нет доступных проектов</td>
-    </tr>
-  {% endfor %}
-</tbody>
+<div class="modal fade" id="editProjectModal{{ project.id }}" tabindex="-1" aria-labelledby="editProjectModalLabel{{ project.id }}" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editProjectModalLabel{{ project.id }}">Редактировать проект</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="{% url 'project-edit' project.id %}" method="POST">
+          {% csrf_token %}
+          <!-- Название проекта -->
+          <div class="col-12 mb-3">
+            <label for="title">Название проекта</label>
+            <input type="text" name="title" class="form-control" value="{{ project.title }}">
+          </div>
+
+          <!-- Опции работы -->
+          <div class="col-12 mb-3">
+            <label for="work_option">Опции работы</label>
+            <select name="work_option" class="form-control">
+              <option value="1" {% if project.work_option == 1 %}selected{% endif %}>Входящие</option>
+              <option value="2" {% if project.work_option == 2 %}selected{% endif %}>Входящие и исходящие</option>
+            </select>
+          </div>
+
+          <!-- Версия GPT -->
+          <div class="col-12 mb-3">
+            <label for="gpt_version">Версия GPT</label>
+            <select name="gpt_version" class="form-control">
+              <option value="1" {% if project.gpt_version == 1 %}selected{% endif %}>GPT-3.5</option>
+              <option value="2" {% if project.gpt_version == 2 %}selected{% endif %}>GPT-4</option>
+            </select>
+          </div>
+
+          <!-- Приветственное сообщение -->
+          <div class="col-12 mb-3">
+            <label for="hello_text">Приветственное сообщение</label>
+            <input type="text" name="hello_text" class="form-control" value="{{ project.hello_text }}">
+          </div>
+
+          <!-- Время начала -->
+          <div class="col-12 mb-3">
+            <label for="time_start">Начало времени</label>
+            <input type="time" name="time_start" class="form-control" value="{{ project.time_start }}">
+          </div>
+
+          <!-- Время окончания -->
+          <div class="col-12 mb-3">
+            <label for="time_end">Конец времени</label>
+            <input type="time" name="time_end" class="form-control" value="{{ project.time_end }}">
+          </div>
+
+          <!-- Описание -->
+          <div class="col-12 mb-3">
+            <label for="prompt">Описание (Prompt)</label>
+            <textarea name="prompt" class="form-control" rows="4">{{ project.prompt }}</textarea>
+          </div>
+
+          <!-- Каналы -->
+          <div class="col-12 mb-3">
+            <label for="channel">Каналы</label>
+            <select name="channel" class="form-control" multiple>
+              {% for channel in channels %}
+              <option value="{{ channel.id }}" {% if channel.project_id == project.id %}selected{% endif %}>{{ channel.title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Получатели -->
+          <div class="col-12 mb-3">
+            <label for="recipients">Получатели</label>
+            <select name="recipients" class="form-control" multiple>
+              {% for recipient in recipients %}
+              <option value="{{ recipient.id }}" {% if recipient.project_id == project.id %}selected{% endif %}>{{ recipient.title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

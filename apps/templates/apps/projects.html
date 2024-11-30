@@ -187,37 +187,40 @@
 									</thead>
 									<tbody>
 										{% for project in projects %}
-										<tr>
+										  <tr>
 											<td class="text-sm">{{ project.title }}</td>
 											<td class="text-sm">
-												{% if project.work_option == 1 %} Входящие {% elif project.work_option == 2 %} Входящие и исходящие {% endif %}
+											  {% if project.work_option == 1 %} Входящие {% elif project.work_option == 2 %} Входящие и исходящие {% endif %}
 											</td>
 											<td class="text-sm">{{ project.status }}</td>
 											<td class="text-sm">
-												<!-- Ползунок для включения/выключения проекта -->
-												<div class="form-check form-switch">
-													<input
-														class="form-check-input project-toggle"
-														type="checkbox"
-														id="toggle-{{ project.id }}"
-														data-project-id="{{ project.id }}"
-														{% if project.is_active %}checked{% endif %}
-													>
-												</div>
+											  <div class="form-check form-switch">
+												<input
+												  class="form-check-input project-toggle"
+												  type="checkbox"
+												  id="toggle-{{ project.id }}"
+												  data-project-id="{{ project.id }}"
+												  {% if project.is_active %}checked{% endif %}
+												>
+											  </div>
 											</td>
 											<td class="text-sm">
-												<a href="{% url 'project-delete' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Удаление">
-													<i class="fas fa-trash-alt"></i>
-												</a>
-												<a href="javascript:void(0);" class="btn btn-link text-secondary" data-bs-toggle="modal" data-bs-target="#editProjectModal{{ project.id }}" title="Изменить">
-													<i class="fas fa-edit"></i>
-												</a>
+											  <a href="{% url 'project-delete' project.id %}" class="btn btn-link text-secondary" data-bs-toggle="tooltip" title="Удаление">
+												<i class="fas fa-trash-alt"></i>
+											  </a>
+											  <a href="javascript:void(0);" class="btn btn-link text-secondary" data-bs-toggle="modal" data-bs-target="#editProjectModal{{ project.id }}" title="Изменить">
+												<i class="fas fa-edit"></i>
+											  </a>
 											</td>
-										</tr>
+										  </tr>
+										  <!-- Подключение модального окна -->
+										  {% include 'apps\project_edit.html' %}
+										{% empty %}
+										  <tr>
+											<td colspan="6" class="text-center">Нет доступных проектов</td>
+										  </tr>
 										{% endfor %}
-									</tbody>
-									
-									
+									  </tbody>
 								</table>
 							</div>
 		
