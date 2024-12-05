@@ -7,141 +7,68 @@
 {% block content %}
 <div class="container-fluid py-4">
     <div class="row">
-        <div class="col-12 card">
-            <div class='m-3'>
-                <h5>Каналы</h5>
-                <p class="text-sm mb-0">Управление каналами.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-md-4">
+        <div class="col-12">
             <div class="card">
-                <div class="card-body">
-                    <h5>Добавить канал</h5>
-                    <p class="text-sm mb-0">Заполните поля формы, выберите нужные параметры и нажмите кнопку “Создать“.</p>
-                    <div class="col-12 col-sm-10 col-md-12 mt-3">
-                        <form action="/channels/" method="post" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div class="col-12 mb-3">
-                                <label for="title">Название канала:</label>
-                                {{ form.title }}
-                            </div>
-							<div class="col-12 mb-3">
-								{{ form.source.label_tag }}
-								{{ form.source }}
-							</div>
-                            <div class="col-12 mb-3">
-                                <label for="phone">Телефон:</label>
-                                {{ form.phone }}
-                            </div>
-                            {% if messages %}
-                            <ul class="messages">
-                                {% for message in messages %}
-                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                                {% endfor %}
-                            </ul>
-                            {% endif %}
-                            <div class="d-flex justify-content-end mt-4">
-                                <button type="submit" class="btn bg-gradient-primary m-0 ms-2">Добавить канал</button>
-                            </div>
-                        </form>
-                    </div>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Управление каналами</h5>
+                    <button class="btn bg-gradient-primary" data-bs-toggle="modal" data-bs-target="#addChannelModal">
+                        Добавить канал
+                    </button>
                 </div>
-            </div>
-        </div>
-
-        <div class="col-md-8 mt-sm-0 mt-4">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header pb-0">
-                            <div class="d-lg-flex">
-                                <div>
-                                    <h5 class="mb-0">Список каналов</h5>
-                                    <p class="text-sm mb-0">Здесь отображаются активные и неактивные каналы.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card-body px-0 pb-0">
-                            <div class="dataTable-container">
-                                <table class="table table-flush dataTable-table" id="channels-list">
-                                    <thead class="thead-light">
-                                        <tr>
-                                            <th>Название</th>
-                                            <th>Источник</th>
-                                            <th>Логин</th>
-                                            <th>Проект</th>
-                                            <th>Статус</th>
-                                            <th>Активность</th>
-                                            <th>Действия</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for channel in channels %}
-                                        <tr>
-                                            <td class="text-sm">{{ channel.title }}</td>
-											<td>
-												{% if channel.source == 'telegram' %}
-													Telegram
-												{% elif channel.source == 'avito' %}
-													Avito
-												{% elif channel.source == 'web_widget' %}
-													Web Widget
-												{% elif channel.source == 'vk' %}
-													VK
-												{% elif channel.source == 'email' %}
-													E-mail
-												{% elif channel.source == 'whatsapp' %}
-													WhatsApp
-												{% elif channel.source == 'instagram' %}
-													Instagram
-												{% endif %}
-											</td>
-                                            <td class="text-sm">{{ channel.phone }}</td>
-											<td class="text-sm">{{ channel.project_title }}</td>
-                                            <td class="text-sm">
-                                                {% if channel.status == 'unauthorized' %}
-                                                    <button 
-                                                        class="btn btn-primary btn-sm authorize-btn" 
-                                                        data-phone="{{ channel.phone }}" 
-                                                        data-channel-id="{{ channel.id }}">
-                                                        Авторизовать
-                                                    </button>
-                                                {% endif %}
-                                            </td>
-                                            
-                                            
-                                            
-                                            <td class="text-sm">{{ channel.status }}</td>
-                                            <td class="text-sm">
-                                                <div class="form-check form-switch">
-                                                    <input 
-                                                        class="form-check-input channel-toggle" 
-                                                        type="checkbox" 
-                                                        id="toggle-{{ channel.id }}" 
-                                                        data-channel-id="{{ channel.id }}" 
-                                                        {% if channel.is_active %}checked{% endif %}
-                                                    >
-                                                </div>
-                                            </td>
-                                            <td class="text-sm">
-                                                <a href="{% url 'channel-delete' channel.id %}" class="btn btn-link text-secondary" title="Удаление">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        {% empty %}
-                                        <tr>
-                                            <td colspan="4" class="text-center">Нет доступных каналов</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="channels-table">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Источник</th>
+                                    <th>Телефон</th>
+                                    <th>Проект</th>
+                                    <th>Статус</th>
+                                    <th>Активность</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for channel in channels %}
+                                <tr>
+                                    <td>{{ channel.title }}</td>
+                                    <td>{{ channel.get_source_display }}</td>
+                                    <td>{{ channel.phone }}</td>
+                                    <td>{{ channel.project_title }}</td>
+                                    <td>
+                                        {% if channel.status == 'unauthorized' %}
+                                            <button class="btn btn-sm btn-warning authorize-btn" data-phone="{{ channel.phone }}" data-channel-id="{{ channel.id }}">
+                                                Авторизовать
+                                            </button>
+                                        {% else %}
+                                            {{ channel.status }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="form-check form-switch">
+                                            <input 
+                                                class="form-check-input channel-toggle" 
+                                                type="checkbox" 
+                                                id="toggle-{{ channel.id }}" 
+                                                data-channel-id="{{ channel.id }}" 
+                                                {% if channel.is_active %}checked{% endif %}
+                                            >
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'channel-delete' channel.id %}" class="btn btn-link text-danger">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">Нет доступных каналов</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -149,31 +76,37 @@
     </div>
 </div>
 
-<div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<!-- Модальное окно добавления канала -->
+<div class="modal fade" id="addChannelModal" tabindex="-1" aria-labelledby="addChannelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="authModalLabel">Авторизация Telegram</h5>
+                <h5 class="modal-title" id="addChannelModalLabel">Добавить канал</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="authForm">
+                <form id="addChannelForm" method="post" enctype="multipart/form-data" action="/channels/">
+                    {% csrf_token %}
                     <div class="mb-3">
-                        <label for="authCode" class="form-label">Введите код из Telegram:</label>
-                        <input type="text" class="form-control" id="authCode" required>
+                        <label for="title" class="form-label">Название канала:</label>
+                        {{ form.title }}
                     </div>
-                    <input type="hidden" id="authPhone">
-                    <input type="hidden" id="authChannelId">
+                    <div class="mb-3">
+                        <label for="source" class="form-label">Источник:</label>
+                        {{ form.source }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Телефон:</label>
+                        {{ form.phone }}
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn bg-gradient-primary">Добавить канал</button>
+                    </div>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="submit" class="btn btn-primary" form="authForm">Авторизовать</button>
             </div>
         </div>
     </div>
 </div>
-
 
 {% include "includes/footer.html" %}
 {% endblock content %}
@@ -181,113 +114,42 @@
 {% block javascripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const toggles = document.querySelectorAll('.channel-toggle');
-
-        toggles.forEach(toggle => {
-            toggle.addEventListener('change', function () {
-                const channelId = this.dataset.channelId;
-                const isActive = this.checked;
-
-                // Отправляем состояние на сервер через AJAX
-                fetch(`/channels/toggle-active/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                    body: JSON.stringify({
-                        channel_id: channelId,
-                        is_active: isActive,
-                    }),
-                })
+        const addChannelForm = document.getElementById('addChannelForm');
+        const addChannelModalElement = document.getElementById('addChannelModal');
+        const addChannelModal = new bootstrap.Modal(addChannelModalElement);
+    
+        // Обработка формы добавления канала
+        addChannelForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+    
+            const formData = new FormData(addChannelForm);
+    
+            fetch('/channels/', {
+                method: 'POST',
+                body: formData,
+            })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Ошибка при обновлении состояния канала');
+                        throw new Error('Ошибка сети или сервера.');
                     }
                     return response.json();
                 })
                 .then(data => {
-                    console.log(`Состояние канала ${channelId} обновлено:`, data);
-                })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                });
-            });
-        });
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Находим кнопки авторизации
-        const authorizeButtons = document.querySelectorAll('.authorize-btn');
-    
-        authorizeButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                const phone = this.getAttribute('data-phone');
-                const channelId = this.getAttribute('data-channel-id');
-    
-                // Отправляем запрос на отправку кода
-                fetch('/channels/send-code/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                    body: JSON.stringify({ phone: phone, channel_id: channelId }),
-                })
-                .then(response => response.json())
-                .then(data => {
                     if (data.success) {
-                        // Если код успешно отправлен, открываем модальное окно
-                        const authModal = new bootstrap.Modal(document.getElementById('authModal'));
-                        document.getElementById('authPhone').value = phone;
-                        document.getElementById('authChannelId').value = channelId;
-                        authModal.show();
+                        // Перезагрузка страницы после успешного добавления
+                        location.reload();
                     } else {
-                        alert(data.error || 'Ошибка при отправке кода.');
+                        // Выводим ошибки формы
+                        alert('Ошибка: ' + JSON.stringify(data.errors));
                     }
                 })
                 .catch(error => {
-                    console.error('Ошибка при отправке кода:', error);
-                    alert('Ошибка при отправке кода.');
+                    console.error('Ошибка при добавлении канала:', error);
+                    alert('Ошибка при добавлении канала.');
                 });
-            });
-        });
-    
-        // Обработка формы авторизации
-        const authForm = document.getElementById('authForm');
-        authForm.addEventListener('submit', function (event) {
-            event.preventDefault();
-    
-            const phone = document.getElementById('authPhone').value;
-            const code = document.getElementById('authCode').value;
-    
-            // Отправка кода для проверки
-            fetch('/channels/verify-code/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: JSON.stringify({ phone: phone, code: code }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Авторизация успешна!');
-                } else {
-                    alert(data.error || 'Ошибка при проверке кода.');
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка при проверке кода:', error);
-                alert('Ошибка при проверке кода.');
-            });
         });
     });
     
     
-    
-    
-</script>    
+</script>
 {% endblock javascripts %}

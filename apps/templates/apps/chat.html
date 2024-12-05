@@ -31,6 +31,18 @@
 }
 
 </style>
+<style>
+  .btn.bg-gradient-primary {
+      background: linear-gradient(90deg, #28a745, #85e085); /* Зеленый градиент */
+      border: none;
+      color: white;
+      transition: background 0.3s ease;
+  }
+  {% comment %} btn bg-gradient-primary {% endcomment %}
+  .btn.bg-gradient-primary:hover {
+      background: linear-gradient(90deg, #218838, #6fcf6f); /* Темнее на hover */
+  }
+</style>
 {% endblock stylesheets %}
 
 {% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}

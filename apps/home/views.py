@@ -615,13 +615,29 @@ def projects(request):
     return render(request, 'apps/projects.html', context)
 
 def project_create(request):
+    print(1)
     if request.method == 'POST':
-        form = ProjectForm(request.POST)
+        form = ProjectForm(request.POST, request.FILES, user=request.user)  # Передаём user для фильтрации
         if form.is_valid():
-            form.save()
-            return redirect('project-list')
+            project = form.save(commit=False)
+            project.client = request.user  # Привязываем проект к текущему пользователю
+            project.save()
+
+            # Обновляем project_id для связанных каналов
+            channels = form.cleaned_data.get('channel', [])
+            for channel in channels:
+                channel.project_id = project.id
+                channel.save()
+
+            # Обновляем project_id для связанных получателей
+            recipients = form.cleaned_data.get('recipients', [])
+            for recipient in recipients:
+                recipient.project_id = project.id
+                recipient.save()
+
+            return redirect('/projects/')
     else:
-        form = ProjectForm()
+        form = ProjectForm(user=request.user)
     return render(request, 'apps/project_create.html', {'form': form})
 
 
@@ -726,7 +742,18 @@ def list_recipient(request):
             for tg_id in tg_ids:
                 TgID.objects.create(recipient=recipient, tg_id=tg_id)
 
-            return redirect('/list-recipient/')
+            # Возвращаем JSON для AJAX-запроса
+            return JsonResponse({
+                'success': True,
+                'recipient': {
+                    'id': recipient.id,
+                    'title': recipient.title,
+                    'project_title': "Не привязан",
+                    'contact_count': len(tg_ids),
+                    'status': recipient.status,
+                }
+            })
+            # return redirect('/list-recipient/')
     else:
         form = RecipientForm()
 
@@ -885,13 +912,32 @@ def channels(request):
     if request.method == 'POST':
         form = ChannelForm(request.POST, request.FILES)
         if form.is_valid():
-            project = form.save(commit=False)
-            project.client = request.user
+            channel = form.save(commit=False)
+            channel.client = request.user
+            channel.save()
             print(form)
-            project.save()
-            return redirect('/channels/')
+            # Возвращаем успех и данные нового канала
+            return JsonResponse({
+                'success': True,
+                'channel': {
+                    'id': channel.id,
+                    'title': channel.title,
+                    'source_display': channel.source,
+                    'phone': channel.phone,
+                    'project_title': "Не привязан",
+                    'status': channel.status,
+                    'is_active': channel.is_active,
+                }
+            })
+        else:
+            # Возвращаем ошибки валидации
+            return JsonResponse({
+                'success': False,
+                'errors': form.errors
+            }, status=400)
     else:
         form = ChannelForm()
+
 
     # Получаем все проекты из модели
     projects = Channel.objects.filter(client=request.user)

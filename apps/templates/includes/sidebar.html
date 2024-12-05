@@ -2,6 +2,27 @@
 {% load static %}
 
 <style>
+  /* Изменение цвета заголовка бокового меню */
+  .sidenav-footer #sidenavCard {
+    background: linear-gradient(90deg, #28a745, #85e085); /* Зеленый градиент */
+    color: #fff;
+  }
+
+  .sidenav-footer .btn:hover {
+    background: linear-gradient(90deg, #218838, #6fcf6f); /* Темнее при наведении */
+    color: #fff;
+  }
+  .nav-link.active .icon {
+    background: linear-gradient(90deg, #28a745, #85e085) !important; /* Зеленый градиент для иконки */
+    color: #fff; /* Белый цвет для иконки */
+    border-radius: 50%; /* Закругляем фон иконки */
+  }
+  .nav-link.active svg {
+    fill: #fff; /* Белый цвет для SVG-иконки */
+  }
+
+
+  
   .nav-link.active path {
     fill: #fff !important;
     color: #fff;

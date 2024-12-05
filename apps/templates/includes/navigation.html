@@ -2,6 +2,17 @@
 {% load static %}
 {% load i18n %}
 <style>
+  .balance-badge-custom {
+    background: linear-gradient(90deg, #28a745, #85e085); /* Зеленый градиент */
+    color: #fff; /* Белый текст */
+    font-weight: bold; /* Полужирный текст */
+    border-radius: 12px; /* Закругленные углы */
+    padding: 0.5rem 1rem; /* Отступы внутри плашки */
+    box-shadow: 0 4px 6px rgba(40, 167, 69, 0.5); /* Тень для эффекта объема */
+    display: inline-block; /* Для правильного отображения */
+    text-align: center; /* Центровка текста */
+}
+
   @media (max-width: 1024px) {
     .anim-img {
       display: none;
@@ -111,9 +122,10 @@
             <li class="nav-item d-flex align-items-center">
               <!-- Плашка с балансом -->
               <div class="balance-badge me-2">
-                <span class="badge bg-success">Баланс {{balance}}</span>
+                <span class="badge balance-badge-custom">Баланс {{balance}}</span>
               </div>
             </li>
+            
             
             
             {% comment %} <li class="nav-item d-flex align-items-center">

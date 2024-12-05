@@ -153,6 +153,7 @@ class ProjectForm(forms.ModelForm):
     )
     outgoing_limit = forms.IntegerField(
         required=True,
+        initial=30,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
             'placeholder': 'Введите ограничение на исходящие сообщения',

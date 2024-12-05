@@ -2,6 +2,23 @@
 
 {% block stylesheets %}
 <style>
+  .is-invalid {
+      border: 1px solid red;
+  }
+</style>
+<style>
+  .btn.bg-gradient-primary {
+      background: linear-gradient(90deg, #28a745, #85e085); /* Зеленый градиент */
+      border: none;
+      color: white;
+      transition: background 0.3s ease;
+  }
+  {% comment %} btn bg-gradient-primary {% endcomment %}
+  .btn.bg-gradient-primary:hover {
+      background: linear-gradient(90deg, #218838, #6fcf6f); /* Темнее на hover */
+  }
+</style>
+<style>
 
   #chat-emulator-container {
     height: 400px; /* Фиксированная высота */
@@ -72,7 +89,7 @@
                 </div>
                 <div class="row">
                     <div class="col-12 col-lg-8 m-auto">
-                        <form action="" method="post" enctype="multipart/form-data" class="multisteps-form__form">
+                        <form action="{% url 'project-create' %}" method="post" enctype="multipart/form-data" class="multisteps-form__form">
                             {% csrf_token %}
 
                             <!-- Шаг 1 -->
@@ -249,48 +266,95 @@
 {% block javascripts %}
 <script src="/static/assets/js/plugins/multistep-form.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const steps = document.querySelectorAll('.multisteps-form__progress-btn');
-        const panels = document.querySelectorAll('.multisteps-form__panel');
-        const nextBtns = document.querySelectorAll('.js-btn-next');
-        const prevBtns = document.querySelectorAll('.js-btn-prev');
-        const helloToggle = document.getElementById('hello-text-toggle');
-        const helloTextField = document.getElementById('hello-text-field');
+  document.addEventListener('DOMContentLoaded', function () {
+      const steps = document.querySelectorAll('.multisteps-form__progress-btn');
+      const panels = document.querySelectorAll('.multisteps-form__panel');
+      const nextBtns = document.querySelectorAll('.js-btn-next');
+      const prevBtns = document.querySelectorAll('.js-btn-prev');
+      const helloToggle = document.getElementById('hello-text-toggle');
+      const helloTextField = document.getElementById('hello-text-field');
 
-        let currentStep = 0;
+      let currentStep = 0;
 
-        function showStep(step) {
-            steps.forEach((btn, index) => {
-                btn.classList.toggle('js-active', index === step);
-                panels[index].classList.toggle('js-active', index === step);
-            });
-        }
+      // Функция проверки полей на шаге
+      function validateStep(step) {
+          const panel = panels[step];
+          const requiredFields = panel.querySelectorAll('input[required], select[required], textarea[required]');
+          let isValid = true;
 
-        nextBtns.forEach((btn) => {
-            btn.addEventListener('click', () => {
-                if (currentStep < steps.length - 1) {
-                    currentStep++;
-                    showStep(currentStep);
-                }
-            });
-        });
+          requiredFields.forEach((field) => {
+              if (!field.value.trim()) {
+                  isValid = false;
+                  field.classList.add('is-invalid'); // Добавляем класс ошибки
+              } else {
+                  field.classList.remove('is-invalid'); // Убираем класс ошибки
+              }
+          });
 
-        prevBtns.forEach((btn) => {
-            btn.addEventListener('click', () => {
-                if (currentStep > 0) {
-                    currentStep--;
-                    showStep(currentStep);
-                }
-            });
-        });
+          return isValid;
+      }
 
-        helloToggle.addEventListener('change', function () {
-            helloTextField.style.display = this.checked ? 'block' : 'none';
-        });
+      // Обновление состояния кнопки "Далее"
+      function updateNextButtonState() {
+          const panel = panels[currentStep];
+          const nextButton = panel.querySelector('.js-btn-next');
 
-        showStep(currentStep);
-    });
+          if (nextButton) {
+              nextButton.disabled = !validateStep(currentStep);
+          }
+      }
+
+      // Показ шага
+      function showStep(step) {
+          steps.forEach((btn, index) => {
+              btn.classList.toggle('js-active', index === step);
+              panels[index].classList.toggle('js-active', index === step);
+          });
+
+          updateNextButtonState(); // Проверяем состояние кнопки "Далее" при смене шага
+      }
+
+      // Валидация при изменении поля
+      panels.forEach((panel) => {
+          const requiredFields = panel.querySelectorAll('input[required], select[required], textarea[required]');
+          requiredFields.forEach((field) => {
+              field.addEventListener('input', updateNextButtonState);
+          });
+      });
+
+      // Переход на следующий шаг
+      nextBtns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+              if (validateStep(currentStep)) {
+                  if (currentStep < steps.length - 1) {
+                      currentStep++;
+                      showStep(currentStep);
+                  }
+              }
+          });
+      });
+
+      // Переход на предыдущий шаг
+      prevBtns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+              if (currentStep > 0) {
+                  currentStep--;
+                  showStep(currentStep);
+              }
+          });
+      });
+
+      // Обработка переключателя для поля приветственного сообщения
+      if (helloToggle) {
+          helloToggle.addEventListener('change', function () {
+              helloTextField.style.display = this.checked ? 'block' : 'none';
+          });
+      }
+
+      showStep(currentStep);
+  });
 </script>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const chatContainer = document.getElementById('chat-emulator-container');
