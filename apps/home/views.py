@@ -59,7 +59,8 @@ from .WB_token import X64ApiClient
 from django.shortcuts import get_object_or_404
 from django.db.models import Max, OuterRef, Subquery
 from django.db.models import Count
-
+from telethon.sync import TelegramClient
+from telethon.errors import SessionPasswordNeededError
 
 def error(request):
     return render(request, "errors/technical_break.html")
@@ -904,3 +905,154 @@ def channels(request):
     }
     return render(request, 'apps/channels.html', context)
     # return render(request, 'apps/projects.html', {'form': form})
+
+
+
+
+BASE_URL = "https://my.telegram.org"
+
+@csrf_exempt
+def send_code(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        phone = data.get('phone')
+        # channel_id = data.get('channel_id')
+
+        if not phone:
+            return JsonResponse({'success': False, 'error': 'Номер телефона обязателен.'})
+
+        session = requests.Session()
+        try:
+            # Отправляем запрос на получение кода
+            response = session.post(
+                f"{BASE_URL}/auth/send_password",
+                data={'phone': phone},
+                headers={'Content-Type': 'application/x-www-form-urlencoded'}
+            )
+            if response.status_code == 200:
+                # Сохраняем сессию для дальнейшего использования
+                request.session['tg_session'] = session.cookies.get_dict()
+                return JsonResponse({'success': True})
+            else:
+                return JsonResponse({'success': False, 'error': 'Ошибка при отправке кода.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+@csrf_exempt
+def verify_code(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        phone = data.get('phone')
+        code = data.get('code')
+
+        if not phone or not code:
+            return JsonResponse({'success': False, 'error': 'Телефон и код обязательны.'})
+
+        try:
+            # Извлекаем сохраненную сессию
+            session = requests.Session()
+            session.cookies.update(request.session.get('tg_session', {}))
+
+            # Отправляем запрос на авторизацию
+            response = session.post(
+                f"{BASE_URL}/auth/login",
+                data={'phone': phone, 'random_hash': '', 'password': code},
+                headers={'Content-Type': 'application/x-www-form-urlencoded'}
+            )
+
+            if response.status_code == 200:
+                # Сохраняем сессию
+                request.session['tg_session'] = session.cookies.get_dict()
+
+                # Автоматически вызываем создание приложения
+                app_creation_response = create_app_internal(session)
+                if app_creation_response['success']:
+                    return JsonResponse({
+                        'success': True,
+                        'api_id': app_creation_response['api_id'],
+                        'api_hash': app_creation_response['api_hash'],
+                    })
+                else:
+                    return JsonResponse({
+                        'success': False,
+                        'error': app_creation_response.get('error', 'Ошибка при создании приложения.'),
+                    })
+
+            else:
+                return JsonResponse({'success': False, 'error': 'Ошибка при авторизации.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+
+def create_app_internal(session):
+    """
+    Внутренняя функция для создания приложения.
+    Используется из verify_code.
+    """
+    try:
+        response = session.post(
+            f"{BASE_URL}/apps/create",
+            data={
+                'app_title': 'Eliment',  # Название приложения
+                'app_shortname': 'eliment_app',  # Уникальное имя
+                'app_platform': 'desktop',  # Можно заменить на web/other
+                'app_url': '',  # URL приложения, если есть
+                'app_desc': '',  # Описание приложения
+            },
+            headers={'Content-Type': 'application/x-www-form-urlencoded'}
+        )
+
+        if response.status_code == 200:
+            response_data = response.json()
+            return {
+                'success': True,
+                'api_id': response_data.get('api_id'),
+                'api_hash': response_data.get('api_hash'),
+            }
+        else:
+            return {
+                'success': False,
+                'error': 'Ошибка при создании приложения на стороне Telegram.',
+            }
+    except Exception as e:
+        return {
+            'success': False,
+            'error': str(e),
+        }
+
+
+
+@csrf_exempt
+def create_app(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        app_title = data.get('title', 'eliment')
+        app_shortname = data.get('shortname', 'eliment_app')
+
+        try:
+            # Извлекаем сохраненную сессию
+            session = requests.Session()
+            session.cookies.update(request.session.get('tg_session', {}))
+
+            # Отправляем запрос на создание приложения
+            response = session.post(
+                f"{BASE_URL}/apps/create",
+                data={
+                    'app_title': app_title,
+                    'app_shortname': app_shortname,
+                    'app_platform': 'desktop',  # Можно заменить на web/other
+                    'app_url': '',  # URL приложения, если есть
+                    'app_desc': '',  # Описание приложения
+                },
+                headers={'Content-Type': 'application/x-www-form-urlencoded'}
+            )
+
+            if response.status_code == 200:
+                # Парсим `API_ID` и `API_HASH` из ответа
+                api_id = response.json().get('api_id')
+                api_hash = response.json().get('api_hash')
+                return JsonResponse({'success': True, 'api_id': api_id, 'api_hash': api_hash})
+            else:
+                return JsonResponse({'success': False, 'error': 'Ошибка при создании приложения.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})

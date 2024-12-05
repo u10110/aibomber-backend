@@ -102,6 +102,19 @@
 											</td>
                                             <td class="text-sm">{{ channel.phone }}</td>
 											<td class="text-sm">{{ channel.project_title }}</td>
+                                            <td class="text-sm">
+                                                {% if channel.status == 'unauthorized' %}
+                                                    <button 
+                                                        class="btn btn-primary btn-sm authorize-btn" 
+                                                        data-phone="{{ channel.phone }}" 
+                                                        data-channel-id="{{ channel.id }}">
+                                                        Авторизовать
+                                                    </button>
+                                                {% endif %}
+                                            </td>
+                                            
+                                            
+                                            
                                             <td class="text-sm">{{ channel.status }}</td>
                                             <td class="text-sm">
                                                 <div class="form-check form-switch">
@@ -135,6 +148,33 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="authModalLabel">Авторизация Telegram</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="authForm">
+                    <div class="mb-3">
+                        <label for="authCode" class="form-label">Введите код из Telegram:</label>
+                        <input type="text" class="form-control" id="authCode" required>
+                    </div>
+                    <input type="hidden" id="authPhone">
+                    <input type="hidden" id="authChannelId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn btn-primary" form="authForm">Авторизовать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 {% include "includes/footer.html" %}
 {% endblock content %}
 
@@ -176,4 +216,78 @@
         });
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Находим кнопки авторизации
+        const authorizeButtons = document.querySelectorAll('.authorize-btn');
+    
+        authorizeButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const phone = this.getAttribute('data-phone');
+                const channelId = this.getAttribute('data-channel-id');
+    
+                // Отправляем запрос на отправку кода
+                fetch('/channels/send-code/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({ phone: phone, channel_id: channelId }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Если код успешно отправлен, открываем модальное окно
+                        const authModal = new bootstrap.Modal(document.getElementById('authModal'));
+                        document.getElementById('authPhone').value = phone;
+                        document.getElementById('authChannelId').value = channelId;
+                        authModal.show();
+                    } else {
+                        alert(data.error || 'Ошибка при отправке кода.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при отправке кода:', error);
+                    alert('Ошибка при отправке кода.');
+                });
+            });
+        });
+    
+        // Обработка формы авторизации
+        const authForm = document.getElementById('authForm');
+        authForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+    
+            const phone = document.getElementById('authPhone').value;
+            const code = document.getElementById('authCode').value;
+    
+            // Отправка кода для проверки
+            fetch('/channels/verify-code/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ phone: phone, code: code }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Авторизация успешна!');
+                } else {
+                    alert(data.error || 'Ошибка при проверке кода.');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при проверке кода:', error);
+                alert('Ошибка при проверке кода.');
+            });
+        });
+    });
+    
+    
+    
+    
+</script>    
 {% endblock javascripts %}
