@@ -614,21 +614,28 @@ def projects(request):
     }
     return render(request, 'apps/projects.html', context)
 
+def project_create(request):
+    if request.method == 'POST':
+        form = ProjectForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('project-list')
+    else:
+        form = ProjectForm()
+    return render(request, 'apps/project_create.html', {'form': form})
+
 
 
 def project_edit(request, id):
     project = get_object_or_404(Project, id=id, client=request.user)
-    print(f"Project ID: {project.id}, Title: {project.title}")  # Отладочная информация
 
     if request.method == 'POST':
         form = ProjectForm(request.POST, instance=project, user=request.user)
         if form.is_valid():
-            print("Форма валидна:", form.cleaned_data)
             form.save()
             return redirect('projects')
     else:
         form = ProjectForm(instance=project, user=request.user)
-        print("Форма для GET:", form)
 
     return render(request, 'project_edit.html', {'form': form, 'project': project})
 
@@ -871,8 +878,6 @@ def chat_messages(request):
         'chat': current_chat,
     })
 
-def project_create(request):
-    return render(request, "apps/project_create.html")
 
 
 

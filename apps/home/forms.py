@@ -125,7 +125,40 @@ class ProjectForm(forms.ModelForm):
         }),
         label="Приветственное сообщение"
     )
+    knowledge_base_text = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 6,
+            'placeholder': 'Введите текст базы знаний...'
+        }),
+        label="Текстовый файл базы знаний"
+    )
 
+    file = forms.FileField(
+        required=False,
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control',
+            'accept': '.pdf,.txt,.doc,.docx,.xlsx,.csv,.xslm'
+        }),
+        label="Файл"
+    )
+    google_doc = forms.URLField(
+        required=False,
+        widget=forms.URLInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ссылка на Google-документ',
+        }),
+        label="Google-документ"
+    )
+    outgoing_limit = forms.IntegerField(
+        required=True,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите ограничение на исходящие сообщения',
+        }),
+        label="Лимит сообщений"
+    )
 
     class Meta:
         model = Project
@@ -137,6 +170,10 @@ class ProjectForm(forms.ModelForm):
             'time_start',
             'time_end',
             'hello_text',
+            'knowledge_base_text',
+            'file',
+            'google_doc',
+            'outgoing_limit',
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название проекта'}),
@@ -152,7 +189,12 @@ class ProjectForm(forms.ModelForm):
             'time_start': 'Начало времени',
             'time_end': 'Конец времени',
             'hello_text': 'Приветственное сообщение',
+            'knowledge_base_text': 'Текстовый файл базы знаний',
+            'file': 'Файл',
+            'google_doc': 'Google-документ',
+            'outgoing_limit': 'Лимит сообщений',
         }
+
 
 
     def __init__(self, *args, **kwargs):
@@ -171,6 +213,7 @@ class ProjectForm(forms.ModelForm):
             # Загружаем связанные записи для редактирования
             self.fields['channel'].initial = Channel.objects.filter(project_id=self.instance.id)
             self.fields['recipients'].initial = Recipient.objects.filter(project_id=self.instance.id)
+
 
 
                 

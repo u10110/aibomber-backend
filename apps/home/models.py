@@ -74,7 +74,6 @@ class Project(models.Model):
         verbose_name = "Проект"
         verbose_name_plural = "Проекты"
 
-
     GPT_VERSION_CHOICES = [
         (1, 'OpenAI GPT-4o'),
         (2, 'OpenAI GPT-4o mini'),
@@ -92,12 +91,28 @@ class Project(models.Model):
     gpt_version = models.IntegerField(choices=GPT_VERSION_CHOICES, default=1)
     hello_text = models.TextField(null=True)
     prompt = models.TextField()
-    file = models.ImageField(null=True, upload_to="images/")
+    knowledge_base_text = models.TextField(null=True, blank=True)
+    file = models.FileField(
+        null=True,
+        blank=True,
+        upload_to="uploads/files/",
+        help_text="Допустимые форматы: PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM"
+    )
+    google_doc = models.URLField(
+        null=True,
+        blank=True,
+        help_text="Ссылка на Google-документ (необязательно)"
+    )
+    outgoing_limit = models.IntegerField(
+        default=30,  # Значение по умолчанию
+        verbose_name="Ограничение исходящих"
+    )
     message_limit = models.IntegerField(default=30)
     time_start = models.TimeField(default=datetime.time(8, 0))
     time_end = models.TimeField(default=datetime.time(22, 0))
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+
 
 
 class Recipient(models.Model):

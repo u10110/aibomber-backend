@@ -1,234 +1,334 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %} Ecommerce Products List {% endblock title %}
+{% block stylesheets %}
+<style>
 
-<!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
+  #chat-emulator-container {
+    height: 400px; /* Фиксированная высота */
+    width: 100%; /* Занимает всю доступную ширину карточки */
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 10px;
+}
 
-{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+}
+
+.chat-message {
+    display: block; /* Каждое сообщение на отдельной строке */
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 80%;
+    word-wrap: break-word; /* Перенос длинных слов */
+    margin-bottom: 10px; /* Пространство между сообщениями */
+}
+
+.chat-message.user {
+    background-color: #e0f7fa;
+    align-self: flex-end; /* Сообщение пользователя справа */
+}
+
+.chat-message.bot {
+    background-color: #ede7f6;
+    align-self: flex-start; /* Сообщение бота слева */
+}
+
+
+</style>
+{% endblock stylesheets %}
+
+{% block title %}Создание Проекта{% endblock title %}
 
 {% block content %}
 <div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="multisteps-form">
+                <div class="row">
+                    <div class="col-12 col-lg-8 mx-auto mt-4 mb-sm-5 mb-3">
+                        <div class="multisteps-form__progress">
+                            <button class="multisteps-form__progress-btn js-active" type="button" title="Информация">
+                                <span>1. Информация</span>
+                            </button>
+                            <button class="multisteps-form__progress-btn" type="button" title="Промпт">
+                                <span>2. Промпт</span>
+                            </button>
+                            <button class="multisteps-form__progress-btn" type="button" title="База знаний">
+                                <span>3. База знаний</span>
+                            </button>
+                            <button class="multisteps-form__progress-btn" type="button" title="Эмулятор">
+                              <span>4. Эмулятор</span>
+                          </button>
+                          <button class="multisteps-form__progress-btn" type="button" title="Каналы">
+                              <span>5. Каналы</span>
+                          </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-lg-8 m-auto">
+                        <form action="" method="post" enctype="multipart/form-data" class="multisteps-form__form">
+                            {% csrf_token %}
 
-  <div class="row">
-    <div class="col-12 card">
-      <div class='m-3'>
-        <h5>Проекты </h5>
-        <p class="text-sm mb-0">Управление проектами.</p>
+                            <!-- Шаг 1 -->
+                            <div class="card multisteps-form__panel p-3 border-radius-xl bg-white js-active" data-animation="FadeIn">
+                                <h5 class="font-weight-bolder">Информация</h5>
+                                <div class="multisteps-form__content">
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <label for="title">Название проекта</label>
+                                            {{ form.title }}
+                                            {{ form.title.errors }}
+                                        </div>
+                                        <div class="col-12 mt-3">
+                                            <label for="work_option">Опции работы</label>
+                                            {{ form.work_option }}
+                                            {{ form.work_option.errors }}
+                                        </div>
+                                        <div class="col-md-6 mt-3">
+                                          <label for="gpt_version">Версия GPT</label>
+                                          {{ form.gpt_version }}
+                                          {{ form.gpt_version.errors }}
+                                        </div>
+                                        <div class="col-md-6 mt-3">
+                                            <label for="outgoing_limit">Лимит сообщений</label>
+                                            {{ form.outgoing_limit }}
+                                            {{ form.outgoing_limit.errors }}
+                                        </div>
+                                        <div class="col-md-6 mt-3">
+                                            <label for="time_start">Начало времени</label>
+                                            {{ form.time_start }}
+                                            {{ form.time_start.errors }}
+                                        </div>
+                                        <div class="col-md-6 mt-3">
+                                            <label for="time_end">Конец времени</label>
+                                            {{ form.time_end }}
+                                            {{ form.time_end.errors }}
+                                        </div>
+                                    </div>
+                                    <div class="button-row d-flex mt-4">
+                                        <button class="btn bg-gradient-dark ms-auto mb-0 js-btn-next" type="button">Далее</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Шаг 2 -->
+                            <div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
+                                <h5 class="font-weight-bolder">Промпт</h5>
+                                <div class="multisteps-form__content">
+                                    <div class="row mt-3">
+                                      <div class="col-12 mt-3 d-flex align-items-center">
+                                        <label class="form-check-label me-3" for="hello-text-toggle">Приветственное сообщение</label>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="hello-text-toggle">
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mt-3" id="hello-text-field" style="display: none;">
+                                        {{ form.hello_text }}
+                                        {{ form.hello_text.errors }}
+                                    </div>
+                                        <div class="col-12">
+                                            <label for="prompt">Описание (Prompt)</label>
+                                            {{ form.prompt }}
+                                            {{ form.prompt.errors }}
+                                        </div>
+                                    </div>
+                                    <div class="button-row d-flex mt-4">
+                                        <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button">Назад</button>
+                                        <button class="btn bg-gradient-dark ms-auto mb-0 js-btn-next" type="button">Далее</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Шаг 3 -->
+                            <div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
+                                <h5 class="font-weight-bolder">База знаний</h5>
+                                <div class="multisteps-form__content">
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <label for="knowledge_base_text">Текстовый файл базы знаний</label>
+                                            {{ form.knowledge_base_text }}
+                                            {{ form.knowledge_base_text.errors }}
+                                        </div>
+                                        <div class="col-12 mt-3">
+                                            <label for="file">Загрузить файл (PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM)</label>
+                                            {{ form.file }}
+                                            {{ form.file.errors }}
+                                        </div>
+                                        <div class="col-12 mt-3">
+                                            <label for="google_doc">Ссылка на Google-документ</label>
+                                            {{ form.google_doc }}
+                                            {{ form.google_doc.errors }}
+                                        </div>
+                                    </div>
+                                    <div class="button-row d-flex mt-4">
+                                        <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button">Назад</button>
+                                        <button class="btn bg-gradient-dark ms-auto mb-0 js-btn-next" type="button">Далее</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Шаг 4 -->
+                            <!-- Шаг 4 -->
+<div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
+  <h5 class="font-weight-bolder text-center">Эмулятор</h5>
+  <div class="row justify-content-center">
+      <div class="col-lg-8">
+          <div class="card blur shadow-blur max-height-vh-70">
+              <div class="card-header p-3">
+                  <h6 class="mb-0">Чат</h6>
+                  <p class="text-sm">Эмулятор взаимодействия с ИИ</p>
+              </div>
+              <div class="chat-container" id="chat-emulator-container">
+                {% comment %} <div class="chat-message user">Пример сообщения пользователя</div>
+                <div class="chat-message bot">Пример ответа бота</div> {% endcomment %}
+            </div>
+              <div class="card-footer">
+                  <div class="d-flex">
+                      <input type="text" id="emulator-chat-input" class="form-control me-2" placeholder="Введите сообщение">
+                      <button id="emulator-send-btn" class="btn bg-gradient-primary mb-0">
+                          <i class="ni ni-send"></i>
+                      </button>
+                  </div>
+              </div>
+          </div>
       </div>
-      
-    </div>
   </div>
-  <div class="row mt-4">
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-body">
-            <h5>Создать Проект</h5>
-            <p class="text-sm mb-0">Заполните поля формы, выберите нужные параметры и нажмите кнопку “Создать“.</p>
-            <div class="col-12 col-sm-10 col-md-12 mt-3">
-                <form action="/project-create/" method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    
-                    <div class="col-12 mb-3">
-                        <label for="client">Клиент</label>
-                        {{ form.client }}
+  <div class="button-row d-flex mt-4 justify-content-between">
+      <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button">Назад</button>
+      <button class="btn bg-gradient-dark ms-auto mb-0 js-btn-next" type="button">Далее</button>
+  </div>
+</div>
+
+                          
+
+
+                            <!-- Шаг 5 -->
+<div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
+  <h5 class="font-weight-bolder text-center">Каналы</h5>
+  <div class="multisteps-form__content">
+      <div class="row justify-content-center">
+          <div class="col-lg-6 col-md-8">
+              <div class="form-section-centered">
+                  <div class="mb-3">
+                      <label for="channel" class="form-label">Каналы</label>
+                      {{ form.channel }}
+                      {{ form.channel.errors }}
+                  </div>
+                  <div class="mb-3">
+                      <label for="recipients" class="form-label">Получатели</label>
+                      {{ form.recipients }}
+                      {{ form.recipients.errors }}
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="button-row d-flex mt-4 justify-content-between">
+          <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button">Назад</button>
+          <button class="btn bg-gradient-primary ms-auto mb-0" type="submit">Создать проект</button>
+      </div>
+  </div>
+</div>
+
+
+
+                        </form>
                     </div>
-                    
-                    <div class="col-12 mb-3">
-                        <label for="title">Название проекта</label>
-                        {{ form.title }}
-                    </div>
-                    
-                    <div class="col-12 mb-3">
-                        <label for="status">Статус</label>
-                        {{ form.status }}
-                    </div>
-                    
-                    <div class="col-12 mb-3">
-                        <label for="work_option">Опции работы</label>
-                        {{ form.work_option }}
-                    </div>
-                    
-                    <div class="col-12 mb-3">
-                        <label for="gpt_version">Версия GPT</label>
-                        {{ form.gpt_version }}
-                    </div>
-                    
-                    <div class="col-12 mb-3">
-                        <label for="prompt">Описание (Prompt)</label>
-                        {{ form.prompt }}
-                    </div>
-                    
-                    <div class="col-12 mb-3">
-                        <label for="file">Загрузить файл</label>
-                        {{ form.file }}
-                    </div>
-    
-                    {% if messages %}
-                    <ul class="messages">
-                        {% for message in messages %}
-                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                        {% endfor %}
-                    </ul>
-                    {% endif %}
-                    
-                    <div class="d-flex justify-content-end mt-4">
-                        <button type="submit" class="btn bg-gradient-primary m-0 ms-2">Создать проект</button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
-    
-      
-    </div>
-    <div class="col-md-8 mt-sm-0 mt-4">
-      <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <!-- Card header -->
-              <div class="card-header pb-0">
-                <div class="d-lg-flex">
-                  <div>
-                    <h5 class="mb-0">Добавленные Списки</h5>
-                    <p class="text-sm mb-0">
-                      Здесь отображаются активные и завершенные списки.
-                    </p>
-                  </div>
-                  <div class="ms-auto my-auto mt-lg-0 mt-4">
-                    <div class="ms-auto my-auto">
-                      
-                      </button>
-                      <div class="modal fade" id="import" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog mt-lg-10">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h5 class="modal-title" id="ModalLabel">Import CSV</h5>
-                              <i class="fas fa-upload ms-3"></i>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                              <p>You can browse your computer for a file.</p>
-                              <input type="text" placeholder="Browse file..." class="form-control mb-3">
-                              <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="importCheck" checked="">
-                                <label class="custom-control-label" for="importCheck">I accept the terms and conditions</label>
-                              </div>
-                            </div>
-                            <div class="modal-footer">
-                              <button type="button" class="btn bg-gradient-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                              <button type="button" class="btn bg-gradient-primary btn-sm">Upload</button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      {% comment %} <button class="btn btn-outline-primary btn-sm export mb-0 mt-sm-0 mt-1" data-type="csv" type="button" name="button">Экспорт</button> {% endcomment %}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="card-body px-0 pb-0">
-                <div class="table-responsive">
-                  <table class="table table-flush" id="products-list">
-                    <thead class="thead-light">
-                      <tr>
-                        <th>Название</th>
-                        <th>Тип списка</th>
-                        <th>Используется в</th>
-                        <th>Действие</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for object in objects%}
-                      <tr>
-                        <td class="text-sm">{{object.marketplace.name}}</td>
-                        
-                        <td class="text-sm">{{object.url}}</td>
-                        <td class="text-sm">{{object.count}}</td>
-                        <td class="text-sm">{{object.count_done}}</td>
-                        <td class="text-sm">
-                            </a>
-                            
-                            <a href="{% url 'favorite-delete' object.id %}" data-bs-toggle="tooltip" data-bs-original-title="Удалить задачу">
-                              <i class="fas fa-trash text-secondary"></i>
-                            </a>
-                          </td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <th>Продукт</th>
-                        <th>Дата</th>
-                        <th>Цена</th>
-                        <th>Ссылка</th>
-                        <th>Количество</th>
-                        <th>Action</th>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-      </div>
-    </div>
-  </div>
-
 </div>
-<div class="container-fluid py-4">
-  </div>
-  {% include "includes/footer.html" %}
-
-
 {% endblock content %}
 
-<!-- Specific JS goes HERE --> 
-{% block javascripts %} 
-  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
-  <script>
-    if ("{{error}}" == "False"){
-      Swal.fire(
-      'Ошибка',
-      '{{ error_message }}',
-      'error'
-    )
-      }
-      
-  </script>
-  <script src="/static/assets/js/datatables.js"></script>
-  <script>
-    if (document.getElementById('products-list')) {
-      const dataTableSearch = new simpleDatatables.DataTable("#products-list", {
-        searchable: true,
-        fixedHeight: false,
-        perPage: 7
-      });
+{% block javascripts %}
+<script src="/static/assets/js/plugins/multistep-form.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const steps = document.querySelectorAll('.multisteps-form__progress-btn');
+        const panels = document.querySelectorAll('.multisteps-form__panel');
+        const nextBtns = document.querySelectorAll('.js-btn-next');
+        const prevBtns = document.querySelectorAll('.js-btn-prev');
+        const helloToggle = document.getElementById('hello-text-toggle');
+        const helloTextField = document.getElementById('hello-text-field');
 
-      document.querySelectorAll(".export").forEach(function(el) {
-        el.addEventListener("click", function(e) {
-          var type = el.dataset.type;
+        let currentStep = 0;
 
-          var data = {
-            type: type,
-            filename: "soft-ui-" + type,
-          };
+        function showStep(step) {
+            steps.forEach((btn, index) => {
+                btn.classList.toggle('js-active', index === step);
+                panels[index].classList.toggle('js-active', index === step);
+            });
+        }
 
-          if (type === "csv") {
-            data.columnDelimiter = "|";
-          }
-
-          dataTableSearch.export(data);
+        nextBtns.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                if (currentStep < steps.length - 1) {
+                    currentStep++;
+                    showStep(currentStep);
+                }
+            });
         });
-      });
-    };
-    document.getElementById("id-list").addEventListener("input", function (event) {
-      let input = event.target.value;
-      // Заменяем запятые и пробелы на переносы строки
-      event.target.value = input.replace(/,|\s+/g, '\n').trim();
-  });
-  
-  </script>
-  
-  <script src="/static/assets/js/plugins/sweetalert.min.js"></script>
+
+        prevBtns.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                if (currentStep > 0) {
+                    currentStep--;
+                    showStep(currentStep);
+                }
+            });
+        });
+
+        helloToggle.addEventListener('change', function () {
+            helloTextField.style.display = this.checked ? 'block' : 'none';
+        });
+
+        showStep(currentStep);
+    });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const chatContainer = document.getElementById('chat-emulator-container');
+    const chatInput = document.getElementById('emulator-chat-input');
+    const sendBtn = document.getElementById('emulator-send-btn');
+
+    function addMessage(content, sender) {
+        const message = document.createElement('div');
+        message.classList.add('chat-message', sender); // Добавление классов
+        message.textContent = content; // Добавление текста сообщения
+        chatContainer.appendChild(message);
+        chatContainer.scrollTop = chatContainer.scrollHeight; // Скролл вниз
+    }
+
+    sendBtn.addEventListener('click', () => {
+        const userMessage = chatInput.value.trim();
+        if (!userMessage) return;
+
+        addMessage(userMessage, 'user'); // Сообщение от пользователя
+        chatInput.value = '';
+
+        // Эмуляция ответа бота
+        setTimeout(() => {
+            const botResponse = `GPT ответ: "${userMessage}"`;
+            addMessage(botResponse, 'bot'); // Сообщение от бота
+        }, 1000);
+    });
+
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendBtn.click();
+        }
+    });
+});
+
+</script>
+
+
+
 {% endblock javascripts %}
