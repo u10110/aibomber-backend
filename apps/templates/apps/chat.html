@@ -5,32 +5,132 @@
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
 <style>
-  #chat-list .chat-item {
+  /* Шапка чата */
+  .card-header {
+      background: #f3f3f3;
+      color: #333;
+      padding: 15px 20px;
+      border-bottom: 1px solid #e0e0e0;
+      border-radius: 15px 15px 0 0;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+      position: relative; /* Для управления дочерними элементами */
+  }
+
+  /* Заголовок */
+  .card-header h6 {
+      margin: 0;
+      line-height: 1.5;
+  }
+
+  /* Переключатель (toggle switch) */
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 20px;
+    transition: 0.4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.4s;
+}
+
+input:checked + .slider {
+    background-color: #4caf50;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+  /* Кнопка настроек */
+  .settings-btn {
+      position: absolute;
+      top: 50%;
+      right: 10px; /* Отступ справа */
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #333;
+      cursor: pointer;
+      font-size: 16px;
+  }
+
+  .settings-btn:hover {
+      color: #000;
+  }
+
+
+  /* Сообщения */
+  .message-container {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
+      max-width: 100%;
+      margin-bottom: 10px;
   }
 
-  #chat-list .ms-auto.text-muted {
-      text-align: right; /* Для правильного выравнивания времени */
+  .message-user .message-content {
+      max-width: 70%;
+      background: #eaeaea; /* Светло-серый */
+      color: #444;
+      border-radius: 15px 15px 15px 0;
+      padding: 12px 18px;
+      border: 1px solid #ccc;
+      word-wrap: break-word; /* Перенос длинных слов */
   }
-  #chat-list .chat-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
 
-#chat-list .ms-auto.text-muted {
-    text-align: right;
-    flex-grow: 1; /* Обеспечивает пространство между именем и временем */
-}
+  .message-answer .message-content {
+      max-width: 70%;
+      background: #d5e8ff; /* Пастельный голубой */
+      color: #333;
+      border-radius: 15px 15px 0 15px;
+      padding: 12px 18px;
+      border: 1px solid #99c4f5;
+      word-wrap: break-word;
+      align-self: flex-end;
+  }
 
-#chat-list .d-flex {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-}
+  /* Время сообщения */
+  .message-content span {
+      font-size: 12px;
+      opacity: 0.7;
+      display: block;
+      margin-top: 6px;
+      text-align: right;
+  }
 
+  /* Карточка */
+  .card-body {
+      overflow-y: auto;
+      max-height: 500px; /* Задаёт фиксированную высоту */
+  }
 </style>
+
 <style>
   .btn.bg-gradient-primary {
       background: linear-gradient(90deg, #28a745, #85e085); /* Зеленый градиент */
@@ -50,7 +150,6 @@
 {% block content %}
 
 <div class="container-fluid py-4">
-
   <div class="row">
     <div class="col-4">
       <div class="card blur shadow-blur max-height-vh-70 overflow-auto overflow-x-hidden mb-5 mb-lg-0">
@@ -59,26 +158,24 @@
           <div class="d-flex">
             <input type="text" id="search-filter" class="form-control me-2" placeholder="Search Contact" aria-label="Search Contact">
             <select id="status-filter" class="form-select w-auto" aria-label="Status Filter">
-              <option value="">Статус</option>
-              <option value="1">Успешные диалоги</option>
-              <option value="2">Диалог закрыт</option>
-              <option value="3">Пользователь ответил</option>
-              <option value="4">Перехвачено оператором</option>
+              <option value="">Все</option>
+              <option value="success">Успешные диалоги</option>
+              <option value="contact_received">Контакт получен</option>
+              <option value="interest_shown">Проявлен интерес</option>
+              <option value="closed">Закрытые</option>
+              <option value="deleted">Удаленные</option>
             </select>
           </div>
         </div>
+        
         <div class="card-body p-2">
-
-          <!-- Контент юзеров -->
           <div id="chat-list">
             {% for chat in chats %}
-                <a href="javascript:;" 
-                   class="d-block p-2 border-radius-lg chat-item {% if chat.unread_count > 0 %}bg-gradient-primary{% endif %}" 
-                   onclick="openChat('{{ chat.user_id }}')" 
+            <a href="javascript:;"
+                   class="d-block p-2 border-radius-lg chat-item {% if chat.unread_count > 0 %}bg-gradient-primary{% endif %}"
+                   onclick="openChat('{{ chat.user_id }}')"
                    data-status="{{ chat.status }}">
                     <div class="d-flex p-2">
-                        <!-- Если используется аватар -->
-                        {% comment %} <img alt="Avatar" src="{{ chat.avatar }}" class="avatar shadow"> {% endcomment %}
                         <div class="ms-3 flex-grow-1">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h6 class="{% if chat.unread_count > 0 %}text-white{% else %}text-dark{% endif %} mb-0">
@@ -87,24 +184,20 @@
                                         <span class="badge badge-success">{{ chat.unread_count }}</span>
                                     {% endif %}
                                 </h6>
-                                <!-- Время с правого края -->
                                 <div class="text-muted text-sm text-end">
                                     <span>{{ chat.last_message_time|date:"H:i" }}</span>
                                 </div>
                             </div>
-                            <!-- Обрезание сообщения до 100 символов с многоточием -->
                             <p class="{% if chat.unread_count > 0 %}text-white{% else %}text-muted{% endif %} mb-0 text-sm">
                                 {{ chat.last_message|slice:":40" }}{% if chat.last_message|length > 40 %}...{% endif %}
                             </p>
                         </div>
                     </div>
                 </a>
+
+
             {% endfor %}
-        </div>
-        
-        
-          
-          
+          </div>
         </div>
       </div>
     </div>
@@ -122,107 +215,88 @@
                 </div>
               </div>
             </div>
-            <div class="col-3 my-auto d-flex justify-content-end">
-              <button class="btn btn-icon-only shadow-none text-dark mb-0 me-3" type="button" title="Start">
-                <i class="ni ni-button-play"></i>
-              </button>
-              <button class="btn btn-icon-only shadow-none text-dark mb-0 me-3" type="button" title="Stop">
-                <i class="ni ni-button-pause"></i>
-              </button>
-              <div class="dropdown">
-                <button class="btn btn-icon-only shadow-none text-dark mb-0" type="button" data-bs-toggle="dropdown">
-                  <i class="ni ni-settings"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end me-sm-n2 p-2" aria-labelledby="chatmsg">
-                  <li>
-                    <a class="dropdown-item border-radius-md" href="javascript:;">
-                      Успех
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item border-radius-md" href="javascript:;">
-                      Контакт получен
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item border-radius-md" href="javascript:;">
-                      Проявлен интерес
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item border-radius-md" href="javascript:;">
-                      Закрыть диалог
-                    </a>
-                  </li>
-                  <li>
-                    <hr class="dropdown-divider">
-                  </li>
-                  <li>
-                    <a class="dropdown-item border-radius-md text-danger" href="javascript:;">
-                      Удалить диалог
-                    </a>
-                  </li>
-                </ul>
-              </div>
+            <div class="col-3 my-auto d-flex justify-content-end align-items-center">
+
+              <!-- Переключатель -->
+        <!-- Переключатель -->
+<div class="form-check form-switch">
+  <input 
+    class="form-check-input chat-toggle" 
+    type="checkbox" 
+    id="chat-toggle" 
+    data-chat-id="{{ chat.id }}" 
+    {% if chat.is_auto_active %}checked{% endif %} 
+    onchange="toggleChat(this)">
+</div>
+
+<!-- Выпадающее меню статусов -->
+<div class="dropdown">
+  <button class="btn btn-icon-only shadow-none text-dark mb-0" type="button" data-bs-toggle="dropdown">
+    <i class="ni ni-settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end me-sm-n2 p-2" aria-labelledby="chatmsg">
+    <li>
+      <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'success')">
+        Успех
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'contact_received')">
+        Контакт получен
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'interest_shown')">
+        Проявлен интерес
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'closed')">
+        Закрыть диалог
+      </a>
+    </li>
+    <li>
+      <hr class="dropdown-divider">
+    </li>
+    <li>
+      <a class="dropdown-item border-radius-md text-danger" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'deleted')">
+        Удалить диалог
+      </a>
+    </li>
+  </ul>
+</div>
+
             </div>
           </div>
         </div>
+        
+        
+        
         <div class="card-body overflow-auto overflow-x-hidden">
-
           <div class="chat-container">
             {% for chat in messages %}
-  {% if chat.message_type == 'answer' %}
-    <div class="message message-answer mb-3">
-      <div class="d-flex justify-content-end">
-        <div class="message-content bg-gradient-primary text-white p-3 rounded">
-          <p class="mb-0">{{ chat.user_message }}</p>
-          <span class="text-sm text-light opacity-8">{{ chat.created_at|date:"H:i" }}</span>
-        </div>
-      </div>
-    </div>
-  {% else %}
-    <div class="message message-user mb-3">
-      <div class="d-flex">
-        <div class="message-content bg-light text-dark p-3 rounded">
-          <p class="mb-0">{{ chat.user_message }}</p>
-          <span class="text-sm text-muted opacity-8">{{ chat.created_at|date:"H:i" }}</span>
-        </div>
-      </div>
-    </div>
-  {% endif %}
-{% endfor %}
+              {% if chat.message_type == 'answer' %}
+                <div class="message message-answer mb-3">
+                  <div class="d-flex justify-content-end">
+                    <div class="message-content">
+                      <p class="mb-0">{{ chat.user_message }}</p>
+                      <span>{{ chat.created_at|date:"H:i" }}</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="message message-user mb-3">
+                  <div class="d-flex">
+                    <div class="message-content">
+                      <p class="mb-0">{{ chat.user_message }}</p>
+                      <span>{{ chat.created_at|date:"H:i" }}</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
           </div>
           
-          {% comment %} <div class="row justify-content-start mb-4">
-            <div class="col-auto">
-              <div class="card ">
-                <div class="card-body py-2 px-3">
-                  <p class="mb-1">
-                    It contains a lot of good lessons about effective practices
-                  </p>
-                  <div class="d-flex align-items-center text-sm opacity-6">
-                    <i class="ni ni-check-bold text-sm me-1"></i>
-                    <small>3:14am</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="row justify-content-end text-right mb-4">
-            <div class="col-auto">
-              <div class="card bg-gray-200">
-                <div class="card-body py-2 px-3">
-                  <p class="mb-1">
-                    Can it generate daily design links that include essays and data visualizations ?<br>
-                  </p>
-                  <div class="d-flex align-items-center justify-content-end text-sm opacity-6">
-                    <i class="ni ni-check-bold text-sm me-1"></i>
-                    <small>4:42pm</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> {% endcomment %}
 
         </div>
         <div class="card-footer d-block">
@@ -251,24 +325,35 @@
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
 <script>
-  // Фильтрация чатов по статусу и тексту
+  // Фильтрация чатов по тексту и статусу
   document.getElementById('search-filter').addEventListener('input', filterChats);
   document.getElementById('status-filter').addEventListener('change', filterChats);
 
   function filterChats() {
-    let search = document.getElementById('search-filter').value.toLowerCase();
-    let status = document.getElementById('status-filter').value;
-    let chats = document.querySelectorAll('.chat-item');
+    const search = document.getElementById('search-filter').value.toLowerCase();
+    const status = document.getElementById('status-filter').value;
+    const chats = document.querySelectorAll('.chat-item');
 
     chats.forEach(chat => {
-      let userName = chat.querySelector('h6').textContent.toLowerCase();
-      let matchesSearch = userName.includes(search);
-      let matchesStatus = !status || chat.getAttribute('data-status') === status;
+      const userName = chat.querySelector('h6').textContent.toLowerCase();
+      const chatStatus = chat.getAttribute('data-status');
+      const matchesSearch = userName.includes(search);
+      const matchesStatus = !status || chatStatus === status;
+      console.log(chatStatus, status)
 
+      if (!status || chatStatus === status) {
+        chat.style.display = ''; // Показываем элемент
+      } else {
+          chat.style.display = 'none'; // Скрываем элемент
+      }
       if (matchesSearch && matchesStatus) {
         chat.style.display = '';
+        chat.style.opacity = '1';
+        chat.style.transform = 'scale(1)';
       } else {
         chat.style.display = 'none';
+        chat.style.opacity = '0';
+        chat.style.transform = 'scale(0.95)';
       }
     });
   }
@@ -277,5 +362,78 @@
   function openChat(userId) {
     window.location.href = `/messages?user_id=${userId}`;
   }
+
+  // Переключатель старт/стоп
+  function toggleStartStop(button) {
+    const isActive = button.classList.contains('active');
+    button.classList.toggle('active', !isActive);
+    button.innerHTML = isActive
+      ? '<i class="ni ni-button-play"></i>'
+      : '<i class="ni ni-button-pause"></i>';
+    button.setAttribute('title', isActive ? 'Start' : 'Stop');
+  }
+  function toggleChat(input) {
+    const isActive = input.checked;
+    const chatId = input.getAttribute('data-chat-id');
+
+    // Отправка запроса на сервер для изменения is_auto_active
+    fetch(`/api/chats/${chatId}/toggle_auto_active/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(), // Функция для получения CSRF токена
+        },
+        body: JSON.stringify({ is_auto_active: isActive }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Ошибка при изменении статуса автоматического управления.');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(`is_auto_active обновлен: ${data.is_auto_active}`);
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+    });
+}
+function changeChatStatus(chatId, newStatus) {
+  // Отправка запроса на сервер для изменения статуса чата
+  fetch(`/api/chats/${chatId}/change_status/`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken(), // Функция для получения CSRF токена
+      },
+      body: JSON.stringify({ status: newStatus }),
+  })
+  .then(response => {
+      if (!response.ok) {
+          throw new Error('Ошибка при изменении статуса чата.');
+      }
+      return response.json();
+  })
+  .then(data => {
+      console.log(`Статус чата обновлен: ${data.status}`);
+  })
+  .catch(error => {
+      console.error('Ошибка:', error);
+  });
+}
+function getCSRFToken() {
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+  if (csrfToken) {
+      return csrfToken.value;
+  } else {
+      console.error('CSRF токен не найден.');
+      return null;
+  }
+}
+
+
+
+
 </script>
+
 {% endblock javascripts %}

@@ -886,18 +886,26 @@ def chat_messages(request):
     if current_chat:
         messages = chats.filter(user_id=current_chat.user_id).order_by('created_at')
 
-    chats = Chat.objects.annotate(
-        last_message_time=Subquery(
-            Chat.objects.filter(user_id=OuterRef('user_id'))
-            .order_by('-created_at')
-            .values('created_at')[:1]  # Получаем только первое (последнее) сообщение
-        ),
-        last_message=Subquery(
-            Chat.objects.filter(user_id=OuterRef('user_id'))
-            .order_by('-created_at')
-            .values('user_message')[:1]  # Получаем текст последнего сообщения
-        )
-    ).distinct('user_id')
+
+
+    chats = Chat.objects.filter(
+    id=Subquery(
+        Chat.objects.filter(user_id=OuterRef('user_id'))
+        .order_by('-created_at')
+        .values('id')[:1]
+    )
+).annotate(
+    last_message_time=Subquery(
+        Chat.objects.filter(user_id=OuterRef('user_id'))
+        .order_by('-created_at')
+        .values('created_at')[:1]
+    ),
+    last_message=Subquery(
+        Chat.objects.filter(user_id=OuterRef('user_id'))
+        .order_by('-created_at')
+        .values('user_message')[:1]
+    )
+)
 
     return render(request, 'apps/chat.html', {
         'chats': chats,
@@ -1107,3 +1115,27 @@ def create_app(request):
                 return JsonResponse({'success': False, 'error': 'Ошибка при создании приложения.'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
+
+
+@csrf_exempt
+def toggle_auto_active(request, chat_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        is_auto_active = data.get('is_auto_active')
+        chat = Chat.objects.get(id=chat_id)
+        chat.is_auto_active = is_auto_active
+        chat.save()
+        return JsonResponse({'is_auto_active': chat.is_auto_active})
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@csrf_exempt
+def change_status(request, chat_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        new_status = data.get('status')
+        chat = Chat.objects.get(id=chat_id)
+        chat.status = new_status
+        chat.save()
+        return JsonResponse({'status': chat.status})
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
