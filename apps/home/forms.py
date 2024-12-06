@@ -158,7 +158,8 @@ class ProjectForm(forms.ModelForm):
             'class': 'form-control',
             'placeholder': 'Введите ограничение на исходящие сообщения',
         }),
-        label="Лимит сообщений"
+        label="Дневной лимит",
+        help_text="Суточный лимит на отправку исходящих сообщений с одного канала. На входящие сообщения не распространяется."
     )
 
     class Meta:
@@ -193,7 +194,7 @@ class ProjectForm(forms.ModelForm):
             'knowledge_base_text': 'Текстовый файл базы знаний',
             'file': 'Файл',
             'google_doc': 'Google-документ',
-            'outgoing_limit': 'Лимит сообщений',
+            'outgoing_limit': 'Дневной лимит',
         }
 
 
@@ -278,9 +279,9 @@ class RecipientForm(forms.ModelForm):
         widget=forms.Textarea(attrs={
             'class': 'form-control',
             'rows': 4,
-            'placeholder': 'Введите список Telegram ID, разделяя их запятыми или с новой строки'
+            'placeholder': 'Введите список Telegram ID или имен пользователей, разделяя их запятыми или с новой строки'
         }),
-        label="Telegram IDs",
+        label="Telegram IDs or Usernames",
         required=False
     )
 
@@ -290,10 +291,10 @@ class RecipientForm(forms.ModelForm):
             return []
 
         # Разделяем идентификаторы по запятой или новой строке
-        tg_ids = [id.strip() for id in ids.replace('\n', ',').split(',') if id.strip().isdigit()]
+        tg_ids = [id.strip() for id in ids.replace('\n', ',').split(',') if id.strip()]
 
         if not tg_ids:
-            raise forms.ValidationError("Введите хотя бы один корректный Telegram ID.")
+            raise forms.ValidationError("Введите хотя бы один Telegram ID или имя пользователя.")
 
         return tg_ids
 

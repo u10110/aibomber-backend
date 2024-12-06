@@ -20,6 +20,7 @@
 </style>
 <style>
 
+
   #chat-emulator-container {
     height: 400px; /* Фиксированная высота */
     width: 100%; /* Занимает всю доступную ширину карточки */
@@ -118,7 +119,11 @@
                                           {{ form.gpt_version.errors }}
                                         </div>
                                         <div class="col-md-6 mt-3">
-                                            <label for="outgoing_limit">Лимит сообщений</label>
+                                            <label for="outgoing_limit">Дневной лимит
+                                              <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.outgoing_limit.help_text }}">
+                                                <i class="fas fa-question-circle"></i>
+                                            </span>
+                                            </label>
                                             {{ form.outgoing_limit }}
                                             {{ form.outgoing_limit.errors }}
                                         </div>

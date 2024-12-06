@@ -84,7 +84,18 @@ input:checked + .slider:before {
   .settings-btn:hover {
       color: #000;
   }
-
+  .form-check-label {
+    font-size: 0.9rem; /* Уменьшенный размер текста */
+    color: #6c757d; /* Спокойный серый цвет */
+    font-weight: 500; /* Полужирный для акцента */
+    white-space: nowrap; /* Убираем переносы текста */
+  }
+  
+  .form-check-input {
+    transform: scale(1.2); /* Увеличиваем переключатель для лучшей видимости */
+    margin-right: 10px; /* Добавляем отступ между переключателем и текстом */
+  }
+  
 
   /* Сообщения */
   .message-container {
@@ -130,6 +141,15 @@ input:checked + .slider:before {
       max-height: 500px; /* Задаёт фиксированную высоту */
   }
 </style>
+<style>
+  .card-header h6 {
+    margin-bottom: 1rem; /* Отступ под заголовком */
+  }
+
+  .card-header .form-control, .card-header .form-select {
+    margin-top: 0.5rem; /* Отступы для элементов ввода */
+  }
+</style>
 
 <style>
   .btn.bg-gradient-primary {
@@ -152,57 +172,59 @@ input:checked + .slider:before {
 <div class="container-fluid py-4">
   <div class="row">
     <div class="col-4">
-      <div class="card blur shadow-blur max-height-vh-70 overflow-auto overflow-x-hidden mb-5 mb-lg-0">
-        <div class="card-header p-3 d-flex align-items-center justify-content-between">
-          <h6>Юзеры</h6>
-          <div class="d-flex">
-            <input type="text" id="search-filter" class="form-control me-2" placeholder="Search Contact" aria-label="Search Contact">
-            <select id="status-filter" class="form-select w-auto" aria-label="Status Filter">
-              <option value="">Все</option>
-              <option value="success">Успешные диалоги</option>
-              <option value="contact_received">Контакт получен</option>
-              <option value="interest_shown">Проявлен интерес</option>
-              <option value="closed">Закрытые</option>
-              <option value="deleted">Удаленные</option>
-            </select>
+      <div class="card blur shadow-blur max-height-vh-70 overflow-auto overflow-x-hidden mb-5 mb-lg-0" style="min-height: 600px;">
+        <div class="card-header p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6>Юзеры</h6>
+            <div class="d-flex">
+              <select id="status-filter" class="form-select w-auto ms-3" aria-label="Status Filter">
+                <option value="">Все</option>
+                <option value="success">Успешные диалоги</option>
+                <option value="contact_received">Контакт получен</option>
+                <option value="interest_shown">Проявлен интерес</option>
+                <option value="closed">Закрытые</option>
+                <option value="deleted">Удаленные</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-3">
+            <!-- Обновил placeholder -->
+            <input type="text" id="search-filter" class="form-control" placeholder="Поиск контакта" aria-label="Search Contact">
           </div>
         </div>
-        
         <div class="card-body p-2">
           <div id="chat-list">
             {% for chat in chats %}
             <a href="javascript:;"
-                   class="d-block p-2 border-radius-lg chat-item {% if chat.unread_count > 0 %}bg-gradient-primary{% endif %}"
-                   onclick="openChat('{{ chat.user_id }}')"
-                   data-status="{{ chat.status }}">
-                    <div class="d-flex p-2">
-                        <div class="ms-3 flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h6 class="{% if chat.unread_count > 0 %}text-white{% else %}text-dark{% endif %} mb-0">
-                                    {{ chat.user_name }}
-                                    {% if chat.unread_count > 0 %}
-                                        <span class="badge badge-success">{{ chat.unread_count }}</span>
-                                    {% endif %}
-                                </h6>
-                                <div class="text-muted text-sm text-end">
-                                    <span>{{ chat.last_message_time|date:"H:i" }}</span>
-                                </div>
+               class="d-block p-2 border-radius-lg chat-item {% if chat.unread_count > 0 %}bg-gradient-primary{% endif %}"
+               onclick="openChat('{{ chat.user_id }}')"
+               data-status="{{ chat.status }}">
+                <div class="d-flex p-2">
+                    <div class="ms-3 flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="{% if chat.unread_count > 0 %}text-white{% else %}text-dark{% endif %} mb-0">
+                                {{ chat.user_name }}
+                                {% if chat.unread_count > 0 %}
+                                    <span class="badge badge-success">{{ chat.unread_count }}</span>
+                                {% endif %}
+                            </h6>
+                            <div class="text-muted text-sm text-end">
+                                <span>{{ chat.last_message_time|date:"H:i" }}</span>
                             </div>
-                            <p class="{% if chat.unread_count > 0 %}text-white{% else %}text-muted{% endif %} mb-0 text-sm">
-                                {{ chat.last_message|slice:":40" }}{% if chat.last_message|length > 40 %}...{% endif %}
-                            </p>
                         </div>
+                        <p class="{% if chat.unread_count > 0 %}text-white{% else %}text-muted{% endif %} mb-0 text-sm">
+                            {{ chat.last_message|slice:":40" }}{% if chat.last_message|length > 40 %}...{% endif %}
+                        </p>
                     </div>
-                </a>
-
-
+                </div>
+            </a>
             {% endfor %}
           </div>
         </div>
       </div>
     </div>
     <div class="col-8">
-      <div class="card blur shadow-blur max-height-vh-70">
+      <div class="card blur shadow-blur max-height-vh-70" style="min-height: 600px;">
         <div class="card-header shadow-lg">
           <div class="row">
             <div class="col-md-9">
@@ -216,62 +238,61 @@ input:checked + .slider:before {
               </div>
             </div>
             <div class="col-3 my-auto d-flex justify-content-end align-items-center">
-
               <!-- Переключатель -->
-        <!-- Переключатель -->
-<div class="form-check form-switch">
-  <input 
-    class="form-check-input chat-toggle" 
-    type="checkbox" 
-    id="chat-toggle" 
-    data-chat-id="{{ chat.id }}" 
-    {% if chat.is_auto_active %}checked{% endif %} 
-    onchange="toggleChat(this)">
-</div>
+              <div class="form-check form-switch d-flex align-items-center">
+                <!-- Переключатель: Включение/выключение автоматической отправки сообщений -->
+                <input 
+                  class="form-check-input chat-toggle" 
+                  type="checkbox" 
+                  id="chat-toggle" 
+                  data-chat-id="{{ chat.id }}" 
+                  {% if chat.is_auto_active %}checked{% endif %} 
+                  onchange="toggleChat(this)">
+                <label class="form-check-label ms-2 text-nowrap" for="chat-toggle" style="margin-bottom: 0;">
+                  Автоматическая отправка
+                </label>
+              </div>
+              
 
-<!-- Выпадающее меню статусов -->
-<div class="dropdown">
-  <button class="btn btn-icon-only shadow-none text-dark mb-0" type="button" data-bs-toggle="dropdown">
-    <i class="ni ni-settings"></i>
-  </button>
-  <ul class="dropdown-menu dropdown-menu-end me-sm-n2 p-2" aria-labelledby="chatmsg">
-    <li>
-      <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'success')">
-        Успех
-      </a>
-    </li>
-    <li>
-      <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'contact_received')">
-        Контакт получен
-      </a>
-    </li>
-    <li>
-      <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'interest_shown')">
-        Проявлен интерес
-      </a>
-    </li>
-    <li>
-      <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'closed')">
-        Закрыть диалог
-      </a>
-    </li>
-    <li>
-      <hr class="dropdown-divider">
-    </li>
-    <li>
-      <a class="dropdown-item border-radius-md text-danger" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'deleted')">
-        Удалить диалог
-      </a>
-    </li>
-  </ul>
-</div>
-
+              <!-- Выпадающее меню статусов -->
+              <div class="dropdown">
+                <button class="btn btn-icon-only shadow-none text-dark mb-0" type="button" data-bs-toggle="dropdown">
+                  <i class="ni ni-settings"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end me-sm-n2 p-2" aria-labelledby="chatmsg">
+                  <li>
+                    <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'success')">
+                      Успех
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'contact_received')">
+                      Контакт получен
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'interest_shown')">
+                      Проявлен интерес
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'closed')">
+                      Закрыть диалог
+                    </a>
+                  </li>
+                  <li>
+                    <hr class="dropdown-divider">
+                  </li>
+                  <li>
+                    <a class="dropdown-item border-radius-md text-danger" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'deleted')">
+                      Удалить диалог
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
-        
-        
-        
         <div class="card-body overflow-auto overflow-x-hidden">
           <div class="chat-container">
             {% for chat in messages %}
@@ -296,8 +317,6 @@ input:checked + .slider:before {
               {% endif %}
             {% endfor %}
           </div>
-          
-
         </div>
         <div class="card-footer d-block">
           <form method="POST" class="align-items-center">
@@ -315,10 +334,9 @@ input:checked + .slider:before {
       </div>
     </div>
   </div>
-
   {% include "includes/footer.html" %}
-
 </div>
+
 
 {% endblock content %}
 
