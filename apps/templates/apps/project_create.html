@@ -196,21 +196,14 @@
                             </div>
 
                             <!-- Шаг 4 -->
-                            <!-- Шаг 4 -->
 <div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
-  <h5 class="font-weight-bolder text-center">Эмулятор</h5>
   <div class="row justify-content-center">
-      <div class="col-lg-8">
-          <div class="card blur shadow-blur max-height-vh-70">
-              <div class="card-header p-3">
-                  <h6 class="mb-0">Чат</h6>
-                  <p class="text-sm">Эмулятор взаимодействия с ИИ</p>
-              </div>
+      <div class="col-lg-12">
+          <div class="card blur shadow-blur max-height-vh-70" style="border: none;">
               <div class="chat-container" id="chat-emulator-container">
-                {% comment %} <div class="chat-message user">Пример сообщения пользователя</div>
-                <div class="chat-message bot">Пример ответа бота</div> {% endcomment %}
-            </div>
-              <div class="card-footer">
+                <!-- Сообщения чата -->
+              </div>
+              <div class="card-footer" style="border-top: none;">
                   <div class="d-flex">
                       <input type="text" id="emulator-chat-input" class="form-control me-2" placeholder="Введите сообщение">
                       <button id="emulator-send-btn" class="btn bg-gradient-primary mb-0">
