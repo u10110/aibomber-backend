@@ -89,8 +89,13 @@
                 </div>
                 <div class="row">
                     <div class="col-12 col-lg-8 m-auto">
-                        <form action="{% url 'project-create' %}" method="post" enctype="multipart/form-data" class="multisteps-form__form">
-                            {% csrf_token %}
+                      <form 
+                      action="{% if project %}{% url 'project-edit' project.id %}{% else %}{% url 'project-create' %}{% endif %}" 
+                      method="post" 
+                      enctype="multipart/form-data"
+                      class="multisteps-form__form">
+                      {% csrf_token %}
+                  
 
                             <!-- Шаг 1 -->
                             <div class="card multisteps-form__panel p-3 border-radius-xl bg-white js-active" data-animation="FadeIn">

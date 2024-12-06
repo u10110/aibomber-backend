@@ -113,13 +113,21 @@
 					  </div>
 					</td>
 					<td class="text-sm">
-					  <a href="{% url 'project-edit' project.id %}" class="btn btn-link text-secondary" title="Изменить">
-						<i class="fas fa-edit"></i>
-					  </a>
-					  <a href="{% url 'project-delete' project.id %}" class="btn btn-link text-secondary" title="Удалить">
-						<i class="fas fa-trash-alt"></i>
-					  </a>
+						<a 
+							href="{% url 'project-edit' project.id %}" 
+							class="btn btn-link text-secondary edit-project-btn" 
+							title="Изменить">
+							<i class="fas fa-edit"></i>
+						</a>
+						<a 
+							href="{% url 'project-delete' project.id %}" 
+							class="btn btn-link text-secondary" 
+							title="Удалить">
+							<i class="fas fa-trash-alt"></i>
+						</a>
 					</td>
+					
+					
 				  </tr>
 				  {% empty %}
 				  <tr>

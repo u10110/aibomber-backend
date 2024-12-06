@@ -642,18 +642,23 @@ def project_create(request):
 
 
 
-def project_edit(request, id):
-    project = get_object_or_404(Project, id=id, client=request.user)
+def project_edit(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
 
-    if request.method == 'POST':
-        form = ProjectForm(request.POST, instance=project, user=request.user)
+    if request.method == "POST":
+        form = ProjectForm(request.POST, request.FILES, instance=project)
         if form.is_valid():
             form.save()
-            return redirect('projects')
+            return redirect("projects")  # После успешного сохранения возвращаемся к списку проектов
     else:
-        form = ProjectForm(instance=project, user=request.user)
+        form = ProjectForm(instance=project)  # Предзаполняем форму данными проекта
 
-    return render(request, 'project_edit.html', {'form': form, 'project': project})
+    context = {
+        "form": form,
+        "project": project,
+    }
+    return render(request, "apps\project_create.html", context)
+
 
 @csrf_exempt
 def toggle_project_active(request):
