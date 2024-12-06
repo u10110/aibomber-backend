@@ -45,12 +45,20 @@
                                         {% endif %}
                                     </td>
                                     <td>
+										<a href="#" 
+											class="btn btn-link text-secondary edit-recipient-btn" 
+											data-id="{{ recipient.id }}" 
+											data-title="{{ recipient.title }}" 
+											data-tg-ids="{{ recipient.tg_ids }}" 
+											data-bs-toggle="modal" 
+											data-bs-target="#editRecipientModal">
+												<i class="fas fa-edit"></i>
+											</a>
+
                                         <a href="{% url 'list-recipient-delete' recipient.id %}" class="btn btn-link text-danger">
                                             <i class="fas fa-trash-alt"></i>
                                         </a>
-                                        <a href="#" class="btn btn-link text-secondary" data-bs-toggle="modal" data-bs-target="#editRecipientModal{{ recipient.id }}">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
+										
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -93,46 +101,106 @@
     </div>
 </div>
 
+
+
+
+<div class="modal fade" id="editRecipientModal" tabindex="-1" aria-labelledby="editRecipientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editRecipientModalLabel">Редактировать список получателей</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editRecipientForm" method="post" enctype="multipart/form-data" action="">
+                    {% csrf_token %}
+                    <input type="hidden" id="editRecipientId" name="id">
+                    <div class="mb-3">
+                        <label for="editRecipientTitle" class="form-label">Название:</label>
+                        <input type="text" id="editRecipientTitle" name="title" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editRecipientTgIds" class="form-label">ТГ ИД список:</label>
+                        <textarea id="editRecipientTgIds" name="tg_ids" class="form-control"></textarea>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn bg-gradient-primary">Сохранить изменения</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 {% endblock content %}
 
 {% block javascripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const addRecipientForm = document.getElementById('addRecipientForm');
-        const addRecipientModalElement = document.getElementById('addRecipientModal');
-        const addRecipientModal = new bootstrap.Modal(addRecipientModalElement);
+		const editRecipientModal = document.getElementById('editRecipientModal');
+		const editRecipientForm = document.getElementById('editRecipientForm');
+		const editRecipientId = document.getElementById('editRecipientId');
+		const editRecipientTitle = document.getElementById('editRecipientTitle');
+		const editRecipientTgIds = document.getElementById('editRecipientTgIds');
+	
+		// Обработка кнопки "Изменить"
+		document.querySelectorAll('.edit-recipient-btn').forEach(button => {
+			button.addEventListener('click', function () {
+				// Получение данных из кнопки
+				const recipientId = this.dataset.id;
+				const recipientTitle = this.dataset.title;
+				const recipientTgIds = this.dataset.tgIds
+				.replace(/[\[\]']/g, '') // Убираем квадратные скобки и кавычки
+				.split(',')              // Разделяем по запятой
+				.map(id => id.trim())    // Убираем пробелы
+				.join('\n');             // Преобразуем в многострочный формат
 
-        // Обработка формы добавления списка
-        addRecipientForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const formData = new FormData(addRecipientForm);
-
-            fetch('/list-recipient/', {
-                method: 'POST',
-                body: formData,
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Ошибка сети или сервера.');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Закрыть модальное окно и перезагрузить страницу
-                    addRecipientModal.hide();
-                    location.reload();
-                } else {
-                    // Выводим ошибки формы
-                    alert('Ошибка: ' + JSON.stringify(data.errors));
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка при добавлении списка:', error);
-                alert('Ошибка при добавлении списка.');
-            });
-        });
-    });
+				// Заполнение полей модального окна
+				editRecipientId.value = recipientId;
+				editRecipientTitle.value = recipientTitle;
+				editRecipientTgIds.value = recipientTgIds;
+	
+				// Установка action для формы
+				editRecipientForm.action = `/list-recipient-edit/${recipientId}/`;
+			});
+		});
+	
+		// Обработка формы отправки (сохранение изменений)
+		editRecipientForm.addEventListener('submit', function (e) {
+			e.preventDefault();
+	
+			const formData = new FormData(editRecipientForm);
+	
+			fetch(editRecipientForm.action, {
+				method: 'POST',
+				body: formData,
+			})
+				.then(response => {
+					if (response.redirected) {
+						// Если сервер вернул редирект, переходим на новую страницу
+						window.location.href = response.url;
+					} else if (!response.ok) {
+						throw new Error('Ошибка сервера');
+					} else {
+						return response.json(); // Если сервер возвращает JSON
+					}
+				})
+				.then(data => {
+					if (data && !data.success) {
+						alert('Ошибка: ' + JSON.stringify(data.errors));
+					} else {
+						location.reload(); // Перезагрузка страницы
+					}
+				})
+				.catch(error => {
+					console.error('Ошибка при сохранении изменений:', error);
+					alert('Не удалось сохранить изменения.');
+				});
+		});
+	});
+	
+	
+	
 </script>
 {% endblock javascripts %}

@@ -273,13 +273,12 @@ class ChannelForm(forms.ModelForm):
 
         return phone
 
-
 class RecipientForm(forms.ModelForm):
     tg_ids = forms.CharField(
         widget=forms.Textarea(attrs={
-            'class': 'form-control', 
-            'rows': 4, 
-            'placeholder': 'Введите список Telegram ID, разделяя их запятыми'
+            'class': 'form-control',
+            'rows': 4,
+            'placeholder': 'Введите список Telegram ID, разделяя их запятыми или с новой строки'
         }),
         label="Telegram IDs",
         required=False
@@ -289,9 +288,13 @@ class RecipientForm(forms.ModelForm):
         ids = self.cleaned_data.get('tg_ids', '')
         if not ids:
             return []
-        tg_ids = [id.strip() for id in ids.split(',') if id.strip().isdigit()]
+
+        # Разделяем идентификаторы по запятой или новой строке
+        tg_ids = [id.strip() for id in ids.replace('\n', ',').split(',') if id.strip().isdigit()]
+
         if not tg_ids:
             raise forms.ValidationError("Введите хотя бы один корректный Telegram ID.")
+
         return tg_ids
 
     def save(self, commit=True):
@@ -310,16 +313,10 @@ class RecipientForm(forms.ModelForm):
         model = Recipient
         fields = [
             'title',
-            # 'work_option',
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название списка'}),
-            'work_option': forms.Select(attrs={'class': 'form-control'}),
         }
         labels = {
             'title': 'Название списка',
-            # 'work_option': 'Опции работы',
         }
-
-
-

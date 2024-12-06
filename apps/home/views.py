@@ -747,18 +747,8 @@ def list_recipient(request):
             for tg_id in tg_ids:
                 TgID.objects.create(recipient=recipient, tg_id=tg_id)
 
-            # Возвращаем JSON для AJAX-запроса
-            return JsonResponse({
-                'success': True,
-                'recipient': {
-                    'id': recipient.id,
-                    'title': recipient.title,
-                    'project_title': "Не привязан",
-                    'contact_count': len(tg_ids),
-                    'status': recipient.status,
-                }
-            })
-            # return redirect('/list-recipient/')
+            print('testetset')
+            return redirect('/list-recipient/')
     else:
         form = RecipientForm()
 
@@ -773,6 +763,10 @@ def list_recipient(request):
     # Добавляем поле project_title в каждый объект
     for project in projects:
         project.project_title = project_titles.get(project.project_id, "Не привязан")
+        
+        # Получаем список всех TG IDs, связанных с этим списком
+        tg_ids = project.tg_id_set.values_list('tg_id', flat=True)  # Получаем только tg_id
+        project.tg_ids = list(tg_ids)  # Преобразуем в список для передачи в шаблон
 
     context = {
         'form': form,
@@ -784,30 +778,18 @@ def list_recipient(request):
 
 
 def list_recipient_edit(request, id):
-    project = get_object_or_404(Project, id=id, client=request.user)
-    print(f"Project ID: {project.id}, Title: {project.title}")  # Отладочная информация
+    recipient = get_object_or_404(Recipient, id=id, client=request.user)
 
-    if request.method == 'POST':
-        form = ProjectForm(request.POST, instance=project, user=request.user)
+    if request.method == 'POST': 
+        form = RecipientForm(request.POST, instance=recipient)
+        print(f" form {form}")
         if form.is_valid():
-            print("Форма валидна:", form.cleaned_data)
             form.save()
-            return redirect('projects')
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
     else:
-        form = ProjectForm(instance=project, user=request.user)
-        print("Форма для GET:", form)
-
-    return render(request, 'list_recipient_edit.html', {'form': form, 'project': project})
-
-# def create_recipient(request):
-#     if request.method == 'POST':
-#         form = RecipientForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('recipient_list')  # Замените на вашу страницу после сохранения
-#     else:
-#         form = RecipientForm()
-#     return render(request, 'recipient_form.html', {'form': form})
+        return JsonResponse({'success': False, 'message': 'Неверный метод запроса'})
 
 
 def save_recipients(request):
@@ -815,6 +797,7 @@ def save_recipients(request):
         form = RecipientForm(request.POST)
         if form.is_valid():
             tg_ids = form.cleaned_data['tg_ids']
+            print(f"tg_ids {tg_ids}")
             recipients = [
                 Recipient(client=request.user, tg_id=tg_id) for tg_id in tg_ids
             ]
@@ -822,8 +805,9 @@ def save_recipients(request):
             return redirect('/list-recipient/')
     else:
         form = RecipientForm()
-
-    return render(request, 'save_recipients.html', {'form': form})
+    print(1)
+    # return render(request, 'save_recipients.html', {'form': form})
+    return render(request, 'apps\list_recipient.html', {'form': form})
 
 
 
