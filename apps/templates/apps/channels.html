@@ -107,6 +107,30 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="authModalLabel">Авторизация Telegram</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="authForm">
+                    <div class="mb-3">
+                        <label for="authCode" class="form-label">Введите код из Telegram:</label>
+                        <input type="text" class="form-control" id="authCode" required>
+                    </div>
+                    <input type="hidden" id="authPhone">
+                    <input type="hidden" id="authChannelId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn bg-gradient-primary" form="authForm">Авторизовать</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% include "includes/footer.html" %}
 {% endblock content %}
@@ -152,4 +176,101 @@
     
     
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const authorizeButtons = document.querySelectorAll('.authorize-btn');
+        const authModalElement = document.getElementById('authModal');
+        const authModal = new bootstrap.Modal(authModalElement);
+        const authForm = document.getElementById('authForm');
+    
+        const authPhoneInput = document.getElementById('authPhone');
+        const authChannelIdInput = document.getElementById('authChannelId');
+        const authCodeInput = document.getElementById('authCode');
+    
+        // Обработка кнопки "Авторизовать"
+        authorizeButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const phone = this.dataset.phone;
+                const channelId = this.dataset.channelId;
+    
+                // Сохраняем данные телефона и канала в скрытые поля модального окна
+                authPhoneInput.value = phone;
+                authChannelIdInput.value = channelId;
+    
+                // Отправляем запрос на send_code
+                fetch('/channels/send-code/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({ phone }),
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Ошибка отправки кода');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Показать модальное окно после успешной отправки кода
+                            authModal.show();
+                        } else {
+                            alert(`Ошибка: ${data.error}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при отправке кода:', error);
+                        alert('Ошибка отправки кода.');
+                    });
+            });
+        });
+    
+        // Обработка формы авторизации (verify_code)
+        authForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+    
+            const phone = authPhoneInput.value.trim();
+            const code = authCodeInput.value.trim();
+    
+            if (!phone || !code) {
+                alert('Введите номер телефона и код.');
+                return;
+            }
+    
+            // Отправляем запрос на verify_code
+            fetch('/channels/verify-code/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ phone, code }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка проверки кода');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Закрываем модальное окно при успешной авторизации
+                        authModal.hide();
+                        alert('Канал успешно авторизован!');
+                    } else {
+                        alert(`Ошибка: ${data.error}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при проверке кода:', error);
+                    alert('Ошибка проверки кода.');
+                });
+        });
+    });
+    
+</script>
+
+
 {% endblock javascripts %}
