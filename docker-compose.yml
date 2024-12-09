@@ -24,6 +24,7 @@ services:
     networks:
       - web_network
     volumes:
+      - ./fastapi:/app  
       - ./sessions:/app/sessions
     ports:
       - "8001:8001"
