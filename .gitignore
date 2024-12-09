@@ -43,4 +43,5 @@ test.py
 
 data/cookies/
 
-fastapi/sessions/
+
+*.session
