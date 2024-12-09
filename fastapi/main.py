@@ -47,7 +47,7 @@ async def send_code(phone: str):
 @app.post("/verify-code/")
 async def verify_code(phone: str, code: str):
     logger.info(f"Получен запрос на подтверждение кода для телефона: {phone}")
-    session_name = os.path.join(SESSION_DIR, f'session_{phone.replace("+", "")}')
+    session_name = os.path.join(SESSION_DIR, "session_" + phone.replace("+", ""))
     client = TelegramClient(session_name, API_ID, API_HASH)
 
     try:
