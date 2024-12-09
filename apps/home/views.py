@@ -55,12 +55,17 @@ from .models import (
 )
 from .module import *
 from .services.services import MinioService
-from .WB_token import X64ApiClient
 from django.shortcuts import get_object_or_404
 from django.db.models import Max, OuterRef, Subquery
 from django.db.models import Count
 from telethon.sync import TelegramClient
 from telethon.errors import SessionPasswordNeededError
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from telethon import TelegramClient
+from telethon.errors import SessionPasswordNeededError
+
 
 def error(request):
     return render(request, "errors/technical_break.html")
@@ -959,79 +964,6 @@ def channels(request):
 
 BASE_URL = "https://my.telegram.org"
 
-@csrf_exempt
-def send_code(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        phone = data.get('phone')
-        # channel_id = data.get('channel_id')
-
-        if not phone:
-            return JsonResponse({'success': False, 'error': 'Номер телефона обязателен.'})
-
-        session = requests.Session()
-        try:
-            # Отправляем запрос на получение кода
-            response = session.post(
-                f"{BASE_URL}/auth/send_password",
-                data={'phone': phone},
-                headers={'Content-Type': 'application/x-www-form-urlencoded'}
-            )
-            if response.status_code == 200:
-                # Сохраняем сессию для дальнейшего использования
-                request.session['tg_session'] = session.cookies.get_dict()
-                return JsonResponse({'success': True})
-            else:
-                return JsonResponse({'success': False, 'error': 'Ошибка при отправке кода.'})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-
-@csrf_exempt
-def verify_code(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        phone = data.get('phone')
-        code = data.get('code')
-
-        if not phone or not code:
-            return JsonResponse({'success': False, 'error': 'Телефон и код обязательны.'})
-
-        try:
-            # Извлекаем сохраненную сессию
-            session = requests.Session()
-            session.cookies.update(request.session.get('tg_session', {}))
-
-            # Отправляем запрос на авторизацию
-            response = session.post(
-                f"{BASE_URL}/auth/login",
-                data={'phone': phone, 'random_hash': '', 'password': code},
-                headers={'Content-Type': 'application/x-www-form-urlencoded'}
-            )
-
-            if response.status_code == 200:
-                # Сохраняем сессию
-                request.session['tg_session'] = session.cookies.get_dict()
-
-                # Автоматически вызываем создание приложения
-                app_creation_response = create_app_internal(session)
-                if app_creation_response['success']:
-                    return JsonResponse({
-                        'success': True,
-                        'api_id': app_creation_response['api_id'],
-                        'api_hash': app_creation_response['api_hash'],
-                    })
-                else:
-                    return JsonResponse({
-                        'success': False,
-                        'error': app_creation_response.get('error', 'Ошибка при создании приложения.'),
-                    })
-
-            else:
-                return JsonResponse({'success': False, 'error': 'Ошибка при авторизации.'})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-
-
 def create_app_internal(session):
     """
     Внутренняя функция для создания приложения.
@@ -1128,3 +1060,59 @@ def change_status(request, chat_id):
         return JsonResponse({'status': chat.status})
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
+
+
+FASTAPI_URL = "http://fastapi_app:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
+@csrf_exempt
+def send_code(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            phone_number = data.get('phone')
+
+            if not phone_number:
+                return JsonResponse({"message": "Номер телефона не указан", "success": False})
+
+            # Отправка запроса в FastAPI
+            response = requests.post(
+                f"{FASTAPI_URL}/send-code/",
+                json={"phone": phone_number},
+            )
+            
+            if response.status_code == 200:
+                return JsonResponse(response.json())
+            else:
+                return JsonResponse({"message": response.text, "success": False}, status=response.status_code)
+        except Exception as e:
+            return JsonResponse({"message": str(e), "success": False})
+
+    return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
+
+
+                        
+# Шаг 2: Подтверждаем код авторизации
+@csrf_exempt
+def verify_code(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            phone_number = data.get('phone')
+            code = data.get('code')
+
+            if not phone_number or not code:
+                return JsonResponse({"message": "Номер телефона или код не предоставлены", "success": False})
+
+            # Отправка запроса в FastAPI
+            response = requests.post(
+                f"{FASTAPI_URL}/verify-code/",
+                json={"phone": phone_number, "code": code},
+            )
+            
+            if response.status_code == 200:
+                return JsonResponse(response.json())
+            else:
+                return JsonResponse({"message": response.text, "success": False}, status=response.status_code)
+        except Exception as e:
+            return JsonResponse({"message": str(e), "success": False})
+
+    return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
