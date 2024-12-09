@@ -1076,7 +1076,7 @@ def send_code(request):
             # Отправка запроса в FastAPI
             response = requests.post(
                 f"{FASTAPI_URL}/send-code/",
-                json={"phone": phone_number},
+                params={"phone": phone_number},
             )
             
             if response.status_code == 200:
@@ -1109,6 +1109,11 @@ def verify_code(request):
             )
             
             if response.status_code == 200:
+                # Если успех, обновляем статус в базе данных
+                channel, created = Channel.objects.get_or_create(phone=phone_number)
+                channel.status = 'authorized'
+                channel.save()
+
                 return JsonResponse(response.json())
             else:
                 return JsonResponse({"message": response.text, "success": False}, status=response.status_code)

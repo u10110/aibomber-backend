@@ -18,6 +18,7 @@ phone_hash_store = {}
 
 @app.post("/send-code/")
 async def send_code(phone: str):
+    print(phone)
     logger.info(f"Получен запрос на отправку кода для телефона: {phone}")
     session_name = os.path.join(SESSION_DIR, f'session_{phone.replace('+', '')}')
     client = TelegramClient(session_name, API_ID, API_HASH)
