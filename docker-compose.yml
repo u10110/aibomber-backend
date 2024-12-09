@@ -1,8 +1,6 @@
 services:
-
   appseed-app:
     container_name: appseed_app
-    #build: .
     image: registry.mplab.io/eliment-web:latest
     restart: always
     env_file: .env
@@ -10,10 +8,23 @@ services:
       - web_network
     volumes:
       - /mnt/media/images:/app/apps/media/images
+      - ./sessions:/app/sessions
     ports:
       - "80:80"
 
+  fastapi-app:
+    container_name: fastapi_app
+    build:
+      context: ./fastapi
+    restart: always
+    networks:
+      - web_network
+    volumes:
+      - ./sessions:/app/sessions
+    ports:
+      - "8001:8001"
+
 networks:
   web_network:
-       external: true
-       name: web_network
+    external: true
+    name: web_network
