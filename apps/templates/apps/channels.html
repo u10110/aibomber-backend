@@ -68,9 +68,10 @@
                                     <td>{{ channel.project_title }}</td>
                                     <td>
                                         {% if channel.status == 'unauthorized' %}
-                                            <button class="btn btn-sm btn-warning authorize-btn" data-phone="{{ channel.phone }}" data-channel-id="{{ channel.id }}">
-                                                Авторизовать
-                                            </button>
+                                        <button class="btn btn-sm btn-warning authorize-btn" data-phone="{{ channel.phone }}" data-channel-id="{{ channel.id }}">
+                                            Авторизовать
+                                        </button>
+                                        
                                             {% elif channel.status == 'authorized' %}
                                             <span class="badge bg-success">Авторизован</span>
                                         {% else %}
@@ -211,9 +212,9 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const authorizeButtons = document.querySelectorAll('.authorize-btn');
+        const authForm = document.getElementById('authForm');
         const authModalElement = document.getElementById('authModal');
         const authModal = new bootstrap.Modal(authModalElement);
-        const authForm = document.getElementById('authForm');
     
         const authPhoneInput = document.getElementById('authPhone');
         const authChannelIdInput = document.getElementById('authChannelId');
@@ -225,11 +226,16 @@
                 const phone = this.dataset.phone;
                 const channelId = this.dataset.channelId;
     
-                // Сохраняем данные телефона и канала в скрытые поля модального окна
+                if (!phone || !channelId) {
+                    alert('Не удалось получить данные для авторизации. Проверьте данные.');
+                    return;
+                }
+    
+                // Сохраняем данные в скрытые поля
                 authPhoneInput.value = phone;
                 authChannelIdInput.value = channelId;
     
-                // Отправляем запрос на send_code
+                // Отправляем запрос на send-code
                 fetch('/channels/send-code/', {
                     method: 'POST',
                     headers: {
@@ -246,33 +252,33 @@
                     })
                     .then(data => {
                         if (data.success) {
-                            // Показать модальное окно после успешной отправки кода
+                            // Открываем модальное окно
                             authModal.show();
                         } else {
-                            alert(`Ошибка: ${data.error}`);
+                            alert(`Ошибка: ${data.message}`);
                         }
                     })
                     .catch(error => {
                         console.error('Ошибка при отправке кода:', error);
-                        alert('Ошибка отправки кода.');
+                        alert('Ошибка при отправке кода.');
                     });
             });
         });
     
-        // Обработка формы авторизации (verify_code)
+        // Обработка формы подтверждения кода
         authForm.addEventListener('submit', function (e) {
             e.preventDefault();
-        
+    
             const phone = authPhoneInput.value.trim();
             const code = authCodeInput.value.trim();
             const channelId = authChannelIdInput.value;
-        
+    
             if (!phone || !code) {
                 alert('Введите номер телефона и код.');
                 return;
             }
-        
-            // Отправляем запрос на verify_code
+    
+            // Отправляем запрос на verify-code
             fetch('/channels/verify-code/', {
                 method: 'POST',
                 headers: {
@@ -289,16 +295,17 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        // Закрываем модальное окно при успешной авторизации
+                        // Закрываем модальное окно
                         authModal.hide();
-                        alert('Канал успешно авторизован!');
-        
+    
                         // Обновляем статус в таблице
                         const channelRow = document.querySelector(`[data-channel-id="${channelId}"]`).closest('tr');
                         const statusCell = channelRow.querySelector('td:nth-child(5)');
                         statusCell.innerHTML = '<span class="badge bg-success">Авторизован</span>';
+    
+                        alert('Канал успешно авторизован!');
                     } else {
-                        alert(`Ошибка: ${data.error}`);
+                        alert(`Ошибка: ${data.message}`);
                     }
                 })
                 .catch(error => {
@@ -306,7 +313,9 @@
                     alert('Ошибка проверки кода.');
                 });
         });
-        
+    });
+    
+    
     
 </script>
 
