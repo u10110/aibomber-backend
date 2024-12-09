@@ -10,7 +10,7 @@ services:
       - /mnt/media/images:/app/apps/media/images
       - ./sessions:/app/sessions
     depends_on:
-      - fastapi_app
+      - fastapi-app
     environment:
       - FASTAPI_URL=http://fastapi_app:8001
     ports:
