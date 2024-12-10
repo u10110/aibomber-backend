@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from telethon import TelegramClient
 import os
 import logging
@@ -47,9 +48,16 @@ async def send_code(phone: str):
         await client.disconnect()
         logger.info("Клиент Telegram отключён")
 
+# Pydantic модель для валидации входных данных
+class VerifyCodeRequest(BaseModel):
+    phone: str
+    code: str
 
 @app.post("/verify-code/")
-async def verify_code(phone: str, code: str):
+async def verify_code(data: VerifyCodeRequest):
+    phone = data.phone
+    code = data.code
+
     logger.info(f"Получен запрос на подтверждение кода для телефона: {phone}")
     session_name = os.path.join(SESSION_DIR, "session_" + phone.replace("+", ""))
     client = TelegramClient(session_name, API_ID, API_HASH)

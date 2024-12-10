@@ -1089,7 +1089,7 @@ def send_code(request):
     return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
 
 
-                        
+
 # Шаг 2: Подтверждаем код авторизации
 @csrf_exempt
 def verify_code(request):
@@ -1103,6 +1103,7 @@ def verify_code(request):
                 return JsonResponse({"message": "Номер телефона или код не предоставлены", "success": False})
 
             # Отправка запроса в FastAPI
+            print({"phone": phone_number, "code": code})
             response = requests.post(
                 f"{FASTAPI_URL}/verify-code/",
                 json={"phone": phone_number, "code": code},
