@@ -4,6 +4,17 @@
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
+
+<style>
+  /* Затемнение заднего фона для всех модальных окон */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.8) !important; /* Темно-серый фон */
+}
+
+.modal-backdrop.show {
+  opacity: 0.15 !important; /* Прозрачность затемнения */
+}
+</style>
 <style>
   /* Шапка чата */
   .card-header {
@@ -249,7 +260,7 @@ input:checked + .slider:before {
                   {% if chat.is_auto_active %}checked{% endif %} 
                   onchange="toggleChat(this)">
                 <label class="form-check-label ms-2 text-nowrap" for="chat-toggle" style="margin-bottom: 0;">
-                  Автоматическая отправка
+                  Фиксация чата
                 </label>
               </div>
               
@@ -337,11 +348,60 @@ input:checked + .slider:before {
   {% include "includes/footer.html" %}
 </div>
 
+<!-- Модальное окно -->
+<div class="modal fade" id="toggleConfirmationModal" tabindex="-1" aria-labelledby="toggleConfirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="toggleConfirmationModalLabel">Подтверждение действия</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Если вы отключите автоматическую отправку, цифровой сотрудник больше не сможет писать. Вы уверены, что хотите продолжить?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-danger" id="confirmToggle">Подтвердить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {% endblock content %}
 
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggleInput = document.querySelector('.chat-toggle'); // Ваш переключатель
+    let previousState = toggleInput.checked; // Запоминаем предыдущее состояние
+    const confirmationModal = new bootstrap.Modal(document.getElementById('toggleConfirmationModal'));
+    const confirmButton = document.getElementById('confirmToggle');
+
+    toggleInput.addEventListener('change', function (event) {
+      event.preventDefault();
+      confirmationModal.show(); // Показываем модальное окно
+    });
+
+    confirmButton.addEventListener('click', function () {
+      confirmationModal.hide(); // Закрываем модальное окно
+
+      // Устанавливаем текущее состояние переключателя в соответствии с выбором пользователя
+      const isActive = toggleInput.checked;
+      if (isActive !== previousState) {
+        toggleChat(toggleInput); // Вызов функции, если состояние изменилось
+        previousState = toggleInput.checked; // Обновляем предыдущее состояние
+      }
+    });
+
+    // Если пользователь закроет модальное окно (без подтверждения), возвращаем переключатель в исходное положение
+    document.getElementById('toggleConfirmationModal').addEventListener('hidden.bs.modal', () => {
+      toggleInput.checked = previousState;
+    });
+  });
+</script>
+
 <script>
   // Фильтрация чатов по тексту и статусу
   document.getElementById('search-filter').addEventListener('input', filterChats);

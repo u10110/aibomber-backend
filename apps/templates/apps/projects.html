@@ -1,6 +1,17 @@
 {% extends 'layouts/base.html' %} {% block title %} Список Проектов {% endblock title %} 
 {% block stylesheets %}
 <style>
+.btn-close {
+  color: #000; /* Черный цвет */
+  opacity: 1;  /* Убирает прозрачность */
+}
+
+.btn-close:hover {
+  color: #ff0000; /* Красный цвет при наведении */
+  opacity: 1;     /* Убирает прозрачность */
+}
+</style>
+<style>
   /* Затемнение заднего фона для всех модальных окон */
 .modal-backdrop {
   background-color: rgba(0, 0, 0, 0.8) !important; /* Темно-серый фон */
