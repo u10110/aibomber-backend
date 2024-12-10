@@ -1065,6 +1065,8 @@ def change_status(request, chat_id):
 # FASTAPI_URL = "http://fastapi_app:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
 # FASTAPI_URL = "http://127.0.0.1:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
 FASTAPI_URL = "http://91.197.96.240:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
+
+
 @csrf_exempt
 def send_code(request):
     if request.method == 'POST':
@@ -1075,6 +1077,12 @@ def send_code(request):
             if not phone_number:
                 return JsonResponse({"message": "Номер телефона не указан", "success": False})
 
+            # Проверка формата номера телефона
+            phone_pattern = re.compile(r'^\+\d+$')  # Номер должен начинаться с '+' и содержать только цифры
+            if not phone_pattern.match(phone_number):
+                return JsonResponse({"message": "Неверный формат номера телефона. Допустимы только + и цифры.", "success": False})
+
+            print(phone_number)
             # Отправка запроса в FastAPI
             response = requests.post(
                 f"{FASTAPI_URL}/send-code/",
