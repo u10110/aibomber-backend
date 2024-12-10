@@ -1062,7 +1062,9 @@ def change_status(request, chat_id):
 
 
 
-FASTAPI_URL = "http://fastapi_app:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
+# FASTAPI_URL = "http://fastapi_app:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
+# FASTAPI_URL = "http://127.0.0.1:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
+FASTAPI_URL = "http://91.197.96.240:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
 @csrf_exempt
 def send_code(request):
     if request.method == 'POST':
