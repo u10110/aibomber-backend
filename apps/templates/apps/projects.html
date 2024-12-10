@@ -1,6 +1,16 @@
 {% extends 'layouts/base.html' %} {% block title %} Список Проектов {% endblock title %} 
 {% block stylesheets %}
 <style>
+  /* Затемнение заднего фона для всех модальных окон */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.8) !important; /* Темно-серый фон */
+}
+
+.modal-backdrop.show {
+  opacity: 0.15 !important; /* Прозрачность затемнения */
+}
+</style>
+<style>
     .option-card {
         display: flex;
         flex-direction: column;

@@ -22,6 +22,50 @@
     
 </style>
 <style>
+    /* Затемнение заднего фона для всех модальных окон */
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.8) !important; /* Темно-серый фон */
+}
+
+.modal-backdrop.show {
+    opacity: 0.15 !important; /* Прозрачность затемнения */
+}
+</style>
+<style>
+    /* Универсальный стиль для кнопок и плашек */
+    .channel-status {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: center;
+        text-transform: uppercase;
+        min-width: 120px; /* Одинаковая ширина */
+        color: #fff;
+    }
+    
+    /* Стиль для кнопки "Авторизовать" (оранжевый градиент) */
+    .channel-status.authorize-btn {
+        background: linear-gradient(90deg, #ff9800, #ffc107); /* Оранжевый градиент */
+        border: none;
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.2s ease;
+    }
+    
+    .channel-status.authorize-btn:hover {
+        background: linear-gradient(90deg, #ff7800, #ffa000); /* Темный оранжевый на hover */
+        transform: scale(1.05);
+    }
+    
+    /* Стиль для плашки "Авторизован" (зеленый градиент) */
+    .channel-status.authorized-badge {
+        background: linear-gradient(90deg, #4caf50, #81c784); /* Зеленый градиент */
+    }
+    
+
+</style>
+<style>
   .btn.bg-gradient-primary {
       background: linear-gradient(90deg, #28a745, #85e085); /* Зеленый градиент */
       border: none;
@@ -68,16 +112,19 @@
                                     <td>{{ channel.project_title }}</td>
                                     <td>
                                         {% if channel.status == 'unauthorized' %}
-                                        <button class="btn btn-sm btn-warning authorize-btn" data-phone="{{ channel.phone }}" data-channel-id="{{ channel.id }}">
+                                        <button 
+                                            class="channel-status authorize-btn" 
+                                            data-phone="{{ channel.phone }}" 
+                                            data-channel-id="{{ channel.id }}">
                                             Авторизовать
                                         </button>
-                                        
-                                            {% elif channel.status == 'authorized' %}
-                                            <span class="badge bg-success">Авторизован</span>
+                                        {% elif channel.status == 'authorized' %}
+                                        <span class="channel-status authorized-badge">Авторизован</span>
                                         {% else %}
-                                            <span class="badge bg-secondary">Неизвестно</span>
+                                        <span class="channel-status" style="background-color: #6c757d;">Неизвестно</span>
                                         {% endif %}
                                     </td>
+                                    
                                     <td>
                                         <div class="form-check form-switch">
                                             <input 
