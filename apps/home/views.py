@@ -1077,10 +1077,9 @@ def send_code(request):
             if not phone_number:
                 return JsonResponse({"message": "Номер телефона не указан", "success": False})
 
-            # Проверка формата номера телефона
-            phone_pattern = re.compile(r'^\+\d+$')  # Номер должен начинаться с '+' и содержать только цифры
-            if not phone_pattern.match(phone_number):
-                return JsonResponse({"message": "Неверный формат номера телефона. Допустимы только + и цифры.", "success": False})
+            phone_number = re.sub(r'[^\d+]', '', phone_number.strip())
+            if not phone_number.startswith('+'):
+                phone_number = '+' + phone_number  # Добавляем '+' в начало, если его нет
 
             print(phone_number)
             # Отправка запроса в FastAPI
@@ -1097,6 +1096,7 @@ def send_code(request):
             return JsonResponse({"message": str(e), "success": False})
 
     return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
+
 
 
 
