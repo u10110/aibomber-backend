@@ -86,6 +86,9 @@ urlpatterns = [
     
     path("projects/", views.projects, name="projects"),
     path('projects/create/', views.project_create, name='project-create'),
+    path('projects/<int:project_id>/chat-emulator/', views.chat_emulator, name='chat-emulator'),
+
+
 
 
     # path('projects/edit/<int:id>/', views.project_edit, name='project-edit'),
@@ -132,6 +135,8 @@ urlpatterns = [
     
     
     path('test-assistant/<int:project_id>/', views.test_gpt_assistant_view, name='test_assistant'),
+    path('create-project-chat/', views.create_project_chat, name='create_project_chat'),
+
 
 ]
 

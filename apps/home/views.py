@@ -67,6 +67,10 @@ from django.http import JsonResponse
 from telethon import TelegramClient
 from telethon.errors import SessionPasswordNeededError
 
+from .models import Project
+# from .services.gpt_trainer import GPTProjectTrainer
+from .services.gpt_assistant import GPTAssistant
+
 
 def error(request):
     return render(request, "errors/technical_break.html")
@@ -1135,6 +1139,40 @@ def verify_code(request):
 
 
 @csrf_exempt
+def chat_emulator(request, project_id):
+    """
+    Взаимодействие с эмулятором чата для тестирования настроек проекта.
+    """
+    if request.method == "POST":
+        try:
+            project = Project.objects.get(id=project_id)
+            trainer = GPTProjectTrainer(project)
+
+            # Получение сообщения пользователя
+            data = json.loads(request.body)
+            user_message = data.get("message")
+
+            if not user_message:
+                return JsonResponse({"error": "Сообщение не должно быть пустым"}, status=400)
+
+            # Взаимодействие с GPT
+            response = trainer.interact(user_message)
+
+            if response["success"]:
+                return JsonResponse({"response": response["response"]})
+            else:
+                return JsonResponse({"error": response["error"]}, status=500)
+        except Project.DoesNotExist:
+            return JsonResponse({"error": "Проект не найден"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Метод запроса должен быть POST"}, status=405)
+
+
+
+
+@csrf_exempt
 def test_gpt_assistant_view(request, project_id):
     """
     Тестовая вью для работы с GPTAssistant.
@@ -1149,9 +1187,12 @@ def test_gpt_assistant_view(request, project_id):
         try:
             # Получаем проект
             project = get_object_or_404(Project, id=project_id)
+            
+            print(project)
 
             # Инициализируем GPTAssistant
             assistant = GPTAssistant(project, 1)
+            print(assistant)
 
             # Получаем вопрос из запроса
             body = json.loads(request.body)
@@ -1161,7 +1202,70 @@ def test_gpt_assistant_view(request, project_id):
                 return JsonResponse({"error": "Вопрос не предоставлен."}, status=400)
 
             # Обрабатываем вопрос и получаем ответ
-            response = assistant.ask_question(question)
+            response = assistant.ask_question(question, False)
+            
+            # query = "Что ты знаешь о магазине?"
+            # data_base = assistant.test_retrieval(query)
+            # print(f"data_base {data_base}")
+            
+            print(response)
+
+            return JsonResponse({
+                "question": question,
+                "response": response
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Метод не поддерживается."}, status=405)
+
+
+@csrf_exempt
+def create_project_chat(request):
+    """
+    Обрабатывает запросы чата на этапе создания проекта.
+    """
+    if request.method == "POST":
+        try:
+            # Парсим данные формы
+            data = json.loads(request.body)
+            print(data)
+            # Создаем временный объект Project
+            project = Project(
+                id=None,
+                title=data.get("title"),
+                agent_type=data.get("agent_type"),
+                work_option=data.get("work_option"),
+                gpt_version=int(data.get("gpt_version")),
+                knowledge_base_text=data.get("knowledge_base_text"),
+                hello_text=data.get("hello_text"),
+                prompt=data.get("prompt"),
+            )
+
+            print("Данные объекта Project:")
+            print(f"id: {project.id}")
+            print(f"title: {project.title}")
+            print(f"agent_type: {project.agent_type}")
+            print(f"work_option: {project.work_option}")
+            print(f"gpt_version: {project.gpt_version}")
+            print(f"knowledge_base_text: {project.knowledge_base_text}")
+            print(f"hello_text: {project.hello_text}")
+            print(f"prompt: {project.prompt}")
+
+            print(f"project is {project}")
+
+            # Инициализируем GPTAssistant
+            assistant = GPTAssistant(project,)  # Укажите ID пользователя временно или динамически
+
+            # Получаем вопрос
+            question = data.get("question")
+            if not question:
+                return JsonResponse({"error": "Вопрос не предоставлен."}, status=400)
+
+            # Получаем ответ от GPT
+            print(f"question is {question}")
+            response = assistant.ask_question(question, False)
+            print(response)
 
             return JsonResponse({
                 "question": question,

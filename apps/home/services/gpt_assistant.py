@@ -11,11 +11,12 @@ from docx import Document  # Для чтения DOCX-файлов
 from apps.home.models import Project  # Если Project используется для связи
 import os
 
-openai_api_key = os.getenv("OPENAI_API_KEY")
-
+OPENAI_API_KEY="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"
+if not OPENAI_API_KEY:
+    print("OPENAI_API_KEY не установлен!")
 
 class GPTAssistant:
-    def __init__(self, project, user_id):
+    def __init__(self, project, user_id=None):
         """
         Инициализация ассистента на основе данных проекта.
         :param project: Экземпляр модели Project.
@@ -24,21 +25,20 @@ class GPTAssistant:
         self.user_id = user_id
         self.vectorstore = None
         self.chat_history = []
-        self._load_chat_history()
+        if user_id:
+            self._load_chat_history()
         self._load_knowledge_base()
 
-    def _load_chat_history(self, ):
+    def _load_chat_history(self):
         """
-        Загружает историю чата из базы данных на основе user_id.
-        
-        :param user_id: Идентификатор пользователя.
+        Загружает историю чата из базы данных на основе user_id и форматирует её.
         """
         chat_records = Chat.objects.filter(project=self.project, user_id=self.user_id).order_by("created_at")
-        self.chat_history = [
-            {"question": record.user_message, "response": record.user_message}
-            for record in chat_records
-            if record.message_type == "anwser"
-        ]
+        self.chat_history = []
+        for record in chat_records:
+            if record.message_type == "anwser":
+                self.chat_history.append((record.user_message, record.user_message))
+
 
     def _load_knowledge_base(self):
         """
@@ -57,8 +57,21 @@ class GPTAssistant:
             knowledge_texts += self._extract_text_from_file(file_path, ext)
 
         if knowledge_texts:
-            embeddings = OpenAIEmbeddings()
+            print("Загруженные тексты базы знаний:", knowledge_texts)
+            embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
             self.vectorstore = FAISS.from_texts(knowledge_texts, embeddings)
+
+    def test_retrieval(self, query):
+        """
+        Тестирует поиск в базе знаний.
+        """
+        if not self.vectorstore:
+            raise ValueError("База знаний не загружена.")
+        
+        retriever = self.vectorstore.as_retriever(search_kwargs={"k": 3})
+        results = retriever.get_relevant_documents(query)
+        print("Результаты поиска:", results)
+        return results
 
     @staticmethod
     def _extract_text_from_file(file_path, ext):
@@ -83,26 +96,34 @@ class GPTAssistant:
             print(f"Error extracting text from file {file_path}: {e}")
             return []
 
-    def ask_question(self, question):
+    def ask_question(self, question, save_to_db=True):
         """
         Задает вопрос ассистенту, учитывая историю переписки.
         """
         if not self.vectorstore:
-            raise ValueError("Knowledge base is not loaded or empty.")
+            print("База знаний не загружена или пуста")
+            raise ValueError("База знаний не загружена или пуста.")
 
-
+        print(f"gpt version: {self.project.gpt_version}")
         llm = ChatOpenAI(
-            temperature=0, 
-            model=self._get_gpt_version(), 
-            openai_api_key=openai_api_key
+            temperature=0,
+            model=self._get_gpt_version(),
+            openai_api_key=OPENAI_API_KEY
         )
+        print(llm)
+        print("message here")
         retriever = self.vectorstore.as_retriever(search_kwargs={"k": 3})
         qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever)
 
-        response = qa_chain({"question": question, "chat_history": self.chat_history})
-        self._update_chat_history(question, response["answer"])
-        self._save_to_db(question, response["answer"])
 
+        full_context = f"{self.project.prompt}\n\n{question}"
+
+
+        response = qa_chain({"question": full_context, "chat_history": self.chat_history})
+        self._update_chat_history(question, response["answer"])
+
+        if save_to_db:
+            self._save_to_db(question, response["answer"])
         return response["answer"]
 
 
@@ -120,7 +141,7 @@ class GPTAssistant:
         Chat.objects.create(
             project=self.project,
             client=self.project.client,
-            user_id=self.project.client.id,
+            user_id=self.user_id,
             message_type="message",
             user_name=self.project.client.username,
             user_message=question,
@@ -128,7 +149,7 @@ class GPTAssistant:
         Chat.objects.create(
             project=self.project,
             client=self.project.client,
-            user_id=self.project.client.id,
+            user_id=self.user_id,
             message_type="anwser",
             user_name="GPT Assistant",
             user_message=response,

@@ -509,48 +509,70 @@
 </script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const chatContainer = document.getElementById('chat-emulator-container');
-    const chatInput = document.getElementById('emulator-chat-input');
-    const sendBtn = document.getElementById('emulator-send-btn');
-
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-
-    function addMessage(content, sender) {
-        const message = document.createElement('div');
-        message.classList.add('chat-message', sender); // Добавление классов
-        message.textContent = content; // Добавление текста сообщения
-        chatContainer.appendChild(message);
-        chatContainer.scrollTop = chatContainer.scrollHeight; // Скролл вниз
-    }
-
-    sendBtn.addEventListener('click', () => {
-        const userMessage = chatInput.value.trim();
-        if (!userMessage) return;
-
-        addMessage(userMessage, 'user'); // Сообщение от пользователя
-        chatInput.value = '';
-
-        // Эмуляция ответа бота
-        setTimeout(() => {
-            const botResponse = `GPT ответ: "${userMessage}"`;
-            addMessage(botResponse, 'bot'); // Сообщение от бота
-        }, 1000);
-    });
-
-    chatInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            sendBtn.click();
+    document.addEventListener('DOMContentLoaded', function () {
+        const chatContainer = document.getElementById('chat-emulator-container');
+        const chatInput = document.getElementById('emulator-chat-input');
+        const sendBtn = document.getElementById('emulator-send-btn');
+        const form = document.querySelector('.multisteps-form__form'); // Форма проекта
+    
+        function addMessage(content, sender) {
+            const message = document.createElement('div');
+            message.classList.add('chat-message', sender);
+            message.textContent = content;
+            chatContainer.appendChild(message);
+            chatContainer.scrollTop = chatContainer.scrollHeight; // Скролл вниз
         }
+    
+        async function sendMessageToGPT(question) {
+            try {
+                // Сбор данных из формы
+                const formData = new FormData(form);
+                const formJSON = Object.fromEntries(formData.entries());
+                formJSON["question"] = question; // Добавляем вопрос
+    
+                const response = await fetch(`/create-project-chat/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formJSON),
+                });
+    
+                if (!response.ok) {
+                    const error = await response.json();
+                    console.error("Ошибка:", error.error);
+                    addMessage("Ошибка при запросе к GPT.", "bot");
+                    return;
+                }
+    
+                const data = await response.json();
+                console.log("Ответ от GPT:", data); // Лог для проверки ответа
+                addMessage(data.response, "bot");
+            } catch (error) {
+                console.error("Ошибка:", error);
+                addMessage("Ошибка подключения.", "bot");
+            }
+        }
+    
+        sendBtn.addEventListener('click', () => {
+            const userMessage = chatInput.value.trim();
+            if (!userMessage) return;
+    
+            addMessage(userMessage, "user");
+            chatInput.value = "";
+    
+            sendMessageToGPT(userMessage); // Отправляем сообщение к GPT
+        });
+    
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendBtn.click();
+            }
+        });
     });
-});
-
+    
+    
 </script>
-
-
 
 {% endblock javascripts %}

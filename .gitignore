@@ -45,3 +45,8 @@ data/cookies/
 
 
 *.session
+fastapi/sessions/
+
+.vscode/launch.json
+
+*.whl
