@@ -82,9 +82,24 @@ class Project(models.Model):
         (1, 'Входящие'),
         (2, 'Входящие и исходящие'),
     ]
+    AGENT_TYPES = [
+        ('sales_manager', 'Менеджер по продажам'),
+        ('consultant', 'Консультант'),
+        ('support_manager', 'Менеджер поддержки'),
+        ('review_manager', 'Менеджер по работе с отзывами'),
+        ('info_business_manager', 'Менеджер для инфобиза'),
+        ('services_manager', 'Менеджер в сфере услуг'),
+        ('health_fitness_manager', 'Менеджер в сфере здоровья и фитнеса'),
+    ]
 
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=1000)
+    agent_type = models.CharField(
+        max_length=50,
+        choices=AGENT_TYPES,
+        default='sales_manager',
+        verbose_name="Тип ИИ-агента"
+    )
     status = models.CharField(max_length=55, default="active")
     is_active = models.BooleanField(default=False)
     work_option = models.IntegerField(choices=OPTIONS, default=1)
@@ -103,6 +118,11 @@ class Project(models.Model):
         blank=True,
         help_text="Ссылка на Google-документ (необязательно)"
     )
+    per_conversation_limit = models.IntegerField(
+        default=50,
+        verbose_name="Лимит на одну переписку"
+    )
+
     outgoing_limit = models.IntegerField(
         default=30,  # Значение по умолчанию
         verbose_name="Ограничение исходящих"
@@ -112,6 +132,9 @@ class Project(models.Model):
     time_end = models.TimeField(default=datetime.time(22, 0))
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    def get_agent_type_display(self):
+        return dict(self.AGENT_TYPES).get(self.agent_type, self.agent_type)
 
 
 
@@ -193,7 +216,7 @@ class Channel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
-        return self.title
+        return f"{self.title} ({self.phone})"
 
 
 class Chat(models.Model):

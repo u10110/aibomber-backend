@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     "apps.amocrm",
     "django_user_agents",
     "widget_tweaks",
+    "apps.templatetags",
     # 'apps.registration'
 ]
 # https://github.com/recamshak/django-debug-panel

@@ -2,6 +2,35 @@
 
 {% block stylesheets %}
 <style>
+    .multisteps-form__panel {
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+    }
+  
+    .form-label {
+        font-size: 1rem;
+        color: #495057;
+    }
+  
+    .form-control {
+        border-radius: 8px;
+        padding: 0.75rem;
+    }
+{% comment %}   
+    .button-row button {
+        padding: 0.6rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 8px;
+    }
+   {% endcomment %}
+    .vr {
+        width: 2px;
+        height: 100%;
+        background-color: #dee2e6;
+    }
+  </style>
+  
+<style>
     .custom-tooltip .tooltip-inner {
         max-width: 400px; /* Устанавливаем максимальную ширину */
         text-align: left; /* Выравнивание текста */
@@ -127,50 +156,85 @@
                   
 
                             <!-- Шаг 1 -->
-                            <div class="card multisteps-form__panel p-3 border-radius-xl bg-white js-active" data-animation="FadeIn">
-                                <h5 class="font-weight-bolder">Информация</h5>
-                                <div class="multisteps-form__content">
-                                    <div class="row mt-3">
-                                        <div class="col-12">
-                                            <label for="title">Название проекта</label>
-                                            {{ form.title }}
-                                            {{ form.title.errors }}
-                                        </div>
-                                        <div class="col-12 mt-3">
-                                            <label for="work_option">Опции работы</label>
-                                            {{ form.work_option }}
-                                            {{ form.work_option.errors }}
-                                        </div>
-                                        <div class="col-md-6 mt-3">
-                                          <label for="gpt_version">Версия GPT</label>
-                                          {{ form.gpt_version }}
-                                          {{ form.gpt_version.errors }}
-                                        </div>
-                                        <div class="col-md-6 mt-3">
-                                            <label for="outgoing_limit">Дневной лимит
-                                              <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.outgoing_limit.help_text }}">
-                                                <i class="fas fa-question-circle"></i>
-                                            </span>
-                                            </label>
-                                            {{ form.outgoing_limit }}
-                                            {{ form.outgoing_limit.errors }}
-                                        </div>
-                                        <div class="col-md-6 mt-3">
-                                            <label for="time_start">Начало времени</label>
-                                            {{ form.time_start }}
-                                            {{ form.time_start.errors }}
-                                        </div>
-                                        <div class="col-md-6 mt-3">
-                                            <label for="time_end">Конец времени</label>
-                                            {{ form.time_end }}
-                                            {{ form.time_end.errors }}
-                                        </div>
-                                    </div>
-                                    <div class="button-row d-flex mt-4">
-                                        <button class="btn bg-gradient-dark ms-auto mb-0 js-btn-next" type="button">Далее</button>
-                                    </div>
-                                </div>
-                            </div>
+                            <!-- Шаг 1 -->
+<div class="card multisteps-form__panel p-3 border-radius-xl bg-white js-active" data-animation="FadeIn">
+    <h5 class="font-weight-bolder">Информация</h5>
+    <div class="multisteps-form__content">
+        <div class="row mt-3">
+            
+
+            
+            
+            <input type="hidden" name="agent_type" value="{{ agent_type }}">
+
+            <h6>
+                Тип ИИ-агента:
+                {% if agent_type == 'sales_manager' %}
+                    Менеджер по продажам
+                {% elif agent_type == 'consultant' %}
+                    Консультант
+                {% elif agent_type == 'support_manager' %}
+                    Менеджер поддержки
+                {% elif agent_type == 'review_manager' %}
+                    Менеджер по работе с отзывами
+                {% elif agent_type == 'info_business_manager' %}
+                    Менеджер для инфобиза
+                {% elif agent_type == 'services_manager' %}
+                    Менеджер в сфере услуг
+                {% elif agent_type == 'health_fitness_manager' %}
+                    Менеджер в сфере здоровья и фитнеса
+                {% else %}
+                    Неизвестный тип
+                {% endif %}
+            </h6>
+
+
+            <div class="col-12">
+                <label for="title">Название проекта</label>
+                {{ form.title }}
+                {{ form.title.errors }}
+            </div>
+            <div class="col-md-6 mt-3">
+                <label for="work_option">Опции работы</label>
+                {{ form.work_option }}
+                {{ form.work_option.errors }}
+            </div>
+            <div class="col-md-6 mt-3">
+                <label for="gpt_version">Версия GPT</label>
+                {{ form.gpt_version }}
+                {{ form.gpt_version.errors }}
+            </div>
+            <div class="col-md-6 mt-3">
+                <label for="per_conversation_limit">Лимит на одну переписку</label>
+                {{ form.per_conversation_limit }}
+                {{ form.per_conversation_limit.errors }}
+            </div>
+            <div class="col-md-6 mt-3">
+                <label for="outgoing_limit">Дневной лимит
+                    <span class="help-icon" data-bs-toggle="tooltip" title="{{ form.outgoing_limit.help_text }}">
+                        <i class="fas fa-question-circle"></i>
+                    </span>
+                </label>
+                {{ form.outgoing_limit }}
+                {{ form.outgoing_limit.errors }}
+            </div>
+            <div class="col-md-6 mt-3">
+                <label for="time_start">Начало времени</label>
+                {{ form.time_start }}
+                {{ form.time_start.errors }}
+            </div>
+            <div class="col-md-6 mt-3">
+                <label for="time_end">Конец времени</label>
+                {{ form.time_end }}
+                {{ form.time_end.errors }}
+            </div>
+        </div>
+        <div class="button-row d-flex mt-4">
+            <button class="btn bg-gradient-dark ms-auto mb-0 js-btn-next" type="button">Далее</button>
+        </div>
+    </div>
+</div>
+
 
                             <!-- Шаг 2 -->
                             <div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
@@ -272,31 +336,40 @@
 
 
                             <!-- Шаг 5 -->
-<div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
-  <h5 class="font-weight-bolder text-center">Каналы</h5>
-  <div class="multisteps-form__content">
-      <div class="row justify-content-center">
-          <div class="col-lg-6 col-md-8">
-              <div class="form-section-centered">
-                  <div class="mb-3">
-                      <label for="channel" class="form-label">Каналы</label>
-                      {{ form.channel }}
-                      {{ form.channel.errors }}
-                  </div>
-                  <div class="mb-3">
-                      <label for="recipients" class="form-label">Получатели</label>
-                      {{ form.recipients }}
-                      {{ form.recipients.errors }}
-                  </div>
-              </div>
-          </div>
-      </div>
-      <div class="button-row d-flex mt-4 justify-content-between">
-          <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button">Назад</button>
-          <button class="btn bg-gradient-primary ms-auto mb-0" type="submit">Создать проект</button>
-      </div>
-  </div>
-</div>
+                            <div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
+                                <div class="multisteps-form__content">
+                                    <div class="row justify-content-center align-items-start">
+                                        <!-- Блок выбора каналов -->
+                                        <div class="col-lg-5 col-md-6">
+                                            <div class="mb-3">
+                                                <label for="channel" class="form-label fw-bold">Выберите каналы:</label>
+                                                {{ form.channel }}
+                                                {{ form.channel.errors }}
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Разделитель -->
+                                        <div class="col-lg-1 d-flex justify-content-center align-items-center">
+                                            <div class="vr"></div>
+                                        </div>
+                              
+                                        <!-- Блок выбора получателей -->
+                                        <div class="col-lg-5 col-md-6">
+                                            <div class="mb-3">
+                                                <label for="recipients" class="form-label fw-bold">Выберите получателей:</label>
+                                                {{ form.recipients }}
+                                                {{ form.recipients.errors }}
+                                            </div>
+                                        </div>
+                                    </div>
+                              
+                                    <!-- Кнопки управления -->
+                                    <div class="button-row d-flex mt-4 justify-content-between">
+                                        <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button">Назад</button>
+                                        <button class="btn bg-gradient-primary ms-auto mb-0" type="submit">Создать проект</button>
+                                    </div>
+                                </div>
+                              </div>
 
 
 

@@ -621,12 +621,13 @@ def projects(request):
     return render(request, 'apps/projects.html', context)
 
 def project_create(request):
-    print(1)
+    agent_type = request.GET.get('type', None)
     if request.method == 'POST':
-        form = ProjectForm(request.POST, request.FILES, user=request.user)  # Передаём user для фильтрации
+        form = ProjectForm(request.POST, request.FILES, user=request.user, agent_type=agent_type)  # Передаём user для фильтрации
         if form.is_valid():
             project = form.save(commit=False)
             project.client = request.user  # Привязываем проект к текущему пользователю
+            # project.agent_type = agent_type
             project.save()
 
             # Обновляем project_id для связанных каналов
@@ -642,9 +643,13 @@ def project_create(request):
                 recipient.save()
 
             return redirect('/projects/')
+        else:
+            print("Форма не прошла валидацию")
+            print(form.errors)  # Печатает ошибки полей
+            print(form.non_field_errors())  # Печатает общие ошибки
     else:
         form = ProjectForm(user=request.user)
-    return render(request, 'apps/project_create.html', {'form': form})
+    return render(request, 'apps/project_create.html', {'form': form, 'agent_type': agent_type})
 
 
 

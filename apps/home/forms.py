@@ -89,6 +89,9 @@ class ClientSettingsForm(forms.Form):
 
 
 class ProjectForm(forms.ModelForm):
+    
+  
+
     channel = forms.ModelMultipleChoiceField(
         queryset=Channel.objects.all(),
         required=True,  # Делаем выбор каналов обязательным
@@ -151,6 +154,15 @@ class ProjectForm(forms.ModelForm):
         }),
         label="Google-документ"
     )
+    per_conversation_limit = forms.IntegerField(
+        label="Лимит на одну переписку",
+        required=False,
+        initial=50,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите лимит'
+        })
+    )
     outgoing_limit = forms.IntegerField(
         required=True,
         initial=30,
@@ -161,7 +173,21 @@ class ProjectForm(forms.ModelForm):
         label="Дневной лимит",
         help_text="Суточный лимит на отправку исходящих сообщений с одного канала. На входящие сообщения не распространяется."
     )
-
+    agent_type = forms.ChoiceField(
+        choices=[
+            ('sales_manager', 'Менеджер по продажам'),
+            ('consultant', 'Консультант'),
+            ('support_manager', 'Менеджер поддержки'),
+            ('review_manager', 'Менеджер по работе с отзывами'),
+            ('info_business_manager', 'Менеджер для инфобиза'),
+            ('services_manager', 'Менеджер в сфере услуг'),
+            ('health_fitness_manager', 'Менеджер в сфере здоровья и фитнеса'),
+        ],
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="Тип ИИ-агента"
+    )
+   
     class Meta:
         model = Project
         fields = [
@@ -176,6 +202,8 @@ class ProjectForm(forms.ModelForm):
             'file',
             'google_doc',
             'outgoing_limit',
+            'per_conversation_limit',
+            'agent_type',
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название проекта'}),
@@ -195,16 +223,35 @@ class ProjectForm(forms.ModelForm):
             'file': 'Файл',
             'google_doc': 'Google-документ',
             'outgoing_limit': 'Дневной лимит',
+            'per_conversation_limit': 'Лимит на одну переписку',
         }
 
 
+    def get_default_work_option(self):
+        # Пример настройки опций в зависимости от типа агента
+        if self.agent_type == 'sales_manager':
+            return 'Опция для менеджера по продажам'
+        elif self.agent_type == 'consultant':
+            return 'Опция для консультанта'
+        if self.agent_type == 'support_manager':
+            return 'Менеджер поддержки'
+        elif self.agent_type == 'review_manager':
+            return 'Менеджер по работе с отзывами'
+        # ('info_business_manager', 'Менеджер для инфобиза'),
+        # ('services_manager', 'Менеджер в сфере услуг'),
+        return ''
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
+        self.agent_type = kwargs.pop('agent_type', None)
         super().__init__(*args, **kwargs)
 
+        print(self.agent_type)
+        if self.agent_type:
+            self.fields['agent_type'].initial = self.agent_type
+
         if user:
-            self.fields['channel'].queryset = Channel.objects.filter(client=user, project_id__isnull=True, status='active')
+            self.fields['channel'].queryset = Channel.objects.filter(client=user, project_id__isnull=True, status='authorized')
             self.fields['recipients'].queryset = Recipient.objects.filter(client=user, project_id__isnull=True, status='active')
 
         # Устанавливаем значения по умолчанию для time_start и time_end

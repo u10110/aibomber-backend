@@ -113,6 +113,8 @@
 				  <tr>
 					<th>Название</th>
 					<th>Опции работы</th>
+					<th>Тип агента</th>
+					<th>Источник коммуникации</th>
 					<th>Статус</th>
 					<th>Активность</th>
 					<th>Действия</th>
@@ -123,15 +125,17 @@
 				  <tr>
 					<td class="text-sm">{{ project.title }}</td>
 					<td class="text-sm">{{ project.get_work_option_display }}</td>
+          <td class="text-sm">{{ project.get_agent_type_display }}</td>
+          <td class="text-sm">Telegram</td>
 					<td class="text-sm">{{ project.status }}</td>
 					<td class="text-sm">
-					  <div class="form-check form-switch">
-						<input
+            <div class="form-check form-switch">
+              <input
 						  class="form-check-input project-toggle"
 						  type="checkbox"
 						  data-project-id="{{ project.id }}"
 						  {% if project.is_active %}checked{% endif %}
-						/>
+              />
 					  </div>
 					</td>
 					<td class="text-sm">
@@ -178,7 +182,7 @@
                 <div class="row">
                     <!-- Менеджер по продажам -->
                     <div class="col-md-6 col-lg-4 mb-3">
-                        <div class="option-card" data-url="{% url 'project-create' %}?type=sales">
+                        <div class="option-card" data-url="{% url 'project-create' %}?type=sales_manager">
                             <div class="option-icon">
                                 <i class="fas fa-handshake"></i>
                             </div>
@@ -202,7 +206,7 @@
                     </div>
                     <!-- Менеджер поддержки -->
                     <div class="col-md-6 col-lg-4 mb-3">
-                        <div class="option-card" data-url="{% url 'project-create' %}?type=support">
+                        <div class="option-card" data-url="{% url 'project-create' %}?type=support_manager">
                             <div class="option-icon">
                                 <i class="fas fa-life-ring"></i>
                             </div>
@@ -214,7 +218,7 @@
                     </div>
                     <!-- Менеджер по работе с отзывами -->
                     <div class="col-md-6 col-lg-4 mb-3">
-                        <div class="option-card" data-url="{% url 'project-create' %}?type=reviews">
+                        <div class="option-card" data-url="{% url 'project-create' %}?type=review_manager">
                             <div class="option-icon">
                                 <i class="fas fa-comment-dots"></i>
                             </div>
