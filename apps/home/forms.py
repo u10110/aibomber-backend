@@ -217,8 +217,6 @@ class ProjectForm(forms.ModelForm):
             self.fields['recipients'].initial = Recipient.objects.filter(project_id=self.instance.id)
 
 
-
-                
     def save(self, commit=True):
         # Сохраняем объект проекта
         project = super().save(commit=commit)
@@ -237,42 +235,96 @@ class ProjectForm(forms.ModelForm):
 
         return project
 
-class ChannelForm(forms.ModelForm):
-    class Meta:
-        model = Channel
-        fields = [
-            'title',
-            'phone',
-            'source',  # Добавлено поле "Источник"
-        ]
-        widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название проекта'}),
-            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите телефон'}),
-            'source': forms.Select(attrs={'class': 'form-control'}),  # Виджет для выбора источника
-        }
-        labels = {
-            'title': 'Название проекта',
-            'phone': 'Телефон',
-            'source': 'Источник',  # Метка для нового поля
-        }
 
-    def __init__(self, *args, **kwargs):
+class ChannelForm(forms.ModelForm):
+    def __init__(self, *args, client=None, **kwargs):
         super().__init__(*args, **kwargs)
-        # Ограничиваем выбор только Telegram
-        choices = [('telegram', 'Telegram')]
-        self.fields['source'].choices = choices
-        self.fields['source'].initial = 'telegram'
+        self.client = client
+
+    phone = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите номера телефонов, каждый с новой строки, например: +1234567890',
+            'rows': 5,
+        }),
+        label="Телефоны",
+        required=True
+    )
 
     def clean_phone(self):
-        phone = self.cleaned_data.get('phone')
-        if not phone:
-            raise ValidationError("Поле телефона обязательно для заполнения.")
+        phone_data = self.cleaned_data.get('phone', '')
+        if not phone_data.strip():
+            raise forms.ValidationError("Введите хотя бы один номер телефона.")
 
-        # Проверка формата: должен начинаться с "+" и содержать только цифры после
-        if not re.match(r'^\+\d+$', phone):
-            raise ValidationError("Введите номер телефона в международном формате, начиная с '+', например, +1234567890.")
+        # Разделяем телефонные номера по строкам
+        phones = [line.strip() for line in phone_data.split('\n') if line.strip()]
 
-        return phone
+        # Убираем пробелы, скобки и любые символы, кроме цифр и "+"
+        cleaned_phones = []
+        for phone in phones:
+            cleaned_phone = re.sub(r'[^\d+]', '', phone)  # Убираем все символы, кроме "+ и цифр"
+            # if not cleaned_phone.startswith('+'):
+            #     raise forms.ValidationError(f"Номер телефона {phone} должен начинаться с '+'.")
+            # if Channel.objects.filter(phone=cleaned_phone).exists():
+            #     raise forms.ValidationError(f"Номер телефона {cleaned_phone} уже существует в базе данных.")
+            cleaned_phones.append(cleaned_phone)
+
+        return cleaned_phones
+
+    def save(self, commit=True):
+        """
+        Сохраняет канал и создает записи для каждого номера телефона.
+        """
+        channel = super().save(commit=False)
+
+        if not channel.client_id:
+            channel.client = self.initial.get('client')
+        if commit:
+            channel.save()  # Сохраняем канал в базе данных
+
+        # Получаем список телефонов из очищенных данных
+        phone_list = self.cleaned_data.get('phone', [])  # Это уже список из clean_phone
+
+        # Удаляем старые записи, связанные с этим каналом
+        Channel.objects.filter(title=channel.title, source=channel.source).delete()
+
+        # Создаем новую запись для каждого номера
+        for phone in phone_list:
+            if not Channel.objects.filter(client=self.client, phone=phone).exists():
+                Channel.objects.create(
+                    client=channel.client,
+                    title=channel.title,
+                    source=channel.source,
+                    phone=phone,
+                    status=channel.status,
+                    is_active="True"
+                )
+
+
+        return channel
+
+    class Meta:
+        model = Channel
+        fields = ['title', 'source']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название канала'}),
+            'source': forms.Select(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'title': 'Название канала',
+            'source': 'Источник',
+        }
+
+
+
+
+
+
+
+
+
+
+
 
 class RecipientForm(forms.ModelForm):
     tg_ids = forms.CharField(

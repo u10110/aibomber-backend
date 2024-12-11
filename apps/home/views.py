@@ -35,6 +35,7 @@ from django.views.generic import DeleteView
 from loguru import logger
 from lxml import html
 from sentry_sdk import last_event_id
+import re
 
 from apps.alert.views import billing_check
 from apps.authentication.models import UserInfo
@@ -912,33 +913,26 @@ def chat_messages(request):
 
 def channels(request):
     if request.method == 'POST':
-        form = ChannelForm(request.POST, request.FILES)
+        form = ChannelForm(request.POST, initial={'client': request.user})
+        print(1)
         if form.is_valid():
-            channel = form.save(commit=False)
-            channel.client = request.user
-            channel.save()
-            print(form)
-            # Возвращаем успех и данные нового канала
-            return JsonResponse({
-                'success': True,
-                'channel': {
-                    'id': channel.id,
-                    'title': channel.title,
-                    'source_display': channel.source,
-                    'phone': channel.phone,
-                    'project_title': "Не привязан",
-                    'status': channel.status,
-                    'is_active': channel.is_active,
-                }
-            })
+            channels = form.save(commit=True)  # Сохраняем все записи
+            # response_data = [{
+            #     'id': channel.id,
+            #     'title': channel.title,
+            #     'source_display': channel.get_source_display(),
+            #     'phone': channel.phone,
+            #     'status': channel.status,
+            #     'is_active': channel.is_active,
+            # } for channel in channels]
+            return redirect('/channels/')
+            # return JsonResponse({'success': True, 'channels': response_data})
         else:
-            # Возвращаем ошибки валидации
-            return JsonResponse({
-                'success': False,
-                'errors': form.errors
-            }, status=400)
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+            
+
     else:
-        form = ChannelForm()
+        form = ChannelForm(request.POST, initial={'client': request.user})
 
 
     # Получаем все проекты из модели

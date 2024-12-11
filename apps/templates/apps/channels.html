@@ -99,7 +99,7 @@
                                     <th>Телефон</th>
                                     <th>Проект</th>
                                     <th>Статус</th>
-                                    <th>Активность</th>
+                                    {% comment %} <th>Активность</th> {% endcomment %}
                                     <th>Действия</th>
                                 </tr>
                             </thead>
@@ -125,7 +125,7 @@
                                         {% endif %}
                                     </td>
                                     
-                                    <td>
+                                    {% comment %} <td>
                                         <div class="form-check form-switch">
                                             <input 
                                                 class="form-check-input channel-toggle" 
@@ -135,7 +135,7 @@
                                                 {% if channel.is_active %}checked{% endif %}
                                             >
                                         </div>
-                                    </td>
+                                    </td> {% endcomment %}
                                     <td>
                                         <a href="{% url 'channel-delete' channel.id %}" class="btn btn-link text-danger">
                                             <i class="fas fa-trash-alt"></i>
@@ -219,45 +219,16 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const addChannelForm = document.getElementById('addChannelForm');
-        const addChannelModalElement = document.getElementById('addChannelModal');
-        const addChannelModal = new bootstrap.Modal(addChannelModalElement);
     
         // Обработка формы добавления канала
         addChannelForm.addEventListener('submit', function (e) {
+            // Убираем стандартное поведение
             e.preventDefault();
     
-            const formData = new FormData(addChannelForm);
-    
-            fetch('/channels/', {
-                method: 'POST',
-                body: formData,
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Ошибка сети или сервера.');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        // Перезагрузка страницы после успешного добавления
-                        location.reload();
-                    } else {
-                        // Выводим ошибки формы
-                        alert('Ошибка: ' + JSON.stringify(data.errors));
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка при добавлении канала:', error);
-                    alert('Ошибка при добавлении канала.');
-                });
+            // Отправляем форму через стандартный submit (с переносом страницы)
+            addChannelForm.submit();
         });
-    });
     
-    
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
         const authorizeButtons = document.querySelectorAll('.authorize-btn');
         const authForm = document.getElementById('authForm');
         const authModalElement = document.getElementById('authModal');
@@ -361,6 +332,7 @@
                 });
         });
     });
+    
     
     
     

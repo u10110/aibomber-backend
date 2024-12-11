@@ -195,6 +195,7 @@ class Channel(models.Model):
     def __str__(self):
         return self.title
 
+
 class Chat(models.Model):
     class Meta:
         verbose_name = "Чаты"
