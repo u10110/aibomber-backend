@@ -129,5 +129,9 @@ urlpatterns = [
     path('channels/send-code/', views.send_code, name='send_code'),
     path('channels/verify-code/', views.verify_code, name='verify_code'),
     path('channels/create-app/', views.create_app, name='create_app'),
+    
+    
+    path('test-assistant/<int:project_id>/', views.test_gpt_assistant_view, name='test_assistant'),
+
 ]
 
