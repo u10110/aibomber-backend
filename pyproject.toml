@@ -51,7 +51,7 @@ django-telegram-login = "^0.2.3"
 django-csp = "^3.8"
 django-widget-tweaks = "^1.5.0"
 Telethon= "^1.38.1"
-openai="^0.28.1"
+openai="^1.55.3"
 
 langchain-openai="^0.2.12"
 langchain-community="^0.3.10"
