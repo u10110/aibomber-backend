@@ -196,8 +196,14 @@
             </div>
             <div class="col-md-6 mt-3">
                 <label for="work_option">Опции работы</label>
-                {{ form.work_option }}
+                {% comment %} {{ form.work_option }} {% endcomment %}
+                <select name="work_option" id="work-option-field" class="form-control">
+                    <option value="1">Входящие</option>
+                    <option value="2">Входящие и исходящие</option>
+                </select>
+                
                 {{ form.work_option.errors }}
+                
             </div>
             <div class="col-md-6 mt-3">
                 <label for="gpt_version">Версия GPT</label>
@@ -340,28 +346,28 @@
                                 <div class="multisteps-form__content">
                                     <div class="row justify-content-center align-items-start">
                                         <!-- Блок выбора каналов -->
-                                        <div class="col-lg-5 col-md-6">
-                                            <div class="mb-3">
-                                                <label for="channel" class="form-label fw-bold">Выберите каналы:</label>
-                                                {{ form.channel }}
-                                                {{ form.channel.errors }}
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Разделитель -->
-                                        <div class="col-lg-1 d-flex justify-content-center align-items-center">
-                                            <div class="vr"></div>
-                                        </div>
+<div class="col-lg-5 col-md-6">
+    <div class="mb-3">
+        <label for="channel" class="form-label fw-bold">Выберите каналы:</label>
+        {{ form.channel }}
+        {{ form.channel.errors }}
+    </div>
+</div>
+
+<!-- Разделитель -->
+<div class="col-lg-1 d-flex justify-content-center align-items-center">
+    <div class="vr"></div>
+</div>
                               
                                         <!-- Блок выбора получателей -->
-                                        <div class="col-lg-5 col-md-6">
+                                        <div class="col-lg-5 col-md-6" id="recipients-block" style="display: none;">
                                             <div class="mb-3">
                                                 <label for="recipients" class="form-label fw-bold">Выберите получателей:</label>
                                                 {{ form.recipients }}
                                                 {{ form.recipients.errors }}
                                             </div>
                                         </div>
-                                    </div>
+                                        
                               
                                     <!-- Кнопки управления -->
                                     <div class="button-row d-flex mt-4 justify-content-between">
@@ -385,6 +391,34 @@
 {% block javascripts %}
 <script src="/static/assets/js/plugins/multistep-form.js"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const workOptionField = document.getElementById('work-option-field'); // Поле выбора опций работы
+        const recipientsBlock = document.getElementById('recipients-block'); // Блок получателей
+    
+        function toggleRecipientsVisibility() {
+            if (!workOptionField || !recipientsBlock) return; // Проверяем существование элементов
+    
+            const selectedOption = workOptionField.value; // Получаем выбранное значение
+    
+            // Показываем или скрываем блок на основе выбранной опции
+            if (selectedOption === '2') {
+                recipientsBlock.style.display = 'block';
+            } else {
+                recipientsBlock.style.display = 'none';
+            }
+        }
+    
+        // Добавляем обработчик событий изменения
+        if (workOptionField) {
+            workOptionField.addEventListener('change', toggleRecipientsVisibility);
+            toggleRecipientsVisibility(); // Устанавливаем начальное состояние
+        }
+    });
+    
+</script>
+<script>
+
+    
   document.addEventListener('DOMContentLoaded', function () {
       const steps = document.querySelectorAll('.multisteps-form__progress-btn');
       const panels = document.querySelectorAll('.multisteps-form__panel');

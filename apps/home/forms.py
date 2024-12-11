@@ -89,8 +89,6 @@ class ClientSettingsForm(forms.Form):
 
 
 class ProjectForm(forms.ModelForm):
-    
-  
 
     channel = forms.ModelMultipleChoiceField(
         queryset=Channel.objects.all(),
@@ -100,7 +98,7 @@ class ProjectForm(forms.ModelForm):
     )
     recipients = forms.ModelMultipleChoiceField(
         queryset=Recipient.objects.all(),
-        required=True,  # Делаем выбор получателей обязательным
+        required=False,  # Делаем выбор получателей обязательным
         widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
         label="Получатели"
     )
