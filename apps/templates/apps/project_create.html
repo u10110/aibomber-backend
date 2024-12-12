@@ -515,12 +515,17 @@
         const sendBtn = document.getElementById('emulator-send-btn');
         const form = document.querySelector('.multisteps-form__form'); // Форма проекта
     
+        const chatHistory = []; // Массив для хранения истории чата
+    
         function addMessage(content, sender) {
             const message = document.createElement('div');
             message.classList.add('chat-message', sender);
             message.textContent = content;
             chatContainer.appendChild(message);
             chatContainer.scrollTop = chatContainer.scrollHeight; // Скролл вниз
+    
+            // Добавляем сообщение в историю
+            chatHistory.push({ question: content, response: sender === 'bot' ? content : null });
         }
     
         async function sendMessageToGPT(question) {
@@ -529,6 +534,7 @@
                 const formData = new FormData(form);
                 const formJSON = Object.fromEntries(formData.entries());
                 formJSON["question"] = question; // Добавляем вопрос
+                formJSON["chat_history"] = chatHistory; // Добавляем историю чата
     
                 const response = await fetch(`/create-project-chat/`, {
                     method: "POST",
@@ -548,6 +554,7 @@
                 const data = await response.json();
                 console.log("Ответ от GPT:", data); // Лог для проверки ответа
                 addMessage(data.response, "bot");
+                chatHistory[chatHistory.length - 1].response = data.response; // Обновляем последний элемент истории
             } catch (error) {
                 console.error("Ошибка:", error);
                 addMessage("Ошибка подключения.", "bot");
@@ -571,6 +578,7 @@
             }
         });
     });
+    
     
     
 </script>

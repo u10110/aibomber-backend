@@ -1257,6 +1257,10 @@ def create_project_chat(request):
             # Инициализируем GPTAssistant
             assistant = GPTAssistant(project,)  # Укажите ID пользователя временно или динамически
 
+            chat_history = data.get("chat_history", [])  # Получаем текущую историю чата из запроса
+            formatted_history = [(item["question"], item["response"]) for item in chat_history]
+            assistant.chat_history = formatted_history
+
             # Получаем вопрос
             question = data.get("question")
             if not question:
