@@ -74,6 +74,12 @@ class GPTAssistant:
             try:
                 logger.debug(f"Начинаем создание эмбеддингов для текстов: {knowledge_texts}")
                 embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+                try:
+                    embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+                    print("Эмбеддинги созданы успешно!")
+                except Exception as e:
+                    print(f"Ошибка при создании эмбеддингов: {e}")
+                    raise
                 logger.debug("Эмбеддинги успешно созданы.")
                 
                 logger.debug("Начинаем индексирование текстов в FAISS.")
