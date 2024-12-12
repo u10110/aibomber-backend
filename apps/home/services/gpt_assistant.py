@@ -11,19 +11,6 @@ from docx import Document  # Для чтения DOCX-файлов
 from apps.home.models import Project  # Если Project используется для связи
 import os
 
-
-import logging
-
-# Настраиваем логирование
-logging.basicConfig(level=logging.DEBUG)
-
-# Включаем логи для langchain
-logger = logging.getLogger("langchain")
-logger.setLevel(logging.DEBUG)
-
-print(f"Текущий уровень логирования: {logging.getLevelName(logger.level)}")
-
-
 OPENAI_API_KEY="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"
 if not OPENAI_API_KEY:
     print("OPENAI_API_KEY не установлен!")
@@ -34,7 +21,6 @@ class GPTAssistant:
         Инициализация ассистента на основе данных проекта.
         :param project: Экземпляр модели Project.
         """
-        print(OPENAI_API_KEY)
         self.project = project
         self.user_id = user_id
         self.vectorstore = None
@@ -71,23 +57,9 @@ class GPTAssistant:
             knowledge_texts += self._extract_text_from_file(file_path, ext)
 
         if knowledge_texts:
-            try:
-                logger.debug(f"Начинаем создание эмбеддингов для текстов: {knowledge_texts}")
-                embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
-                try:
-                    embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
-                    print("Эмбеддинги созданы успешно!")
-                except Exception as e:
-                    print(f"Ошибка при создании эмбеддингов: {e}")
-                    raise
-                logger.debug("Эмбеддинги успешно созданы.")
-                
-                logger.debug("Начинаем индексирование текстов в FAISS.")
-                self.vectorstore = FAISS.from_texts(knowledge_texts, embeddings)
-                logger.debug("Индексирование в FAISS завершено.")
-            except Exception as e:
-                logger.error(f"Ошибка при создании эмбеддингов или индексации в FAISS: {e}")
-                raise
+            print("Загруженные тексты базы знаний:", knowledge_texts)
+            embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+            self.vectorstore = FAISS.from_texts(knowledge_texts, embeddings)
 
     def test_retrieval(self, query):
         """
@@ -126,47 +98,33 @@ class GPTAssistant:
 
     def ask_question(self, question, save_to_db=True):
         """
-        Задает вопрос ассистенту, учитывая историю переписки и prompt. 
-        Использование базы знаний (vectorstore) опционально.
+        Задает вопрос ассистенту, учитывая историю переписки.
         """
-        # Проверяем, задан ли prompt
-        if not self.project.prompt:
-            print("Промпт не задан.")
-            raise ValueError("Промпт не задан.")
+        if not self.vectorstore:
+            print("База знаний не загружена или пуста")
+            raise ValueError("База знаний не загружена или пуста.")
 
         print(f"gpt version: {self.project.gpt_version}")
-
-        # Инициализируем модель
         llm = ChatOpenAI(
             temperature=0,
             model=self._get_gpt_version(),
-            openai_api_key=OPENAI_API_KEY,
-            verbose=True
+            openai_api_key=OPENAI_API_KEY
         )
         print(llm)
         print("message here")
+        retriever = self.vectorstore.as_retriever(search_kwargs={"k": 3})
+        qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever)
 
-        # Формируем полный контекст (с prompt)
+
         full_context = f"{self.project.prompt}\n\n{question}"
 
-        # Если база знаний доступна, используем retriever
-        if self.vectorstore:
-            retriever = self.vectorstore.as_retriever(search_kwargs={"k": 3})
-            qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever)
-            response = qa_chain({"question": full_context, "chat_history": self.chat_history})
-            answer = response["answer"]
-        else:
-            # Если база знаний недоступна, отправляем только full_context
-            answer = llm(full_context).content
 
-        # Обновляем историю чата
-        self._update_chat_history(question, answer)
+        response = qa_chain({"question": full_context, "chat_history": self.chat_history})
+        self._update_chat_history(question, response["answer"])
 
         if save_to_db:
-            self._save_to_db(question, answer)
-
-        return answer
-
+            self._save_to_db(question, response["answer"])
+        return response["answer"]
 
 
 

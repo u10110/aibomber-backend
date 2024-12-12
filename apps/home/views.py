@@ -1219,6 +1219,18 @@ def test_gpt_assistant_view(request, project_id):
 
     return JsonResponse({"error": "Метод не поддерживается."}, status=405)
 
+def format_chat_history(chat_history):
+    """
+    Преобразует chat_history в формат для OpenAI API.
+    """
+    formatted = []
+    for question, response in chat_history:
+        if question:
+            formatted.append({"role": "user", "content": question})
+        if response:
+            formatted.append({"role": "assistant", "content": response})
+    return formatted
+
 
 @csrf_exempt
 def create_project_chat(request):
@@ -1256,10 +1268,6 @@ def create_project_chat(request):
 
             # Инициализируем GPTAssistant
             assistant = GPTAssistant(project,)  # Укажите ID пользователя временно или динамически
-
-            chat_history = data.get("chat_history", [])  # Получаем текущую историю чата из запроса
-            formatted_history = [(item["question"], item["response"]) for item in chat_history]
-            assistant.chat_history = formatted_history
 
             # Получаем вопрос
             question = data.get("question")
