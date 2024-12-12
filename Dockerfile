@@ -1,26 +1,27 @@
 FROM registry.mplab.io/python3.9:latest
 
 LABEL maintainer="Kirill Loginov"
-COPY . .
 
-# set environment variables
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# install python dependencies
-RUN pip3 install python-dateutil
-
-# resolve cryptography and lxml dependencies
-USER root
+# Install required packages
 RUN apt-get update && apt-get install -qqy --no-install-recommends \
-    jq curl tesseract-ocr tesseract-ocr-rus \
+    jq \
+    curl \
+    tesseract-ocr \
+    tesseract-ocr-rus \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
-# install poetry, dependencies
+# Upgrade pip and install Poetry
 RUN pip install --upgrade pip \
     && pip install poetry poetry-setup \
     && poetry config virtualenvs.create false
+
+# Copy project files
+COPY . .
 
 # Update poetry.lock if necessary
 COPY pyproject.toml ./
@@ -29,8 +30,17 @@ RUN poetry lock --no-update
 # Install only main dependencies
 RUN poetry install --only main
 
+# Set working directory
 WORKDIR /app
+
+# Copy application code
 COPY . .
 
-# gunicorn
+# Install additional Python dependencies
+RUN pip3 install python-dateutil
+
+# Collect static files
+RUN python manage.py collectstatic --noinput
+
+# Gunicorn configuration
 CMD ["gunicorn", "--config", "gunicorn-cfg.py", "core.wsgi", "--workers", "12", "--threads", "12", "--timeout", "300", "--graceful-timeout", "300", "--max-requests", "1000", "--max-requests-jitter", "50"]
