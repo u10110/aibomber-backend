@@ -672,7 +672,7 @@ def project_edit(request, project_id):
         "form": form,
         "project": project,
     }
-    return render(request, "apps\project_create.html", context)
+    return render(request, "apps/project_create.html", context)
 
 
 @csrf_exempt
