@@ -258,8 +258,8 @@ class ProjectForm(forms.ModelForm):
             self.fields['time_end'].initial = datetime.time(22, 0)
         else:
             # Загружаем связанные записи для редактирования
-            self.fields['channel'].initial = Channel.objects.filter(project_id=self.instance.id)
-            self.fields['recipients'].initial = Recipient.objects.filter(project_id=self.instance.id)
+            self.fields['channel'].initial = Channel.objects.filter(client=user, project_id=self.instance.id, status='authorized')
+            self.fields['recipients'].initial = Recipient.objects.filter(client=user, project_id=self.instance.id, status='active')
 
 
     def save(self, commit=True):
