@@ -845,9 +845,14 @@ def chat(request):
             Chat.objects.filter(user_id=OuterRef('user_id'))
             .order_by('-created_at')
             .values('user_message')[:1]  # Получаем текст последнего сообщения
+        ),
+        is_auto_active=Subquery(
+            TgID.objects.filter(tg_id=OuterRef('user_id'))
+            .values('is_auto_active')[:1]  # Получаем значение is_auto_active из TgID
         )
     ).distinct('user_id')
-    
+    for chat in chats:
+        print(f"chats {chat.is_auto_active}")
     # Передаем данные в контекст
     context = {'chats': chats}
     return render(request, "apps/chat.html", context)
@@ -884,7 +889,9 @@ def chat_messages(request):
         current_chat = chats.filter(user_id=user_id).first()
     if not current_chat:
         current_chat = chats.first()  # Если текущий чат не найден, берем первый из списка
+    current_chat.is_auto_active = TgID.objects.filter(tg_id=user_id).values_list('is_auto_active', flat=True).first()
 
+    print(current_chat.is_auto_active)
     # Получаем сообщения для текущего чата
     messages = []
     if current_chat:
@@ -908,9 +915,9 @@ def chat_messages(request):
         Chat.objects.filter(user_id=OuterRef('user_id'))
         .order_by('-created_at')
         .values('user_message')[:1]
-    )
+    ),
+    
 )
-
     return render(request, 'apps/chat.html', {
         'chats': chats,
         'messages': messages,
@@ -1044,13 +1051,33 @@ def create_app(request):
 @csrf_exempt
 def toggle_auto_active(request, chat_id):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        is_auto_active = data.get('is_auto_active')
-        chat = Chat.objects.get(id=chat_id)
-        chat.is_auto_active = is_auto_active
-        chat.save()
-        return JsonResponse({'is_auto_active': chat.is_auto_active})
+        try:
+            # Получаем данные из тела запроса
+            data = json.loads(request.body)
+            is_auto_active = data.get('is_auto_active')
+
+            if is_auto_active is None:
+                return JsonResponse({'error': 'is_auto_active is required'}, status=400)
+
+            # Получаем объекты Chat и TgID
+            chat = get_object_or_404(Chat, id=chat_id)
+            tg = get_object_or_404(TgID, tg_id=chat.user_id)  # Предполагается связь через user_id
+
+            # Обновляем значения is_auto_active
+            tg.is_auto_active = is_auto_active
+            tg.save()
+
+            chat.is_auto_active = is_auto_active
+            chat.save()
+
+            return JsonResponse({'is_auto_active': chat.is_auto_active})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
 
 @csrf_exempt
 def change_status(request, chat_id):

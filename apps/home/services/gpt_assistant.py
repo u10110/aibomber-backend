@@ -35,14 +35,10 @@ class GPTAssistant:
         """
         
         tg = TgID.objects.get(tg_id=self.tgid_id)
+        self.is_auto_active = tg.is_auto_active
 
         chat_records = Chat.objects.filter(project=self.project, user_id=tg.tg_id).order_by("created_at")
 
-        first_chat_record = chat_records.first()
-        if first_chat_record:
-            self.is_auto_active = first_chat_record.is_auto_active
-        else:
-            self.is_auto_active = None  # Если записи нет, значение None
 
 
         if chat_records:
