@@ -1219,18 +1219,6 @@ def test_gpt_assistant_view(request, project_id):
 
     return JsonResponse({"error": "Метод не поддерживается."}, status=405)
 
-def format_chat_history(chat_history):
-    """
-    Преобразует chat_history в формат для OpenAI API.
-    """
-    formatted = []
-    for question, response in chat_history:
-        if question:
-            formatted.append({"role": "user", "content": question})
-        if response:
-            formatted.append({"role": "assistant", "content": response})
-    return formatted
-
 
 @csrf_exempt
 def create_project_chat(request):
@@ -1241,8 +1229,6 @@ def create_project_chat(request):
         try:
             # Парсим данные формы
             data = json.loads(request.body)
-            print(data)
-            # Создаем временный объект Project
             project = Project(
                 id=None,
                 title=data.get("title"),
@@ -1254,30 +1240,35 @@ def create_project_chat(request):
                 prompt=data.get("prompt"),
             )
 
-            print("Данные объекта Project:")
-            print(f"id: {project.id}")
-            print(f"title: {project.title}")
-            print(f"agent_type: {project.agent_type}")
-            print(f"work_option: {project.work_option}")
-            print(f"gpt_version: {project.gpt_version}")
-            print(f"knowledge_base_text: {project.knowledge_base_text}")
-            print(f"hello_text: {project.hello_text}")
-            print(f"prompt: {project.prompt}")
+            # Форматируем историю чата
+            chat_history = data.get("chat_history", [])
+            formatted_history = []
 
-            print(f"project is {project}")
+            # Форматируем историю чата
+            for item in chat_history:
+                question = item.get("question")
+                response = item.get("response")
+                if question and response:  # Проверяем, что есть и вопрос, и ответ
+                    formatted_history.append({"role": "user", "content": question})
+                    formatted_history.append({"role": "assistant", "content": response})
 
-            # Инициализируем GPTAssistant
-            assistant = GPTAssistant(project,)  # Укажите ID пользователя временно или динамически
+            # Ограничиваем длину истории (например, 10 пар сообщений)
+            formatted_history = formatted_history[-20:]  # 10 вопросов и 10 ответов
+
+
+            # Инициализируем GPTAssistant с историей чата
+            assistant = GPTAssistant(project)
+            # Передаём историю в GPTAssistant
+            assistant.chat_history = formatted_history
 
             # Получаем вопрос
+            print(assistant.chat_history)
             question = data.get("question")
             if not question:
                 return JsonResponse({"error": "Вопрос не предоставлен."}, status=400)
-
+            print(question)
             # Получаем ответ от GPT
-            print(f"question is {question}")
-            response = assistant.ask_question(question, False)
-            print(response)
+            response = assistant.ask_question(question, save_to_db=False)
 
             return JsonResponse({
                 "question": question,
@@ -1287,3 +1278,5 @@ def create_project_chat(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Метод не поддерживается."}, status=405)
+
+
