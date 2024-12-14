@@ -69,6 +69,8 @@ class AmoCrm(models.Model):
     tg = models.JSONField()
 
 
+
+
 class Project(models.Model):
     class Meta:
         verbose_name = "Проект"
@@ -107,12 +109,6 @@ class Project(models.Model):
     hello_text = models.TextField(null=True)
     prompt = models.TextField()
     knowledge_base_text = models.TextField(null=True, blank=True)
-    file = models.FileField(
-        null=True,
-        blank=True,
-        upload_to="uploads/files/",
-        help_text="Допустимые форматы: PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM"
-    )
     google_doc = models.URLField(
         null=True,
         blank=True,
@@ -136,6 +132,14 @@ class Project(models.Model):
     def get_agent_type_display(self):
         return dict(self.AGENT_TYPES).get(self.agent_type, self.agent_type)
 
+
+class ProjectFile(models.Model):
+    project = models.ForeignKey(Project, related_name="files", on_delete=models.CASCADE)
+    file = models.FileField(
+        upload_to="uploads/files/",
+        help_text="Допустимые форматы: PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM"
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
 
 class Recipient(models.Model):

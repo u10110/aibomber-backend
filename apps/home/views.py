@@ -628,7 +628,9 @@ def project_create(request):
     agent_type = request.GET.get('type', None)
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES, user=request.user, agent_type=agent_type)  # Передаём user для фильтрации
-        if form.is_valid():
+        file_formset = ProjectFileFormSet(request.POST, request.FILES, queryset=ProjectFile.objects.none())
+
+        if form.is_valid() and file_formset.is_valid():
             project = form.save(commit=False)
             project.client = request.user  # Привязываем проект к текущему пользователю
             # project.agent_type = agent_type
@@ -645,6 +647,13 @@ def project_create(request):
             for recipient in recipients:
                 recipient.project_id = project.id
                 recipient.save()
+            
+            for file_form in file_formset:
+                if file_form.cleaned_data.get('file'):
+                    project_file = file_form.save(commit=False)
+                    project_file.project = project
+                    project_file.save()
+
 
             return redirect('/projects/')
         else:
@@ -652,8 +661,13 @@ def project_create(request):
             print(form.errors)  # Печатает ошибки полей
             print(form.non_field_errors())  # Печатает общие ошибки
     else:
+        max_files = 6
+        uploaded_files = 0  # Если редактируется проект, здесь можно подсчитать уже загруженные файлы
+
         form = ProjectForm(user=request.user)
-    return render(request, 'apps/project_create.html', {'form': form, 'agent_type': agent_type})
+        file_formset = ProjectFileFormSet(queryset=ProjectFile.objects.none())
+
+    return render(request, 'apps/project_create.html', {'form': form, 'agent_type': agent_type, 'file_formset': file_formset, 'max_files': max_files, 'uploaded_files': uploaded_files,})
 
 
 

@@ -2,6 +2,19 @@
 
 {% block stylesheets %}
 <style>
+    #file-upload-status {
+        font-weight: bold;
+        color: #495057;
+    }
+
+    .btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+</style>
+
+
+<style>
     .multisteps-form__panel {
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         border-radius: 15px;
@@ -296,15 +309,31 @@
                                             {{ form.knowledge_base_text.errors }}
                                         </div>
                                         <div class="col-12 mt-3">
-                                            <label for="file">Загрузить файл (PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM)</label>
-                                            {{ form.file }}
-                                            {{ form.file.errors }}
-                                        </div>
-                                        <div class="col-12 mt-3">
                                             <label for="google_doc">Ссылка на Google-документ</label>
                                             {{ form.google_doc }}
                                             {{ form.google_doc.errors }}
                                         </div>
+
+                                        
+                                        <div class="col-12">
+                                            <h6>Загрузить файлы</h6>
+                                            <p id="file-upload-status">Загружено {{ uploaded_files }} из {{ max_files }}</p>
+                                            {{ file_formset.management_form }}
+                                        
+                                            <!-- Контейнер для полей загрузки -->
+                                            <div class="file-upload-container" id="file-upload-container"></div>
+                                        
+                                            <!-- Кнопка добавления нового поля -->
+                                            <button id="add-file-button" class="btn btn-sm bg-gradient-primary mt-3" type="button">
+                                                Добавить файл
+                                            </button>
+                                        
+                                            <p class="text-muted mt-2">Допустимые форматы: PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM</p>
+                                        </div>
+                                        
+                                        
+                                        
+                                        
                                     </div>
                                     <div class="button-row d-flex mt-4">
                                         <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button">Назад</button>
@@ -390,6 +419,44 @@
 
 {% block javascripts %}
 <script src="/static/assets/js/plugins/multistep-form.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const maxFiles = {{ max_files }}; // Максимальное количество файлов
+        let uploadedFiles = {{ uploaded_files }}; // Сколько уже загружено
+        const fileUploadContainer = document.getElementById('file-upload-container');
+        const addFileButton = document.getElementById('add-file-button');
+        const fileUploadStatus = document.getElementById('file-upload-status');
+            
+        // Функция обновления статуса
+        function updateFileStatus() {
+            fileUploadStatus.textContent = `Загружено ${uploadedFiles} из ${maxFiles}`;
+            addFileButton.disabled = uploadedFiles >= maxFiles;
+        }
+
+        // Обработчик кнопки добавления файлов
+        addFileButton.addEventListener('click', function () {
+            if (uploadedFiles < maxFiles) {
+                // Создаем новое поле загрузки
+                const newFileField = document.createElement('input');
+                newFileField.type = 'file';
+                newFileField.name = `form-${uploadedFiles}-file`; // Имя, соответствующее FormSet
+                newFileField.classList.add('form-control', 'mt-2');
+
+                // Добавляем новое поле в контейнер
+                fileUploadContainer.appendChild(newFileField);
+
+                // Увеличиваем счетчик и обновляем статус
+                uploadedFiles++;
+                updateFileStatus();
+            }
+        });
+
+        // Инициализируем статус при загрузке страницы
+        updateFileStatus();
+    });
+</script>
+
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const workOptionField = document.getElementById('work-option-field'); // Поле выбора опций работы

@@ -11,8 +11,10 @@ from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.forms import fields
 from django import forms
-from .models import Project, Recipient, TgID, Channel
+from .models import Project, Recipient, TgID, Channel, ProjectFile
 from django.core.exceptions import ValidationError
+from django.forms import modelformset_factory
+
 
 class Account(forms.Form):
     first_name = forms.CharField(
@@ -87,6 +89,26 @@ class ClientSettingsForm(forms.Form):
         return data
 
 
+class ProjectFileForm(forms.ModelForm):
+    class Meta:
+        model = ProjectFile
+        fields = ['file']
+        widgets = {
+            'file': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'multiple': True,  # Разрешить выбор нескольких файлов
+                'accept': '.pdf,.txt,.doc,.docx,.xlsx,.csv,.xslm'
+            }),
+        }
+        labels = {
+            'file': 'Файл',
+        }
+
+ProjectFileFormSet = modelformset_factory(
+    ProjectFile,
+    form=ProjectFileForm,
+    extra=6,  # Позволяет загружать до 6 файлов
+)
 
 class ProjectForm(forms.ModelForm):
 
