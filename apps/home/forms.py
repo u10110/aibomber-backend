@@ -338,11 +338,20 @@ class ChannelForm(forms.ModelForm):
 
         return cleaned_phones
 
+   
+
     def save(self, commit=True):
         """
         Сохраняет канал и создает записи для каждого номера телефона.
         """
+
         channel = super().save(commit=False)
+
+
+            
+
+        # if Channel.objects.filter(title=channel.title, source=channel.source).exists():
+        #     raise ValueError(f"Канал с названием '{channel.title}' и источником '{channel.source}' уже существует.")
 
         if not channel.client_id:
             channel.client = self.initial.get('client')
@@ -352,15 +361,17 @@ class ChannelForm(forms.ModelForm):
         # Получаем список телефонов из очищенных данных
         phone_list = self.cleaned_data.get('phone', [])  # Это уже список из clean_phone
 
-        # Удаляем старые записи, связанные с этим каналом
-        Channel.objects.filter(title=channel.title, source=channel.source).delete()
+        counter = 1
 
         # Создаем новую запись для каждого номера
         for phone in phone_list:
+            title = f"{channel.title} {counter}"
+            counter += 1
+            channel.title = channel.title
             if not Channel.objects.filter(client=self.client, phone=phone).exists():
                 Channel.objects.create(
                     client=channel.client,
-                    title=channel.title,
+                    title=title,
                     source=channel.source,
                     phone=phone,
                     status=channel.status,
