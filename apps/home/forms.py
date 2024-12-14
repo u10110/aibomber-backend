@@ -158,14 +158,6 @@ class ProjectForm(forms.ModelForm):
         label="Текстовый файл базы знаний"
     )
 
-    file = forms.FileField(
-        required=False,
-        widget=forms.ClearableFileInput(attrs={
-            'class': 'form-control',
-            'accept': '.pdf,.txt,.doc,.docx,.xlsx,.csv,.xslm'
-        }),
-        label="Файл"
-    )
     google_doc = forms.URLField(
         required=False,
         widget=forms.URLInput(attrs={
@@ -219,7 +211,6 @@ class ProjectForm(forms.ModelForm):
             'time_end',
             'hello_text',
             'knowledge_base_text',
-            'file',
             'google_doc',
             'outgoing_limit',
             'per_conversation_limit',
