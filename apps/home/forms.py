@@ -365,10 +365,13 @@ class ChannelForm(forms.ModelForm):
 
         # Создаем новую запись для каждого номера
         for phone in phone_list:
-            title = f"{channel.title} {counter}"
-            counter += 1
-            channel.title = channel.title
-            if not Channel.objects.filter(client=self.client, phone=phone).exists():
+            if not phone.strip():
+                continue
+
+            if not Channel.objects.filter(phone=phone).exists():
+                title = f"{channel.title} {counter}"
+                counter += 1
+                channel.title = channel.title
                 Channel.objects.create(
                     client=channel.client,
                     title=title,
