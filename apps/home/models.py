@@ -156,7 +156,6 @@ class Recipient(models.Model):
     work_option = models.IntegerField(choices=OPTIONS, default=1)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
-    tg_id = models.BigIntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.title
@@ -168,6 +167,7 @@ class TgID(models.Model):
         on_delete=models.CASCADE
     )
     tg_id = models.CharField(max_length=255)
+    is_auto_active = models.BooleanField(default=True)
 
 
 class Channel(models.Model):
@@ -237,7 +237,6 @@ class Chat(models.Model):
         choices=MESSAGE_TYPE,
         default='message',
     )
-    is_auto_active = models.BooleanField(default=True)
     status = models.CharField(max_length=55, default="active")
     user_name = models.CharField(max_length=55, )
     user_message = models.CharField(max_length=555, )

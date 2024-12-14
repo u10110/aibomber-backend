@@ -1268,7 +1268,7 @@ def create_project_chat(request):
                 return JsonResponse({"error": "Вопрос не предоставлен."}, status=400)
             print(question)
             # Получаем ответ от GPT
-            response = assistant.ask_question(question, save_to_db=False)
+            response = assistant.ask_question(question, False)
 
             return JsonResponse({
                 "question": question,
@@ -1280,3 +1280,35 @@ def create_project_chat(request):
     return JsonResponse({"error": "Метод не поддерживается."}, status=405)
 
 
+
+
+
+@csrf_exempt
+def gpt_assistant(request):
+    """
+    Эндпоинт для взаимодействия с GPTAssistant.
+    """
+    if request.method != 'POST':
+        return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
+
+    # Получение user_id, project_id и question из тела запроса
+    tgid_id = request.POST.get('tgid_id')
+    project_id = request.POST.get('project_id')
+    question = request.POST.get('question')
+
+    if not project_id:
+        return JsonResponse({"error": "Missing required parameters: user_id, project_id, or question"}, status=400)
+
+    # Получение объекта проекта
+    project = get_object_or_404(Project, id=project_id)
+    print(project)
+
+    # Создание экземпляра GPTAssistant
+    assistant = GPTAssistant(project=project, tgid_id=tgid_id)
+
+    # Получение ответа от GPT
+    try:
+        answer = assistant.ask_question(question)
+        return JsonResponse({"answer": answer})
+    except Exception as e:
+        return JsonResponse({"error": f"Failed to process the request: {str(e)}"}, status=500)
