@@ -94,7 +94,7 @@ class ProjectFileForm(forms.ModelForm):
         model = ProjectFile
         fields = ['file']
         widgets = {
-            'file': forms.ClearableFileInput(attrs={
+            'file': forms.FileInput(attrs={
                 'class': 'form-control',
                 'multiple': True,  # Разрешить выбор нескольких файлов
                 'accept': '.pdf,.txt,.doc,.docx,.xlsx,.csv,.xslm'
