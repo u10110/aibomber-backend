@@ -513,64 +513,92 @@
         const chatContainer = document.getElementById('chat-emulator-container');
         const chatInput = document.getElementById('emulator-chat-input');
         const sendBtn = document.getElementById('emulator-send-btn');
-        const form = document.querySelector('.multisteps-form__form'); // Форма проекта
     
-        const chatHistory = []; // Массив для хранения истории чата
+        // История чата
+        const chatHistory = [];
     
+        // Функция для добавления сообщений в интерфейс и историю
         function addMessage(content, sender) {
             const message = document.createElement('div');
             message.classList.add('chat-message', sender);
             message.textContent = content;
+    
+            // Добавляем сообщение в интерфейс
             chatContainer.appendChild(message);
-            chatContainer.scrollTop = chatContainer.scrollHeight; // Скролл вниз
+            chatContainer.scrollTop = chatContainer.scrollHeight;
     
             // Добавляем сообщение в историю
-            chatHistory.push({ question: content, response: sender === 'bot' ? content : null });
+            if (sender === 'user') {
+                chatHistory.push({ question: content, response: null }); // Пользовательский вопрос
+            } else if (sender === 'bot') {
+                const lastMessage = chatHistory[chatHistory.length - 1];
+                if (lastMessage && lastMessage.response === null) {
+                    lastMessage.response = content; // Ответ на последний вопрос
+                } else {
+                    // Если бот отвечает без вопроса (например, ошибка)
+                    chatHistory.push({ question: "Ошибка при запросе к GPT.", response: content });
+                }
+            }
         }
     
+        // Функция отправки сообщения к GPT
         async function sendMessageToGPT(question) {
             try {
-                // Сбор данных из формы
-                const formData = new FormData(form);
-                const formJSON = Object.fromEntries(formData.entries());
-                formJSON["question"] = question; // Добавляем вопрос
-                formJSON["chat_history"] = chatHistory; // Добавляем историю чата
+                // Получение данных проекта из формы
+                const projectData = {
+                    title: document.querySelector('[name="title"]').value,
+                    agent_type: document.querySelector('[name="agent_type"]').value,
+                    work_option: document.querySelector('[name="work_option"]').value,
+                    gpt_version: document.querySelector('[name="gpt_version"]').value,
+                    knowledge_base_text: document.querySelector('[name="knowledge_base_text"]').value,
+                    hello_text: document.querySelector('[name="hello_text"]').value,
+                    prompt: document.querySelector('[name="prompt"]').value,
+                };
     
-                const response = await fetch(`/create-project-chat/`, {
-                    method: "POST",
+                // Формируем payload
+                const payload = {
+                    question: question,
+                    chat_history: chatHistory,
+                    ...projectData // Включаем данные проекта
+                };
+    
+                const response = await fetch('/create-project-chat/', {
+                    method: 'POST',
                     headers: {
-                        "Content-Type": "application/json",
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(formJSON),
+                    body: JSON.stringify(payload)
                 });
     
                 if (!response.ok) {
                     const error = await response.json();
-                    console.error("Ошибка:", error.error);
-                    addMessage("Ошибка при запросе к GPT.", "bot");
+                    console.error('Ошибка:', error.error);
+                    addMessage('Ошибка при запросе к GPT.', 'bot');
                     return;
                 }
     
                 const data = await response.json();
-                console.log("Ответ от GPT:", data); // Лог для проверки ответа
-                addMessage(data.response, "bot");
-                chatHistory[chatHistory.length - 1].response = data.response; // Обновляем последний элемент истории
+                console.log('Ответ от GPT:', data);
+    
+                addMessage(data.response, 'bot');
             } catch (error) {
-                console.error("Ошибка:", error);
-                addMessage("Ошибка подключения.", "bot");
+                console.error('Ошибка подключения:', error);
+                addMessage('Ошибка при запросе к GPT.', 'bot');
             }
         }
     
+        // Обработчик нажатия на кнопку "Отправить"
         sendBtn.addEventListener('click', () => {
             const userMessage = chatInput.value.trim();
             if (!userMessage) return;
     
-            addMessage(userMessage, "user");
-            chatInput.value = "";
+            addMessage(userMessage, 'user'); // Добавляем сообщение пользователя
+            chatInput.value = ''; // Очищаем поле ввода
     
-            sendMessageToGPT(userMessage); // Отправляем сообщение к GPT
+            sendMessageToGPT(userMessage); // Отправляем запрос
         });
     
+        // Обработчик нажатия клавиши Enter
         chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -578,6 +606,8 @@
             }
         });
     });
+    
+    
     
     
     
