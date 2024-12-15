@@ -14,7 +14,7 @@ from django import forms
 from .models import Project, Recipient, TgID, Channel, ProjectFile
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
-
+from django.db.models import Q
 
 class Account(forms.Form):
     first_name = forms.CharField(
@@ -257,6 +257,7 @@ class ProjectForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
+        project = kwargs.get('instance', None)
         self.agent_type = kwargs.pop('agent_type', None)
         super().__init__(*args, **kwargs)
 
@@ -273,9 +274,22 @@ class ProjectForm(forms.ModelForm):
             self.fields['time_start'].initial = datetime.time(8, 0)
             self.fields['time_end'].initial = datetime.time(22, 0)
         else:
+            user = project.client_id
             # Загружаем связанные записи для редактирования
-            self.fields['channel'].initial = Channel.objects.filter(client=user, project_id=self.instance.id, status='authorized')
-            self.fields['recipients'].initial = Recipient.objects.filter(client=user, project_id=self.instance.id, status='active')
+            self.fields['channel'].queryset = Channel.objects.filter(
+                Q(project_id__isnull=True) | Q(project_id=self.instance.id),
+                client=user,
+                status='authorized')
+            self.fields['channel'].initial = Channel.objects.filter(
+                Q(project_id__isnull=True) | Q(project_id=self.instance.id),
+                client=user,
+                status='authorized'
+            )
+            self.fields['recipients'].queryset = Recipient.objects.filter(
+                Q(project_id__isnull=True) | Q(project_id=self.instance.id),
+                client=user,
+                status='active')
+            self.fields['recipients'].initial = Recipient.objects.filter(client=user, project_id__isnull=True, project_id=self.instance.id, status='active')
 
 
     def save(self, commit=True):
