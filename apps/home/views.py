@@ -1382,3 +1382,25 @@ def validate_google_link(request):
             return JsonResponse({"valid": False, "message": f"Ошибка проверки: {str(e)}"})
 
     return JsonResponse({"valid": False, "message": "Некорректный метод запроса."})
+
+
+@csrf_exempt
+def save_google_link(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            google_doc = data.get('google_doc')
+            project_id = data.get('project_id')
+
+            if not google_doc or not project_id:
+                return JsonResponse({'success': False, 'message': 'Неверные данные'})
+
+            project = Project.objects.get(id=project_id)
+            project.google_doc = google_doc
+            project.save()
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Только POST-запросы'})

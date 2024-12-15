@@ -87,7 +87,7 @@ urlpatterns = [
     path("projects/", views.projects, name="projects"),
     path('projects/create/', views.project_create, name='project-create'),
     path('gpt-assistant/', views.gpt_assistant, name='gpt_assistant'),
-
+    path('save-google-link/', views.save_google_link, name='save-google-link'),
     path('projects/<int:project_id>/chat-emulator/', views.chat_emulator, name='chat-emulator'),
 
 

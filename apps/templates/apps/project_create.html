@@ -315,16 +315,17 @@
                                             {{ form.knowledge_base_text.errors }}
                                         </div>
                                         <!-- Кнопка для добавления ссылки -->
-<div class="col-12 mt-3">
-    <button type="button" id="add-google-link" class="btn bg-gradient-primary" data-bs-toggle="modal" data-bs-target="#googleLinkModal">
-        Добавить Google-ссылку
-    </button>
-</div>
-<!-- Добавьте блок для отображения добавленной ссылки -->
-<div class="col-12 mt-3" id="google-link-display" style="display: none;">
-    <h6>Добавленная Google-ссылка:</h6>
-    <a href="#" id="google-link-url" target="_blank"></a>
-</div>
+                                        <input type="hidden" name="google_doc" value="{{ form.google_doc.value }}">
+                                        <div class="col-12 mt-3">
+                                            <button type="button" id="add-google-link" class="btn bg-gradient-primary" data-bs-toggle="modal" data-bs-target="#googleLinkModal">
+                                                Добавить Google-ссылку
+                                            </button>
+                                        </div>
+                                        <div class="col-12 mt-3" id="google-link-display" style="{% if form.google_doc.value %}display: block;{% else %}display: none;{% endif %}">
+                                            <h6>Добавленная Google-ссылка:</h6>
+                                            <a href="{{ form.google_doc.value }}" id="google-link-url" target="_blank">{{ form.google_doc.value }}</a>
+                                        </div>
+
 
 
                                         
@@ -457,12 +458,46 @@
 
 {% block javascripts %}
 <script src="/static/assets/js/plugins/multistep-form.js"></script>
+{% comment %} <script>
+    saveButton.addEventListener('click', function () {
+        const link = googleLinkInput.value.trim();
+    
+        if (!link) {
+            googleLinkError.textContent = "Пожалуйста, введите ссылку.";
+            googleLinkError.style.display = "block";
+            return;
+        }
+    
+        // Установите значение скрытого поля формы
+        const googleDocField = document.querySelector('[name="google_doc"]');
+        if (googleDocField) {
+            googleDocField.value = link;
+    
+            // Обновляем отображение ссылки
+            googleLinkUrl.textContent = link;
+            googleLinkUrl.href = link;
+            googleLinkDisplay.style.display = "block";
+    
+            // Скрываем кнопку добавления
+            addGoogleLinkButton.style.display = "none";
+    
+            // Закрываем модальное окно
+            const bootstrapModal = bootstrap.Modal.getInstance(googleLinkModal);
+            bootstrapModal.hide();
+    
+            alert("Ссылка успешно добавлена!");
+        }
+    });
+    
+    
+</script> {% endcomment %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const saveButton = document.getElementById('save-google-link');
         const googleLinkInput = document.getElementById('google-link-input');
         const googleLinkError = document.getElementById('google-link-error');
         const googleLinkModal = document.getElementById('googleLinkModal');
+        const googleLinkHiddenInput = document.querySelector('input[name="google_doc"]');
     
         saveButton.addEventListener('click', function () {
             const link = googleLinkInput.value.trim();
@@ -505,7 +540,10 @@
                     // Закрытие модального окна
                     const bootstrapModal = bootstrap.Modal.getInstance(googleLinkModal);
                     bootstrapModal.hide();
-    
+                    
+                    // Обновляем скрытое поле
+                    googleLinkHiddenInput.value = link;
+
                     // Ручное удаление затемнения и блокировки
                     document.body.classList.remove('modal-open');
                     const backdrop = document.querySelector('.modal-backdrop');
@@ -556,7 +594,7 @@
 
         // Обработчик кнопки добавления файлов
         addFileButton.addEventListener('click', function () {
-            if (uploadedFiles < maxFiles) {
+            if (uploadedFiles <script maxFiles) {
                 // Создаем новое поле загрузки
                 const newFileField = document.createElement('input');
                 newFileField.type = 'file';

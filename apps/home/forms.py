@@ -158,14 +158,17 @@ class ProjectForm(forms.ModelForm):
         label="Текстовый файл базы знаний"
     )
 
-    google_doc = forms.URLField(
+    google_doc = forms.CharField(
         required=False,
-        widget=forms.URLInput(attrs={
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Введите URL Google-документа',
             'class': 'form-control',
-            'placeholder': 'Ссылка на Google-документ',
         }),
-        label="Google-документ"
+        error_messages={
+            'invalid': 'Введите правильный URL.',
+        }
     )
+
     per_conversation_limit = forms.IntegerField(
         label="Лимит на одну переписку",
         required=False,
