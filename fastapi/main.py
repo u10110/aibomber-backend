@@ -26,7 +26,15 @@ async def send_code(phone: str):
     print(phone)
     logger.info(f"Получен запрос на отправку кода для телефона: {phone}")
     session_name = os.path.join(SESSION_DIR, "session_" + phone.replace("+", ""))
-    
+
+    # Если файл сессии существует, удаляем его
+    if os.path.exists(session_name + ".session"):
+        try:
+            os.remove(session_name + ".session")
+            logger.info(f"Существующий файл сессии удалён: {session_name}.session")
+        except Exception as e:
+            logger.error(f"Ошибка при удалении файла сессии: {str(e)}")
+            raise HTTPException(status_code=500, detail="Ошибка при очистке предыдущей сессии")
 
     client = TelegramClient(session_name, API_ID, API_HASH)
 
@@ -34,7 +42,6 @@ async def send_code(phone: str):
         await client.connect()
         logger.info("Клиент Telegram подключён")
         if not await client.is_user_authorized():
-            # Отправляем код и сохраняем phone_code_hash
             result = await client.send_code_request(phone)
             phone_hash_store[phone] = result.phone_code_hash
             logger.info(f"Код успешно отправлен, phone_code_hash сохранён для телефона: {phone}")
@@ -48,7 +55,7 @@ async def send_code(phone: str):
         await client.disconnect()
         logger.info("Клиент Telegram отключён")
 
-# Pydantic модель для валидации входных данных
+
 class VerifyCodeRequest(BaseModel):
     phone: str
     code: str
