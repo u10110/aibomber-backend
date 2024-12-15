@@ -91,11 +91,11 @@ class ClientSettingsForm(forms.Form):
 class ProjectFileForm(forms.ModelForm):
     class Meta:
         model = ProjectFile
-        fields = ['file']  # Укажите поле 'file' или другие необходимые поля
+        fields = ['file']
         widgets = {
-            'file': forms.ClearableFileInput(attrs={
-                'multiple': True,  # Разрешение на множественную загрузку
-                'class': 'form-control',  # Дополнительные CSS-классы
+            'file': forms.FileInput(attrs={
+                'multiple': True,  # Позволяет выбирать несколько файлов
+                'class': 'form-control',
             }),
         }
 
