@@ -102,6 +102,14 @@ class ProjectForm(forms.ModelForm):
         widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
         label="Получатели"
     )
+
+    CRM_TYPES = [
+        ('amo_crm', 'Amo Crm')
+    ]
+
+    integrations = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+                                             choices=CRM_TYPES)
+
     time_start = forms.TimeField(
         required=True,
         widget=forms.TimeInput(attrs={

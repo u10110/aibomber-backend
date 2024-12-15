@@ -63,10 +63,55 @@ class ReferralUsers(models.Model):
         verbose_name_plural = "Реферальные пользователи"
 
 
-
 class AmoCrm(models.Model):
     website = models.JSONField()
     tg = models.JSONField()
+
+
+class Integrations(models.Model):
+    CRM_TYPES = [
+        ('amo_crm', 'Amo Crm'),
+        ('bitrix', 'Bitrix 24')
+    ]
+    type = models.CharField(
+        max_length=40,
+        choices=CRM_TYPES,
+        verbose_name="Статус общения"
+    )
+    client = models.ForeignKey(User, on_delete=models.CASCADE)
+    access_granted = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+
+class CrmPipelines(models.Model):
+    class Meta:
+        verbose_name = "Воронки проектов в CRМ"
+        verbose_name_plural = "Воронки"
+
+    TRIGGER_ACTIONS = [
+        ('success', 'Успешные диалоги'),
+        ('contact_received', 'Контакт получен'),
+        ('interest_shown', 'Проявлен интерес'),
+        ('closed', 'Закрытые'),
+    ]
+
+    integration = models.ForeignKey(Integrations, on_delete=models.CASCADE)
+    project_id = models.IntegerField(null=True)
+    name = models.CharField(max_length=1000)
+
+    trigger = models.CharField(
+        max_length=40,
+        choices=TRIGGER_ACTIONS,
+        verbose_name="Статус общения"
+    )
+    is_active = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.name})"
+
 
 
 class Project(models.Model):

@@ -9,7 +9,7 @@ $( function() {
 			{ src: 'images/background4.jpg', fade: 4000 },
 			{ src: 'images/background3.jpg', fade: 4000 },
 			{ src: 'images/background2.jpg', fade: 4000 },
-			{ src: 'images/background1.jpg', fade: 4000 }
+			{ src: 'images/amocrm.jpg', fade: 4000 }
 		]
 	} )( 'overlay' );
 	

@@ -46,6 +46,7 @@ ALLOWED_HOSTS = [
     "192.168.122.200",
     "192.168.122.26",
     config("SERVER", default="192.168.122.200"),
+    "localhost.localdomain"
 ]
 
 # Application definition

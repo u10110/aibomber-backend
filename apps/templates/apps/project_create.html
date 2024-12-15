@@ -142,6 +142,9 @@
                           <button class="multisteps-form__progress-btn" type="button" title="Каналы">
                               <span>5. Каналы</span>
                           </button>
+                          <button class="multisteps-form__progress-btn" type="button" title="Интеграции">
+                              <span>6. Интеграции</span>
+                          </button>
                         </div>
                     </div>
                 </div>
@@ -346,18 +349,18 @@
                                 <div class="multisteps-form__content">
                                     <div class="row justify-content-center align-items-start">
                                         <!-- Блок выбора каналов -->
-<div class="col-lg-5 col-md-6">
-    <div class="mb-3">
-        <label for="channel" class="form-label fw-bold">Выберите каналы:</label>
-        {{ form.channel }}
-        {{ form.channel.errors }}
-    </div>
-</div>
+                                            <div class="col-lg-5 col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="channel" class="form-label fw-bold">Выберите каналы:</label>
+                                                    {{ form.channel }}
+                                                    {{ form.channel.errors }}
+                                                </div>
+                                            </div>
 
-<!-- Разделитель -->
-<div class="col-lg-1 d-flex justify-content-center align-items-center">
-    <div class="vr"></div>
-</div>
+                                            <!-- Разделитель -->
+                                            <div class="col-lg-1 d-flex justify-content-center align-items-center">
+                                                <div class="vr"></div>
+                                            </div>
                               
                                         <!-- Блок выбора получателей -->
                                         <div class="col-lg-5 col-md-6" id="recipients-block" style="display: none;">
@@ -376,9 +379,32 @@
                                     </div>
                                 </div>
                               </div>
+                            </div>
 
 
+                            <!-- Шаг 6 -->
 
+                            <div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
+                                <div class="multisteps-form__content">
+                                    <div class="row align-items-start" align="left">
+                                        <!-- Блок выбора интеграции -->
+                                        <div class="col-lg-3">
+                                            <img src="/static/assets/img/small-logos/amocrm.jpg"
+                                                 width="150"
+                                                 style="cursor: pointer"
+                                                 id="amo-integration"
+                                            />
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <img src="/static/assets/img/small-logos/bitrix24.png" width="170"  style="cursor: pointer"/>
+                                            {{ form.integrations }}
+                                        </div>
+                                    </div>
+                                    <div class="row align-items-start" align="left">
+
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -394,7 +420,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         const workOptionField = document.getElementById('work-option-field'); // Поле выбора опций работы
         const recipientsBlock = document.getElementById('recipients-block'); // Блок получателей
-    
+
         function toggleRecipientsVisibility() {
             if (!workOptionField || !recipientsBlock) return; // Проверяем существование элементов
     
@@ -578,9 +604,17 @@
             }
         });
     });
-    
-    
-    
+
+
+
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const amoIntegrationButton = document.getElementById('amo-integration');
+        amoIntegrationButton.addEventListener('click', () => {
+
+        });
+    });
 </script>
 
 {% endblock javascripts %}
