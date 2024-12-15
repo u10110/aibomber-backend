@@ -315,11 +315,21 @@
                                             {{ form.knowledge_base_text.errors }}
                                         </div>
                                         <!-- Кнопка для добавления ссылки -->
-                                        <input type="hidden" name="google_doc" value="{{ form.google_doc.value }}">
+                                        <input type="hidden" name="google_doc" value="{{ form.google_doc.value|default:'' }}">
                                         <div class="col-12 mt-3">
-                                            <button type="button" id="add-google-link" class="btn bg-gradient-primary" data-bs-toggle="modal" data-bs-target="#googleLinkModal">
-                                                Добавить Google-ссылку
-                                            </button>
+                                            <button 
+    type="button" 
+    id="add-google-link" 
+    class="btn bg-gradient-primary" 
+    data-bs-toggle="modal" 
+    data-bs-target="#googleLinkModal">
+    {% if form.google_doc.value %}
+        Изменить Google-ссылку
+    {% else %}
+        Добавить Google-ссылку
+    {% endif %}
+</button>
+
                                         </div>
                                         <div class="col-12 mt-3" id="google-link-display" style="{% if form.google_doc.value %}display: block;{% else %}display: none;{% endif %}">
                                             <h6>Добавленная Google-ссылка:</h6>
@@ -330,11 +340,25 @@
 
                                         
                                         <div class="col-12">
-                                            {% comment %} <h6>Загрузить файлы</h6> {% endcomment %}
                                             <p id="file-upload-status">Загружено {{ uploaded_files }} из {{ max_files }}</p>
                                             {{ file_formset.management_form }}
                                         
-                                            <!-- Контейнер для полей загрузки -->
+                                            <!-- Контейнер для отображения загруженных файлов -->
+                                            <div class="uploaded-files-container">
+                                                {% for file in file_formset.forms %}
+                                                    {% if file.instance.file %}
+                                                        <div class="uploaded-file-item">
+                                                            <a href="{{ file.instance.file.url }}" target="_blank">{{ file.instance.file.name }}</a>
+                                                            <!-- Кнопка для удаления файла (если нужно) -->
+                                                            <button type="button" class="btn btn-sm btn-danger remove-file-button" data-file-id="{{ file.instance.id }}">
+                                                                Удалить
+                                                            </button>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        
+                                            <!-- Контейнер для добавления новых полей -->
                                             <div class="file-upload-container" id="file-upload-container"></div>
                                         
                                             <!-- Кнопка добавления нового поля -->
@@ -344,6 +368,7 @@
                                         
                                             <p class="text-muted mt-2">Допустимые форматы: PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM</p>
                                         </div>
+                                        
                                         
                                         
                                         

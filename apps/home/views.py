@@ -681,10 +681,13 @@ def project_edit(request, project_id):
             return redirect("projects")  # После успешного сохранения возвращаемся к списку проектов
     else:
         form = ProjectForm(instance=project)  # Предзаполняем форму данными проекта
-
+    max_files = 6
+    uploaded_files = 0  # Если редактируется проект, здесь можно 
     context = {
         "form": form,
         "project": project,
+        "max_files": 6,
+        "uploaded_files": 0
     }
     return render(request, "apps/project_create.html", context)
 
