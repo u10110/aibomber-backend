@@ -86,6 +86,7 @@
 
 {% endblock stylesheets %}
 {% block content %}
+<input type="hidden" id="user-balance" value="{{ current_balance }}">
 <div class="container-fluid py-4">
 	<div class="row">
 	  <div class="col-12 card">
@@ -270,63 +271,94 @@
 
 
   
+
+
+
+
+
+<!-- Модальное окно: Уведомление об оплате -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="paymentModalLabel">Недостаточно средств</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+          </div>
+          <div class="modal-body">
+              У вас недостаточно средств для создания и включения проекта. Пожалуйста, пополните баланс.
+          </div>
+          <div class="modal-footer">
+              <a href="/payment/" class="btn bg-gradient-primary">Пополнить баланс</a>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+          </div>
+      </div>
+  </div>
+</div>
+
 {% endblock content %}
 
 {% block javascripts %}
 <script>
+  document.getElementById('createProjectModal').addEventListener('show.bs.modal', function (event) {
+    const userBalance = parseFloat(document.getElementById('user-balance').value) || 0;
+    if (userBalance <= 0) {
+        event.preventDefault(); // Отменяем показ модального окна
+        const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+        paymentModal.show();
+    }
+});
+
+</script>
+
+<script>
 	
 	document.addEventListener("DOMContentLoaded", function () {
-		// Находим все активные карточки (без класса disabled)
-		const projectOptions = document.querySelectorAll(".option-card:not(.disabled)");
-	
-		// Добавляем обработчик клика для каждой активной карточки
-		projectOptions.forEach((card) => {
-			card.addEventListener("click", function () {
-				const url = this.dataset.url; // Получаем URL из атрибута data-url
-				if (url) {
-					window.location.href = url; // Перенаправляем пользователя
-				}
-			});
-		});
-	
-		// Обработка переключателей активности
-		const toggles = document.querySelectorAll(".project-toggle");
-	
-		toggles.forEach((toggle) => {
-			toggle.addEventListener("change", function () {
-				const projectId = this.dataset.projectId; // ID проекта
-				const isActive = this.checked; // Состояние переключателя
-	
-				// Отправляем AJAX-запрос
-				fetch("{% url 'toggle-project-active' %}", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"X-CSRFToken": "{{ csrf_token }}", // Добавляем CSRF-токен
-					},
-					body: JSON.stringify({
-						project_id: projectId,
-						is_active: isActive,
-					}),
-				})
-					.then((response) => response.json())
-					.then((data) => {
-						if (data.success) {
-							console.log("Состояние проекта обновлено:", data.is_active);
-						} else {
-							alert("Ошибка: " + data.message);
-							// Восстанавливаем предыдущее состояние переключателя в случае ошибки
-							this.checked = !isActive;
-						}
-					})
-					.catch((error) => {
-						console.error("Ошибка при обновлении проекта:", error);
-						// Восстанавливаем предыдущее состояние переключателя
-						this.checked = !isActive;
-					});
-			});
-		});
-	});
+    const toggles = document.querySelectorAll(".project-toggle");
+    const userBalance = parseFloat(document.getElementById('user-balance').value) || 0; // Получаем баланс пользователя
+    const paymentModal = new bootstrap.Modal(document.getElementById("paymentModal"));
+
+    toggles.forEach((toggle) => {
+        toggle.addEventListener("change", function () {
+            const projectId = this.dataset.projectId; // ID проекта
+            const isActive = this.checked; // Текущее состояние переключателя
+
+            // Проверяем баланс пользователя
+            if (userBalance <= 0) {
+                // Показываем модальное окно оплаты
+                paymentModal.show();
+
+                // Возвращаем переключатель в исходное состояние
+                this.checked = !isActive;
+                return; // Прекращаем выполнение функции
+            }
+
+            // Если баланс больше 0, выполняем AJAX-запрос
+            fetch("{% url 'toggle-project-active' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: JSON.stringify({
+                    project_id: projectId,
+                    is_active: isActive,
+                }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (!data.success) {
+                        alert("Ошибка: " + data.message);
+                        this.checked = !isActive; // Восстанавливаем переключатель
+                    }
+                })
+                .catch((error) => {
+                    console.error("Ошибка при обновлении проекта:", error);
+                    this.checked = !isActive; // Восстанавливаем переключатель
+                });
+        });
+    });
+});
+
 	
 	  
 </script>

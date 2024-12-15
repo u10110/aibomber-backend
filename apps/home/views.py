@@ -611,13 +611,18 @@ def projects(request):
     else:
         form = ProjectForm(user=request.user)  # Передаём user для фильтрации
 
-    # Получаем все проекты из модели, принадлежащие текущему пользователю
     projects = Project.objects.filter(client=request.user)
 
+
+    
+    # Получаем все проекты из модели, принадлежащие текущему пользователю
+    client_settings = ClientSettings.objects.get(client=request.user)
+    current_balance = client_settings.balance
     # Передаем данные в шаблон
     context = {
         'form': form,
         'projects': projects,
+        'current_balance': current_balance,
     }
     return render(request, 'apps/projects.html', context)
 
