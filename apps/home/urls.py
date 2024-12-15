@@ -10,7 +10,7 @@ from apps.home import views
 
 urlpatterns = [
     path("", login_required(views.index), name="home"),
-    path("upload/", login_required(views.upload), name="upload"),
+    # path("upload/", login_required(views.upload), name="upload"),
     path("pricing/", login_required(views.pricing), name="pricing"),
     path(
         "account-billing/",

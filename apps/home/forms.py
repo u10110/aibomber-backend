@@ -88,20 +88,15 @@ class ClientSettingsForm(forms.Form):
             raise forms.ValidationError("Ссылка нерабочая")
         return data
 
-
 class ProjectFileForm(forms.ModelForm):
     class Meta:
         model = ProjectFile
-        fields = ['file']
+        fields = ['file']  # Укажите поле 'file' или другие необходимые поля
         widgets = {
-            'file': forms.FileInput(attrs={
-                'class': 'form-control',
-                'multiple': True,  # Разрешить выбор нескольких файлов
-                'accept': '.pdf,.txt,.doc,.docx,.xlsx,.csv,.xslm'
+            'file': forms.ClearableFileInput(attrs={
+                'multiple': True,  # Разрешение на множественную загрузку
+                'class': 'form-control',  # Дополнительные CSS-классы
             }),
-        }
-        labels = {
-            'file': 'Файл',
         }
 
 ProjectFileFormSet = modelformset_factory(
