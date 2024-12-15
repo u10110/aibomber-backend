@@ -317,14 +317,23 @@ class ChannelForm(forms.ModelForm):
         self.client = client
 
     phone = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'placeholder': 'Введите номера телефонов, каждый с новой строки, например: +1234567890',
-            'rows': 5,
-        }),
-        label="Телефоны",
-        required=True
-    )
+    widget=forms.Textarea(attrs={
+        'class': 'form-control',
+        'placeholder': (
+            'Введите номера телефонов, каждый с новой строки, например:\n'
+            '+1234567890\n'
+            '+1 (234) 567-8900\n'
+            '+44 20 7946 0958\n'
+            '+91-9876543210\n'
+            '+61 412 345 678\n'
+            '+49-151-12345678'
+        ),
+        'rows': 5,
+    }),
+    label="Телефоны",
+    required=True
+)
+
 
     def clean_phone(self):
         phone_data = self.cleaned_data.get('phone', '')
