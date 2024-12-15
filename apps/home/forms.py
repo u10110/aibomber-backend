@@ -94,7 +94,7 @@ class ProjectFileForm(forms.ModelForm):
         fields = ['file']
         widgets = {
             'file': forms.FileInput(attrs={
-                'multiple': True,  # Позволяет выбирать несколько файлов
+                # 'multiple': True,  # Позволяет выбирать несколько файлов
                 'class': 'form-control',
             }),
         }
