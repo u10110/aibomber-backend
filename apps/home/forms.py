@@ -11,8 +11,10 @@ from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.forms import fields
 from django import forms
-from .models import Project, Recipient, TgID, Channel
+from .models import Project, Recipient, TgID, Channel, ProjectFile
 from django.core.exceptions import ValidationError
+from django.forms import modelformset_factory
+from django.db.models import Q
 
 class Account(forms.Form):
     first_name = forms.CharField(
@@ -86,7 +88,22 @@ class ClientSettingsForm(forms.Form):
             raise forms.ValidationError("Ссылка нерабочая")
         return data
 
+class ProjectFileForm(forms.ModelForm):
+    class Meta:
+        model = ProjectFile
+        fields = ['file']
+        widgets = {
+            'file': forms.FileInput(attrs={
+                'multiple': True,  # Позволяет выбирать несколько файлов
+                'class': 'form-control',
+            }),
+        }
 
+ProjectFileFormSet = modelformset_factory(
+    ProjectFile,
+    form=ProjectFileForm,
+    extra=6,  # Позволяет загружать до 6 файлов
+)
 
 class ProjectForm(forms.ModelForm):
 
@@ -144,22 +161,17 @@ class ProjectForm(forms.ModelForm):
         label="Текстовый файл базы знаний"
     )
 
-    file = forms.FileField(
+    google_doc = forms.CharField(
         required=False,
-        widget=forms.ClearableFileInput(attrs={
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Введите URL Google-документа',
             'class': 'form-control',
-            'accept': '.pdf,.txt,.doc,.docx,.xlsx,.csv,.xslm'
         }),
-        label="Файл"
+        error_messages={
+            'invalid': 'Введите правильный URL.',
+        }
     )
-    google_doc = forms.URLField(
-        required=False,
-        widget=forms.URLInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Ссылка на Google-документ',
-        }),
-        label="Google-документ"
-    )
+
     per_conversation_limit = forms.IntegerField(
         label="Лимит на одну переписку",
         required=False,
@@ -205,7 +217,6 @@ class ProjectForm(forms.ModelForm):
             'time_end',
             'hello_text',
             'knowledge_base_text',
-            'file',
             'google_doc',
             'outgoing_limit',
             'per_conversation_limit',
@@ -249,6 +260,7 @@ class ProjectForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
+        project = kwargs.get('instance', None)
         self.agent_type = kwargs.pop('agent_type', None)
         super().__init__(*args, **kwargs)
 
@@ -265,9 +277,22 @@ class ProjectForm(forms.ModelForm):
             self.fields['time_start'].initial = datetime.time(8, 0)
             self.fields['time_end'].initial = datetime.time(22, 0)
         else:
+            user = project.client_id
             # Загружаем связанные записи для редактирования
-            self.fields['channel'].initial = Channel.objects.filter(project_id=self.instance.id)
-            self.fields['recipients'].initial = Recipient.objects.filter(project_id=self.instance.id)
+            self.fields['channel'].queryset = Channel.objects.filter(
+                Q(project_id__isnull=True) | Q(project_id=self.instance.id),
+                client=user,
+                status='authorized')
+            self.fields['channel'].initial = Channel.objects.filter(
+                Q(project_id__isnull=True) | Q(project_id=self.instance.id),
+                client=user,
+                status='authorized'
+            )
+            self.fields['recipients'].queryset = Recipient.objects.filter(
+                Q(project_id__isnull=True) | Q(project_id=self.instance.id),
+                client=user,
+                status='active')
+            self.fields['recipients'].initial = Recipient.objects.filter(client=user, project_id__isnull=True, project_id=self.instance.id, status='active')
 
 
     def save(self, commit=True):
@@ -295,14 +320,23 @@ class ChannelForm(forms.ModelForm):
         self.client = client
 
     phone = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'placeholder': 'Введите номера телефонов, каждый с новой строки, например: +1234567890',
-            'rows': 5,
-        }),
-        label="Телефоны",
-        required=True
-    )
+    widget=forms.Textarea(attrs={
+        'class': 'form-control',
+        'placeholder': (
+            'Введите номера телефонов, каждый с новой строки, например:\n'
+            '+1234567890\n'
+            '+1 (234) 567-8900\n'
+            '+44 20 7946 0958\n'
+            '+91-9876543210\n'
+            '+61 412 345 678\n'
+            '+49-151-12345678'
+        ),
+        'rows': 5,
+    }),
+    label="Телефоны",
+    required=True
+)
+
 
     def clean_phone(self):
         phone_data = self.cleaned_data.get('phone', '')
@@ -324,11 +358,20 @@ class ChannelForm(forms.ModelForm):
 
         return cleaned_phones
 
+   
+
     def save(self, commit=True):
         """
         Сохраняет канал и создает записи для каждого номера телефона.
         """
+
         channel = super().save(commit=False)
+
+
+            
+
+        # if Channel.objects.filter(title=channel.title, source=channel.source).exists():
+        #     raise ValueError(f"Канал с названием '{channel.title}' и источником '{channel.source}' уже существует.")
 
         if not channel.client_id:
             channel.client = self.initial.get('client')
@@ -338,15 +381,20 @@ class ChannelForm(forms.ModelForm):
         # Получаем список телефонов из очищенных данных
         phone_list = self.cleaned_data.get('phone', [])  # Это уже список из clean_phone
 
-        # Удаляем старые записи, связанные с этим каналом
-        Channel.objects.filter(title=channel.title, source=channel.source).delete()
+        counter = 1
 
         # Создаем новую запись для каждого номера
         for phone in phone_list:
-            if not Channel.objects.filter(client=self.client, phone=phone).exists():
+            if not phone.strip():
+                continue
+
+            if not Channel.objects.filter(phone=phone).exists():
+                title = f"{channel.title} {counter}"
+                counter += 1
+                channel.title = channel.title
                 Channel.objects.create(
                     client=channel.client,
-                    title=channel.title,
+                    title=title,
                     source=channel.source,
                     phone=phone,
                     status=channel.status,

@@ -137,6 +137,12 @@ class Project(models.Model):
         ('health_fitness_manager', 'Менеджер в сфере здоровья и фитнеса'),
     ]
 
+    STATUS_CHOICES = [
+    ('active', 'В работе'),
+    ('completed', 'Завершен'),
+    ('paused', 'Пауза'),
+    ]
+
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=1000)
     agent_type = models.CharField(
@@ -145,19 +151,18 @@ class Project(models.Model):
         default='sales_manager',
         verbose_name="Тип ИИ-агента"
     )
-    status = models.CharField(max_length=55, default="active")
+    status = models.CharField(
+    max_length=55,
+    choices=STATUS_CHOICES,
+    default='active',
+    verbose_name="Статус"
+)
     is_active = models.BooleanField(default=False)
     work_option = models.IntegerField(choices=OPTIONS, default=1)
     gpt_version = models.IntegerField(choices=GPT_VERSION_CHOICES, default=1)
     hello_text = models.TextField(null=True)
     prompt = models.TextField()
     knowledge_base_text = models.TextField(null=True, blank=True)
-    file = models.FileField(
-        null=True,
-        blank=True,
-        upload_to="uploads/files/",
-        help_text="Допустимые форматы: PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM"
-    )
     google_doc = models.URLField(
         null=True,
         blank=True,
@@ -178,9 +183,20 @@ class Project(models.Model):
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
+    def get_status_display(self):
+        return dict(self.STATUS_CHOICES).get(self.status, self.status)
+
     def get_agent_type_display(self):
         return dict(self.AGENT_TYPES).get(self.agent_type, self.agent_type)
 
+
+class ProjectFile(models.Model):
+    project = models.ForeignKey(Project, related_name="files", on_delete=models.CASCADE)
+    file = models.FileField(
+        upload_to="uploads/files/",
+        help_text="Допустимые форматы: PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM"
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
 
 class Recipient(models.Model):
@@ -201,7 +217,6 @@ class Recipient(models.Model):
     work_option = models.IntegerField(choices=OPTIONS, default=1)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
-    tg_id = models.BigIntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.title
@@ -213,6 +228,7 @@ class TgID(models.Model):
         on_delete=models.CASCADE
     )
     tg_id = models.CharField(max_length=255)
+    is_auto_active = models.BooleanField(default=True)
 
 
 class Channel(models.Model):
@@ -282,7 +298,6 @@ class Chat(models.Model):
         choices=MESSAGE_TYPE,
         default='message',
     )
-    is_auto_active = models.BooleanField(default=True)
     status = models.CharField(max_length=55, default="active")
     user_name = models.CharField(max_length=55, )
     user_message = models.CharField(max_length=555, )

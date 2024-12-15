@@ -2,6 +2,20 @@
 
 {% block stylesheets %}
 <style>
+    #google-link-display a {
+        font-weight: bold;
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    #google-link-display a:hover {
+        text-decoration: underline;
+    }
+
+</style>
+
+
+<style>
     .multisteps-form__panel {
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         border-radius: 15px;
@@ -172,24 +186,29 @@
 
             <h6>
                 Тип ИИ-агента:
-                {% if agent_type == 'sales_manager' %}
-                    Менеджер по продажам
-                {% elif agent_type == 'consultant' %}
-                    Консультант
-                {% elif agent_type == 'support_manager' %}
-                    Менеджер поддержки
-                {% elif agent_type == 'review_manager' %}
-                    Менеджер по работе с отзывами
-                {% elif agent_type == 'info_business_manager' %}
-                    Менеджер для инфобиза
-                {% elif agent_type == 'services_manager' %}
-                    Менеджер в сфере услуг
-                {% elif agent_type == 'health_fitness_manager' %}
-                    Менеджер в сфере здоровья и фитнеса
+                {% if form.agent_type.value %}
+                    {{ form.agent_type }}
                 {% else %}
-                    Неизвестный тип
+                    {% if agent_type == 'sales_manager' %}
+                        Менеджер по продажам
+                    {% elif agent_type == 'consultant' %}
+                        Консультант
+                    {% elif agent_type == 'support_manager' %}
+                        Менеджер поддержки
+                    {% elif agent_type == 'review_manager' %}
+                        Менеджер по работе с отзывами
+                    {% elif agent_type == 'info_business_manager' %}
+                        Менеджер для инфобиза
+                    {% elif agent_type == 'services_manager' %}
+                        Менеджер в сфере услуг
+                    {% elif agent_type == 'health_fitness_manager' %}
+                        Менеджер в сфере здоровья и фитнеса
+                    {% else %}
+                        Неизвестный тип
+                    {% endif %}
                 {% endif %}
             </h6>
+
 
 
             <div class="col-12">
@@ -298,16 +317,65 @@
                                             {{ form.knowledge_base_text }}
                                             {{ form.knowledge_base_text.errors }}
                                         </div>
+                                        <!-- Кнопка для добавления ссылки -->
+                                        <input type="hidden" name="google_doc" value="{{ form.google_doc.value|default:'' }}">
                                         <div class="col-12 mt-3">
-                                            <label for="file">Загрузить файл (PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM)</label>
-                                            {{ form.file }}
-                                            {{ form.file.errors }}
+                                            <button
+    type="button"
+    id="add-google-link"
+    class="btn bg-gradient-primary"
+    data-bs-toggle="modal"
+    data-bs-target="#googleLinkModal">
+    {% if form.google_doc.value %}
+        Изменить Google-ссылку
+    {% else %}
+        Добавить Google-ссылку
+    {% endif %}
+</button>
+
                                         </div>
-                                        <div class="col-12 mt-3">
-                                            <label for="google_doc">Ссылка на Google-документ</label>
-                                            {{ form.google_doc }}
-                                            {{ form.google_doc.errors }}
+                                        <div class="col-12 mt-3" id="google-link-display" style="{% if form.google_doc.value %}display: block;{% else %}display: none;{% endif %}">
+                                            <h6>Добавленная Google-ссылка:</h6>
+                                            <a href="{{ form.google_doc.value }}" id="google-link-url" target="_blank">{{ form.google_doc.value }}</a>
                                         </div>
+
+
+
+
+                                        <div class="col-12">
+                                            <p id="file-upload-status">Загружено {{ uploaded_files }} из {{ max_files }}</p>
+                                            {{ file_formset.management_form }}
+
+                                            <!-- Контейнер для отображения загруженных файлов -->
+                                            <div class="uploaded-files-container">
+                                                {% for file in file_formset.forms %}
+                                                    {% if file.instance.file %}
+                                                        <div class="uploaded-file-item">
+                                                            <a href="{{ file.instance.file.url }}" target="_blank">{{ file.instance.file.name }}</a>
+                                                            <!-- Кнопка для удаления файла (если нужно) -->
+                                                            <button type="button" class="btn btn-sm btn-danger remove-file-button" data-file-id="{{ file.instance.id }}">
+                                                                Удалить
+                                                            </button>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+
+                                            <!-- Контейнер для добавления новых полей -->
+                                            <div class="file-upload-container" id="file-upload-container"></div>
+
+                                            <!-- Кнопка добавления нового поля -->
+                                            <button id="add-file-button" class="btn btn-sm bg-gradient-primary mt-3" type="button">
+                                                Добавить файл
+                                            </button>
+
+                                            <p class="text-muted mt-2">Допустимые форматы: PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM</p>
+                                        </div>
+
+
+
+
+
                                     </div>
                                     <div class="button-row d-flex mt-4">
                                         <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button">Назад</button>
@@ -412,10 +480,193 @@
         </div>
     </div>
 </div>
+
+
+
+<!-- Popup для добавления и проверки Google-ссылки -->
+<div class="modal fade" id="googleLinkModal" tabindex="-1" aria-labelledby="googleLinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="googleLinkModalLabel">Добавление Google-ссылки</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="google-link-input">Введите ссылку на Google-документ</label>
+                    <input type="url" id="google-link-input" class="form-control" placeholder="https://docs.google.com/...">
+                    <small id="google-link-error" class="text-danger" style="display: none;"></small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" id="save-google-link" class="btn bg-gradient-primary">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock content %}
 
 {% block javascripts %}
 <script src="/static/assets/js/plugins/multistep-form.js"></script>
+{% comment %} <script>
+    saveButton.addEventListener('click', function () {
+        const link = googleLinkInput.value.trim();
+
+        if (!link) {
+            googleLinkError.textContent = "Пожалуйста, введите ссылку.";
+            googleLinkError.style.display = "block";
+            return;
+        }
+
+        // Установите значение скрытого поля формы
+        const googleDocField = document.querySelector('[name="google_doc"]');
+        if (googleDocField) {
+            googleDocField.value = link;
+
+            // Обновляем отображение ссылки
+            googleLinkUrl.textContent = link;
+            googleLinkUrl.href = link;
+            googleLinkDisplay.style.display = "block";
+
+            // Скрываем кнопку добавления
+            addGoogleLinkButton.style.display = "none";
+
+            // Закрываем модальное окно
+            const bootstrapModal = bootstrap.Modal.getInstance(googleLinkModal);
+            bootstrapModal.hide();
+
+            alert("Ссылка успешно добавлена!");
+        }
+    });
+
+
+</script> {% endcomment %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const saveButton = document.getElementById('save-google-link');
+        const googleLinkInput = document.getElementById('google-link-input');
+        const googleLinkError = document.getElementById('google-link-error');
+        const googleLinkModal = document.getElementById('googleLinkModal');
+        const googleLinkHiddenInput = document.querySelector('input[name="google_doc"]');
+
+        saveButton.addEventListener('click', function () {
+            const link = googleLinkInput.value.trim();
+
+            if (!link) {
+                googleLinkError.textContent = "Пожалуйста, введите ссылку.";
+                googleLinkError.style.display = "block";
+                return;
+            }
+
+            // Отправка запроса на проверку ссылки
+            fetch('/validate-google-link/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: `link=${encodeURIComponent(link)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    googleLinkError.textContent = "";
+                    googleLinkError.style.display = "none";
+                    googleLinkInput.classList.remove('is-invalid');
+                    googleLinkInput.classList.add('is-valid');
+
+
+                     // Обновляем отображение ссылки
+                    const googleLinkDisplay = document.getElementById('google-link-display');
+                    const googleLinkUrl = document.getElementById('google-link-url');
+                    googleLinkUrl.textContent = link;
+                    googleLinkUrl.href = link;
+                    googleLinkDisplay.style.display = "block";
+
+                    // Скрываем кнопку добавления
+                    saveButton.style.display = "none";
+
+
+                    // Закрытие модального окна
+                    const bootstrapModal = bootstrap.Modal.getInstance(googleLinkModal);
+                    bootstrapModal.hide();
+
+                    // Обновляем скрытое поле
+                    googleLinkHiddenInput.value = link;
+
+                    // Ручное удаление затемнения и блокировки
+                    document.body.classList.remove('modal-open');
+                    const backdrop = document.querySelector('.modal-backdrop');
+                    if (backdrop) backdrop.remove();
+
+                    // Переключение кликабельности экрана
+                    document.body.style.overflow = 'auto';
+                    document.body.style.paddingRight = '0';
+
+                    alert("Ссылка успешно добавлена!");
+                } else {
+                    googleLinkError.textContent = data.message;
+                    googleLinkError.style.display = "block";
+                    googleLinkInput.classList.add('is-invalid');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                googleLinkError.textContent = "Ошибка проверки ссылки.";
+                googleLinkError.style.display = "block";
+            });
+        });
+
+        // Дополнительное событие на случай, если модальное окно закрыто, но фон остался
+        googleLinkModal.addEventListener('hidden.bs.modal', function () {
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '0';
+        });
+    });
+
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const maxFiles = {{ max_files }}; // Максимальное количество файлов
+        let uploadedFiles = {{ uploaded_files }}; // Сколько уже загружено
+        const fileUploadContainer = document.getElementById('file-upload-container');
+        const addFileButton = document.getElementById('add-file-button');
+        const fileUploadStatus = document.getElementById('file-upload-status');
+
+        // Функция обновления статуса
+        function updateFileStatus() {
+            fileUploadStatus.textContent = `Загружено ${uploadedFiles} из ${maxFiles}`;
+            addFileButton.disabled = uploadedFiles >= maxFiles;
+        }
+
+        // Обработчик кнопки добавления файлов
+        addFileButton.addEventListener('click', function () {
+            if (uploadedFiles <  maxFiles) {
+                // Создаем новое поле загрузки
+                const newFileField = document.createElement('input');
+                newFileField.type = 'file';
+                newFileField.name = `form-${uploadedFiles}-file`; // Имя, соответствующее FormSet
+                newFileField.classList.add('form-control', 'mt-2');
+
+                // Добавляем новое поле в контейнер
+                fileUploadContainer.appendChild(newFileField);
+
+                // Увеличиваем счетчик и обновляем статус
+                uploadedFiles++;
+                updateFileStatus();
+            }
+        });
+
+        // Инициализируем статус при загрузке страницы
+        updateFileStatus();
+    });
+</script>
+
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const workOptionField = document.getElementById('work-option-field'); // Поле выбора опций работы
@@ -539,64 +790,92 @@
         const chatContainer = document.getElementById('chat-emulator-container');
         const chatInput = document.getElementById('emulator-chat-input');
         const sendBtn = document.getElementById('emulator-send-btn');
-        const form = document.querySelector('.multisteps-form__form'); // Форма проекта
     
-        const chatHistory = []; // Массив для хранения истории чата
+        // История чата
+        const chatHistory = [];
     
+        // Функция для добавления сообщений в интерфейс и историю
         function addMessage(content, sender) {
             const message = document.createElement('div');
             message.classList.add('chat-message', sender);
             message.textContent = content;
+
+            // Добавляем сообщение в интерфейс
             chatContainer.appendChild(message);
-            chatContainer.scrollTop = chatContainer.scrollHeight; // Скролл вниз
+            chatContainer.scrollTop = chatContainer.scrollHeight;
     
             // Добавляем сообщение в историю
-            chatHistory.push({ question: content, response: sender === 'bot' ? content : null });
+            if (sender === 'user') {
+                chatHistory.push({ question: content, response: null }); // Пользовательский вопрос
+            } else if (sender === 'bot') {
+                const lastMessage = chatHistory[chatHistory.length - 1];
+                if (lastMessage && lastMessage.response === null) {
+                    lastMessage.response = content; // Ответ на последний вопрос
+                } else {
+                    // Если бот отвечает без вопроса (например, ошибка)
+                    chatHistory.push({ question: "Ошибка при запросе к GPT.", response: content });
+                }
+            }
         }
     
+        // Функция отправки сообщения к GPT
         async function sendMessageToGPT(question) {
             try {
-                // Сбор данных из формы
-                const formData = new FormData(form);
-                const formJSON = Object.fromEntries(formData.entries());
-                formJSON["question"] = question; // Добавляем вопрос
-                formJSON["chat_history"] = chatHistory; // Добавляем историю чата
+                // Получение данных проекта из формы
+                const projectData = {
+                    title: document.querySelector('[name="title"]').value,
+                    agent_type: document.querySelector('[name="agent_type"]').value,
+                    work_option: document.querySelector('[name="work_option"]').value,
+                    gpt_version: document.querySelector('[name="gpt_version"]').value,
+                    knowledge_base_text: document.querySelector('[name="knowledge_base_text"]').value,
+                    hello_text: document.querySelector('[name="hello_text"]').value,
+                    prompt: document.querySelector('[name="prompt"]').value,
+                };
     
-                const response = await fetch(`/create-project-chat/`, {
-                    method: "POST",
+                // Формируем payload
+                const payload = {
+                    question: question,
+                    chat_history: chatHistory,
+                    ...projectData // Включаем данные проекта
+                };
+
+                const response = await fetch('/create-project-chat/', {
+                    method: 'POST',
                     headers: {
-                        "Content-Type": "application/json",
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(formJSON),
+                    body: JSON.stringify(payload)
                 });
     
                 if (!response.ok) {
                     const error = await response.json();
-                    console.error("Ошибка:", error.error);
-                    addMessage("Ошибка при запросе к GPT.", "bot");
+                    console.error('Ошибка:', error.error);
+                    addMessage('Ошибка при запросе к GPT.', 'bot');
                     return;
                 }
     
                 const data = await response.json();
-                console.log("Ответ от GPT:", data); // Лог для проверки ответа
-                addMessage(data.response, "bot");
-                chatHistory[chatHistory.length - 1].response = data.response; // Обновляем последний элемент истории
+                console.log('Ответ от GPT:', data);
+
+                addMessage(data.response, 'bot');
             } catch (error) {
-                console.error("Ошибка:", error);
-                addMessage("Ошибка подключения.", "bot");
+                console.error('Ошибка подключения:', error);
+                addMessage('Ошибка при запросе к GPT.', 'bot');
             }
         }
     
+        // Обработчик нажатия на кнопку "Отправить"
         sendBtn.addEventListener('click', () => {
             const userMessage = chatInput.value.trim();
             if (!userMessage) return;
     
-            addMessage(userMessage, "user");
-            chatInput.value = "";
+            addMessage(userMessage, 'user'); // Добавляем сообщение пользователя
+            chatInput.value = ''; // Очищаем поле ввода
     
-            sendMessageToGPT(userMessage); // Отправляем сообщение к GPT
+            sendMessageToGPT(userMessage); // Отправляем запрос
         });
     
+        // Обработчик нажатия клавиши Enter
         chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -615,6 +894,11 @@
 
         });
     });
+
+
+
+
+
 </script>
 
 {% endblock javascripts %}

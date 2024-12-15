@@ -24,7 +24,6 @@ from django import template
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.core.files.storage import FileSystemStorage
-from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
@@ -57,8 +56,7 @@ from .models import (
 from .module import *
 from .services.services import MinioService
 from django.shortcuts import get_object_or_404
-from django.db.models import Max, OuterRef, Subquery
-from django.db.models import Count
+from django.db.models import Max, OuterRef, Subquery, Count, Q, F
 from telethon.sync import TelegramClient
 from telethon.errors import SessionPasswordNeededError
 
@@ -70,7 +68,6 @@ from telethon.errors import SessionPasswordNeededError
 from .models import Project
 # from .services.gpt_trainer import GPTProjectTrainer
 from .services.gpt_assistant import GPTAssistant
-
 
 def error(request):
     return render(request, "errors/technical_break.html")
@@ -614,13 +611,18 @@ def projects(request):
     else:
         form = ProjectForm(user=request.user)  # Передаём user для фильтрации
 
-    # Получаем все проекты из модели, принадлежащие текущему пользователю
     projects = Project.objects.filter(client=request.user)
 
+
+    
+    # Получаем все проекты из модели, принадлежащие текущему пользователю
+    client_settings = ClientSettings.objects.get(client=request.user)
+    current_balance = client_settings.balance
     # Передаем данные в шаблон
     context = {
         'form': form,
         'projects': projects,
+        'current_balance': current_balance,
     }
     return render(request, 'apps/projects.html', context)
 
@@ -628,7 +630,9 @@ def project_create(request):
     agent_type = request.GET.get('type', None)
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES, user=request.user, agent_type=agent_type)  # Передаём user для фильтрации
-        if form.is_valid():
+        file_formset = ProjectFileFormSet(request.POST, request.FILES, queryset=ProjectFile.objects.none())
+
+        if form.is_valid() and file_formset.is_valid():
             project = form.save(commit=False)
             project.client = request.user  # Привязываем проект к текущему пользователю
             # project.agent_type = agent_type
@@ -645,6 +649,13 @@ def project_create(request):
             for recipient in recipients:
                 recipient.project_id = project.id
                 recipient.save()
+            
+            for file_form in file_formset:
+                if file_form.cleaned_data.get('file'):
+                    project_file = file_form.save(commit=False)
+                    project_file.project = project
+                    project_file.save()
+
 
             return redirect('/projects/')
         else:
@@ -652,8 +663,13 @@ def project_create(request):
             print(form.errors)  # Печатает ошибки полей
             print(form.non_field_errors())  # Печатает общие ошибки
     else:
+        max_files = 6
+        uploaded_files = 0  # Если редактируется проект, здесь можно подсчитать уже загруженные файлы
+
         form = ProjectForm(user=request.user)
-    return render(request, 'apps/project_create.html', {'form': form, 'agent_type': agent_type})
+        file_formset = ProjectFileFormSet(queryset=ProjectFile.objects.none())
+
+    return render(request, 'apps/project_create.html', {'form': form, 'agent_type': agent_type, 'file_formset': file_formset, 'max_files': max_files, 'uploaded_files': uploaded_files,})
 
 
 
@@ -667,10 +683,13 @@ def project_edit(request, project_id):
             return redirect("projects")  # После успешного сохранения возвращаемся к списку проектов
     else:
         form = ProjectForm(instance=project)  # Предзаполняем форму данными проекта
-
+    max_files = 6
+    uploaded_files = 0  # Если редактируется проект, здесь можно 
     context = {
         "form": form,
         "project": project,
+        "max_files": 6,
+        "uploaded_files": 0
     }
     return render(request, "apps/project_create.html", context)
 
@@ -775,6 +794,34 @@ def list_recipient(request):
         contact_count=Count('tg_id_set')
     )
 
+    # Аннотация для подсчета количества контактов, активных переписок, отправленных и оставшихся сообщений
+    projects = Recipient.objects.filter(client=request.user).annotate(
+        # Общее количество TG ID, связанных с получателем
+        contact_count=Count('tg_id_set', distinct=True),
+        
+        # Количество активных переписок
+        active_conversations=Count(
+            'tg_id_set', 
+            filter=Q(
+                tg_id_set__tg_id__in=Subquery(
+                    Chat.objects.filter(
+                        client=request.user, 
+                        message_type='message', 
+                        user_id=OuterRef('tg_id_set__tg_id')
+                    ).values('user_id')
+                )
+            ),
+            distinct=True
+        ),
+
+        # Отправлено: количество TG ID в TgID таблице
+        sent=Count('tg_id_set', filter=Q(tg_id_set__is_auto_active=True), distinct=True),
+
+        # Осталось: общее количество минус отправленные
+        remaining=F('contact_count') - Count('tg_id_set', filter=Q(tg_id_set__is_auto_active=True), distinct=True),
+    )
+    
+    
     # Добавляем поле project_title в каждый объект
     for project in projects:
         project.project_title = project_titles.get(project.project_id, "Не привязан")
@@ -845,9 +892,14 @@ def chat(request):
             Chat.objects.filter(user_id=OuterRef('user_id'))
             .order_by('-created_at')
             .values('user_message')[:1]  # Получаем текст последнего сообщения
+        ),
+        is_auto_active=Subquery(
+            TgID.objects.filter(tg_id=OuterRef('user_id'))
+            .values('is_auto_active')[:1]  # Получаем значение is_auto_active из TgID
         )
     ).distinct('user_id')
-    
+    for chat in chats:
+        print(f"chats {chat.is_auto_active}")
     # Передаем данные в контекст
     context = {'chats': chats}
     return render(request, "apps/chat.html", context)
@@ -884,7 +936,9 @@ def chat_messages(request):
         current_chat = chats.filter(user_id=user_id).first()
     if not current_chat:
         current_chat = chats.first()  # Если текущий чат не найден, берем первый из списка
+    current_chat.is_auto_active = TgID.objects.filter(tg_id=user_id).values_list('is_auto_active', flat=True).first()
 
+    print(current_chat.is_auto_active)
     # Получаем сообщения для текущего чата
     messages = []
     if current_chat:
@@ -908,9 +962,9 @@ def chat_messages(request):
         Chat.objects.filter(user_id=OuterRef('user_id'))
         .order_by('-created_at')
         .values('user_message')[:1]
-    )
+    ),
+    
 )
-
     return render(request, 'apps/chat.html', {
         'chats': chats,
         'messages': messages,
@@ -1044,13 +1098,33 @@ def create_app(request):
 @csrf_exempt
 def toggle_auto_active(request, chat_id):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        is_auto_active = data.get('is_auto_active')
-        chat = Chat.objects.get(id=chat_id)
-        chat.is_auto_active = is_auto_active
-        chat.save()
-        return JsonResponse({'is_auto_active': chat.is_auto_active})
+        try:
+            # Получаем данные из тела запроса
+            data = json.loads(request.body)
+            is_auto_active = data.get('is_auto_active')
+
+            if is_auto_active is None:
+                return JsonResponse({'error': 'is_auto_active is required'}, status=400)
+
+            # Получаем объекты Chat и TgID
+            chat = get_object_or_404(Chat, id=chat_id)
+            tg = get_object_or_404(TgID, tg_id=chat.user_id)  # Предполагается связь через user_id
+
+            # Обновляем значения is_auto_active
+            tg.is_auto_active = is_auto_active
+            tg.save()
+
+            chat.is_auto_active = is_auto_active
+            chat.save()
+
+            return JsonResponse({'is_auto_active': chat.is_auto_active})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
 
 @csrf_exempt
 def change_status(request, chat_id):
@@ -1229,8 +1303,6 @@ def create_project_chat(request):
         try:
             # Парсим данные формы
             data = json.loads(request.body)
-            print(data)
-            # Создаем временный объект Project
             project = Project(
                 id=None,
                 title=data.get("title"),
@@ -1242,34 +1314,35 @@ def create_project_chat(request):
                 prompt=data.get("prompt"),
             )
 
-            print("Данные объекта Project:")
-            print(f"id: {project.id}")
-            print(f"title: {project.title}")
-            print(f"agent_type: {project.agent_type}")
-            print(f"work_option: {project.work_option}")
-            print(f"gpt_version: {project.gpt_version}")
-            print(f"knowledge_base_text: {project.knowledge_base_text}")
-            print(f"hello_text: {project.hello_text}")
-            print(f"prompt: {project.prompt}")
+            # Форматируем историю чата
+            chat_history = data.get("chat_history", [])
+            formatted_history = []
 
-            print(f"project is {project}")
+            # Форматируем историю чата
+            for item in chat_history:
+                question = item.get("question")
+                response = item.get("response")
+                if question and response:  # Проверяем, что есть и вопрос, и ответ
+                    formatted_history.append({"role": "user", "content": question})
+                    formatted_history.append({"role": "assistant", "content": response})
 
-            # Инициализируем GPTAssistant
-            assistant = GPTAssistant(project,)  # Укажите ID пользователя временно или динамически
+            # Ограничиваем длину истории (например, 10 пар сообщений)
+            formatted_history = formatted_history[-20:]  # 10 вопросов и 10 ответов
 
-            chat_history = data.get("chat_history", [])  # Получаем текущую историю чата из запроса
-            formatted_history = [(item["question"], item["response"]) for item in chat_history]
+
+            # Инициализируем GPTAssistant с историей чата
+            assistant = GPTAssistant(project)
+            # Передаём историю в GPTAssistant
             assistant.chat_history = formatted_history
 
             # Получаем вопрос
+            print(assistant.chat_history)
             question = data.get("question")
             if not question:
                 return JsonResponse({"error": "Вопрос не предоставлен."}, status=400)
-
+            print(question)
             # Получаем ответ от GPT
-            print(f"question is {question}")
             response = assistant.ask_question(question, False)
-            print(response)
 
             return JsonResponse({
                 "question": question,
@@ -1279,3 +1352,88 @@ def create_project_chat(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Метод не поддерживается."}, status=405)
+
+
+
+
+
+@csrf_exempt
+def gpt_assistant(request):
+    """
+    Эндпоинт для взаимодействия с GPTAssistant.
+    """
+    if request.method != 'POST':
+        return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
+
+    # Получение user_id, project_id и question из тела запроса
+    tgid_id = request.POST.get('tgid_id')
+    project_id = request.POST.get('project_id')
+    question = request.POST.get('question')
+
+    if not project_id:
+        return JsonResponse({"error": "Missing required parameters: user_id, project_id, or question"}, status=400)
+
+    # Получение объекта проекта
+    project = get_object_or_404(Project, id=project_id)
+    print(project)
+
+    # Создание экземпляра GPTAssistant
+    assistant = GPTAssistant(project=project, tgid_id=tgid_id)
+
+    # Получение ответа от GPT
+    try:
+        answer = assistant.ask_question(question)
+        return JsonResponse({"answer": answer})
+    except Exception as e:
+        return JsonResponse({"error": f"Failed to process the request: {str(e)}"}, status=500)
+    
+    
+    
+
+@csrf_exempt
+def validate_google_link(request):
+    """
+    Проверяет, является ли предоставленная ссылка действительной Google-ссылкой.
+    """
+    if request.method == "POST":
+        link = request.POST.get("link", "").strip()
+        if not link:
+            return JsonResponse({"valid": False, "message": "Ссылка не указана."})
+
+        # Проверяем, начинается ли ссылка с Google-домена
+        if not link.startswith("https://docs.google.com/"):
+            return JsonResponse({"valid": False, "message": "Ссылка должна быть Google-документом."})
+
+        # Проверяем доступность ссылки
+        try:
+            response = requests.head(link, allow_redirects=True, timeout=5)
+            if response.status_code == 200:
+                return JsonResponse({"valid": True, "message": "Ссылка валидна."})
+            else:
+                return JsonResponse({"valid": False, "message": "Ссылка недоступна."})
+        except requests.RequestException as e:
+            return JsonResponse({"valid": False, "message": f"Ошибка проверки: {str(e)}"})
+
+    return JsonResponse({"valid": False, "message": "Некорректный метод запроса."})
+
+
+@csrf_exempt
+def save_google_link(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            google_doc = data.get('google_doc')
+            project_id = data.get('project_id')
+
+            if not google_doc or not project_id:
+                return JsonResponse({'success': False, 'message': 'Неверные данные'})
+
+            project = Project.objects.get(id=project_id)
+            project.google_doc = google_doc
+            project.save()
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Только POST-запросы'})
