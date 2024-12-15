@@ -94,6 +94,12 @@ class Project(models.Model):
         ('health_fitness_manager', 'Менеджер в сфере здоровья и фитнеса'),
     ]
 
+    STATUS_CHOICES = [
+    ('active', 'В работе'),
+    ('completed', 'Завершен'),
+    ('paused', 'Пауза'),
+    ]
+
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=1000)
     agent_type = models.CharField(
@@ -102,7 +108,12 @@ class Project(models.Model):
         default='sales_manager',
         verbose_name="Тип ИИ-агента"
     )
-    status = models.CharField(max_length=55, default="active")
+    status = models.CharField(
+    max_length=55,
+    choices=STATUS_CHOICES,
+    default='active',
+    verbose_name="Статус"
+)
     is_active = models.BooleanField(default=False)
     work_option = models.IntegerField(choices=OPTIONS, default=1)
     gpt_version = models.IntegerField(choices=GPT_VERSION_CHOICES, default=1)
@@ -128,6 +139,9 @@ class Project(models.Model):
     time_end = models.TimeField(default=datetime.time(22, 0))
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    def get_status_display(self):
+        return dict(self.STATUS_CHOICES).get(self.status, self.status)
 
     def get_agent_type_display(self):
         return dict(self.AGENT_TYPES).get(self.agent_type, self.agent_type)
