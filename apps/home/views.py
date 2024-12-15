@@ -1353,3 +1353,32 @@ def gpt_assistant(request):
         return JsonResponse({"answer": answer})
     except Exception as e:
         return JsonResponse({"error": f"Failed to process the request: {str(e)}"}, status=500)
+    
+    
+    
+
+@csrf_exempt
+def validate_google_link(request):
+    """
+    Проверяет, является ли предоставленная ссылка действительной Google-ссылкой.
+    """
+    if request.method == "POST":
+        link = request.POST.get("link", "").strip()
+        if not link:
+            return JsonResponse({"valid": False, "message": "Ссылка не указана."})
+
+        # Проверяем, начинается ли ссылка с Google-домена
+        if not link.startswith("https://docs.google.com/"):
+            return JsonResponse({"valid": False, "message": "Ссылка должна быть Google-документом."})
+
+        # Проверяем доступность ссылки
+        try:
+            response = requests.head(link, allow_redirects=True, timeout=5)
+            if response.status_code == 200:
+                return JsonResponse({"valid": True, "message": "Ссылка валидна."})
+            else:
+                return JsonResponse({"valid": False, "message": "Ссылка недоступна."})
+        except requests.RequestException as e:
+            return JsonResponse({"valid": False, "message": f"Ошибка проверки: {str(e)}"})
+
+    return JsonResponse({"valid": False, "message": "Некорректный метод запроса."})

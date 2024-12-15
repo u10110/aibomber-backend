@@ -138,7 +138,7 @@ urlpatterns = [
     
     path('test-assistant/<int:project_id>/', views.test_gpt_assistant_view, name='test_assistant'),
     path('create-project-chat/', views.create_project_chat, name='create_project_chat'),
-
+    path('validate-google-link/', views.validate_google_link, name='validate_google_link'),
 
 ]
 

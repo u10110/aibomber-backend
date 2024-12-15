@@ -2,15 +2,16 @@
 
 {% block stylesheets %}
 <style>
-    #file-upload-status {
+    #google-link-display a {
         font-weight: bold;
-        color: #495057;
+        color: #007bff;
+        text-decoration: none;
     }
-
-    .btn:disabled {
-        cursor: not-allowed;
-        opacity: 0.65;
+    
+    #google-link-display a:hover {
+        text-decoration: underline;
     }
+    
 </style>
 
 
@@ -308,15 +309,22 @@
                                             {{ form.knowledge_base_text }}
                                             {{ form.knowledge_base_text.errors }}
                                         </div>
-                                        <div class="col-12 mt-3">
-                                            <label for="google_doc">Ссылка на Google-документ</label>
-                                            {{ form.google_doc }}
-                                            {{ form.google_doc.errors }}
-                                        </div>
+                                        <!-- Кнопка для добавления ссылки -->
+<div class="col-12 mt-3">
+    <button type="button" id="add-google-link" class="btn bg-gradient-primary" data-bs-toggle="modal" data-bs-target="#googleLinkModal">
+        Добавить Google-ссылку
+    </button>
+</div>
+<!-- Добавьте блок для отображения добавленной ссылки -->
+<div class="col-12 mt-3" id="google-link-display" style="display: none;">
+    <h6>Добавленная Google-ссылка:</h6>
+    <a href="#" id="google-link-url" target="_blank"></a>
+</div>
+
 
                                         
                                         <div class="col-12">
-                                            <h6>Загрузить файлы</h6>
+                                            {% comment %} <h6>Загрузить файлы</h6> {% endcomment %}
                                             <p id="file-upload-status">Загружено {{ uploaded_files }} из {{ max_files }}</p>
                                             {{ file_formset.management_form }}
                                         
@@ -415,10 +423,118 @@
         </div>
     </div>
 </div>
+
+
+
+<!-- Popup для добавления и проверки Google-ссылки -->
+<div class="modal fade" id="googleLinkModal" tabindex="-1" aria-labelledby="googleLinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="googleLinkModalLabel">Добавление Google-ссылки</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="google-link-input">Введите ссылку на Google-документ</label>
+                    <input type="url" id="google-link-input" class="form-control" placeholder="https://docs.google.com/...">
+                    <small id="google-link-error" class="text-danger" style="display: none;"></small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" id="save-google-link" class="btn bg-gradient-primary">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock content %}
 
 {% block javascripts %}
 <script src="/static/assets/js/plugins/multistep-form.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const saveButton = document.getElementById('save-google-link');
+        const googleLinkInput = document.getElementById('google-link-input');
+        const googleLinkError = document.getElementById('google-link-error');
+        const googleLinkModal = document.getElementById('googleLinkModal');
+    
+        saveButton.addEventListener('click', function () {
+            const link = googleLinkInput.value.trim();
+    
+            if (!link) {
+                googleLinkError.textContent = "Пожалуйста, введите ссылку.";
+                googleLinkError.style.display = "block";
+                return;
+            }
+    
+            // Отправка запроса на проверку ссылки
+            fetch('/validate-google-link/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: `link=${encodeURIComponent(link)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    googleLinkError.textContent = "";
+                    googleLinkError.style.display = "none";
+                    googleLinkInput.classList.remove('is-invalid');
+                    googleLinkInput.classList.add('is-valid');
+    
+
+                     // Обновляем отображение ссылки
+                    const googleLinkDisplay = document.getElementById('google-link-display');
+                    const googleLinkUrl = document.getElementById('google-link-url');
+                    googleLinkUrl.textContent = link;
+                    googleLinkUrl.href = link;
+                    googleLinkDisplay.style.display = "block";
+
+                    // Скрываем кнопку добавления
+                    saveButton.style.display = "none";
+
+                    
+                    // Закрытие модального окна
+                    const bootstrapModal = bootstrap.Modal.getInstance(googleLinkModal);
+                    bootstrapModal.hide();
+    
+                    // Ручное удаление затемнения и блокировки
+                    document.body.classList.remove('modal-open');
+                    const backdrop = document.querySelector('.modal-backdrop');
+                    if (backdrop) backdrop.remove();
+    
+                    // Переключение кликабельности экрана
+                    document.body.style.overflow = 'auto';
+                    document.body.style.paddingRight = '0'; 
+    
+                    alert("Ссылка успешно добавлена!");
+                } else {
+                    googleLinkError.textContent = data.message;
+                    googleLinkError.style.display = "block";
+                    googleLinkInput.classList.add('is-invalid');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                googleLinkError.textContent = "Ошибка проверки ссылки.";
+                googleLinkError.style.display = "block";
+            });
+        });
+    
+        // Дополнительное событие на случай, если модальное окно закрыто, но фон остался
+        googleLinkModal.addEventListener('hidden.bs.modal', function () {
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '0';
+        });
+    });
+    
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const maxFiles = {{ max_files }}; // Максимальное количество файлов
