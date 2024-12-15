@@ -183,24 +183,29 @@
 
             <h6>
                 Тип ИИ-агента:
-                {% if agent_type == 'sales_manager' %}
-                    Менеджер по продажам
-                {% elif agent_type == 'consultant' %}
-                    Консультант
-                {% elif agent_type == 'support_manager' %}
-                    Менеджер поддержки
-                {% elif agent_type == 'review_manager' %}
-                    Менеджер по работе с отзывами
-                {% elif agent_type == 'info_business_manager' %}
-                    Менеджер для инфобиза
-                {% elif agent_type == 'services_manager' %}
-                    Менеджер в сфере услуг
-                {% elif agent_type == 'health_fitness_manager' %}
-                    Менеджер в сфере здоровья и фитнеса
+                {% if form.agent_type.value %}
+                    {{ form.agent_type }}
                 {% else %}
-                    Неизвестный тип
+                    {% if agent_type == 'sales_manager' %}
+                        Менеджер по продажам
+                    {% elif agent_type == 'consultant' %}
+                        Консультант
+                    {% elif agent_type == 'support_manager' %}
+                        Менеджер поддержки
+                    {% elif agent_type == 'review_manager' %}
+                        Менеджер по работе с отзывами
+                    {% elif agent_type == 'info_business_manager' %}
+                        Менеджер для инфобиза
+                    {% elif agent_type == 'services_manager' %}
+                        Менеджер в сфере услуг
+                    {% elif agent_type == 'health_fitness_manager' %}
+                        Менеджер в сфере здоровья и фитнеса
+                    {% else %}
+                        Неизвестный тип
+                    {% endif %}
                 {% endif %}
             </h6>
+            
 
 
             <div class="col-12">
