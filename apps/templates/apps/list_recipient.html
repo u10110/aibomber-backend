@@ -47,6 +47,8 @@
                                     <th>Название</th>
                                     <th>Проект</th>
                                     <th>Количество контактов</th>
+                                    <th>Активных переписок</th>
+                                    <th>Осталось/Отправлено</th>
                                     <th>Статус</th>
                                     <th>Действия</th>
                                 </tr>
@@ -57,6 +59,8 @@
                                     <td>{{ recipient.title }}</td>
                                     <td>{{ recipient.project_title }}</td>
                                     <td>{{ recipient.contact_count }}</td>
+                                    <td>{{ recipient.active_conversations }}</td>
+                                    <td>{{ recipient.sent }}/{{ recipient.remaining }}</td>
                                     <td>
                                         {% if recipient.status == 'active' %}
                                             В работе

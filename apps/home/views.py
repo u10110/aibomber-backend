@@ -24,7 +24,6 @@ from django import template
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.core.files.storage import FileSystemStorage
-from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
@@ -57,8 +56,7 @@ from .models import (
 from .module import *
 from .services.services import MinioService
 from django.shortcuts import get_object_or_404
-from django.db.models import Max, OuterRef, Subquery
-from django.db.models import Count
+from django.db.models import Max, OuterRef, Subquery, Count, Q, F
 from telethon.sync import TelegramClient
 from telethon.errors import SessionPasswordNeededError
 
@@ -70,7 +68,6 @@ from telethon.errors import SessionPasswordNeededError
 from .models import Project
 # from .services.gpt_trainer import GPTProjectTrainer
 from .services.gpt_assistant import GPTAssistant
-
 
 def error(request):
     return render(request, "errors/technical_break.html")
@@ -792,6 +789,34 @@ def list_recipient(request):
         contact_count=Count('tg_id_set')
     )
 
+    # Аннотация для подсчета количества контактов, активных переписок, отправленных и оставшихся сообщений
+    projects = Recipient.objects.filter(client=request.user).annotate(
+        # Общее количество TG ID, связанных с получателем
+        contact_count=Count('tg_id_set', distinct=True),
+        
+        # Количество активных переписок
+        active_conversations=Count(
+            'tg_id_set', 
+            filter=Q(
+                tg_id_set__tg_id__in=Subquery(
+                    Chat.objects.filter(
+                        client=request.user, 
+                        message_type='message', 
+                        user_id=OuterRef('tg_id_set__tg_id')
+                    ).values('user_id')
+                )
+            ),
+            distinct=True
+        ),
+
+        # Отправлено: количество TG ID в TgID таблице
+        sent=Count('tg_id_set', filter=Q(tg_id_set__is_auto_active=True), distinct=True),
+
+        # Осталось: общее количество минус отправленные
+        remaining=F('contact_count') - Count('tg_id_set', filter=Q(tg_id_set__is_auto_active=True), distinct=True),
+    )
+    
+    
     # Добавляем поле project_title в каждый объект
     for project in projects:
         project.project_title = project_titles.get(project.project_id, "Не привязан")
