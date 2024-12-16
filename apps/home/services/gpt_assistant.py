@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 from datetime import datetime
-from apps.home.models import Chat, TgID, Project
+from apps.home.models import Chat, TgID, Project, ProjectFile
 from PyPDF2 import PdfReader
 from docx import Document
 import re
@@ -57,10 +57,14 @@ class GPTAssistant:
         if self.project.knowledge_base_text:
             self.knowledge_texts.append(self.project.knowledge_base_text)
 
-        if self.project.file:
-            file_path = self.project.file.path
+        project_files = ProjectFile.objects.filter(project=self.project)
+        for project_file in project_files:
+            file_path = project_file.file.path
             ext = os.path.splitext(file_path)[1].lower()
+
+            # Выполняем обработку файла в зависимости от его расширения
             self.knowledge_texts += self._extract_text_from_file(file_path, ext)
+
 
     @staticmethod
     def _extract_text_from_file(file_path, ext):
@@ -99,14 +103,34 @@ class GPTAssistant:
         """
         Задает вопрос ассистенту, используя OpenAI API.
         """
+        # Проверяем, есть ли запись с данным user_id и user_message
+        # existing_chat = Chat.objects.filter(
+        #     project=self.project,
+        #     client=self.project.client,
+        #     user_id=self.tgid_id,
+        #     user_message=question
+        # ).first()
+        # print(existing_chat)
+        # print(existing_chat)
+        # print(existing_chat)
+
+        # if existing_chat:
+        #     # Если запись существует, возвращаем, что нет новых сообщений
+        #     return {"status": "no_new_messages", "message": "Нет новых сообщений для обработки."}
+
         # Формируем контекст для запроса
         if not self.is_auto_active:
             self._save_to_db(question)
         
         if not question and self.project.hello_text:
             hello_message = self._process_spintax(self.project.hello_text)
-            self._save_to_db(hello_message)
-            return hello_message
+            r = self._save_to_db(hello_message)
+            if r:
+                return hello_message
+            else:
+                return {"status": "уже отправляли хелоу", "anwser": ""}
+
+
 
         if not question:
             try:
@@ -177,14 +201,24 @@ class GPTAssistant:
                 user_message=anwser_response,
             )
         
-        Chat.objects.create(
+        if not Chat.objects.filter(
             project=self.project,
             client=self.project.client,
             user_id=self.tgid_id,
-            message_type="anwser",
-            user_name="GPT Assistant",
-            user_message=message_question,
-        )
+            user_message=message_question
+        ).exists():
+            Chat.objects.create(
+                project=self.project,
+                client=self.project.client,
+                user_id=self.tgid_id,
+                message_type="anwser",
+                user_name="GPT Assistant",
+                user_message=message_question,
+            )
+        else:
+            return False
+        return True
+
 
     def _get_gpt_version(self):
         """
