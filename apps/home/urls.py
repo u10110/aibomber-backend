@@ -86,7 +86,6 @@ urlpatterns = [
     
     path("projects/", views.projects, name="projects"),
     path('projects/create/', views.project_create, name='project-create'),
-    path('gpt-assistant/', views.gpt_assistant, name='gpt_assistant'),
     path('save-google-link/', views.save_google_link, name='save-google-link'),
     path('projects/<int:project_id>/chat-emulator/', views.chat_emulator, name='chat-emulator'),
 
@@ -136,9 +135,9 @@ urlpatterns = [
     path('channels/create-app/', views.create_app, name='create_app'),
     
     
-    path('test-assistant/<int:project_id>/', views.test_gpt_assistant_view, name='test_assistant'),
     path('create-project-chat/', views.create_project_chat, name='create_project_chat'),
     path('validate-google-link/', views.validate_google_link, name='validate_google_link'),
 
+    path('gpt-assistant/', views.gpt_assistant, name='gpt_assistant'),
 ]
 

@@ -1247,54 +1247,6 @@ def chat_emulator(request, project_id):
 
 
 @csrf_exempt
-def test_gpt_assistant_view(request, project_id):
-    """
-    Тестовая вью для работы с GPTAssistant.
-
-    Args:
-        request: HTTP запрос.
-        project_id: ID проекта, с которым будет работать GPTAssistant.
-    Returns:
-        JSON-ответ с результатом обработки вопроса.
-    """
-    if request.method == "POST":
-        try:
-            # Получаем проект
-            project = get_object_or_404(Project, id=project_id)
-            
-            print(project)
-
-            # Инициализируем GPTAssistant
-            assistant = GPTAssistant(project, 1)
-            print(assistant)
-
-            # Получаем вопрос из запроса
-            body = json.loads(request.body)
-            question = body.get("question")
-
-            if not question:
-                return JsonResponse({"error": "Вопрос не предоставлен."}, status=400)
-
-            # Обрабатываем вопрос и получаем ответ
-            response = assistant.ask_question(question, False)
-            
-            # query = "Что ты знаешь о магазине?"
-            # data_base = assistant.test_retrieval(query)
-            # print(f"data_base {data_base}")
-            
-            print(response)
-
-            return JsonResponse({
-                "question": question,
-                "response": response
-            }, status=200)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-
-    return JsonResponse({"error": "Метод не поддерживается."}, status=405)
-
-
-@csrf_exempt
 def create_project_chat(request):
     """
     Обрабатывает запросы чата на этапе создания проекта.

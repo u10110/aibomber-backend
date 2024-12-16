@@ -250,6 +250,7 @@ class Chat(models.Model):
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     user_id = models.CharField(max_length=1000)
+    messageId = models.CharField(null=True, max_length=1000)
     message_type = models.CharField(
         max_length=20,
         choices=MESSAGE_TYPE,
