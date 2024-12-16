@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 from datetime import datetime
-from apps.home.models import Chat, TgID, Project, ProjectFile
+from apps.home.models import Chat, TgID, Project, ProjectFile, ClientSettings
 from PyPDF2 import PdfReader
 from docx import Document
 import re
@@ -32,6 +32,35 @@ class GPTAssistant:
         if tgid_id:
             self._load_chat_history()
         self._load_knowledge_base()
+
+    def _calculate_cost(self, token_usage):
+        """
+        Вычисляет стоимость запроса на основе использования токенов.
+        """
+        cost_per_token = 0.00002  # Пример: $0.00002 за токен (замените на актуальное значение)
+        return token_usage * cost_per_token
+
+    
+    def _update_user_balance(self, cost):
+        """
+        Уменьшает баланс в ClientSettings по client_id.
+        """
+        try:
+            client_id = self.project.client_id
+            client_settings = ClientSettings.objects.get(client_id=client_id)
+            # Проверка на достаточность баланса
+            if client_settings.balance < cost:
+                raise ValueError("Недостаточно средств на балансе.")
+            
+            # Уменьшение баланса
+            client_settings.balance -= cost
+            client_settings.save()
+
+            return client_settings.balance
+        except ClientSettings.DoesNotExist:
+            raise ValueError(f"ClientSettings with client_id {client_id} does not exist.")
+
+
 
     def _load_chat_history(self):
         """
@@ -110,21 +139,6 @@ class GPTAssistant:
         """
         Задает вопрос ассистенту, используя OpenAI API.
         """
-        # Проверяем, есть ли запись с данным user_id и user_message
-        # existing_chat = Chat.objects.filter(
-        #     project=self.project,
-        #     client=self.project.client,
-        #     user_id=self.tgid_id,
-        #     user_message=question
-        # ).first()
-        # print(existing_chat)
-        # print(existing_chat)
-        # print(existing_chat)
-
-        # if existing_chat:
-        #     # Если запись существует, возвращаем, что нет новых сообщений
-        #     return {"status": "no_new_messages", "message": "Нет новых сообщений для обработки."}
-
         # Формируем контекст для запроса
         if not self.is_auto_active:
             self._save_to_db(question)
@@ -152,6 +166,14 @@ class GPTAssistant:
                     temperature=0.7  # Регулирует креативность ответов
                 )
                 answer = response.choices[0].message.content
+                
+                token_usage = response.usage.total_tokens
+                # Вычисляем стоимость
+                cost = self._calculate_cost(token_usage)
+                # Обновляем баланс пользователя
+                self._update_user_balance(cost)
+                
+            
                 self._save_to_db(answer)
                 return response.choices[0].message.content
             except Exception as e:
@@ -172,7 +194,15 @@ class GPTAssistant:
                 temperature=0.7  # Регулирует креативность ответов
             )
             answer = response.choices[0].message.content
+            
             self._update_chat_history(question, answer)
+            
+            token_usage = response.usage.total_tokens
+            # Вычисляем стоимость
+            cost = self._calculate_cost(token_usage)
+            # Обновляем баланс пользователя
+            self._update_user_balance(cost)
+            
 
             if save_to_db:
                 self._save_to_db(answer, question)
@@ -198,22 +228,14 @@ class GPTAssistant:
         """
         Сохраняет новый вопрос-ответ в базу данных.
         """
-        # if anwser_response:
-        #     Chat.objects.create(
-        #         project=self.project,
-        #         client=self.project.client,
-        #         user_id=self.tgid_id,
-        #         message_type="message",
-        #         user_name=self.project.client.username,
-        #         user_message=anwser_response,
-        #     )
-        
         if not Chat.objects.filter(
             project=self.project,
             client=self.project.client,
             user_id=self.tgid_id,
             user_message=message_question
         ).exists():
+            print(11111111111111)
+            print(self.project.client)
             Chat.objects.create(
                 project=self.project,
                 client=self.project.client,
