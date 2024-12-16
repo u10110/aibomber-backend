@@ -14,7 +14,7 @@ client = OpenAI(
     api_key=OPENAI_API_KEY  # Рекомендуется использовать переменные окружения
 )
 class GPTAssistant:
-    def __init__(self, project, tgid_id=None, channel_phone=None, user_id=None):
+    def __init__(self, project, tgid_id=None, channel_phone=None, user_id=None,):
         """
         Инициализация ассистента на основе данных проекта.
         :param project: Экземпляр модели Project.
@@ -22,6 +22,11 @@ class GPTAssistant:
         self.project = project
         self.tgid_id = tgid_id
         self.is_auto_active = True
+        self.client_id = None
+        print(f"projectisis {self.project}")
+        if self.project.id:
+            self.client_id = self.project.client_id
+        print(f"client_id {self.client_id}")
         
         self.channel_phone=channel_phone
         self.user_id=user_id
@@ -46,8 +51,8 @@ class GPTAssistant:
         Уменьшает баланс в ClientSettings по client_id.
         """
         try:
-            client_id = self.project.client_id
-            client_settings = ClientSettings.objects.get(client_id=client_id)
+            print(self.client_id)
+            client_settings = ClientSettings.objects.get(client_id=self.client_id)
             # Проверка на достаточность баланса
             if client_settings.balance < cost:
                 raise ValueError("Недостаточно средств на балансе.")
@@ -58,7 +63,7 @@ class GPTAssistant:
 
             return client_settings.balance
         except ClientSettings.DoesNotExist:
-            raise ValueError(f"ClientSettings with client_id {client_id} does not exist.")
+            raise ValueError(f"ClientSettings with client_id {self.client_id} does not exist.")
 
 
 
@@ -171,7 +176,8 @@ class GPTAssistant:
                 # Вычисляем стоимость
                 cost = self._calculate_cost(token_usage)
                 # Обновляем баланс пользователя
-                self._update_user_balance(cost)
+                if self.client_id:
+                    self._update_user_balance(cost)
                 
             
                 self._save_to_db(answer)
@@ -201,7 +207,8 @@ class GPTAssistant:
             # Вычисляем стоимость
             cost = self._calculate_cost(token_usage)
             # Обновляем баланс пользователя
-            self._update_user_balance(cost)
+            if self.client_id:
+                self._update_user_balance(cost)
             
 
             if save_to_db:
