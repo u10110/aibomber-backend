@@ -14,7 +14,7 @@ client = OpenAI(
     api_key=OPENAI_API_KEY  # Рекомендуется использовать переменные окружения
 )
 class GPTAssistant:
-    def __init__(self, project, tgid_id=None):
+    def __init__(self, project, tgid_id=None, channel_phone=None, user_id=None):
         """
         Инициализация ассистента на основе данных проекта.
         :param project: Экземпляр модели Project.
@@ -22,6 +22,10 @@ class GPTAssistant:
         self.project = project
         self.tgid_id = tgid_id
         self.is_auto_active = True
+        
+        self.channel_phone=channel_phone
+        self.user_id=user_id
+        
         self.chat_history = []  # Здесь хранится история в формате [{"role": "user", ...}, {"role": "assistant", ...}]
         self.knowledge_texts = []  # Здесь хранится база знаний
         
@@ -33,7 +37,7 @@ class GPTAssistant:
         """
         Загружает историю чата из базы данных на основе user_id.
         """
-        
+        print(self.tgid_id)
         tg = TgID.objects.get(tg_id=self.tgid_id)
         self.is_auto_active = tg.is_auto_active
 
@@ -194,15 +198,15 @@ class GPTAssistant:
         """
         Сохраняет новый вопрос-ответ в базу данных.
         """
-        if anwser_response:
-            Chat.objects.create(
-                project=self.project,
-                client=self.project.client,
-                user_id=self.tgid_id,
-                message_type="message",
-                user_name=self.project.client.username,
-                user_message=anwser_response,
-            )
+        # if anwser_response:
+        #     Chat.objects.create(
+        #         project=self.project,
+        #         client=self.project.client,
+        #         user_id=self.tgid_id,
+        #         message_type="message",
+        #         user_name=self.project.client.username,
+        #         user_message=anwser_response,
+        #     )
         
         if not Chat.objects.filter(
             project=self.project,
@@ -213,9 +217,9 @@ class GPTAssistant:
             Chat.objects.create(
                 project=self.project,
                 client=self.project.client,
-                user_id=self.tgid_id,
+                user_id=self.user_id,
                 message_type="anwser",
-                user_name="GPT Assistant",
+                user_name=self.channel_phone,
                 user_message=message_question,
             )
         else:
