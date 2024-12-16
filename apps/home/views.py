@@ -1321,6 +1321,9 @@ def gpt_assistant(request):
     tgid_id = request.POST.get('tgid_id')
     project_id = request.POST.get('project_id')
     question = request.POST.get('question')
+    
+    channel_phone = request.POST.get('channel_phone')
+    user_id = request.POST.get('user_id')
 
     if not project_id:
         return JsonResponse({"error": "Missing required parameters: user_id, project_id, or question"}, status=400)
@@ -1330,12 +1333,12 @@ def gpt_assistant(request):
     print(project)
 
     # Создание экземпляра GPTAssistant
-    assistant = GPTAssistant(project=project, tgid_id=tgid_id)
+    assistant = GPTAssistant(project=project, tgid_id=tgid_id, channel_phone=channel_phone, user_id=user_id)
 
     # Получение ответа от GPT
     try:
         answer = assistant.ask_question(question)
-        return JsonResponse({"answer": answer})
+        return JsonResponse({"anwser": answer})
     except Exception as e:
         return JsonResponse({"error": f"Failed to process the request: {str(e)}"}, status=500)
     
