@@ -54,8 +54,10 @@ class GPTAssistant:
         """
         Загружает базу знаний из текста и файлов.
         """
+        print(f"know {self.project.knowledge_base_text}")
         if self.project.knowledge_base_text:
             self.knowledge_texts.append(self.project.knowledge_base_text)
+
 
         project_files = ProjectFile.objects.filter(project=self.project)
         for project_file in project_files:
@@ -64,6 +66,7 @@ class GPTAssistant:
 
             # Выполняем обработку файла в зависимости от его расширения
             self.knowledge_texts += self._extract_text_from_file(file_path, ext)
+        print(self.knowledge_texts)
 
 
     @staticmethod
