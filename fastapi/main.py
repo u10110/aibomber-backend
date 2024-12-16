@@ -3,6 +3,10 @@ from pydantic import BaseModel
 from telethon import TelegramClient
 import os
 import logging
+from telethon.tl.types import PeerUser, User
+from datetime import datetime, timedelta, timezone
+from telethon.tl.functions.messages import GetHistoryRequest
+
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -10,12 +14,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 app = FastAPI()
 
 API_ID = '858408'
 API_HASH = 'c42722e7a3d3896caf40e74a1c4ecba9'
 SESSION_DIR = os.path.join(os.getcwd(), 'sessions')
+print(SESSION_DIR)
 os.makedirs(SESSION_DIR, exist_ok=True)
 
 # Временное хранилище phone_code_hash для каждого номера
@@ -23,9 +27,8 @@ phone_hash_store = {}
 
 @app.post("/send-code/")
 async def send_code(phone: str):
-    print(phone)
     logger.info(f"Получен запрос на отправку кода для телефона: {phone}")
-    session_name = os.path.join(SESSION_DIR, "session_" + phone.replace("+", ""))
+    session_name = os.path.join(SESSION_DIR, "session_" + phone.strip().replace("+", ""))
 
     # Если файл сессии существует, удаляем его
     if os.path.exists(session_name + ".session"):
@@ -66,28 +69,158 @@ async def verify_code(data: VerifyCodeRequest):
     code = data.code
 
     logger.info(f"Получен запрос на подтверждение кода для телефона: {phone}")
-    session_name = os.path.join(SESSION_DIR, "session_" + phone.replace("+", ""))
+    session_name = os.path.join(SESSION_DIR, "session_" + phone.strip().replace("+", ""))
     client = TelegramClient(session_name, API_ID, API_HASH)
 
     try:
-        # Проверяем наличие phone_code_hash для телефона
         phone_code_hash = phone_hash_store.get(phone)
         if not phone_code_hash:
             raise HTTPException(status_code=400, detail="Код не был отправлен или истёк")
 
         await client.connect()
         logger.info("Клиент Telegram подключён")
-
-        # Завершаем авторизацию
         await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
         logger.info(f"Код подтверждён для телефона: {phone}")
 
-        # Удаляем сохранённый hash после успешной авторизации
         del phone_hash_store[phone]
-
         return {"message": f"Авторизация завершена для номера {phone}", "success": True}
     except Exception as e:
         logger.error(f"Ошибка при подтверждении кода: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        await client.disconnect()
+        logger.info("Клиент Telegram отключён")
+
+@app.get("/get-users/")
+async def get_users(phone: str):
+    """
+    Получает список всех пользователей, с которыми велась переписка.
+    """
+    session_name = os.path.join(SESSION_DIR, "session_" + phone.strip().replace("+", ""))
+    print(f"session_name {session_name}")
+    client = TelegramClient(session_name, API_ID, API_HASH)
+    print(client)
+
+    try:
+        await client.connect()
+        logger.info("Клиент Telegram подключён")
+
+        dialogs = await client.get_dialogs()
+        for dialog in dialogs:
+            print(f"Dialog: {dialog.id}, Name: {dialog.name}, Entity: {type(dialog.entity)}")
+
+        users = [
+            {"id": dialog.id, "name": dialog.name}
+            for dialog in dialogs
+            if isinstance(dialog.entity, User)
+        ]
+        return {"users": users}
+    except Exception as e:
+        logger.error(f"Ошибка при получении списка пользователей: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        await client.disconnect()
+        logger.info("Клиент Telegram отключён")
+
+class GetMessagesRequest(BaseModel):
+    phone: str
+    user_id: int
+    limit: int
+
+
+async def get_all_messages(client, channel_id, limit=100):
+    """
+    Получает все сообщения из указанного канала.
+    
+    :param client: Экземпляр TelegramClient.
+    :param channel_id: ID канала, из которого будут получены сообщения.
+    :param limit: Максимальное количество сообщений для выборки.
+    :return: Список всех сообщений с полными данными.
+    """
+    try:
+        # Получаем историю сообщений
+        history = await client(GetHistoryRequest(
+            peer=channel_id,
+            limit=limit,
+            offset_date=None,
+            offset_id=0,
+            max_id=0,
+            min_id=0,
+            add_offset=0,
+            hash=0
+        ))
+        print(f"Получено сообщений: {len(history.messages)}")
+
+        # Создаём список всех сообщений с полными данными
+        all_messages = []
+        for message in history.messages:
+            print(f"Message ID: {message.id}, Date: {message.date}, Text: {message.message}")
+            if message.message:  # Проверяем, что сообщение не пустое
+                all_messages.append({
+                    "id": message.id,
+                    "date": message.date.isoformat(),  # Преобразуем дату в строку
+                    "text": message.message,
+                    "user_id": message.from_id.user_id if message.from_id else channel_id,
+                })
+
+        return all_messages
+    except Exception as e:
+        print(f"Ошибка при получении сообщений из канала {channel_id}: {e}")
+        return []
+
+
+
+
+@app.post("/get-messages/")
+async def get_messages(data: GetMessagesRequest):
+    """
+    Получает все сообщения из указанного канала с полными данными.
+    """
+    session_name = os.path.join(SESSION_DIR, "session_" + data.phone.strip().replace("+", ""))
+    client = TelegramClient(session_name, API_ID, API_HASH)
+
+    try:
+        # Подключаем клиента
+        await client.connect()
+        logger.info("Клиент Telegram подключён")
+
+        # ID канала или пользователя
+        channel_id = data.user_id
+
+        # Получаем все сообщения
+        all_messages = await get_all_messages(client, channel_id, data.limit)
+
+        return {"messages": all_messages}
+    except Exception as e:
+        logger.error(f"Ошибка при получении сообщений: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        await client.disconnect()
+        logger.info("Клиент Telegram отключён")
+
+
+class SendMessageRequest(BaseModel):
+    phone: str
+    user_id: int
+    message: str
+
+@app.post("/send-message/")
+async def send_message(data: SendMessageRequest):
+    """
+    Отправляет сообщение пользователю.
+    """
+    session_name = os.path.join(SESSION_DIR, "session_" + data.phone.strip().replace("+", ""))
+    client = TelegramClient(session_name, API_ID, API_HASH)
+
+    try:
+        await client.connect()
+        logger.info("Клиент Telegram подключён")
+
+        await client.send_message(data.user_id, data.message)
+        logger.info(f"Сообщение отправлено пользователю с ID {data.user_id}")
+        return {"message": "Сообщение успешно отправлено", "success": True}
+    except Exception as e:
+        logger.error(f"Ошибка при отправке сообщения: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         await client.disconnect()
