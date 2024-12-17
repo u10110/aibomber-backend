@@ -451,7 +451,6 @@
 
 
                             <!-- Шаг 6 -->
-
                             <div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
                                 <div class="multisteps-form__content">
                                     <div class="row align-items-start" align="left">
@@ -460,20 +459,58 @@
                                             <img src="/static/assets/img/small-logos/amocrm.jpg"
                                                  width="150"
                                                  style="cursor: pointer"
-                                                 id="amo-integration"
+                                                 id="amo_integration"
                                             />
                                         </div>
                                         <div class="col-lg-3">
                                             <img src="/static/assets/img/small-logos/bitrix24.png" width="170"  style="cursor: pointer"/>
-                                            {{ form.integrations }}
                                         </div>
+                                        {{ form.integrations }}
                                     </div>
                                     <div class="row align-items-start" align="left">
-
+                                        {{ form.pipelines }}
+                                        <table class="table table-striped">
+                                            <tbody>
+                                            <tr>
+                                                <td>Успешные диалоги</td>
+                                                <td>Otto</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Проявлен интерес</th>
+                                                <td>Larry</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Контакт получен</th>
+                                                <td>Jacob</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Закрытые</th>
+                                                <td>Larry</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
-                        </form>
+
+                          <!-- Модальное окно атворизации в ЦРМ -->
+                          <div class="modal fade" id="crmOauth2Modal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+                              <div class="modal-dialog">
+                                  <div class="modal-content">
+                                      <div class="modal-header">
+                                          <h5 class="modal-title" id=crmOauthModalLabel">Авторизация в ЦРМ</h5>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                      </div>
+                                      <div class="modal-body">
+                                         <iframe src="https://integration.eliment.ai/amo?user_id={{ project.client_id }}" ></iframe>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+
+
+
+                      </form>
                     </div>
                 </div>
             </div>
@@ -889,9 +926,44 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const amoIntegrationButton = document.getElementById('amo-integration');
+        const amoIntegrationButton = document.getElementById('amo_integration');
+        const amoIntegrationModal = document.getElementById('crmOauth2Modal');
         amoIntegrationButton.addEventListener('click', () => {
+            const oauthModal = new bootstrap.Modal(amoIntegrationModal);
+            // Отправляем запрос на send-code
+            fetch('https://integration.eliment.ai/amo/token?user_id={{ project.client_id }}')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка отправки кода');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status && data.status === 'AccessTokenNotFound') {
+                        // Открываем модальное окно
+                        oauthModal.show();
+                    } else {
+                       return fetch('https://integration.eliment.ai/amo/pipelines?user_id={{ project.client_id }}')
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка отправки кода');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.count && data.count > 0) {
+                        // Открываем модальное окно
 
+                    } else {
+                        return  alert('Воронок не найдено.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при отправке кода:', error);
+                    alert('Ошибка при отправке кода.');
+                });
         });
     });
 

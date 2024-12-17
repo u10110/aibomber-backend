@@ -121,7 +121,8 @@ class ProjectForm(forms.ModelForm):
     )
 
     CRM_TYPES = [
-        ('amo_crm', 'Amo Crm')
+        ('amo_crm', 'Amo Crm'),
+        ('bitrix', 'Bitrix 24')
     ]
 
     integrations = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
@@ -243,7 +244,6 @@ class ProjectForm(forms.ModelForm):
             'per_conversation_limit': 'Лимит на одну переписку',
         }
 
-
     def get_default_work_option(self):
         # Пример настройки опций в зависимости от типа агента
         if self.agent_type == 'sales_manager':
@@ -294,7 +294,6 @@ class ProjectForm(forms.ModelForm):
                 status='active')
             self.fields['recipients'].initial = Recipient.objects.filter(client=user, project_id__isnull=True, project_id=self.instance.id, status='active')
 
-
     def save(self, commit=True):
         # Сохраняем объект проекта
         project = super().save(commit=commit)
@@ -335,7 +334,7 @@ class ChannelForm(forms.ModelForm):
     }),
     label="Телефоны",
     required=True
-)
+    )
 
 
     def clean_phone(self):
@@ -415,16 +414,6 @@ class ChannelForm(forms.ModelForm):
             'title': 'Название канала',
             'source': 'Источник',
         }
-
-
-
-
-
-
-
-
-
-
 
 
 class RecipientForm(forms.ModelForm):
