@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 from datetime import datetime
-from apps.home.models import Chat, TgID, Project
+from apps.home.models import Chat, TgID, Project, ProjectFile, ClientSettings
 from PyPDF2 import PdfReader
 from docx import Document
 import re
@@ -14,7 +14,7 @@ client = OpenAI(
     api_key=OPENAI_API_KEY  # Рекомендуется использовать переменные окружения
 )
 class GPTAssistant:
-    def __init__(self, project, tgid_id=None):
+    def __init__(self, project, tgid_id=None, channel_phone=None, user_id=None,):
         """
         Инициализация ассистента на основе данных проекта.
         :param project: Экземпляр модели Project.
@@ -22,6 +22,15 @@ class GPTAssistant:
         self.project = project
         self.tgid_id = tgid_id
         self.is_auto_active = True
+        self.client_id = None
+        print(f"projectisis {self.project}")
+        if self.project.id:
+            self.client_id = self.project.client_id
+        print(f"client_id {self.client_id}")
+        
+        self.channel_phone=channel_phone
+        self.user_id=user_id
+        
         self.chat_history = []  # Здесь хранится история в формате [{"role": "user", ...}, {"role": "assistant", ...}]
         self.knowledge_texts = []  # Здесь хранится база знаний
         
@@ -29,11 +38,40 @@ class GPTAssistant:
             self._load_chat_history()
         self._load_knowledge_base()
 
+    def _calculate_cost(self, token_usage):
+        """
+        Вычисляет стоимость запроса на основе использования токенов.
+        """
+        cost_per_token = 0.00002  # Пример: $0.00002 за токен (замените на актуальное значение)
+        return token_usage * cost_per_token
+
+    
+    def _update_user_balance(self, cost):
+        """
+        Уменьшает баланс в ClientSettings по client_id.
+        """
+        try:
+            print(self.client_id)
+            client_settings = ClientSettings.objects.get(client_id=self.client_id)
+            # Проверка на достаточность баланса
+            if client_settings.balance < cost:
+                raise ValueError("Недостаточно средств на балансе.")
+            
+            # Уменьшение баланса
+            client_settings.balance -= cost
+            client_settings.save()
+
+            return client_settings.balance
+        except ClientSettings.DoesNotExist:
+            raise ValueError(f"ClientSettings with client_id {self.client_id} does not exist.")
+
+
+
     def _load_chat_history(self):
         """
         Загружает историю чата из базы данных на основе user_id.
         """
-        
+        print(self.tgid_id)
         tg = TgID.objects.get(tg_id=self.tgid_id)
         self.is_auto_active = tg.is_auto_active
 
@@ -54,13 +92,20 @@ class GPTAssistant:
         """
         Загружает базу знаний из текста и файлов.
         """
+        print(f"know {self.project.knowledge_base_text}")
         if self.project.knowledge_base_text:
             self.knowledge_texts.append(self.project.knowledge_base_text)
 
-        if self.project.file:
-            file_path = self.project.file.path
+
+        project_files = ProjectFile.objects.filter(project=self.project)
+        for project_file in project_files:
+            file_path = project_file.file.path
             ext = os.path.splitext(file_path)[1].lower()
+
+            # Выполняем обработку файла в зависимости от его расширения
             self.knowledge_texts += self._extract_text_from_file(file_path, ext)
+        print(self.knowledge_texts)
+
 
     @staticmethod
     def _extract_text_from_file(file_path, ext):
@@ -105,8 +150,13 @@ class GPTAssistant:
         
         if not question and self.project.hello_text:
             hello_message = self._process_spintax(self.project.hello_text)
-            self._save_to_db(hello_message)
-            return hello_message
+            r = self._save_to_db(hello_message)
+            if r:
+                return hello_message
+            else:
+                return {"status": "уже отправляли хелоу", "anwser": ""}
+
+
 
         if not question:
             try:
@@ -121,6 +171,15 @@ class GPTAssistant:
                     temperature=0.7  # Регулирует креативность ответов
                 )
                 answer = response.choices[0].message.content
+                
+                token_usage = response.usage.total_tokens
+                # Вычисляем стоимость
+                cost = self._calculate_cost(token_usage)
+                # Обновляем баланс пользователя
+                if self.client_id:
+                    self._update_user_balance(cost)
+                
+            
                 self._save_to_db(answer)
                 return response.choices[0].message.content
             except Exception as e:
@@ -141,7 +200,16 @@ class GPTAssistant:
                 temperature=0.7  # Регулирует креативность ответов
             )
             answer = response.choices[0].message.content
+            
             self._update_chat_history(question, answer)
+            
+            token_usage = response.usage.total_tokens
+            # Вычисляем стоимость
+            cost = self._calculate_cost(token_usage)
+            # Обновляем баланс пользователя
+            if self.client_id:
+                self._update_user_balance(cost)
+            
 
             if save_to_db:
                 self._save_to_db(answer, question)
@@ -167,24 +235,26 @@ class GPTAssistant:
         """
         Сохраняет новый вопрос-ответ в базу данных.
         """
-        if anwser_response:
-            Chat.objects.create(
-                project=self.project,
-                client=self.project.client,
-                user_id=self.tgid_id,
-                message_type="message",
-                user_name=self.project.client.username,
-                user_message=anwser_response,
-            )
-        
-        Chat.objects.create(
+        if not Chat.objects.filter(
             project=self.project,
             client=self.project.client,
             user_id=self.tgid_id,
-            message_type="anwser",
-            user_name="GPT Assistant",
-            user_message=message_question,
-        )
+            user_message=message_question
+        ).exists():
+            print(11111111111111)
+            print(self.project.client)
+            Chat.objects.create(
+                project=self.project,
+                client=self.project.client,
+                user_id=self.user_id,
+                message_type="anwser",
+                user_name=self.channel_phone,
+                user_message=message_question,
+            )
+        else:
+            return False
+        return True
+
 
     def _get_gpt_version(self):
         """

@@ -15,6 +15,9 @@ from .models import Project, Recipient, TgID, Channel, ProjectFile
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.db.models import Q
+import os 
+
+
 
 class Account(forms.Form):
     first_name = forms.CharField(
@@ -297,6 +300,15 @@ class ProjectForm(forms.ModelForm):
     def save(self, commit=True):
         # Сохраняем объект проекта
         project = super().save(commit=commit)
+
+        # Обработка файлов из формы
+        if hasattr(self, 'files') and self.files:  # Проверяем наличие файлов
+            for file in self.files.getlist('file'):  # Файлы из формы
+                ext = os.path.splitext(file.name)[1].lower()
+
+                # Выполняем обработку файла в зависимости от его расширения
+                if hasattr(self, 'knowledge_texts'):  # Проверяем наличие свойства knowledge_texts
+                    self.knowledge_texts += self._extract_text_from_file(file.temporary_file_path(), ext)
 
         # Обновляем поле project_id в связанных каналах
         channels = self.cleaned_data.get('channel', [])
