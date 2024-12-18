@@ -3,7 +3,7 @@ import numbers
 import re
 from calendar import month
 from urllib import request
-
+import json
 import datetime
 import requests
 from django import forms
@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.forms import fields
 from django import forms
-from .models import Project, Recipient, TgID, Channel, ProjectFile
+from .models import Project, Recipient, TgID, Channel, ProjectFile, CrmPipelines
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.db.models import Q
@@ -124,12 +124,17 @@ class ProjectForm(forms.ModelForm):
     )
 
     CRM_TYPES = [
+        ('null', 'не выбрано'),
         ('amo_crm', 'Amo Crm'),
         ('bitrix', 'Bitrix 24')
     ]
 
-    integrations = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
-                                             choices=CRM_TYPES)
+    integrations = forms.MultipleChoiceField(widget=forms.RadioSelect, choices=CRM_TYPES, required=True)
+
+    pipelines = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=True
+    )
 
     time_start = forms.TimeField(
         required=True,
@@ -247,6 +252,15 @@ class ProjectForm(forms.ModelForm):
             'per_conversation_limit': 'Лимит на одну переписку',
         }
 
+    def clean_pipelines(self):
+        pipelines = json.loads(self.cleaned_data["pipelines"])
+        print(pipelines)
+       # if len(pipelines) < 11:
+        #    raise forms.ValidationError("Неверный формат теелфона")
+        return pipelines
+
+
+
     def get_default_work_option(self):
         # Пример настройки опций в зависимости от типа агента
         if self.agent_type == 'sales_manager':
@@ -321,6 +335,21 @@ class ProjectForm(forms.ModelForm):
         for recipient in recipients:
             recipient.project_id = project.id
             recipient.save()
+
+        pipelines = self.cleaned_data.get('pipelines', [])
+        if commit:
+            # Удаляем старые записи, связанные с этим Recipient
+            CrmPipelines.objects.filter(project=project).delete()
+            # Создаем новые записи
+            CrmPipelines.objects.bulk_create(
+                [CrmPipelines(
+                    project=project,
+                    integration=pipelines[status].integration,
+                    name=pipelines[status].name,
+                    remote_id=pipelines[status].id,
+                    trigger=status
+                ) for status in pipelines]
+            )
 
         return project
 

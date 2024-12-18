@@ -90,9 +90,9 @@ class Project(models.Model):
     ]
 
     STATUS_CHOICES = [
-    ('active', 'В работе'),
-    ('completed', 'Завершен'),
-    ('paused', 'Пауза'),
+        ('active', 'В работе'),
+        ('completed', 'Завершен'),
+        ('paused', 'Пауза')
     ]
 
     client = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -286,15 +286,18 @@ class CrmPipelines(models.Model):
     ]
 
     integration = models.ForeignKey(Integrations, on_delete=models.CASCADE)
-    project_id = models.IntegerField(null=True)
+    project_id = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE
+    )
     name = models.CharField(max_length=1000)
-
+    remote_id = models.IntegerField(null=False)
     trigger = models.CharField(
         max_length=40,
         choices=TRIGGER_ACTIONS,
         verbose_name="Статус общения"
     )
-    is_active = models.BooleanField(default=False)
+
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 

@@ -129,6 +129,54 @@
 
 
 </style>
+
+<style>
+
+    .parent>.row{
+        display: flex;
+        align-items: center;
+        height: 100%;
+    }
+    .col img{
+        height:100px;
+        width: 100%;
+        cursor: pointer;
+        transition: transform 1s;
+        object-fit: cover;
+    }
+    .col label{
+        overflow: hidden;
+        position: relative;
+    }
+    .imgbgchk:checked + label>.tick_container{
+        opacity: 1;
+    }
+    /*         aNIMATION */
+    .imgbgchk:checked + label>img{
+        transform: scale(1.25);
+        opacity: 0.3;
+    }
+    .tick_container {
+        transition: .5s ease;
+        opacity: 0;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        cursor: pointer;
+        text-align: center;
+    }
+    .tick {
+        background-color: #4CAF50;
+        color: white;
+        font-size: 16px;
+        padding: 6px 12px;
+        height: 40px;
+        width: 40px;
+        border-radius: 100%;
+    }
+</style>
 {% endblock stylesheets %}
 
 {% block title %}Создание Проекта{% endblock title %}
@@ -443,7 +491,7 @@
                                     <!-- Кнопки управления -->
                                     <div class="button-row d-flex mt-4 justify-content-between">
                                         <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button">Назад</button>
-                                        <button class="btn bg-gradient-primary ms-auto mb-0" type="submit">Создать проект</button>
+                                        <button class="btn bg-gradient-dark ms-auto mb-0 js-btn-next" type="button">Далее</button>
                                     </div>
                                 </div>
                               </div>
@@ -453,42 +501,90 @@
                             <!-- Шаг 6 -->
                             <div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
                                 <div class="multisteps-form__content">
-                                    <div class="row align-items-start" align="left">
-                                        <!-- Блок выбора интеграции -->
-                                        <div class="col-lg-3">
-                                            <img src="/static/assets/img/small-logos/amocrm.jpg"
-                                                 width="150"
-                                                 style="cursor: pointer"
-                                                 id="amo_integration"
-                                            />
+                                    <div class="row">
+                                        <h5>Выберите  CRM для интеграции: </h5>
+                                        <input type="radio" name="integrations" id="id_integrations_0"
+                                               class="d-none imgbgchk" value="null"  style="display: none" >
+                                        <div class='col text-center'>
+                                            <input type="radio" name="integrations" id="id_integrations_1"
+                                                   class="d-none imgbgchk" value="amo_crm" >
+                                            <label for="id_integrations_1">
+                                                <img src="/static/assets/img/small-logos/amocrm.jpg" alt="AmoCrm">
+                                                <div class="tick_container">
+                                                    <div class="tick"><i class="fa fa-check"></i></div>
+                                                </div>
+                                            </label>
                                         </div>
-                                        <div class="col-lg-3">
-                                            <img src="/static/assets/img/small-logos/bitrix24.png" width="170"  style="cursor: pointer"/>
+                                        <div class='col text-center' style="display: none;">
+                                            <input type="radio" name="integrations" id="id_integrations_2"
+                                                   class="d-none imgbgchk" value="bitrix">
+                                            <label for="id_integrations_2">
+                                                <img src="/static/assets/img/small-logos/bitrix24.png" alt="Bitrix 24">
+                                                <div class="tick_container">
+                                                    <div class="tick"><i class="fa fa-check"></i></div>
+                                                </div>
+                                            </label>
                                         </div>
-                                        {{ form.integrations }}
+                                        <div class='col text-center'>
+                                        </div>
                                     </div>
                                     <div class="row align-items-start" align="left">
                                         {{ form.pipelines }}
+                                        <h5>Выберите этапы воронки для статусов лида: </h5>
                                         <table class="table table-striped">
+                                            <thead>
+                                                <td>Статус лида</td>
+                                                <td>Этап  вашей воронки</td>
+                                            </thead>
                                             <tbody>
                                             <tr>
-                                                <td>Успешные диалоги</td>
-                                                <td>Otto</td>
+                                                <th>Успешные диалоги</th>
+                                                <td>
+                                                <select name="success_dialogs_pipeline_choice" id="success_dialogs"
+                                                        class="form-select w-auto ms-3"
+                                                        disabled
+                                                >
+                                                    <option value="0">Выберите этап воронки</option>
+                                                </select>
+                                                </td>
                                             </tr>
                                             <tr>
                                                 <th>Проявлен интерес</th>
-                                                <td>Larry</td>
+                                                <td><select name="contact_received_pipeline_choice" id="contact_received"
+                                                            class="form-select w-auto ms-3"
+                                                            disabled
+                                                >
+                                                    <option value="0">Выберите этап воронки</option>
+                                                </select></td>
                                             </tr>
                                             <tr>
                                                 <th>Контакт получен</th>
-                                                <td>Jacob</td>
+                                                <td><select name="interest_shown_pipeline_choice" id="interest_shown"
+                                                            class="form-select w-auto ms-3"
+                                                            disabled
+                                                >
+                                                    <option value="0">Выберите этап воронки</option>
+                                                </select></td>
                                             </tr>
                                             <tr>
                                                 <th>Закрытые</th>
-                                                <td>Larry</td>
+                                                <td><select name="closed_pipeline_choice" id="closed_pipeline"
+                                                            class="form-select w-auto ms-3"
+                                                            disabled
+                                                >
+                                                    <option value="0">Выберите этап воронки</option>
+                                                </select></td>
                                             </tr>
                                             </tbody>
                                         </table>
+
+
+                                        <!-- Кнопки управления -->
+                                        <div class="button-row d-flex mt-4 justify-content-between">
+                                            <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button">Назад</button>
+                                            <button class="btn bg-gradient-primary ms-auto mb-0" type="submit">Создать проект</button>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -502,7 +598,7 @@
                                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                       </div>
                                       <div class="modal-body">
-                                         <iframe src="https://integration.eliment.ai/amo?user_id={{ project.client_id }}" ></iframe>
+
                                       </div>
                                   </div>
                               </div>
@@ -926,15 +1022,37 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const amoIntegrationButton = document.getElementById('amo_integration');
+        const amoIntegrationRadio = document.getElementById('id_integrations_1');
         const amoIntegrationModal = document.getElementById('crmOauth2Modal');
-        amoIntegrationButton.addEventListener('click', () => {
+
+        const successDialogsSelect = document.getElementById('success_dialogs');
+        const contactReceivedSelect = document.getElementById('contact_received');
+        const interestShownSelect = document.getElementById('interest_shown');
+        const closedPipelineSelect = document.getElementById('closed_pipeline');
+
+        const projectPipelinesInput =  document.getElementById('id_pipelines');
+
+        const remotePipelineSteps = [];
+
+        const setPipelineSteps = (select, status) => {
+            const currentProjectPipelines = JSON.parse( projectPipelinesInput.value || '{}' );
+            const selectedStep  = select.value;
+            const fullStepData = remotePipelineSteps.find(step => Number(step.id) === Number(selectedStep));
+            currentProjectPipelines[status] = {
+                integration: amoIntegrationRadio.value,
+                ...fullStepData
+            }
+            projectPipelinesInput.value = JSON.stringify(currentProjectPipelines);
+        }
+
+        const loadAmoPipelineSteps = () => {
+            //  <iframe src="https://integration.eliment.ai/amo?user_id={{ project.client_id }}" ></iframe>
             const oauthModal = new bootstrap.Modal(amoIntegrationModal);
             // Отправляем запрос на send-code
             fetch('https://integration.eliment.ai/amo/token?user_id={{ project.client_id }}')
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Ошибка отправки кода');
+                        throw new Error('Ошибка проверки токена');
                     }
                     return response.json();
                 })
@@ -943,19 +1061,34 @@
                         // Открываем модальное окно
                         oauthModal.show();
                     } else {
-                       return fetch('https://integration.eliment.ai/amo/pipelines?user_id={{ project.client_id }}')
+                        return fetch('https://integration.eliment.ai/amo/pipelines?user_id={{ project.client_id }}')
                     }
                 })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Ошибка отправки кода');
+                        throw new Error('Ошибка получения воронок');
                     }
                     return response.json();
                 })
                 .then(data => {
                     if (data.count && data.count > 0) {
-                        // Открываем модальное окно
 
+                        const pipeline = data.data[0];
+                        const { statuses }  = pipeline;
+
+                        for (var i = 0; i<=(statuses.length - 1); i++){
+                            addOption(successDialogsSelect, statuses[i]);
+                            addOption(contactReceivedSelect, statuses[i]);
+                            addOption(interestShownSelect, statuses[i]);
+                            addOption(closedPipelineSelect, statuses[i]);
+
+                            remotePipelineSteps.push(statuses[i])
+                        }
+
+                        successDialogsSelect.disabled = false;
+                        contactReceivedSelect.disabled = false;
+                        interestShownSelect.disabled = false;
+                        closedPipelineSelect.disabled = false;
                     } else {
                         return  alert('Воронок не найдено.');
                     }
@@ -964,6 +1097,35 @@
                     console.error('Ошибка при отправке кода:', error);
                     alert('Ошибка при отправке кода.');
                 });
+        }
+
+        const addOption = (select,status)  => {
+            var opt = document.createElement('option');
+            opt.value = status.id;
+            opt.innerHTML = status.name;
+            select.appendChild(opt);
+        }
+
+        if(amoIntegrationRadio.checked) {
+            loadAmoPipelineSteps();
+        }
+
+
+        amoIntegrationRadio.addEventListener('change', () => {
+            loadAmoPipelineSteps();
+        });
+
+        successDialogsSelect.addEventListener('change', () => {
+            setPipelineSteps(successDialogsSelect, 'success');
+        });
+        contactReceivedSelect.addEventListener('change', () => {
+            setPipelineSteps(contactReceivedSelect, 'contact_received');
+        });
+        interestShownSelect.addEventListener('change', () => {
+            setPipelineSteps(interestShownSelect, 'interest_shown');
+        });
+        closedPipelineSelect.addEventListener('change', () => {
+            setPipelineSteps(closedPipelineSelect, 'closed');
         });
     });
 
