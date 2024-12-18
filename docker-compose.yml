@@ -8,7 +8,6 @@ services:
       - web_network
     volumes:
       - /mnt/media/images:/app/apps/media/images
-      - /sessions:/app/sessions
     # depends_on:
     #   - fastapi-app
     environment:
@@ -24,7 +23,7 @@ services:
   #   networks:
   #     - web_network
   #   volumes:
-  #     - ./fastapi:/app  
+  #     - ./fastapi:/app
   #     - /sessions:/app/sessions
   #   ports:
   #     - "8001:8001"

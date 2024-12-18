@@ -997,6 +997,8 @@
     
         // Обработчик нажатия на кнопку "Отправить"
         sendBtn.addEventListener('click', () => {
+            event.preventDefault(); // Останавливаем стандартное поведение формы
+
             const userMessage = chatInput.value.trim();
             if (!userMessage) return;
     

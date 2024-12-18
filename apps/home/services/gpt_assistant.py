@@ -72,7 +72,7 @@ class GPTAssistant:
         Загружает историю чата из базы данных на основе user_id.
         """
         print(self.tgid_id)
-        tg = TgID.objects.get(tg_id=self.tgid_id)
+        tg = TgID.objects.filter(tg_id=self.tgid_id).first()
         self.is_auto_active = tg.is_auto_active
 
         chat_records = Chat.objects.filter(project=self.project, user_id=tg.tg_id).order_by("created_at")
