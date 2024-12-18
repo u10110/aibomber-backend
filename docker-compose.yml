@@ -8,7 +8,6 @@ services:
       - web_network
     volumes:
       - /mnt/media/images:/app/apps/media/images
-      - /sessions:/app/sessions
     depends_on:
       - fastapi-app
     environment:
