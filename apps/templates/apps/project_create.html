@@ -502,10 +502,10 @@
                             <div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
                                 <div class="multisteps-form__content">
                                     <div class="row">
-                                        {{ form.integrations }}
+
                                         <h5>Выберите  CRM для интеграции: </h5>
-                                        <!--<input type="radio" name="integrations" id="id_integrations_0"
-                                               class="d-none imgbgchk" value="" >
+                                        <input type="radio" name="integrations" id="id_integrations_0"
+                                               class="d-none imgbgchk" value=""  style="display: none" >
                                         <div class='col text-center'>
                                             <input type="radio" name="integrations" id="id_integrations_1"
                                                    class="d-none imgbgchk" value="amo_crm" >
@@ -525,7 +525,7 @@
                                                     <div class="tick"><i class="fa fa-check"></i></div>
                                                 </div>
                                             </label>
-                                        </div>-->
+                                        </div>
                                         <div class='col text-center'>
                                         </div>
                                     </div>
@@ -1023,6 +1023,7 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+
         const amoIntegrationRadio = document.getElementById('id_integrations_1');
         const clearIntegrationRadio = document.getElementById('id_integrations_0');
 
@@ -1036,17 +1037,34 @@
         const projectPipelinesInput =  document.getElementById('id_pipelines');
 
         const remotePipelineSteps = [];
-        const project_user_id = '{{ project.client_id }}';
-        const request_user_id = '{{ request.user  }}';
-        const user = project_user_id || request_user_id;
+        const projectUserId = '{{ project.client_id }}';
+        const requestUserId = '{{ request.user  }}';
+        const integrationValue = '{{ form.integrations.value }}';
+        const user = projectUserId || requestUserId;
+        const projectPipelinesFromServer = JSON.parse( projectPipelinesInput.value || '[]' );
+
+        switch (integrationValue){
+            case 'null':
+                clearIntegrationRadio.checked = true;
+                break;
+            case 'amo_crm':
+                amoIntegrationRadio.checked = true;
+                break;
+        }
 
         const setPipelineSteps = (select, status) => {
-            const currentProjectPipelines = JSON.parse( projectPipelinesInput.value || '{}' );
+            const currentProjectPipelines = JSON.parse( projectPipelinesInput.value || '[]' );
             const selectedStep  = select.value;
             const fullStepData = remotePipelineSteps.find(step => Number(step.id) === Number(selectedStep));
-            currentProjectPipelines[status] = {
-                integration: amoIntegrationRadio.value,
+            const currentStatusIndex = currentProjectPipelines.findIndex(pipeline => pipeline.status === status);
+            const pipelineToSet = {
+                trigger: status,
                 ...fullStepData
+            };
+            if(currentStatusIndex === -1) {
+                currentProjectPipelines.push(pipelineToSet);
+            } else {
+                currentProjectPipelines[currentStatusIndex] = pipelineToSet
             }
             projectPipelinesInput.value = JSON.stringify(currentProjectPipelines);
         }
@@ -1108,7 +1126,9 @@
 
                             remotePipelineSteps.push(statuses[i])
                         }
-
+                        if(Number(projectUserId) > 0){
+                            setSavedOptionsIfExists();
+                        }
                         successDialogsSelect.disabled = false;
                         contactReceivedSelect.disabled = false;
                         interestShownSelect.disabled = false;
@@ -1151,7 +1171,18 @@
             select.appendChild(opt);
         }
 
-        if(amoIntegrationRadio.checked && Number(project_user_id) > 0) {
+        const setSavedOptionsIfExists = () => {
+            successDialogsSelect.value = projectPipelinesFromServer.find(pipeline=> pipeline.trigger === 'success')
+                ?.remote_id;
+            contactReceivedSelect.value = projectPipelinesFromServer.find(pipeline=> pipeline.trigger === 'contact_received')
+                ?.remote_id;
+            interestShownSelect.value = projectPipelinesFromServer.find(pipeline=> pipeline.trigger === 'interest_shown')
+                ?.remote_id;
+            closedPipelineSelect.value = projectPipelinesFromServer.find(pipeline=> pipeline.trigger === 'closed')
+                ?.remote_id;
+        }
+
+        if(amoIntegrationRadio.checked && Number(projectUserId) > 0) {
             loadAmoPipelineSteps();
         }
 

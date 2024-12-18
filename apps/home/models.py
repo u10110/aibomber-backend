@@ -283,12 +283,13 @@ class CrmPipelines(models.Model):
         ('closed', 'Закрытые'),
     ]
 
-    project_id = models.ForeignKey(
+    project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE
     )
-    name = models.CharField(max_length=1000)
-    remote_id = models.IntegerField(null=False)
+    remote_name = models.CharField(max_length=1000)
+    remote_id = models.IntegerField(null=True)
+    remote_pipeline_id = models.IntegerField(null=True)
     trigger = models.CharField(
         max_length=40,
         choices=TRIGGER_ACTIONS,
@@ -299,6 +300,6 @@ class CrmPipelines(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
-        return f"{self.title} ({self.name})"
+        return f"{self.trigger} ({self.remote_name})"
 
 

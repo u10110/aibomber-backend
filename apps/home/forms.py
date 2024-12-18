@@ -15,6 +15,8 @@ from .models import Project, Recipient, TgID, Channel, ProjectFile, CrmPipelines
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.db.models import Q
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 import os 
 
 
@@ -123,22 +125,10 @@ class ProjectForm(forms.ModelForm):
         label="Получатели"
     )
 
-    CRM_TYPES = [
-        ('null', 'не выбрано'),
-        ('amo_crm', 'Amo Crm'),
-        ('bitrix', 'Bitrix 24')
-    ]
-
-    integrations = forms.MultipleChoiceField(
-        widget=forms.RadioSelect,
-        choices=CRM_TYPES,
-        required=False)
-
-
-    # pipelines = forms.CharField(
-       #     widget=forms.HiddenInput(),
-       #     required=True
-       # )
+    pipelines = forms.CharField(
+            widget=forms.HiddenInput(),
+            required=True
+    )
 
     time_start = forms.TimeField(
         required=True,
@@ -221,11 +211,18 @@ class ProjectForm(forms.ModelForm):
    
     class Meta:
         model = Project
+        CRM_TYPES = [
+            ('null', 'не выбрано'),
+            ('amo_crm', 'Amo Crm'),
+            ('bitrix', 'Bitrix 24')
+        ]
+
         fields = [
             'title',
             'work_option',
             'gpt_version',
             'prompt',
+            'integrations',
             'time_start',
             'time_end',
             'hello_text',
@@ -240,6 +237,7 @@ class ProjectForm(forms.ModelForm):
             'work_option': forms.Select(attrs={'class': 'form-control'}),
             'gpt_version': forms.Select(attrs={'class': 'form-control'}),
             'prompt': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Введите промпт'}),
+            'integrations': forms.RadioSelect(attrs={'name': 'rating'}, choices=CRM_TYPES)
         }
         labels = {
             'title': 'Название проекта',
@@ -256,10 +254,10 @@ class ProjectForm(forms.ModelForm):
             'per_conversation_limit': 'Лимит на одну переписку',
         }
 
-   # def clean_pipelines(self):
-   #     pipelines = json.loads(self.cleaned_data["pipelines"])
-   #     print(pipelines)
-   #     return pipelines
+    def clean_pipelines(self):
+        pipelines = json.loads(self.cleaned_data["pipelines"])
+        print(pipelines)
+        return pipelines
 
     def get_default_work_option(self):
         # Пример настройки опций в зависимости от типа агента
@@ -312,12 +310,20 @@ class ProjectForm(forms.ModelForm):
                 Q(project_id__isnull=True) | Q(project_id=self.instance.id),
                 client=user,
                 status='active')
-            self.fields['recipients'].initial = Recipient.objects.filter(client=user, project_id__isnull=True, project_id=self.instance.id, status='active')
+            self.fields['recipients'].initial = Recipient.objects.filter(client=user,
+                                                                         project_id__isnull=True,
+                                                                         project_id=self.instance.id,
+                                                                         status='active')
+
+            values_list = CrmPipelines.objects.filter(
+                project_id=self.instance.id) \
+                .values('remote_name', 'remote_id', 'trigger', 'remote_pipeline_id')
+            self.fields['pipelines'].initial = json.dumps(list(values_list), cls=DjangoJSONEncoder)
 
     def save(self, commit=True):
         # Сохраняем объект проекта
         project = super().save(commit=commit)
-        print(project.integrations)
+
         # Обработка файлов из формы
         if hasattr(self, 'files') and self.files:  # Проверяем наличие файлов
             for file in self.files.getlist('file'):  # Файлы из формы
@@ -341,20 +347,20 @@ class ProjectForm(forms.ModelForm):
 
         pipelines = self.cleaned_data.get('pipelines', [])
 
-       # print(project)
-       # if commit:
-       #     # Удаляем старые записи, связанные с этим Recipient
-       #     CrmPipelines.objects.filter(project_id=project).delete()
-      #      # Создаем новые записи
-      #      CrmPipelines.objects.bulk_create(
-      #          [CrmPipelines(
-      #              project=project,
-       #             integration=pipelines[status].integration,
-     #               name=pipelines[status].name,
-     #               remote_id=pipelines[status].id,
-     #               trigger=status
-    #            ) for status in pipelines]
-     #       )
+        if commit:
+            # Удаляем старые записи, связанные с этим Recipient
+            CrmPipelines.objects.filter(project_id=project).delete()
+            # Создаем новые записи
+
+            CrmPipelines.objects.bulk_create(
+                [CrmPipelines(
+                    project=project,
+                    remote_name=pipeline['name'],
+                    remote_id=pipeline['id'],
+                    remote_pipeline_id=pipeline['pipeline_id'],
+                    trigger=pipeline['trigger']
+                ) for pipeline in pipelines]
+            )
 
         return project
 
