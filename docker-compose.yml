@@ -9,25 +9,25 @@ services:
     volumes:
       - /mnt/media/images:/app/apps/media/images
       - /sessions:/app/sessions
-    # depends_on:
-    #   - fastapi-app
+    depends_on:
+      - fastapi-app
     environment:
       - FASTAPI_URL=http://fastapi_app:8001
     ports:
       - "80:80"
 
-  # fastapi-app:
-  #   container_name: fastapi_app
-  #   build:
-  #     context: ./fastapi
-  #   restart: always
-  #   networks:
-  #     - web_network
-  #   volumes:
-  #     - ./fastapi:/app  
-  #     - /sessions:/app/sessions
-  #   ports:
-  #     - "8001:8001"
+  fastapi-app:
+    container_name: fastapi_app
+    build:
+      context: ./fastapi
+    restart: always
+    networks:
+      - web_network
+    volumes:
+      - ./fastapi:/app
+      - /sessions:/app/sessions
+    ports:
+      - "8001:8001"
 
 networks:
   web_network:
