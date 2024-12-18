@@ -89,6 +89,12 @@ class Project(models.Model):
         ('health_fitness_manager', 'Менеджер в сфере здоровья и фитнеса'),
     ]
 
+    CRM_TYPES = [
+        ('null', 'не выбрано'),
+        ('amo_crm', 'Amo Crm'),
+        ('bitrix', 'Bitrix 24')
+    ]
+
     STATUS_CHOICES = [
         ('active', 'В работе'),
         ('completed', 'Завершен'),
@@ -130,6 +136,14 @@ class Project(models.Model):
         verbose_name="Ограничение исходящих"
     )
     message_limit = models.IntegerField(default=30)
+
+    integrations = models.CharField(
+        max_length=50,
+        choices=CRM_TYPES,
+        default='null',
+        verbose_name="Интеграция"
+    )
+
     time_start = models.TimeField(default=datetime.time(8, 0))
     time_end = models.TimeField(default=datetime.time(22, 0))
     updated_at = models.DateTimeField(auto_now=True, null=True)
@@ -257,22 +271,6 @@ class Chat(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 
-class Integrations(models.Model):
-    CRM_TYPES = [
-        ('amo_crm', 'Amo Crm'),
-        ('bitrix', 'Bitrix 24')
-    ]
-    type = models.CharField(
-        max_length=40,
-        choices=CRM_TYPES,
-        verbose_name="Статус общения"
-    )
-    client = models.ForeignKey(User, on_delete=models.CASCADE)
-    access_granted = models.BooleanField(default=False)
-    updated_at = models.DateTimeField(auto_now=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-
-
 class CrmPipelines(models.Model):
     class Meta:
         verbose_name = "Воронки проектов в CRМ"
@@ -285,7 +283,6 @@ class CrmPipelines(models.Model):
         ('closed', 'Закрытые'),
     ]
 
-    integration = models.ForeignKey(Integrations, on_delete=models.CASCADE)
     project_id = models.ForeignKey(
         Project,
         on_delete=models.CASCADE

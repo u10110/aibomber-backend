@@ -129,11 +129,16 @@ class ProjectForm(forms.ModelForm):
         ('bitrix', 'Bitrix 24')
     ]
 
-    integrations = forms.MultipleChoiceField(widget=forms.RadioSelect, choices=CRM_TYPES)
+    integrations = forms.MultipleChoiceField(
+        widget=forms.RadioSelect,
+        choices=CRM_TYPES,
+        required=False)
 
-    pipelines = forms.CharField(
-        widget=forms.HiddenInput()
-    )
+
+    # pipelines = forms.CharField(
+       #     widget=forms.HiddenInput(),
+       #     required=True
+       # )
 
     time_start = forms.TimeField(
         required=True,
@@ -251,13 +256,10 @@ class ProjectForm(forms.ModelForm):
             'per_conversation_limit': 'Лимит на одну переписку',
         }
 
-    def clean_pipelines(self):
-        pipelines = json.loads(self.cleaned_data["pipelines"])
-       # if len(pipelines) < 11:
-        #    raise forms.ValidationError("Неверный формат теелфона")
-        return pipelines
-
-
+   # def clean_pipelines(self):
+   #     pipelines = json.loads(self.cleaned_data["pipelines"])
+   #     print(pipelines)
+   #     return pipelines
 
     def get_default_work_option(self):
         # Пример настройки опций в зависимости от типа агента
@@ -315,7 +317,7 @@ class ProjectForm(forms.ModelForm):
     def save(self, commit=True):
         # Сохраняем объект проекта
         project = super().save(commit=commit)
-
+        print(project.integrations)
         # Обработка файлов из формы
         if hasattr(self, 'files') and self.files:  # Проверяем наличие файлов
             for file in self.files.getlist('file'):  # Файлы из формы
@@ -338,28 +340,21 @@ class ProjectForm(forms.ModelForm):
             recipient.save()
 
         pipelines = self.cleaned_data.get('pipelines', [])
-        print(123)
-        print(commit)
-        if commit:
-            # Удаляем старые записи, связанные с этим Recipient
-            CrmPipelines.objects.filter(project=project).delete()
-            # Создаем новые записи
-            print([CrmPipelines(
-                project=project,
-                integration=pipelines[status].integration,
-                name=pipelines[status].name,
-                remote_id=pipelines[status].id,
-                trigger=status
-            ) for status in pipelines])
-            CrmPipelines.objects.bulk_create(
-                [CrmPipelines(
-                    project=project,
-                    integration=pipelines[status].integration,
-                    name=pipelines[status].name,
-                    remote_id=pipelines[status].id,
-                    trigger=status
-                ) for status in pipelines]
-            )
+
+       # print(project)
+       # if commit:
+       #     # Удаляем старые записи, связанные с этим Recipient
+       #     CrmPipelines.objects.filter(project_id=project).delete()
+      #      # Создаем новые записи
+      #      CrmPipelines.objects.bulk_create(
+      #          [CrmPipelines(
+      #              project=project,
+       #             integration=pipelines[status].integration,
+     #               name=pipelines[status].name,
+     #               remote_id=pipelines[status].id,
+     #               trigger=status
+    #            ) for status in pipelines]
+     #       )
 
         return project
 
