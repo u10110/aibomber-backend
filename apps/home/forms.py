@@ -129,11 +129,10 @@ class ProjectForm(forms.ModelForm):
         ('bitrix', 'Bitrix 24')
     ]
 
-    integrations = forms.MultipleChoiceField(widget=forms.RadioSelect, choices=CRM_TYPES, required=True)
+    integrations = forms.MultipleChoiceField(widget=forms.RadioSelect, choices=CRM_TYPES)
 
     pipelines = forms.CharField(
-        widget=forms.HiddenInput(),
-        required=True
+        widget=forms.HiddenInput()
     )
 
     time_start = forms.TimeField(
@@ -254,7 +253,6 @@ class ProjectForm(forms.ModelForm):
 
     def clean_pipelines(self):
         pipelines = json.loads(self.cleaned_data["pipelines"])
-        print(pipelines)
        # if len(pipelines) < 11:
         #    raise forms.ValidationError("Неверный формат теелфона")
         return pipelines
@@ -286,13 +284,16 @@ class ProjectForm(forms.ModelForm):
             self.fields['agent_type'].initial = self.agent_type
 
         if user:
-            self.fields['channel'].queryset = Channel.objects.filter(client=user, project_id__isnull=True, status='authorized')
-            self.fields['recipients'].queryset = Recipient.objects.filter(client=user, project_id__isnull=True, status='active')
+            self.fields['channel'].queryset = Channel.objects.filter(client=user,
+                                                                     project_id__isnull=True, status='authorized')
+            self.fields['recipients'].queryset = Recipient.objects.filter(client=user,
+                                                                          project_id__isnull=True, status='active')
 
         # Устанавливаем значения по умолчанию для time_start и time_end
         if not self.instance.pk:  # Если объект модели ещё не сохранён
             self.fields['time_start'].initial = datetime.time(8, 0)
             self.fields['time_end'].initial = datetime.time(22, 0)
+
         else:
             user = project.client_id
             # Загружаем связанные записи для редактирования
@@ -337,10 +338,19 @@ class ProjectForm(forms.ModelForm):
             recipient.save()
 
         pipelines = self.cleaned_data.get('pipelines', [])
+        print(123)
+        print(commit)
         if commit:
             # Удаляем старые записи, связанные с этим Recipient
             CrmPipelines.objects.filter(project=project).delete()
             # Создаем новые записи
+            print([CrmPipelines(
+                project=project,
+                integration=pipelines[status].integration,
+                name=pipelines[status].name,
+                remote_id=pipelines[status].id,
+                trigger=status
+            ) for status in pipelines])
             CrmPipelines.objects.bulk_create(
                 [CrmPipelines(
                     project=project,

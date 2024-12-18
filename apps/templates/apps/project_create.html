@@ -504,7 +504,7 @@
                                     <div class="row">
                                         <h5>Выберите  CRM для интеграции: </h5>
                                         <input type="radio" name="integrations" id="id_integrations_0"
-                                               class="d-none imgbgchk" value="null"  style="display: none" >
+                                               class="d-none imgbgchk" value=""  style="display: none" >
                                         <div class='col text-center'>
                                             <input type="radio" name="integrations" id="id_integrations_1"
                                                    class="d-none imgbgchk" value="amo_crm" >
@@ -597,14 +597,12 @@
                                           <h5 class="modal-title" id=crmOauthModalLabel">Авторизация в ЦРМ</h5>
                                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                       </div>
-                                      <div class="modal-body">
-
+                                      <div class="modal-body" id="crmOauth2ModalBody">
+                                          <iframe id="crmOauthIframe" ></iframe>
                                       </div>
                                   </div>
                               </div>
                           </div>
-
-
 
                       </form>
                     </div>
@@ -1023,6 +1021,8 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const amoIntegrationRadio = document.getElementById('id_integrations_1');
+        const clearIntegrationRadio = document.getElementById('id_integrations_0');
+
         const amoIntegrationModal = document.getElementById('crmOauth2Modal');
 
         const successDialogsSelect = document.getElementById('success_dialogs');
@@ -1033,6 +1033,9 @@
         const projectPipelinesInput =  document.getElementById('id_pipelines');
 
         const remotePipelineSteps = [];
+        const project_user_id = '{{ project.client_id }}';
+        const request_user_id = '{{ request.user  }}';
+        const user = project_user_id || request_user_id;
 
         const setPipelineSteps = (select, status) => {
             const currentProjectPipelines = JSON.parse( projectPipelinesInput.value || '{}' );
@@ -1046,29 +1049,47 @@
         }
 
         const loadAmoPipelineSteps = () => {
-            //  <iframe src="https://integration.eliment.ai/amo?user_id={{ project.client_id }}" ></iframe>
+            //
             const oauthModal = new bootstrap.Modal(amoIntegrationModal);
             // Отправляем запрос на send-code
-            fetch('https://integration.eliment.ai/amo/token?user_id={{ project.client_id }}')
+            fetch('https://integration.eliment.ai/amo/token?user_id=' + user)
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Ошибка проверки токена');
+                        console.log('Ошибка проверки токена');
                     }
                     return response.json();
                 })
                 .then(data => {
-                    if (data.status && data.status === 'AccessTokenNotFound') {
+                    if (data.error	 && data.error	=== 'AccessTokenNotFound') {
                         // Открываем модальное окно
-                        oauthModal.show();
+
+                        popupCenter(
+                            {
+                                url: 'https://integration.eliment.ai/amo?user_id=' + user ,
+                                title: 'Авторизация в Amo Crm',
+                                w: 450,
+                                h: 450
+                            }
+                        );
+
+                        clearIntegrationRadio.checked = true;
+
+                        // oauthModal.show();
+                        return {tokenModalOpen : true}
                     } else {
-                        return fetch('https://integration.eliment.ai/amo/pipelines?user_id={{ project.client_id }}')
+                        return fetch('https://integration.eliment.ai/amo/pipelines?user_id=' + user)
                     }
                 })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Ошибка получения воронок');
+                        if(response.tokenModalOpen) {
+                            return {};
+                        } else {
+                            throw new Error('Ошибка получения воронок');
+                        }
+                    } else {
+                        return response.json();
                     }
-                    return response.json();
                 })
                 .then(data => {
                     if (data.count && data.count > 0) {
@@ -1089,14 +1110,35 @@
                         contactReceivedSelect.disabled = false;
                         interestShownSelect.disabled = false;
                         closedPipelineSelect.disabled = false;
-                    } else {
-                        return  alert('Воронок не найдено.');
                     }
                 })
                 .catch(error => {
                     console.error('Ошибка при отправке кода:', error);
-                    alert('Ошибка при отправке кода.');
+                    //alert('Ошибка при отправке кода.');
                 });
+        }
+
+        const popupCenter = ({url, title, w, h}) => {
+            // Fixes dual-screen position                             Most browsers      Firefox
+            const dualScreenLeft = window.screenLeft !==  undefined ? window.screenLeft : window.screenX;
+            const dualScreenTop = window.screenTop !==  undefined   ? window.screenTop  : window.screenY;
+
+            const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+            const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+            const systemZoom = width / window.screen.availWidth;
+            const left = (width - w) / 2 / systemZoom + dualScreenLeft
+            const top = (height - h) / 2 / systemZoom + dualScreenTop
+            const newWindow = window.open(url, 'amoWin',
+                 `scrollbars=yes,
+                  width=${w / systemZoom},
+                  height=${h / systemZoom},
+                  top=${top},
+                  left=${left}`
+            )
+
+            if (window.focus) newWindow.focus();
+            return newWindow;
         }
 
         const addOption = (select,status)  => {
@@ -1106,12 +1148,15 @@
             select.appendChild(opt);
         }
 
-        if(amoIntegrationRadio.checked) {
+        if(amoIntegrationRadio.checked && Number(project_user_id) > 0) {
             loadAmoPipelineSteps();
         }
 
 
         amoIntegrationRadio.addEventListener('change', () => {
+            loadAmoPipelineSteps();
+        });
+        amoIntegrationRadio.addEventListener('click', () => {
             loadAmoPipelineSteps();
         });
 
