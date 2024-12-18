@@ -27,8 +27,9 @@ phone_hash_store = {}
 
 @app.post("/send-code/")
 async def send_code(phone: str):
+    phone = phone.strip().replace("+", "")
     logger.info(f"Получен запрос на отправку кода для телефона: {phone}")
-    session_name = os.path.join(SESSION_DIR, "session_" + phone.strip().replace("+", ""))
+    session_name = os.path.join(SESSION_DIR, "session_" + phone)
 
     # Если файл сессии существует, удаляем его
     if os.path.exists(session_name + ".session"):
@@ -47,6 +48,7 @@ async def send_code(phone: str):
         if not await client.is_user_authorized():
             result = await client.send_code_request(phone)
             phone_hash_store[phone] = result.phone_code_hash
+            print(phone_hash_store)
             logger.info(f"Код успешно отправлен, phone_code_hash сохранён для телефона: {phone}")
             return {"message": f"Код отправлен на номер {phone}", "success": True}
         logger.info("Пользователь уже авторизован")
@@ -66,14 +68,17 @@ class VerifyCodeRequest(BaseModel):
 @app.post("/verify-code/")
 async def verify_code(data: VerifyCodeRequest):
     phone = data.phone
+    phone = phone.strip().replace("+", "")
     code = data.code
 
     logger.info(f"Получен запрос на подтверждение кода для телефона: {phone}")
-    session_name = os.path.join(SESSION_DIR, "session_" + phone.strip().replace("+", ""))
+    session_name = os.path.join(SESSION_DIR, "session_" + phone)
     client = TelegramClient(session_name, API_ID, API_HASH)
 
     try:
+        print(f"phone_hash_store {phone_hash_store}")
         phone_code_hash = phone_hash_store.get(phone)
+        
         if not phone_code_hash:
             raise HTTPException(status_code=400, detail="Код не был отправлен или истёк")
 
@@ -96,7 +101,10 @@ async def get_users(phone: str):
     """
     Получает список всех пользователей, с которыми велась переписка.
     """
-    session_name = os.path.join(SESSION_DIR, "session_" + phone.strip().replace("+", ""))
+    phone = phone.strip().replace("+", "")
+    print(111111111111)
+    print(phone)
+    session_name = os.path.join(SESSION_DIR, "session_" + phone)
     print(f"session_name {session_name}")
     client = TelegramClient(session_name, API_ID, API_HASH)
     print(client)
@@ -176,7 +184,8 @@ async def get_messages(data: GetMessagesRequest):
     """
     Получает все сообщения из указанного канала с полными данными.
     """
-    session_name = os.path.join(SESSION_DIR, "session_" + data.phone.strip().replace("+", ""))
+    phone = data.phone.strip().replace("+", "")
+    session_name = os.path.join(SESSION_DIR, "session_" + phone)
     client = TelegramClient(session_name, API_ID, API_HASH)
 
     try:
@@ -209,7 +218,8 @@ async def send_message(data: SendMessageRequest):
     """
     Отправляет сообщение пользователю.
     """
-    session_name = os.path.join(SESSION_DIR, "session_" + data.phone.strip().replace("+", ""))
+    phone = data.phone.strip().replace("+", "")
+    session_name = os.path.join(SESSION_DIR, "session_" + phone)
     client = TelegramClient(session_name, API_ID, API_HASH)
 
     try:
