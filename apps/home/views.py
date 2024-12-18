@@ -66,7 +66,6 @@ from telethon import TelegramClient
 from telethon.errors import SessionPasswordNeededError
 
 from .models import Project
-# from .services.gpt_trainer import GPTProjectTrainer
 from .services.gpt_assistant import GPTAssistant
 
 def error(request):
@@ -928,7 +927,7 @@ def chat_messages(request):
             # return redirect(request.path_info)
             return redirect(f'{reverse("messages")}?user_id={user_id}')
 
-    chats = Chat.objects.all().order_by('-created_at')
+    chats = Chat.objects.filter(client_id=request.user.id).order_by('-created_at')
 
     # Определяем текущий чат
     current_chat = None
@@ -948,7 +947,7 @@ def chat_messages(request):
 
     chats = Chat.objects.filter(
     id=Subquery(
-        Chat.objects.filter(user_id=OuterRef('user_id'))
+        Chat.objects.filter(client_id=request.user.id, user_id=OuterRef('user_id'))
         .order_by('-created_at')
         .values('id')[:1]
     )
@@ -1210,38 +1209,6 @@ def verify_code(request):
 
     return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
 
-
-
-@csrf_exempt
-def chat_emulator(request, project_id):
-    """
-    Взаимодействие с эмулятором чата для тестирования настроек проекта.
-    """
-    if request.method == "POST":
-        try:
-            project = Project.objects.get(id=project_id)
-            trainer = GPTProjectTrainer(project)
-
-            # Получение сообщения пользователя
-            data = json.loads(request.body)
-            user_message = data.get("message")
-
-            if not user_message:
-                return JsonResponse({"error": "Сообщение не должно быть пустым"}, status=400)
-
-            # Взаимодействие с GPT
-            response = trainer.interact(user_message)
-
-            if response["success"]:
-                return JsonResponse({"response": response["response"]})
-            else:
-                return JsonResponse({"error": response["error"]}, status=500)
-        except Project.DoesNotExist:
-            return JsonResponse({"error": "Проект не найден"}, status=404)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-    else:
-        return JsonResponse({"error": "Метод запроса должен быть POST"}, status=405)
 
 
 
