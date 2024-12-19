@@ -185,6 +185,8 @@ class TgID(models.Model):
         on_delete=models.CASCADE
     )
     tg_id = models.CharField(max_length=255)
+    status = models.CharField(max_length=55, default="active")
+    phone = models.CharField(max_length=55,null=True)
     is_auto_active = models.BooleanField(default=True)
 
 
