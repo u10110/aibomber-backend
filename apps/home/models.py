@@ -190,15 +190,56 @@ class Recipient(models.Model):
 
 
 class TgID(models.Model):
+
+    TG_STATUS = [
+        ('active', 'Активный'),
+        ('success', 'Успешные диалоги'),
+        ('contact_received', 'Контакт получен'),
+        ('interest_shown', 'Проявлен интерес'),
+        ('closed', 'Закрыт'),
+    ]
+
+    previous_status = None
+
+    @staticmethod
+    def post_save(sender, instance, created, **kwargs):
+        if instance.previous_status != instance.status and instance.status != 'active':
+            pipeline = CrmPipelines.objects.filter(
+                project_id=instance.recipient.project_id,
+                trigger=instance.status
+            )
+            r = requests.get(url="https://integration.eliment.ai/amo/lead", params={
+                'pipeline_id': pipeline.remote_pipeline_id,
+                'remote_step_id': pipeline.remote_step_id,
+                'remote_lead_id': instance.remote_lead_id,
+                'user_name': instance.tg_id,
+                'phone':  instance.phone,
+            })
+            if r.status_code == 200 and instance.remote_lead_id is None:
+                lead_action_response=json.loads(r.content)
+                instance.remote_lead_id = lead_action_response.lead_id
+                instance.save()
+
+
+
+
+    @staticmethod
+    def remember_state(sender, instance, **kwargs):
+        instance.previous_state = instance.state
     recipient = models.ForeignKey(
         Recipient,
         related_name='tg_id_set',
         on_delete=models.CASCADE
     )
+    remote_lead_id = models.IntegerField(null=True)
     tg_id = models.CharField(max_length=255)
     status = models.CharField(max_length=55, default="active")
     phone = models.CharField(max_length=55,null=True)
     is_auto_active = models.BooleanField(default=True)
+
+
+#post_save.connect(TgID.post_save, sender=TgID)
+#post_init.connect(TgID.remember_state, sender=TgID)
 
 
 class Channel(models.Model):
@@ -250,46 +291,6 @@ class Channel(models.Model):
 
 
 class Chat(models.Model):
-
-    CHAT_STATUS = [
-        ('active', 'Активный'),
-        ('success', 'Успешные диалоги'),
-        ('contact_received', 'Контакт получен'),
-        ('interest_shown', 'Проявлен интерес'),
-        ('closed', 'Закрыт'),
-    ]
-
-    previous_status = None
-
-    @staticmethod
-    def post_save(sender, instance, created, **kwargs):
-        if instance.previous_status != instance.status:
-            pipeline = CrmPipelines.objects.filter(
-                project_id=instance.project_id,
-                trigger=instance.status
-            )
-            URL = "http://maps.googleapis.com/maps/api/geocode/json"
-
-            PARAMS = {
-                'pipeline_id': pipeline.remote_pipeline_id,
-                'remote_step_id': pipeline.remote_step_id,
-                'remote_lead_id': instance.remote_lead_id,
-                'user_name': instance.user_id,
-                'phone': ''
-            }
-            r = requests.get(url=URL, params=PARAMS)
-            if r.status_code == 200 and instance.remote_lead_id is None:
-                lead_action_response=json.loads(r.content)
-                instance.remote_lead_id = lead_action_response.lead_id
-                instance.save()
-
-
-
-
-    @staticmethod
-    def remember_state(sender, instance, **kwargs):
-        instance.previous_state = instance.state
-
     class Meta:
         verbose_name = "Чаты"
         verbose_name_plural = "Чаты"
@@ -308,16 +309,11 @@ class Chat(models.Model):
         choices=MESSAGE_TYPE,
         default='message',
     )
-    status = models.CharField(max_length=55, choices=CHAT_STATUS, default="active")
+    status = models.CharField(max_length=55, default="active")
     user_name = models.CharField(max_length=55, )
     user_message = models.CharField(max_length=555, )
     sex = models.IntegerField(null=True)
-    remote_lead_id = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
-
-
-post_save.connect(Chat.post_save, sender=Chat)
-post_init.connect(Chat.remember_state, sender=Chat)
 
 
 class CrmPipelines(models.Model):
