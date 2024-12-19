@@ -256,7 +256,6 @@ class ProjectForm(forms.ModelForm):
 
     def clean_pipelines(self):
         pipelines = json.loads(self.cleaned_data["pipelines"])
-        print(pipelines)
         return pipelines
 
     def get_default_work_option(self):
@@ -317,7 +316,7 @@ class ProjectForm(forms.ModelForm):
 
             values_list = CrmPipelines.objects.filter(
                 project_id=self.instance.id) \
-                .values('remote_name', 'remote_id', 'trigger', 'remote_pipeline_id')
+                .values('remote_name', 'remote_step_id', 'trigger', 'remote_pipeline_id')
             self.fields['pipelines'].initial = json.dumps(list(values_list), cls=DjangoJSONEncoder)
 
     def save(self, commit=True):
@@ -356,7 +355,7 @@ class ProjectForm(forms.ModelForm):
                 [CrmPipelines(
                     project=project,
                     remote_name=pipeline['name'],
-                    remote_id=pipeline['id'],
+                    remote_step_id=pipeline['id'],
                     remote_pipeline_id=pipeline['pipeline_id'],
                     trigger=pipeline['trigger']
                 ) for pipeline in pipelines]

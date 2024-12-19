@@ -1173,13 +1173,13 @@
 
         const setSavedOptionsIfExists = () => {
             successDialogsSelect.value = projectPipelinesFromServer.find(pipeline=> pipeline.trigger === 'success')
-                ?.remote_id;
+                ?.remote_step_id;
             contactReceivedSelect.value = projectPipelinesFromServer.find(pipeline=> pipeline.trigger === 'contact_received')
-                ?.remote_id;
+                ?.remote_step_id;
             interestShownSelect.value = projectPipelinesFromServer.find(pipeline=> pipeline.trigger === 'interest_shown')
-                ?.remote_id;
+                ?.remote_step_id;
             closedPipelineSelect.value = projectPipelinesFromServer.find(pipeline=> pipeline.trigger === 'closed')
-                ?.remote_id;
+                ?.remote_step_id;
         }
 
         if(amoIntegrationRadio.checked && Number(projectUserId) > 0) {
