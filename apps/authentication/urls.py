@@ -18,8 +18,8 @@ from .views import LoginCallbackView
 urlpatterns = [
     path("login/", login_view, name="login"),
     re_path(r"^signup/?$", register_user, name="register"),
-    path("signup_tg/", register_tg_user, name="register_tg"),
-    path("reset_tg_password/", reset_tg_password, name="reset_tg_password"),
+    path("/api/v1/signup_tg/", register_tg_user, name="register_tg"),
+    path("/api/v1/reset_tg_password/", reset_tg_password, name="reset_tg_password"),
     # re_path(r'^register-dev123$', register_user, name="register"),
     path("logout/", LogoutView.as_view(), name="logout"),
     re_path(r"^activate/(?P<code>[0-9]+)/$", activate, name="activate"),
