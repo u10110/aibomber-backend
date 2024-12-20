@@ -1118,6 +1118,11 @@
                         const pipeline = data.data[0];
                         const { statuses }  = pipeline;
 
+                        successDialogsSelect.innerHTML = "";
+                        contactReceivedSelect.innerHTML = "";
+                        interestShownSelect.innerHTML = "";
+                        closedPipelineSelect.innerHTML = "";
+
                         for (var i = 0; i<=(statuses.length - 1); i++){
                             addOption(successDialogsSelect, statuses[i]);
                             addOption(contactReceivedSelect, statuses[i]);
