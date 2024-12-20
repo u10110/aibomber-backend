@@ -319,6 +319,7 @@ class Chat(models.Model):
     user_name = models.CharField(max_length=55, )
     user_message = models.CharField(max_length=555, )
     sex = models.IntegerField(null=True)
+    remote_lead_id = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 
