@@ -1,0 +1,177 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Messages {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+    }
+
+    .card {
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        margin: 20px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+        font-size: 22px;
+        font-weight: bold;
+        color: #4caf50;
+    }
+
+    .divider {
+        height: 1px;
+        background: #ddd;
+        margin: 10px 0;
+    }
+
+    .pricing-btn {
+        background: linear-gradient(to right, #4caf50, #388e3c);
+        color: #fff;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 30px;
+        transition: transform 0.2s, background 0.3s;
+    }
+
+    .pricing-btn:hover {
+        background: linear-gradient(to right, #388e3c, #2e7d32);
+        transform: translateY(-2px);
+    }
+
+    .modal-header {
+        background-color: #4caf50;
+        color: #fff;
+        border-bottom: 2px solid #388e3c;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .modal-body {
+        padding: 20px;
+        font-size: 1rem;
+    }
+
+    .btn-primary {
+        background-color: #4caf50;
+        border: none;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #388e3c;
+    }
+
+    .form-control {
+        border: 2px solid #4caf50;
+        border-radius: 8px;
+        padding: 10px;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #388e3c;
+        box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center; /* Центрируем карточки */
+      gap: 20px; /* Добавляем промежутки между карточками */
+  }
+  
+  .col-md-3 {
+      flex: 0 0 calc(25% - 20px); /* Карточки занимают 25% ширины контейнера */
+      max-width: calc(25% - 20px); /* Устанавливаем максимальную ширину */
+      box-sizing: border-box; /* Включаем отступы в расчет ширины */
+  }
+  
+</style>
+
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        {% for tariff in tariffs %}
+        <div class="col-md-3 d-flex align-items-stretch">
+            <div class="card text-center">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ tariff.name }}</h5>
+                    <div class="divider"></div>
+                    <p>{{ tariff.users }}</p>
+                    <p>{{ tariff.storage }}</p>
+                    <p>{{ tariff.price_month }}</p>
+                    <p>{{ tariff.price_year }}</p>
+                    <button class="pricing-btn mt-auto" data-tariff="{{ tariff.id }}" onclick="showPopup('{{ tariff.name }}')">Подключить</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Popup -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Обратная связь</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <form id="contactForm">
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Введите ваш номер телефона</label>
+                        <input type="text" class="form-control" id="phone" placeholder="+7 (___) ___-__-__">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "includes/footer.html" %}
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+<script>
+    function showPopup(tariffName) {
+        const modal = new bootstrap.Modal(document.getElementById('contactModal'));
+        modal.show();
+        document.getElementById('contactForm').onsubmit = function(e) {
+            e.preventDefault();
+            const phone = document.getElementById('phone').value;
+            fetch('/contact-request/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ phone_number: phone, tariff: tariffName }),
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message || "Ошибка!"))
+            .catch(err => console.error(err));
+        };
+    }
+</script>
+{% endblock javascripts %}

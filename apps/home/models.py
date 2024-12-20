@@ -54,6 +54,12 @@ class ReferralClickCounter(models.Model):
     ip = models.CharField(max_length=100)
 
 
+class Phone(models.Model):
+    phone = models.CharField(max_length=100)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+
 class ReferralUsers(models.Model):
     source = models.ForeignKey(ReferralLinks, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

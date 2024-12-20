@@ -118,6 +118,11 @@ urlpatterns = [
     
     
     path("chat/", views.chat, name="chat"),
+    path("tariffs/", views.tariffs, name="tariffs"),
+    path('contact-request/', views.contact_request, name='contact_request'),
+    
+    
+    
     path('messages/', views.chat_messages, name='messages'),
     path('api/chats/<int:chat_id>/toggle_auto_active/', views.toggle_auto_active, name='toggle_auto_active'),
     path('api/chats/<int:chat_id>/change_status/', views.change_status, name='change_status'),

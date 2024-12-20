@@ -49,6 +49,11 @@ class ClientProductAdmin(admin.ModelAdmin):
     list_display = ("client_id", "client", "sku", "title", "price")
     search_fields = ("client__phone",)
 
+class PhoneAdmin(admin.ModelAdmin):
+    list_display = ('phone', 'updated_at', 'created_at')  # Поля, которые отображаются в списке
+    list_filter = ('updated_at', 'created_at')  # Возможность фильтрации
+    search_fields = ('phone',)  # Поле для поиска
+    ordering = ('-created_at',)  # Сортировка по умолчанию
 
 @admin.action(description="Payment Status - done")
 def make_done(modeladmin, request, queryset):
@@ -299,5 +304,6 @@ admin.site.register(Project, ProjectAdmin)
 admin.site.register(Channel, ChannelAdmin)
 admin.site.register(ClientSettings, ClientSettingsAdmin)
 admin.site.register(Proxy, ProxyAdmin)
+admin.site.register(Phone, PhoneAdmin)
 # admin.site.register(ReferralLinks, ReferralLinksAdmin)
 # admin.site.register(ReferralUsers, ReferralUsersAdmin)

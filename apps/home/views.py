@@ -51,7 +51,8 @@ from .models import (
     ReferralLinks,
     ClientSettings,
     Channel,
-    Chat
+    Chat,
+    Phone
 )
 from .module import *
 from .services.services import MinioService
@@ -582,6 +583,54 @@ def get_segment(request):
     
 def services(request):
     return render(request, "apps/services.html")
+
+
+def tariffs(request):
+    tariffs = [
+        # {
+        #     "name": "Тариф Класс",
+        #     "price_month": "12 500 ₽/мес.",
+        #     "price_year": "150 000 ₽ в год",
+        #     "users": "55 пользователей",
+        #     "storage": "до 3 Гб",
+        #     "id": "class"
+        # },
+        {
+            "name": "Тариф Академия",
+            "price_month": "14 900 ₽/мес.",
+            "price_year": "178 800 ₽ в год",
+            "users": "110 пользователей",
+            "storage": "до 5 Гб",
+            "id": "academy"
+        },
+        {
+            "name": "Тариф Университет",
+            "price_month": "24 900 ₽/мес.",
+            "price_year": "298 800 ₽ в год",
+            "users": "550 пользователей",
+            "storage": "до 50 Гб",
+            "id": "university"
+        },
+        {
+            "name": "Текущий тариф VIP",
+            "price_month": "83 325 ₽/мес.",
+            "price_year": "999 900 ₽ в год",
+            "users": "405 из 5500",
+            "storage": "2 Гб из 1000 Гб",
+            "id": "vip"
+        }
+    ]
+    return render(request, 'apps/tariffs.html', {"tariffs": tariffs})
+
+@csrf_exempt
+def contact_request(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        phone_number = data.get("phone_number")
+        Phone.objects.create(phone=phone_number)
+        # Здесь можно сохранить номер в базу данных или отправить уведомление
+        return JsonResponse({"message": "Спасибо за вашу заявку! Мы свяжемся с вами."})
+    return JsonResponse({"error": "Некорректный запрос"}, status=400)
 
 
 
