@@ -4,6 +4,13 @@
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
+<style>
+  .price-month {
+      font-weight: bold; /* Жирный текст */
+      font-size: 1.5rem; /* Увеличенный размер шрифта */
+      color: #4caf50; /* (Опционально) цвет текста */
+  }
+</style>
 
 <style>
     body {
@@ -116,11 +123,13 @@
               <div class="card-body d-flex flex-column">
                   <h5 class="card-title">{{ tariff.name }}</h5>
                   <div class="divider"></div>
-                  <p><strong>Стоимость:</strong> {{ tariff.price_month }} / {{ tariff.price_year }}</p>
+                  <p><strong>Стоимость:</strong></p>
+                  <p class="price-month">{{ tariff.price_month }}</p>
+                  <p>{{ tariff.price_year }}</p>
                   <p><strong>Сотрудники:</strong> {{ tariff.users }}</p>
                   {% comment %} <p><strong>Описание:</strong> {{ tariff.storage|safe }}</p> {% endcomment %}
-                  <p><strong>Срок действия:</strong> {{ tariff.duration }}</p>
-                  <p><strong>Цена за сотрудника:</strong> {{ tariff.cost_per_employee }}</p>
+                  {% comment %} <p><strong>Срок действия:</strong> {{ tariff.duration }}</p> {% endcomment %}
+                  {% comment %} <p><strong>Цена за сотрудника:</strong> {{ tariff.cost_per_employee }}</p> {% endcomment %}
                   <p><strong>Доп. сотрудник:</strong> {{ tariff.extra_employee_cost }}</p>
                   {% comment %} <p><strong>Апгрейд:</strong> {{ tariff.upgrade_option }}</p> {% endcomment %}
                   <button class="pricing-btn mt-auto" data-tariff="{{ tariff.name }}" onclick="showPopup('{{ tariff.name }}')">Подключить</button>

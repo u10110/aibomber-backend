@@ -625,17 +625,17 @@ def tariffs(request):
             "extra_employee_cost": "5 000 ₽ (в месяц)",
             "upgrade_option": "Возможно в течение 3 месяцев после начала действия текущего тарифа"
         },
-        {
-            "name": "Тариф Индивидуальный",
-            "price_month": "По согласованию",
-            "price_year": "По согласованию",
-            "users": "Индивидуальное количество сотрудников",
-            "storage": "Возможность реализации на серверах клиента.",
-            "duration": "от 1 года",
-            "cost_per_employee": "-",
-            "extra_employee_cost": "Индивидуально",
-            "upgrade_option": "-"
-        }
+        # {
+        #     "name": "Тариф Индивидуальный",
+        #     "price_month": "По согласованию",
+        #     "price_year": "По согласованию",
+        #     "users": "Индивидуальное количество сотрудников",
+        #     "storage": "Возможность реализации на серверах клиента.",
+        #     "duration": "от 1 года",
+        #     "cost_per_employee": "-",
+        #     "extra_employee_cost": "Индивидуально",
+        #     "upgrade_option": "-"
+        # }
     ]
     return render(request, 'apps/tariffs.html', {"tariffs": tariffs})
 
