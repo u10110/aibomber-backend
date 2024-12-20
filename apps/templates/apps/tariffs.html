@@ -91,15 +91,15 @@
     .row {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center; /* Центрируем карточки */
-      gap: 20px; /* Добавляем промежутки между карточками */
+      justify-content: space-around; /* Распределение карточек */
   }
   
   .col-md-3 {
-      flex: 0 0 calc(25% - 20px); /* Карточки занимают 25% ширины контейнера */
-      max-width: calc(25% - 20px); /* Устанавливаем максимальную ширину */
-      box-sizing: border-box; /* Включаем отступы в расчет ширины */
+      flex: 0 0 30%; /* Увеличенная ширина карточек */
+      max-width: 30%;
+      margin-bottom: 20px;
   }
+  
   
 </style>
 
@@ -109,24 +109,28 @@
 
 {% block content %}
 <div class="container mt-5">
-    <div class="row">
-        {% for tariff in tariffs %}
-        <div class="col-md-3 d-flex align-items-stretch">
-            <div class="card text-center">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">{{ tariff.name }}</h5>
-                    <div class="divider"></div>
-                    <p>{{ tariff.users }}</p>
-                    <p>{{ tariff.storage }}</p>
-                    <p>{{ tariff.price_month }}</p>
-                    <p>{{ tariff.price_year }}</p>
-                    <button class="pricing-btn mt-auto" data-tariff="{{ tariff.id }}" onclick="showPopup('{{ tariff.name }}')">Подключить</button>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
+  <div class="row">
+      {% for tariff in tariffs %}
+      <div class="col-md-3 d-flex align-items-stretch">
+          <div class="card text-center">
+              <div class="card-body d-flex flex-column">
+                  <h5 class="card-title">{{ tariff.name }}</h5>
+                  <div class="divider"></div>
+                  <p><strong>Стоимость:</strong> {{ tariff.price_month }} / {{ tariff.price_year }}</p>
+                  <p><strong>Сотрудники:</strong> {{ tariff.users }}</p>
+                  {% comment %} <p><strong>Описание:</strong> {{ tariff.storage|safe }}</p> {% endcomment %}
+                  <p><strong>Срок действия:</strong> {{ tariff.duration }}</p>
+                  <p><strong>Цена за сотрудника:</strong> {{ tariff.cost_per_employee }}</p>
+                  <p><strong>Доп. сотрудник:</strong> {{ tariff.extra_employee_cost }}</p>
+                  {% comment %} <p><strong>Апгрейд:</strong> {{ tariff.upgrade_option }}</p> {% endcomment %}
+                  <button class="pricing-btn mt-auto" data-tariff="{{ tariff.name }}" onclick="showPopup('{{ tariff.name }}')">Подключить</button>
+              </div>
+          </div>
+      </div>
+      {% endfor %}
+  </div>
 </div>
+
 
 <!-- Popup -->
 <div class="modal fade" id="contactModal" tabindex="-1" aria-hidden="true">

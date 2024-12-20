@@ -587,40 +587,58 @@ def services(request):
 
 def tariffs(request):
     tariffs = [
-        # {
-        #     "name": "Тариф Класс",
-        #     "price_month": "12 500 ₽/мес.",
-        #     "price_year": "150 000 ₽ в год",
-        #     "users": "55 пользователей",
-        #     "storage": "до 3 Гб",
-        #     "id": "class"
-        # },
         {
-            "name": "Тариф Академия",
-            "price_month": "14 900 ₽/мес.",
-            "price_year": "178 800 ₽ в год",
-            "users": "110 пользователей",
-            "storage": "до 5 Гб",
-            "id": "academy"
+            "name": "Тариф Базовый",
+            "price_month": "8 333 ₽/мес.",
+            "price_year": "100 000 ₽ в год",
+            "users": "1 цифровой сотрудник",
+            "storage": "Одна роль - лидоруб, работает через Telegram.",
+            "duration": "1 год",
+            "cost_per_employee": "8 333 ₽",
+            "extra_employee_cost": "невозможно",
+            "upgrade_option": "Возможно"
         },
         {
-            "name": "Тариф Университет",
-            "price_month": "24 900 ₽/мес.",
-            "price_year": "298 800 ₽ в год",
-            "users": "550 пользователей",
-            "storage": "до 50 Гб",
-            "id": "university"
+            "name": "Тариф Микробизнес",
+            "price_month": "5 556 ₽/мес.",
+            "price_year": "200 000 ₽ в год",
+            "users": "3 цифровых сотрудника",
+            "storage": """- 2 сотрудника: роль - лидоруб, работает через Telegram и WhatsApp.<br>
+                          - 1 сотрудник: роль - обработка входящего трафика на Avito.""",
+            "duration": "1 год",
+            "cost_per_employee": "5 556 ₽",
+            "extra_employee_cost": "8 500 ₽ (в месяц)",
+            "upgrade_option": "Возможно в течение 3 месяцев после начала действия текущего тарифа"
         },
         {
-            "name": "Текущий тариф VIP",
-            "price_month": "83 325 ₽/мес.",
-            "price_year": "999 900 ₽ в год",
-            "users": "405 из 5500",
-            "storage": "2 Гб из 1000 Гб",
-            "id": "vip"
+            "name": "Тариф Компания",
+            "price_month": "3 333 ₽/мес.",
+            "price_year": "400 000 ₽ в год",
+            "users": "10 цифровых сотрудников",
+            "storage": """Первый продукт (5 сотрудников):<br>
+                          - 3 сотрудника: роль - лидоруб, работает через Telegram, WhatsApp и VK.<br>
+                          - 1 сотрудник: роль - обработка входящего трафика на Avito.<br>
+                          - 1 сотрудник: роль - поддержка клиентов через Telegram.<br><br>
+                          Второй продукт (5 сотрудников): аналогично.""",
+            "duration": "1 год",
+            "cost_per_employee": "3 333 ₽",
+            "extra_employee_cost": "5 000 ₽ (в месяц)",
+            "upgrade_option": "Возможно в течение 3 месяцев после начала действия текущего тарифа"
+        },
+        {
+            "name": "Тариф Индивидуальный",
+            "price_month": "По согласованию",
+            "price_year": "По согласованию",
+            "users": "Индивидуальное количество сотрудников",
+            "storage": "Возможность реализации на серверах клиента.",
+            "duration": "от 1 года",
+            "cost_per_employee": "-",
+            "extra_employee_cost": "Индивидуально",
+            "upgrade_option": "-"
         }
     ]
     return render(request, 'apps/tariffs.html', {"tariffs": tariffs})
+
 
 @csrf_exempt
 def contact_request(request):

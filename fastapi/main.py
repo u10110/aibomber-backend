@@ -118,7 +118,7 @@ async def get_users(phone: str):
             print(f"Dialog: {dialog.id}, Name: {dialog.name}, Entity: {type(dialog.entity)}")
 
         users = [
-            {"id": dialog.id, "name": dialog.name}
+            {"id": dialog.id, "name": dialog.name} # ! dialog.name это имя аккаунта а не username
             for dialog in dialogs
             if isinstance(dialog.entity, User)
         ]
@@ -136,19 +136,17 @@ class GetMessagesRequest(BaseModel):
     limit: int
 
 
-async def get_all_messages(client, channel_id, limit=100):
-    """
-    Получает все сообщения из указанного канала.
-    
-    :param client: Экземпляр TelegramClient.
-    :param channel_id: ID канала, из которого будут получены сообщения.
-    :param limit: Максимальное количество сообщений для выборки.
-    :return: Список всех сообщений с полными данными.
-    """
+from telethon.tl.types import PeerUser
+
+async def get_all_messages(client, channel_id, limit):
     try:
-        # Получаем историю сообщений
+        if not channel_id:
+            raise ValueError("channel_id не может быть None.")
+
+        entity = await client.get_entity(channel_id)
+
         history = await client(GetHistoryRequest(
-            peer=channel_id,
+            peer=entity,
             limit=limit,
             offset_date=None,
             offset_id=0,
@@ -159,22 +157,42 @@ async def get_all_messages(client, channel_id, limit=100):
         ))
         print(f"Получено сообщений: {len(history.messages)}")
 
-        # Создаём список всех сообщений с полными данными
         all_messages = []
         for message in history.messages:
-            print(f"Message ID: {message.id}, Date: {message.date}, Text: {message.message}")
-            if message.message:  # Проверяем, что сообщение не пустое
-                all_messages.append({
-                    "id": message.id,
-                    "date": message.date.isoformat(),  # Преобразуем дату в строку
-                    "text": message.message,
-                    "user_id": message.from_id.user_id if message.from_id else channel_id,
-                })
+            user_id = None
+            username = None
+
+            if message.from_id and isinstance(message.from_id, PeerUser):
+                user_id = message.from_id.user_id
+                try:
+                    sender = await client.get_entity(user_id)
+                    username = getattr(sender, 'username', None)
+                except Exception as e:
+                    print(f"Ошибка при получении отправителя: {e}")
+
+            if not user_id and message.sender_id:
+                try:
+                    sender = await client.get_entity(message.sender_id)
+                    user_id = sender.id
+                    username = getattr(sender, 'username', None)
+                except Exception as e:
+                    print(f"Ошибка при получении отправителя через sender_id: {e}")
+
+            print(f"Message ID: {message.id}, Date: {message.date}, Text: {message.message}, User ID: {user_id}, Username: @{username if username else 'None'}")
+
+            all_messages.append({
+                "id": message.id,
+                "date": message.date.isoformat(),
+                "text": message.message,
+                "user_id": user_id,
+                "username": f"@{username}" if username else None
+            })
 
         return all_messages
     except Exception as e:
-        print(f"Ошибка при получении сообщений из канала {channel_id}: {e}")
-        return []
+        print(f"Ошибка при получении сообщений: {e}")
+        raise
+
 
 
 
@@ -210,28 +228,49 @@ async def get_messages(data: GetMessagesRequest):
 
 class SendMessageRequest(BaseModel):
     phone: str
-    user_id: int
+    username: str
     message: str
+    
+    
+from telethon.tl.functions.contacts import ResolveUsernameRequest
+from telethon.tl.types import PeerUser
+from telethon.errors.rpcerrorlist import UserNotMutualContactError, UserPrivacyRestrictedError
+from telethon.tl.types import InputPeerUser
 
+from telethon.tl.functions.contacts import ImportContactsRequest
+from telethon.tl.types import InputPhoneContact, InputPeerUser
 @app.post("/send-message/")
 async def send_message(data: SendMessageRequest):
     """
-    Отправляет сообщение пользователю.
+    Отправляет сообщение пользователю через Telegram API.
+    - `data.phone`: Аккаунт, с которого отправляем (номер телефона отправителя).
+    - `data.username`: Ник пользователя, которому отправляем (например, @username).
+    - `data.message`: Сообщение.
     """
-    phone = data.phone.strip().replace("+", "")
-    session_name = os.path.join(SESSION_DIR, "session_" + phone)
+    sender_phone = data.phone.strip().replace("+", "")  # Аккаунт отправителя
+    session_name = os.path.join(SESSION_DIR, "session_" + sender_phone)
     client = TelegramClient(session_name, API_ID, API_HASH)
 
     try:
         await client.connect()
-        logger.info("Клиент Telegram подключён")
+        logger.info(f"Клиент Telegram подключён с аккаунта: {sender_phone}")
 
-        await client.send_message(data.user_id, data.message)
-        logger.info(f"Сообщение отправлено пользователю с ID {data.user_id}")
+        # Определяем сущность пользователя по username
+        try:
+            entity = await client.get_entity(data.username)
+            logger.info(f"Найдена сущность пользователя {data.username}: {entity}")
+        except Exception as e:
+            logger.error(f"Ошибка при получении сущности для {data.username}: {e}")
+            raise HTTPException(status_code=404, detail="Пользователь с указанным username не найден.")
+
+        # Отправка сообщения
+        msg = await client.send_message(entity, data.message)
+        logger.info(f"Сообщение отправлено пользователю {data.username}: {msg}")
         return {"message": "Сообщение успешно отправлено", "success": True}
+
     except Exception as e:
         logger.error(f"Ошибка при отправке сообщения: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         await client.disconnect()
-        logger.info("Клиент Telegram отключён")
+        logger.info(f"Клиент Telegram {sender_phone} отключён")
