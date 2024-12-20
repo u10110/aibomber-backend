@@ -142,6 +142,6 @@ urlpatterns = [
     path('create-project-chat/', views.create_project_chat, name='create_project_chat'),
     path('validate-google-link/', views.validate_google_link, name='validate_google_link'),
 
-    path('gpt-assistant/', views.gpt_assistant, name='gpt_assistant'),
+    path('api/v1/gpt-assistant/', views.gpt_assistant, name='gpt_assistant'),
 ]
 
