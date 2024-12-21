@@ -66,7 +66,7 @@ from django.http import JsonResponse
 from telethon import TelegramClient
 from telethon.errors import SessionPasswordNeededError
 
-from .models import Project
+from .models import Project, TgID
 from .services.gpt_assistant import GPTAssistant
 
 def error(request):
@@ -1197,9 +1197,15 @@ def change_status(request, chat_id):
     if request.method == 'POST':
         data = json.loads(request.body)
         new_status = data.get('status')
+
         chat = Chat.objects.get(id=chat_id)
         chat.status = new_status
         chat.save()
+
+        tg_id = TgID.objects.get(tg_id=chat.user_id)
+        tg_id.status = new_status
+        tg_id.save()
+
         return JsonResponse({'status': chat.status})
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
