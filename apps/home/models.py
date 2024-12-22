@@ -146,7 +146,7 @@ class Project(models.Model):
     message_limit = models.IntegerField(default=30)
 
     integrations = models.CharField(
-        max_length=50,
+        max_length =50,
         choices=CRM_TYPES,
         default='null',
         verbose_name="Интеграция"
