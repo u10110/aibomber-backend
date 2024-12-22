@@ -45,7 +45,7 @@ class GPTAssistant:
         cost_per_token = 0.00002  # Пример: $0.00002 за токен (замените на актуальное значение)
         return token_usage * cost_per_token
 
-    
+
     def _update_user_balance(self, cost):
         """
         Уменьшает баланс в ClientSettings по client_id.
@@ -73,7 +73,8 @@ class GPTAssistant:
         """
         print(self.tgid_id)
         tg = TgID.objects.filter(tg_id=self.tgid_id).first()
-        self.is_auto_active = tg.is_auto_active
+        if tg:
+            self.is_auto_active = tg.is_auto_active
 
         chat_records = Chat.objects.filter(project=self.project, user_id=tg.tg_id).order_by("created_at")
 
