@@ -214,24 +214,38 @@ class TgID(models.Model):
                 project_id=instance.recipient.project_id,
                 trigger=instance.status
             )
-            r = requests.get(url="https://integration.eliment.ai/amo/lead", params={
-                'pipeline_id': pipeline.remote_pipeline_id,
-                'remote_step_id': pipeline.remote_step_id,
-                'remote_lead_id': instance.remote_lead_id,
-                'user_name': instance.tg_id,
-                'phone':  instance.phone,
-            })
-            if r.status_code == 200 and instance.remote_lead_id is None:
-                lead_action_response=json.loads(r.content)
-                instance.remote_lead_id = lead_action_response.lead_id
-                instance.save()
+            integration_name = pipeline.project.integrations
+            if pipeline:
+                if integration_name == 'amo_crm':
+                    r = requests.get(url="https://integration.eliment.ai/amo/lead", params={
+                        'pipeline_id': pipeline.remote_pipeline_id,
+                        'remote_step_id': pipeline.remote_step_id,
+                        'remote_lead_id': instance.remote_lead_id,
+                        'user_name': instance.tg_id,
+                        'phone':  instance.phone,
+                    })
+                    if r.status_code == 200 and instance.remote_lead_id is None:
+                        lead_action_response=json.loads(r.content)
+                        instance.remote_lead_id = lead_action_response.lead_id
+                        instance.save()
 
-
-
+                if integration_name == 'bitrix':
+                    r = requests.get(url="https://integration.eliment.ai/bitrix/lead", params={
+                        'pipeline_id': pipeline.remote_pipeline_id,
+                        'remote_step_id': pipeline.remote_step_id,
+                        'remote_lead_id': instance.remote_lead_id,
+                        'user_name': instance.tg_id,
+                        'phone':  instance.phone,
+                    })
+                    if r.status_code == 200 and instance.remote_lead_id is None:
+                        lead_action_response=json.loads(r.content)
+                        instance.remote_lead_id = lead_action_response.lead_id
+                        instance.save()
 
     @staticmethod
     def remember_state(sender, instance, **kwargs):
         instance.previous_state = instance.state
+
     recipient = models.ForeignKey(
         Recipient,
         related_name='tg_id_set',
@@ -242,7 +256,6 @@ class TgID(models.Model):
     status = models.CharField(max_length=55, default="active")
     phone = models.CharField(max_length=55, null=True)
     is_auto_active = models.BooleanField(default=True)
-
 
 post_save.connect(TgID.post_save, sender=TgID)
 post_init.connect(TgID.remember_state, sender=TgID)

@@ -516,7 +516,7 @@
                                                 </div>
                                             </label>
                                         </div>
-                                        <div class='col text-center' style="display: none;">
+                                        <div class='col text-center'">
                                             <input type="radio" name="integrations" id="id_integrations_2"
                                                    class="d-none imgbgchk" value="bitrix">
                                             <label for="id_integrations_2">
@@ -1025,6 +1025,7 @@
     document.addEventListener('DOMContentLoaded', function () {
 
         const amoIntegrationRadio = document.getElementById('id_integrations_1');
+        const bitrixIntegrationRadio = document.getElementById('id_integrations_2');
         const clearIntegrationRadio = document.getElementById('id_integrations_0');
 
         const amoIntegrationModal = document.getElementById('crmOauth2Modal');
@@ -1050,6 +1051,10 @@
             case 'amo_crm':
                 amoIntegrationRadio.checked = true;
                 break;
+            case 'bitrix':
+                bitrixIntegrationRadio.checked = true;
+                break;
+
         }
 
         const setPipelineSteps = (select, status) => {
@@ -1146,28 +1151,85 @@
                 });
         }
 
-        const popupCenter = ({url, title, w, h}) => {
-            // Fixes dual-screen position                             Most browsers      Firefox
-            const dualScreenLeft = window.screenLeft !==  undefined ? window.screenLeft : window.screenX;
-            const dualScreenTop = window.screenTop !==  undefined   ? window.screenTop  : window.screenY;
 
-            const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
-            const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+        const loadBitrixPipelineSteps = () => {
+            //
+            const oauthModal = new bootstrap.Modal(amoIntegrationModal);
+            // Отправляем запрос на send-code
+            fetch('https://integration.eliment.ai/bitrix/token?user_id=' + user)
+                .then(response => {
+                    if (!response.ok) {
+                        console.log('Ошибка проверки токена');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error	 && data.error	=== 'AccessTokenNotFound') {
+                        // Открываем модальное окно
 
-            const systemZoom = width / window.screen.availWidth;
-            const left = (width - w) / 2 / systemZoom + dualScreenLeft
-            const top = (height - h) / 2 / systemZoom + dualScreenTop
-            const newWindow = window.open(url, 'amoWin',
-                 `scrollbars=yes,
-                  width=${w / systemZoom},
-                  height=${h / systemZoom},
-                  top=${top},
-                  left=${left}`
-            )
+                        popupCenter(
+                            {
+                                url: 'https://integration.eliment.ai/bitrix?user_id=' + user ,
+                                title: 'Авторизация в Amo Crm',
+                                w: 450,
+                                h: 450
+                            }
+                        );
 
-            if (window.focus) newWindow.focus();
-            return newWindow;
+                        clearIntegrationRadio.checked = true;
+
+                        // oauthModal.show();
+                        return {tokenModalOpen : true}
+                    } else {
+                        return fetch('https://integration.eliment.ai/bitrix/pipelines?user_id=' + user)
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        if(response.tokenModalOpen) {
+                            return {};
+                        } else {
+                            throw new Error('Ошибка получения воронок');
+                        }
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data.count && data.count > 0) {
+
+                        const pipeline = data.data[0];
+                        const { statuses }  = pipeline;
+
+                        successDialogsSelect.innerHTML = "";
+                        contactReceivedSelect.innerHTML = "";
+                        interestShownSelect.innerHTML = "";
+                        closedPipelineSelect.innerHTML = "";
+
+                        for (var i = 0; i<=(statuses.length - 1); i++){
+                            addOption(successDialogsSelect, statuses[i]);
+                            addOption(contactReceivedSelect, statuses[i]);
+                            addOption(interestShownSelect, statuses[i]);
+                            addOption(closedPipelineSelect, statuses[i]);
+
+                            remotePipelineSteps.push(statuses[i])
+                        }
+                        if(Number(projectUserId) > 0){
+                            setSavedOptionsIfExists();
+                        }
+                        successDialogsSelect.disabled = false;
+                        contactReceivedSelect.disabled = false;
+                        interestShownSelect.disabled = false;
+                        closedPipelineSelect.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при отправке кода:', error);
+                    //alert('Ошибка при отправке кода.');
+                });
         }
+
+
 
         const addOption = (select,status)  => {
             var opt = document.createElement('option');
@@ -1191,12 +1253,22 @@
             loadAmoPipelineSteps();
         }
 
-
         amoIntegrationRadio.addEventListener('change', () => {
             loadAmoPipelineSteps();
         });
         amoIntegrationRadio.addEventListener('click', () => {
             loadAmoPipelineSteps();
+        });
+
+        if(bitrixIntegrationRadio.checked && Number(projectUserId) > 0) {
+            loadBitrixPipelineSteps();
+        }
+
+        bitrixIntegrationRadio.addEventListener('change', () => {
+            loadBitrixPipelineSteps();
+        });
+        bitrixIntegrationRadio.addEventListener('click', () => {
+            loadBitrixPipelineSteps();
         });
 
         successDialogsSelect.addEventListener('change', () => {
@@ -1211,6 +1283,30 @@
         closedPipelineSelect.addEventListener('change', () => {
             setPipelineSteps(closedPipelineSelect, 'closed');
         });
+
+        const popupCenter = ({url, title, w, h}) => {
+            // Fixes dual-screen position                             Most browsers      Firefox
+            const dualScreenLeft = window.screenLeft !==  undefined ? window.screenLeft : window.screenX;
+            const dualScreenTop = window.screenTop !==  undefined   ? window.screenTop  : window.screenY;
+
+            const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+            const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+            const systemZoom = width / window.screen.availWidth;
+            const left = (width - w) / 2 / systemZoom + dualScreenLeft
+            const top = (height - h) / 2 / systemZoom + dualScreenTop
+            const newWindow = window.open(url, 'amoWin',
+                `scrollbars=yes,
+                  width=${w / systemZoom},
+                  height=${h / systemZoom},
+                  top=${top},
+                  left=${left}`
+            )
+
+            if (window.focus) newWindow.focus();
+            return newWindow;
+        }
+
     });
 
 
