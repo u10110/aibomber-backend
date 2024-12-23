@@ -694,6 +694,9 @@ def projects(request):
 
 def project_create(request):
     agent_type = request.GET.get('type', None)
+    max_files = 6
+    uploaded_files = 0  # Если редактируется проект, здесь можно подсчитать уже загруженные файлы
+
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES, user=request.user, agent_type=agent_type)  # Передаём user для фильтрации
         file_formset = ProjectFileFormSet(request.POST, request.FILES, queryset=ProjectFile.objects.none())
@@ -729,8 +732,6 @@ def project_create(request):
             print(form.errors)  # Печатает ошибки полей
             print(form.non_field_errors())  # Печатает общие ошибки
     else:
-        max_files = 6
-        uploaded_files = 0  # Если редактируется проект, здесь можно подсчитать уже загруженные файлы
 
         form = ProjectForm(user=request.user)
         file_formset = ProjectFileFormSet(queryset=ProjectFile.objects.none())

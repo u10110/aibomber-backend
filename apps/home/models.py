@@ -597,7 +597,6 @@ class TgID(models.Model):
                     'user_id': pipeline.project.client_id
                 })
                 if r.status_code == 200 and instance.remote_lead_id is None:
-                    print(r.content)
                     lead_action_response=json.loads(r.content)
                     instance.remote_lead_id = lead_action_response.id
                     instance.save()
