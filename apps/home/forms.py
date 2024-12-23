@@ -283,10 +283,8 @@ class ProjectForm(forms.ModelForm):
             self.fields['agent_type'].initial = self.agent_type
 
         if user:
-            self.fields['channel'].queryset = Channel.objects.filter(client=user,
-                                                                     project_id__isnull=True, status='authorized')
-            self.fields['recipients'].queryset = Recipient.objects.filter(client=user,
-                                                                          project_id__isnull=True, status='active')
+            self.fields['channel'].queryset = Channel.objects.filter(client=user, project_id__isnull=True, status='authorized')
+            self.fields['recipients'].queryset = Recipient.objects.filter(client=user,project_id__isnull=True, status='active')
 
         # Устанавливаем значения по умолчанию для time_start и time_end
         if not self.instance.pk:  # Если объект модели ещё не сохранён
