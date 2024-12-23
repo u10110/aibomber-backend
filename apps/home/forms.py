@@ -356,7 +356,7 @@ class ProjectForm(forms.ModelForm):
                     remote_step_id=pipeline['id'],
                     remote_pipeline_id=pipeline['pipeline_id'],
                     trigger=pipeline['trigger']
-                ) for pipeline in pipelines]
+                ) for pipeline in pipelines if pipeline.get('id', None) in pipeline]
             )
 
         return project
