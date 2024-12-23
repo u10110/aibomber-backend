@@ -75,9 +75,9 @@ class GPTAssistant:
         tg = TgID.objects.filter(tg_id=self.tgid_id).first()
         if tg:
             self.is_auto_active = tg.is_auto_active
-
-        chat_records = Chat.objects.filter(project=self.project, user_id=tg.tg_id).order_by("created_at")
-
+            chat_records = Chat.objects.filter(project=self.project, user_id=tg.tg_id).order_by("created_at")
+        else:
+            chat_records = []
 
 
         if chat_records:
