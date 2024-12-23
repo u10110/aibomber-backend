@@ -228,6 +228,7 @@ class TgID(models.Model):
                     if r.status_code == 200 and instance.remote_lead_id is None:
                         lead_action_response=json.loads(r.content)
                         instance.remote_lead_id = lead_action_response.lead_id
+                        instance.save()
 
 
                 if integration_name == 'bitrix':
@@ -241,8 +242,9 @@ class TgID(models.Model):
                     if r.status_code == 200 and instance.remote_lead_id is None:
                         lead_action_response=json.loads(r.content)
                         instance.remote_lead_id = lead_action_response.lead_id
+                        instance.save()
 
-            instance.save()
+
 
     @staticmethod
     def remember_state(sender, instance, **kwargs):
