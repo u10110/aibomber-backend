@@ -127,7 +127,7 @@ class ProjectForm(forms.ModelForm):
 
     pipelines = forms.CharField(
             widget=forms.HiddenInput(),
-            required=True
+            required=False
     )
 
     time_start = forms.TimeField(
@@ -255,8 +255,10 @@ class ProjectForm(forms.ModelForm):
         }
 
     def clean_pipelines(self):
-        pipelines = json.loads(self.cleaned_data["pipelines"])
-        return pipelines
+        if not (self.cleaned_data["pipelines"] is None) and len(self.cleaned_data["pipelines"]) > 0:
+            pipelines = json.loads(self.cleaned_data["pipelines"])
+            return pipelines
+        return []
 
     def get_default_work_option(self):
         # Пример настройки опций в зависимости от типа агента
@@ -277,6 +279,8 @@ class ProjectForm(forms.ModelForm):
         project = kwargs.get('instance', None)
         self.agent_type = kwargs.pop('agent_type', None)
         super().__init__(*args, **kwargs)
+
+        self.fields['integrations'].required = False
 
         print(self.agent_type)
         if self.agent_type:
