@@ -204,7 +204,7 @@ class TgID(models.Model):
         ('interest_shown', 'Проявлен интерес'),
         ('closed', 'Закрыт'),
     ]
-
+    state = models.IntegerField()
     previous_status = None
 
     @staticmethod
