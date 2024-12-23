@@ -214,8 +214,9 @@ class TgID(models.Model):
                 project_id=instance.recipient.project_id,
                 trigger=instance.status
             )
-            integration_name = pipeline.project.integrations
+
             if pipeline:
+                integration_name = pipeline.project.integrations
                 if integration_name == 'amo_crm':
                     r = requests.get(url="https://integration.eliment.ai/amo/lead", params={
                         'pipeline_id': pipeline.remote_pipeline_id,
