@@ -1059,7 +1059,7 @@
         const setPipelineSteps = (select, status) => {
             const currentProjectPipelines = JSON.parse( projectPipelinesInput.value || '[]' );
             const selectedStep  = select.value;
-            const fullStepData = remotePipelineSteps.find(step => Number(step.id) === Number(selectedStep));
+            const fullStepData = remotePipelineSteps.find(step => step.id === selectedStep);
 
             const currentStatusIndex = currentProjectPipelines.findIndex(pipeline => pipeline.status === status);
             const pipelineToSet = {
@@ -1255,7 +1255,7 @@
         }
 
         if(amoIntegrationRadio.checked && Number(projectUserId) > 0) {
-            loadAmoPipelineSteps();
+           loadAmoPipelineSteps();
         }
 
 
