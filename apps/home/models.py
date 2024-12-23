@@ -259,8 +259,8 @@ class TgID(models.Model):
     phone = models.CharField(max_length=55, null=True)
     is_auto_active = models.BooleanField(default=True)
 
-#post_save.connect(TgID.post_save, sender=TgID)
-#post_init.connect(TgID.remember_state, sender=TgID)
+post_save.connect(TgID.post_save, sender=TgID)
+post_init.connect(TgID.remember_state, sender=TgID)
 
 
 class Channel(models.Model):

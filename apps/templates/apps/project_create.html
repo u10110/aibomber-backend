@@ -1148,6 +1148,13 @@
                     console.error('Ошибка при отправке кода:', error);
                     //alert('Ошибка при отправке кода.');
                 });
+
+            const addOption = (select,status)  => {
+                var opt = document.createElement('option');
+                opt.value = status.id;
+                opt.innerHTML = status.name;
+                select.appendChild(opt);
+            }
         }
 
 
@@ -1225,16 +1232,18 @@
                     console.error('Ошибка при отправке кода:', error);
                     //alert('Ошибка при отправке кода.');
                 });
+
+            const addOption = (select,status)  => {
+                var opt = document.createElement('option');
+                opt.value = status.ID;
+                opt.innerHTML = status.NAME;
+                select.appendChild(opt);
+            }
         }
 
 
 
-        const addOption = (select,status)  => {
-            var opt = document.createElement('option');
-            opt.value = status.id;
-            opt.innerHTML = status.name;
-            select.appendChild(opt);
-        }
+
 
         const setSavedOptionsIfExists = () => {
             successDialogsSelect.value = projectPipelinesFromServer.find(pipeline=> pipeline.trigger === 'success')
