@@ -204,7 +204,7 @@ class TgID(models.Model):
         ('interest_shown', 'Проявлен интерес'),
         ('closed', 'Закрыт'),
     ]
-    state = models.IntegerField()
+
     previous_status = None
 
     @staticmethod
@@ -246,7 +246,7 @@ class TgID(models.Model):
 
     @staticmethod
     def remember_state(sender, instance, **kwargs):
-        instance.previous_state = instance.state
+        instance.previous_state = instance
 
     recipient = models.ForeignKey(
         Recipient,
