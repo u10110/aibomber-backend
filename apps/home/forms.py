@@ -255,10 +255,8 @@ class ProjectForm(forms.ModelForm):
         }
 
     def clean_pipelines(self):
-        if not (self.cleaned_data["pipelines"] is None) and len(self.cleaned_data["pipelines"]) > 0:
-            pipelines = json.loads(self.cleaned_data["pipelines"])
-            return pipelines
-        return []
+        pipelines = json.loads(self.cleaned_data["pipelines"])
+        return pipelines
 
     def get_default_work_option(self):
         # Пример настройки опций в зависимости от типа агента
@@ -352,15 +350,17 @@ class ProjectForm(forms.ModelForm):
             # Удаляем старые записи, связанные с этим Recipient
             CrmPipelines.objects.filter(project_id=project).delete()
             # Создаем новые записи
+            print(pipelines)
+            crm_pipelines = [CrmPipelines(
+                project_id=project.id,
+                remote_name=pipeline['remote_name'],
+                remote_step_id=pipeline['remote_step_id'],
+                remote_pipeline_id=pipeline['remote_pipeline_id'],
+                trigger=pipeline['trigger']
+            ) for pipeline in pipelines]
 
             CrmPipelines.objects.bulk_create(
-                [CrmPipelines(
-                    project=project,
-                    remote_name=pipeline['name'],
-                    remote_step_id=pipeline['id'],
-                    remote_pipeline_id=pipeline['pipeline_id'],
-                    trigger=pipeline['trigger']
-                ) for pipeline in pipelines if pipeline.get('id', None) in pipeline]
+                crm_pipelines
             )
 
         return project

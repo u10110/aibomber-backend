@@ -1060,9 +1060,13 @@
             const currentProjectPipelines = JSON.parse( projectPipelinesInput.value || '[]' );
             const selectedStep  = select.value;
             const fullStepData = remotePipelineSteps.find(step => Number(step.id) === Number(selectedStep));
+
             const currentStatusIndex = currentProjectPipelines.findIndex(pipeline => pipeline.status === status);
             const pipelineToSet = {
                 trigger: status,
+                remote_step_id: fullStepData.id,
+                remote_pipeline_id: fullStepData.pipeline_id,
+                remote_name: fullStepData.name,
                 ...fullStepData
             };
             if(currentStatusIndex === -1) {
@@ -1149,12 +1153,6 @@
                     //alert('Ошибка при отправке кода.');
                 });
 
-            const addOption = (select,status)  => {
-                var opt = document.createElement('option');
-                opt.value = status.id;
-                opt.innerHTML = status.name;
-                select.appendChild(opt);
-            }
         }
 
 
@@ -1233,15 +1231,15 @@
                     //alert('Ошибка при отправке кода.');
                 });
 
-            const addOption = (select,status)  => {
-                var opt = document.createElement('option');
-                opt.value = status.ID;
-                opt.innerHTML = status.NAME;
-                select.appendChild(opt);
-            }
         }
 
 
+        const addOption = (select,status)  => {
+            var opt = document.createElement('option');
+            opt.value = status.id;
+            opt.innerHTML = status.name;
+            select.appendChild(opt);
+        }
 
 
 
@@ -1260,10 +1258,13 @@
             loadAmoPipelineSteps();
         }
 
+
+        if(bitrixIntegrationRadio.checked && Number(projectUserId) > 0) {
+            loadBitrixPipelineSteps();
+        }
+
         amoIntegrationRadio.addEventListener('change', () => {
-            loadAmoPipelineSteps();
-        });
-        amoIntegrationRadio.addEventListener('click', () => {
+            projectPipelinesInput.value = '';
             loadAmoPipelineSteps();
         });
 
@@ -1272,11 +1273,10 @@
         }
 
         bitrixIntegrationRadio.addEventListener('change', () => {
+            projectPipelinesInput.value = '';
             loadBitrixPipelineSteps();
         });
-        bitrixIntegrationRadio.addEventListener('click', () => {
-            loadBitrixPipelineSteps();
-        });
+
 
         successDialogsSelect.addEventListener('change', () => {
             setPipelineSteps(successDialogsSelect, 'success');
