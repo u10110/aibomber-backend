@@ -1012,6 +1012,25 @@ def chat_messages(request):
         if user_message:
             current_chat = Chat.objects.filter(user_id=user_id).first()
             if current_chat:
+
+                url = "http://localhost:8001/send-message/"
+
+                payload = json.dumps({
+                "phone": current_chat.user_name,
+                "username": user_id,
+                "message": user_message
+                })
+                headers = {
+                'Content-Type': 'application/json'
+                }
+                response = requests.request("POST", url, headers=headers, data=payload)
+                print(response.text)
+                print(
+                    user_id,
+                    current_chat.user_name,
+                    current_chat.client_id,
+                    user_message,
+                )
                 Chat.objects.create(
                     user_id=user_id,
                     user_name=current_chat.user_name,
