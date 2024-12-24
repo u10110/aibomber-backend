@@ -974,14 +974,10 @@ def chat(request):
 def chat_messages(request):
     user_id = request.GET.get('user_id', None)
     
-    # Обработка отправки сообщения
     if request.method == "POST":
         user_message = request.POST.get('user_message')
         if user_message:
-            # Найти текущий чат пользователя
             current_chat = Chat.objects.filter(user_id=user_id).first()
-
-            # Создать новое сообщение типа 'answer'
             Chat.objects.create(
                 user_id=user_id,
                 user_name=current_chat.user_name,
@@ -990,48 +986,47 @@ def chat_messages(request):
                 user_message=user_message,
                 message_type='answer',
             )
-
-            # Возвращаемся на ту же страницу, чтобы отобразить обновленный чат
-            # return redirect(request.path_info)
             return redirect(f'{reverse("messages")}?user_id={user_id}')
 
-    chats = Chat.objects.filter(client_id=request.user.id).order_by('-created_at')
+    all_chats = Chat.objects.filter(client_id=request.user.id)
 
-    # Определяем текущий чат
     current_chat = None
     if user_id:
-        current_chat = chats.filter(user_id=user_id).first()
+        current_chat = all_chats.filter(user_id=user_id).first()
     if not current_chat:
-        current_chat = chats.first()  # Если текущий чат не найден, берем первый из списка
-    current_chat.is_auto_active = TgID.objects.filter(tg_id=user_id).values_list('is_auto_active', flat=True).first()
+        current_chat = all_chats.first()
 
-    print(current_chat.is_auto_active)
-    # Получаем сообщения для текущего чата
+    if current_chat:
+        current_chat.is_auto_active = TgID.objects.filter(tg_id=current_chat.user_id).values_list('is_auto_active', flat=True).first()
+
     messages = []
     if current_chat:
-        messages = chats.filter(user_id=current_chat.user_id).order_by('created_at')
-
-
+        messages = Chat.objects.filter(
+            user_id=current_chat.user_id
+        ).order_by('created_at')
 
     chats = Chat.objects.filter(
-    id=Subquery(
-        Chat.objects.filter(client_id=request.user.id, user_id=OuterRef('user_id'))
-        .order_by('-created_at')
-        .values('id')[:1]
-    )
-).annotate(
-    last_message_time=Subquery(
-        Chat.objects.filter(user_id=OuterRef('user_id'))
-        .order_by('-created_at')
-        .values('created_at')[:1]
-    ),
-    last_message=Subquery(
-        Chat.objects.filter(user_id=OuterRef('user_id'))
-        .order_by('-created_at')
-        .values('user_message')[:1]
-    ),
-    
-)
+        id__in=Subquery(
+            Chat.objects.filter(
+                client_id=request.user.id,
+                user_id=OuterRef('user_id')
+            )
+            .order_by('-created_at')
+            .values('id')[:1]
+        )
+    ).annotate(
+        last_message_time=Subquery(
+            Chat.objects.filter(user_id=OuterRef('user_id'))
+            .order_by('-created_at')
+            .values('created_at')[:1]
+        ),
+        last_message=Subquery(
+            Chat.objects.filter(user_id=OuterRef('user_id'))
+            .order_by('-created_at')
+            .values('user_message')[:1]
+        ),
+    ).order_by('-last_message_time')
+
     return render(request, 'apps/chat.html', {
         'chats': chats,
         'messages': messages,
