@@ -1022,7 +1022,7 @@ def chat_messages(request):
                 'Content-Type': 'application/json'
                 }
                 response = requests.post(
-                    f"{FASTAPI_URL}/send-code/",
+                    f"{FASTAPI_URL}/send-message/",
                     headers=headers,
                     data=payload
                 )
