@@ -1203,9 +1203,9 @@ def change_status(request, chat_id):
         chat.status = new_status
         chat.save()
 
-        tg_id = TgID.objects.get(tg_id=chat.user_id)
-        tg_id.status = new_status
-        tg_id.save()
+       # tg_id = TgID.objects.get(tg_id=chat.user_id)
+       # tg_id.status = new_status
+       # tg_id.save()
 
         return JsonResponse({'status': chat.status})
     return JsonResponse({'error': 'Invalid request method'}, status=400)
