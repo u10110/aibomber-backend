@@ -265,11 +265,11 @@
             </div>
             <div class="col-md-6 mt-3">
                 <label for="work_option">Опции работы</label>
-                {% comment %} {{ form.work_option }} {% endcomment %}
-                <select name="work_option" id="work-option-field" class="form-control">
+                {{ form.work_option }}
+                {% comment %} <select name="work_option" id="work-option-field" class="form-control">
                     <option value="1">Входящие</option>
                     <option value="2">Входящие и исходящие</option>
-                </select>
+                </select> {% endcomment %}
                 
                 {{ form.work_option.errors }}
                 
