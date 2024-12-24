@@ -1013,8 +1013,6 @@ def chat_messages(request):
             current_chat = Chat.objects.filter(user_id=user_id).first()
             if current_chat:
 
-                url = "http://localhost:8001/send-message/"
-
                 payload = json.dumps({
                 "phone": current_chat.user_name,
                 "username": user_id,
@@ -1023,7 +1021,11 @@ def chat_messages(request):
                 headers = {
                 'Content-Type': 'application/json'
                 }
-                response = requests.request("POST", url, headers=headers, data=payload)
+                response = requests.post(
+                    f"{FASTAPI_URL}/send-code/",
+                    headers=headers,
+                    data=payload
+                )
                 print(response.text)
                 print(
                     user_id,
