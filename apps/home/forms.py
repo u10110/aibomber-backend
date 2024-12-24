@@ -426,47 +426,41 @@ class ChannelForm(forms.ModelForm):
 
     def save(self, commit=True):
         """
-        Сохраняет канал и создает записи для каждого номера телефона.
+        Сохраняет только каналы с телефонами, пропуская создание пустого канала.
         """
-
+        # Не сохраняем базовую модель
         channel = super().save(commit=False)
-
-
-            
-
-        # if Channel.objects.filter(title=channel.title, source=channel.source).exists():
-        #     raise ValueError(f"Канал с названием '{channel.title}' и источником '{channel.source}' уже существует.")
-
+        
         if not channel.client_id:
             channel.client = self.initial.get('client')
-        if commit:
-            channel.save()  # Сохраняем канал в базе данных
 
         # Получаем список телефонов из очищенных данных
-        phone_list = self.cleaned_data.get('phone', [])  # Это уже список из clean_phone
+        phone_list = [phone for phone in self.cleaned_data.get('phone', []) if phone.strip()]
+        
+        if not phone_list:
+            return None
 
-        counter = 1
-
-        # Создаем новую запись для каждого номера
-        for phone in phone_list:
-            if not phone.strip():
+        created_channels = []
+        
+        # Создаем каналы только для непустых телефонов
+        for index, phone in enumerate(phone_list):
+            if Channel.objects.filter(phone=phone).exists():
                 continue
+                
+            title = f"{channel.title} {index + 1}" if len(phone_list) > 1 else channel.title
+            
+            new_channel = Channel.objects.create(
+                client=channel.client,
+                title=title,
+                source=channel.source,
+                phone=phone,
+                status=channel.status,
+                is_active=True
+            )
+            created_channels.append(new_channel)
 
-            if not Channel.objects.filter(phone=phone).exists():
-                title = f"{channel.title} {counter}"
-                counter += 1
-                channel.title = channel.title
-                Channel.objects.create(
-                    client=channel.client,
-                    title=title,
-                    source=channel.source,
-                    phone=phone,
-                    status=channel.status,
-                    is_active="True"
-                )
-
-
-        return channel
+        # Возвращаем первый созданный канал или None
+        return created_channels[0] if created_channels else None
 
     class Meta:
         model = Channel

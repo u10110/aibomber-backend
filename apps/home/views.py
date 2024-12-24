@@ -1084,17 +1084,8 @@ def channels(request):
         form = ChannelForm(request.POST, initial={'client': request.user})
         print(1)
         if form.is_valid():
-            channels = form.save(commit=True)  # Сохраняем все записи
-            # response_data = [{
-            #     'id': channel.id,
-            #     'title': channel.title,
-            #     'source_display': channel.get_source_display(),
-            #     'phone': channel.phone,
-            #     'status': channel.status,
-            #     'is_active': channel.is_active,
-            # } for channel in channels]
+            channels = form.save()  # Сохраняем все записи
             return redirect('/channels/')
-            # return JsonResponse({'success': True, 'channels': response_data})
         else:
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
             
@@ -1119,7 +1110,6 @@ def channels(request):
         'channels': projects,
     }
     return render(request, 'apps/channels.html', context)
-    # return render(request, 'apps/projects.html', {'form': form})
 
 
 
