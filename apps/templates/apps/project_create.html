@@ -800,27 +800,23 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const workOptionField = document.getElementById('work-option-field'); // Поле выбора опций работы
-        const recipientsBlock = document.getElementById('recipients-block'); // Блок получателей
-
+        const workOptionField = document.querySelector('[name="work_option"]'); // Изменено на более универсальный селектор
+        const recipientsBlock = document.getElementById('recipients-block');
+    
         function toggleRecipientsVisibility() {
-            if (!workOptionField || !recipientsBlock) return; // Проверяем существование элементов
-    
-            const selectedOption = workOptionField.value; // Получаем выбранное значение
-    
-            // Показываем или скрываем блок на основе выбранной опции
-            if (selectedOption === '2') {
-                recipientsBlock.style.display = 'block';
-            } else {
-                recipientsBlock.style.display = 'none';
-            }
+            if (!workOptionField || !recipientsBlock) return;
+            
+            // Преобразуем значение в строку для надежного сравнения
+            const selectedOption = String(workOptionField.value);
+            
+            recipientsBlock.style.display = selectedOption === '2' ? 'block' : 'none';
         }
     
-        // Добавляем обработчик событий изменения
         if (workOptionField) {
             workOptionField.addEventListener('change', toggleRecipientsVisibility);
-            toggleRecipientsVisibility(); // Устанавливаем начальное состояние
+            toggleRecipientsVisibility(); // Вызываем сразу для установки начального состояния
         }
+    
     });
     
 </script>

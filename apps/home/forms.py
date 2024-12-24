@@ -255,8 +255,13 @@ class ProjectForm(forms.ModelForm):
         }
 
     def clean_pipelines(self):
-        pipelines = json.loads(self.cleaned_data["pipelines"])
-        return pipelines
+        pipelines_data = self.cleaned_data.get("pipelines", "[]")
+        if not pipelines_data:
+            return []
+        try:
+            return json.loads(pipelines_data)
+        except json.JSONDecodeError:
+            return []
 
     def get_default_work_option(self):
         # Пример настройки опций в зависимости от типа агента
@@ -301,7 +306,7 @@ class ProjectForm(forms.ModelForm):
                 client=user,
                 status='authorized')
             self.fields['channel'].initial = Channel.objects.filter(
-                Q(project_id__isnull=True) | Q(project_id=self.instance.id),
+                project_id=self.instance.id,
                 client=user,
                 status='authorized'
             )
@@ -309,10 +314,10 @@ class ProjectForm(forms.ModelForm):
                 Q(project_id__isnull=True) | Q(project_id=self.instance.id),
                 client=user,
                 status='active')
-            self.fields['recipients'].initial = Recipient.objects.filter(client=user,
-                                                                         project_id__isnull=True,
-                                                                         project_id=self.instance.id,
-                                                                         status='active')
+            self.fields['recipients'].initial = Recipient.objects.filter(
+                project_id=self.instance.id,
+                client=user,
+                status='active')
 
             values_list = CrmPipelines.objects.filter(
                 project_id=self.instance.id) \
@@ -320,48 +325,55 @@ class ProjectForm(forms.ModelForm):
             self.fields['pipelines'].initial = json.dumps(list(values_list), cls=DjangoJSONEncoder)
 
     def save(self, commit=True):
-        # Сохраняем объект проекта
         project = super().save(commit=commit)
+        
+        # Обработка каналов
+        new_channels = set(self.cleaned_data.get('channel', []))
+        if self.instance.pk:  # Если это редактирование существующего проекта
+            # Получаем текущие каналы проекта
+            current_channels = set(Channel.objects.filter(project_id=self.instance.pk))
+            
+            # Находим каналы, которые нужно освободить (убрать project_id)
+            channels_to_free = current_channels - new_channels
+            Channel.objects.filter(id__in=[c.id for c in channels_to_free]).update(project_id=None)
+            
+            # Находим новые каналы, которые нужно привязать
+            channels_to_assign = new_channels - current_channels
+            Channel.objects.filter(id__in=[c.id for c in channels_to_assign]).update(project_id=project.id)
+        else:
+            # Для нового проекта просто привязываем все выбранные каналы
+            Channel.objects.filter(id__in=[c.id for c in new_channels]).update(project_id=project.id)
 
-        # Обработка файлов из формы
-        if hasattr(self, 'files') and self.files:  # Проверяем наличие файлов
-            for file in self.files.getlist('file'):  # Файлы из формы
-                ext = os.path.splitext(file.name)[1].lower()
+        # Аналогичная обработка для получателей
+        new_recipients = set(self.cleaned_data.get('recipients', []))
+        if self.instance.pk:
+            current_recipients = set(Recipient.objects.filter(project_id=self.instance.pk))
+            
+            # Освобождаем старых получателей
+            recipients_to_free = current_recipients - new_recipients
+            Recipient.objects.filter(id__in=[r.id for r in recipients_to_free]).update(project_id=None)
+            
+            # Привязываем новых получателей
+            recipients_to_assign = new_recipients - current_recipients
+            Recipient.objects.filter(id__in=[r.id for r in recipients_to_assign]).update(project_id=project.id)
+        else:
+            # Для нового проекта привязываем всех выбранных получателей
+            Recipient.objects.filter(id__in=[r.id for r in new_recipients]).update(project_id=project.id)
 
-                # Выполняем обработку файла в зависимости от его расширения
-                if hasattr(self, 'knowledge_texts'):  # Проверяем наличие свойства knowledge_texts
-                    self.knowledge_texts += self._extract_text_from_file(file.temporary_file_path(), ext)
-
-        # Обновляем поле project_id в связанных каналах
-        channels = self.cleaned_data.get('channel', [])
-        for channel in channels:
-            channel.project_id = project.id
-            channel.save()
-
-        # Обновляем поле project_id в связанных получателях
-        recipients = self.cleaned_data.get('recipients', [])
-        for recipient in recipients:
-            recipient.project_id = project.id
-            recipient.save()
-
+        # Обработка пайплайнов
         pipelines = self.cleaned_data.get('pipelines', [])
-
         if commit:
-            # Удаляем старые записи, связанные с этим Recipient
             CrmPipelines.objects.filter(project_id=project).delete()
-            # Создаем новые записи
-            print(pipelines)
-            crm_pipelines = [CrmPipelines(
-                project_id=project.id,
-                remote_name=pipeline['remote_name'],
-                remote_step_id=pipeline['remote_step_id'],
-                remote_pipeline_id=pipeline['remote_pipeline_id'],
-                trigger=pipeline['trigger']
-            ) for pipeline in pipelines]
-
-            CrmPipelines.objects.bulk_create(
-                crm_pipelines
-            )
+            crm_pipelines = [
+                CrmPipelines(
+                    project_id=project.id,
+                    remote_name=pipeline['remote_name'],
+                    remote_step_id=pipeline['remote_step_id'],
+                    remote_pipeline_id=pipeline['remote_pipeline_id'],
+                    trigger=pipeline['trigger']
+                ) for pipeline in pipelines
+            ]
+            CrmPipelines.objects.bulk_create(crm_pipelines)
 
         return project
 
