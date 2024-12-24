@@ -1018,7 +1018,7 @@ def chat_messages(request):
                     client_id=current_chat.client_id,
                     project_id=current_chat.project_id,
                     user_message=user_message,
-                    message_type='question',  # Изменено на 'question'
+                    message_type='anwser',  # Изменено на 'question'
                 )
             return redirect(f'{reverse("messages")}?user_id={user_id}')
 
