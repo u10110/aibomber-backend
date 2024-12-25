@@ -515,7 +515,7 @@
                                                 </div>
                                             </label>
                                         </div>
-                                        <div class='col text-center'">
+                                        <div class='col text-center'>
                                             <input type="radio" name="integrations" id="id_integrations_2"
                                                    class="d-none imgbgchk" value="bitrix">
                                             <label for="id_integrations_2">
@@ -1040,23 +1040,6 @@
         const projectPipelinesFromServer = JSON.parse( projectPipelinesInput.value || '[]' );
 
 
-        switch (integrationValue){
-            case 'null':
-                clearIntegrationRadio.checked = true;
-                break;
-            case 'amo_crm':
-                amoIntegrationRadio.checked = true;
-                loadAmoPipelineStep();
-                break;
-            case 'bitrix':
-                bitrixIntegrationRadio.checked = true;
-                loadBitrixPipelineStep();
-                break;
-
-        }
-
-        setPipelineSteps(successDialogsSelect, 'success');
-
         const setPipelineSteps = (select, status) => {
             const currentProjectPipelines = JSON.parse( projectPipelinesInput.value || '[]' );
             const selectedStep  = select.value;
@@ -1255,13 +1238,19 @@
                 ?.remote_step_id;
         }
 
-        if(amoIntegrationRadio.checked && Number(projectUserId) > 0) {
-           loadAmoPipelineSteps();
-        }
+        switch (integrationValue){
+            case 'null':
+                clearIntegrationRadio.checked = true;
+                break;
+            case 'amo_crm':
+                amoIntegrationRadio.checked = true;
+                loadAmoPipelineSteps();
+                break;
+            case 'bitrix':
+                bitrixIntegrationRadio.checked = true;
+                loadBitrixPipelineSteps();
+                break;
 
-
-        if(bitrixIntegrationRadio.checked && Number(projectUserId) > 0) {
-            loadBitrixPipelineSteps();
         }
 
         amoIntegrationRadio.addEventListener('change', () => {
@@ -1269,9 +1258,6 @@
             loadAmoPipelineSteps();
         });
 
-        if(bitrixIntegrationRadio.checked && Number(projectUserId) > 0) {
-            loadBitrixPipelineSteps();
-        }
 
         bitrixIntegrationRadio.addEventListener('change', () => {
             projectPipelinesInput.value = '';
