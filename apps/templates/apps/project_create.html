@@ -1039,18 +1039,23 @@
         const user = projectUserId || requestUserId;
         const projectPipelinesFromServer = JSON.parse( projectPipelinesInput.value || '[]' );
 
+
         switch (integrationValue){
             case 'null':
                 clearIntegrationRadio.checked = true;
                 break;
             case 'amo_crm':
                 amoIntegrationRadio.checked = true;
+                loadAmoPipelineStep();
                 break;
             case 'bitrix':
                 bitrixIntegrationRadio.checked = true;
+                loadBitrixPipelineStep();
                 break;
 
         }
+
+        setPipelineSteps(successDialogsSelect, 'success');
 
         const setPipelineSteps = (select, status) => {
             const currentProjectPipelines = JSON.parse( projectPipelinesInput.value || '[]' );
