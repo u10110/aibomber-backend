@@ -742,7 +742,6 @@ def project_create(request):
     return render(request, 'apps/project_create.html', {'form': form, 'agent_type': agent_type, 'file_formset': file_formset, 'max_files': max_files, 'uploaded_files': uploaded_files,})
 
 
-
 def project_edit(request, project_id):
     project = get_object_or_404(Project, id=project_id)
 
@@ -964,14 +963,12 @@ def chat(request):
     chat_id = request.GET.get('chat_id')
     user_id = request.user.id
 
-    chat = Chat.objects.filter(
+    current_chat = Chat.objects.filter(
         id=chat_id
     ).first()
 
-
-
     chats = Chat.objects.filter(
-        id=chat_id
+        user_id=user_id
     ).values(
         'user_id'
     )
@@ -983,7 +980,7 @@ def chat(request):
             chat_id=chat_id,
         ).order_by('created_at')
 
-    context = get_context_data(request, user_id, chats, current_messages, chat)
+    current_context = get_context_data(request, user_id, chats, current_messages, current_chat)
 
     return render(request, "apps/chat.html", context)
 
