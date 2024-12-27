@@ -77,7 +77,7 @@
 											class="btn btn-link text-secondary edit-recipient-btn" 
 											data-id="{{ recipient.id }}" 
 											data-title="{{ recipient.title }}" 
-											data-tg-ids="{{ recipient.tg_ids }}" 
+											data-tg-ids="{{ recipient.remote_ids }}"
 											data-bs-toggle="modal" 
 											data-bs-target="#editRecipientModal">
 												<i class="fas fa-edit"></i>
@@ -116,9 +116,9 @@
                         <small class="text-danger">{{ form.title.errors }}</small>
                     </div>
                     <div class="mb-3">
-                        <label for="tg_ids" class="form-label">ТГ ИД список:</label>
-                        {{ form.tg_ids }}
-                        <small class="text-danger">{{ form.tg_ids.errors }}</small>
+                        <label for="remote_ids" class="form-label">ТГ ИД список:</label>
+                        {{ form.remote_ids }}
+                        <small class="text-danger">{{ form.remote_ids.errors }}</small>
                     </div>
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn bg-gradient-primary">Добавить список</button>
@@ -149,7 +149,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="editRecipientTgIds" class="form-label">ТГ ИД список:</label>
-                        <textarea id="editRecipientTgIds" name="tg_ids" class="form-control"></textarea>
+                        <textarea id="editRecipientTgIds" name="remote_ids" class="form-control"></textarea>
                     </div>
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn bg-gradient-primary">Сохранить изменения</button>

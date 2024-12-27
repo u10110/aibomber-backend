@@ -188,82 +188,12 @@ class Recipient(models.Model):
     title = models.CharField(max_length=1000)
     status = models.CharField(max_length=55, default="active")
     work_option = models.IntegerField(choices=OPTIONS, default=1)
+    remote_ids = models.TextField(default='')
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return self.title
-
-
-class TgID(models.Model):
-
-    TG_STATUS = [
-        ('active', 'Активный'),
-        ('success', 'Успешные диалоги'),
-        ('contact_received', 'Контакт получен'),
-        ('interest_shown', 'Проявлен интерес'),
-        ('closed', 'Закрыт'),
-    ]
-
-    previous_status = None
-
-    @staticmethod
-    def post_save(sender, instance, created, **kwargs):
-        if instance.previous_status != instance.status and instance.status != 'active':
-            pipeline = CrmPipelines.objects.filter(
-                project_id=instance.recipient.project_id,
-                trigger=instance.status
-            )
-
-            if pipeline:
-                integration_name = pipeline.project.integrations
-                if integration_name == 'amo_crm':
-                    r = requests.get(url="https://integration.eliment.ai/amo/lead", params={
-                        'pipeline_id': pipeline.remote_pipeline_id,
-                        'remote_step_id': pipeline.remote_step_id,
-                        'remote_lead_id': instance.remote_lead_id,
-                        'user_name': instance.tg_id,
-                        'phone':  instance.phone,
-                    })
-                    if r.status_code == 200 and instance.remote_lead_id is None:
-                        lead_action_response=json.loads(r.content)
-                        instance.remote_lead_id = lead_action_response.lead_id
-                        instance.save()
-
-
-                if integration_name == 'bitrix':
-                    r = requests.get(url="https://integration.eliment.ai/bitrix/lead", params={
-                        'pipeline_id': pipeline.remote_pipeline_id,
-                        'remote_step_id': pipeline.remote_step_id,
-                        'remote_lead_id': instance.remote_lead_id,
-                        'user_name': instance.tg_id,
-                        'phone':  instance.phone,
-                    })
-                    if r.status_code == 200 and instance.remote_lead_id is None:
-                        lead_action_response=json.loads(r.content)
-                        instance.remote_lead_id = lead_action_response.lead_id
-                        instance.save()
-
-
-
-    @staticmethod
-    def remember_state(sender, instance, **kwargs):
-        instance.previous_state = instance
-
-    recipient = models.ForeignKey(
-        Recipient,
-        related_name='tg_id_set',
-        on_delete=models.CASCADE
-    )
-    remote_lead_id = models.IntegerField(null=True)
-    tg_id = models.CharField(max_length=255)
-    status = models.CharField(max_length=55, default="active")
-    phone = models.CharField(max_length=55, null=True)
-    is_auto_active = models.BooleanField(default=True)
-
-post_save.connect(TgID.post_save, sender=TgID)
-post_init.connect(TgID.remember_state, sender=TgID)
-
 
 class Channel(models.Model):
     class Meta:
@@ -318,26 +248,96 @@ class Chat(models.Model):
         verbose_name = "Чаты"
         verbose_name_plural = "Чаты"
 
-    MESSAGE_TYPE = [
-            ('anwser', 'Наше сообщение'),
-            ('message', 'Сообщение пользователя'),
-        ]
+    @staticmethod
+    def post_save(sender, instance, created, **kwargs):
+        if instance.previous_status != instance.status and instance.status != 'active':
+            pipeline = CrmPipelines.objects.filter(
+                project_id=instance.recipient.project_id,
+                trigger=instance.status
+            )
 
-    client = models.ForeignKey(User, on_delete=models.CASCADE)
+            if pipeline:
+                integration_name = pipeline.project.integrations
+                if integration_name == 'amo_crm':
+                    r = requests.get(url="https://integration.eliment.ai/amo/lead", params={
+                        'pipeline_id': pipeline.remote_pipeline_id,
+                        'remote_step_id': pipeline.remote_step_id,
+                        'remote_lead_id': instance.remote_lead_id,
+                        'user_name': instance.tg_id,
+                        'phone':  instance.phone,
+                    })
+                    if r.status_code == 200 and instance.remote_lead_id is None:
+                        lead_action_response=json.loads(r.content)
+                        instance.remote_lead_id = lead_action_response.lead_id
+                        instance.save()
+
+
+                if integration_name == 'bitrix':
+                    r = requests.get(url="https://integration.eliment.ai/bitrix/lead", params={
+                        'pipeline_id': pipeline.remote_pipeline_id,
+                        'remote_step_id': pipeline.remote_step_id,
+                        'remote_lead_id': instance.remote_lead_id,
+                        'user_name': instance.tg_id,
+                        'phone':  instance.phone,
+                    })
+                    if r.status_code == 200 and instance.remote_lead_id is None:
+                        lead_action_response=json.loads(r.content)
+                        instance.remote_lead_id = lead_action_response.lead_id
+                        instance.save()
+
+
+
+    @staticmethod
+    def remember_state(sender, instance, **kwargs):
+        instance.previous_state = instance
+
+
+
+    CHAT_STATUS = [
+        ('new', 'Новый'),
+        ('success', 'Успешные диалоги'),
+        ('contact_received', 'Контакт получен'),
+        ('interest_shown', 'Проявлен интерес'),
+        ('closed', 'Закрыт'),
+    ]
+
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     user_id = models.CharField(max_length=1000)
+    recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE, default=None)
+    channel = models.ForeignKey(Channel, on_delete=models.CASCADE, default=0)
+    status = models.CharField(max_length=55, default="new")
+    sex = models.IntegerField(null=True)
+    remote_lead_id = models.IntegerField(null=True)
+    phone = models.CharField(max_length=55, null=True)
+    is_auto_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+
+post_save.connect(Chat.post_save, sender=Chat)
+post_init.connect(Chat.remember_state, sender=Chat)
+
+
+class ChatMessages(models.Model):
+    class Meta:
+        verbose_name = "Чаты"
+        verbose_name_plural = "Чаты"
+
+    MESSAGE_TYPE = [
+        ('Outcoming', 'Исходящее'),
+        ('incoming', 'Входящее'),
+    ]
+
+    chat_id = models.ForeignKey(Chat, on_delete=models.CASCADE)
     messageId = models.CharField(null=True, max_length=1000)
     message_type = models.CharField(
         max_length=20,
         choices=MESSAGE_TYPE,
-        default='message',
+        default=None,
     )
     status = models.CharField(max_length=55, default="active")
     user_name = models.CharField(max_length=55, )
     user_message = models.CharField(max_length=555, )
-    sex = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
-    remote_lead_id = models.IntegerField(null=True)
 
 
 class CrmPipelines(models.Model):

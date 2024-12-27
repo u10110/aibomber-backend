@@ -52,7 +52,8 @@ from .models import (
     ClientSettings,
     Channel,
     Chat,
-    Phone
+    Phone,
+    ChatMessages
 )
 from .module import *
 from .services.services import MinioService
@@ -66,7 +67,7 @@ from django.http import JsonResponse
 from telethon import TelegramClient
 from telethon.errors import SessionPasswordNeededError
 
-from .models import Project, TgID
+from .models import Project
 from .services.gpt_assistant import GPTAssistant
 from django.db.models import Count, Max, Subquery, OuterRef, IntegerField, Case, When
 
@@ -76,7 +77,6 @@ def error(request):
 
 def dynamic_page(request,page_name):
     return render(request, f'home/{page_name}.html')
-
 
 
 
@@ -694,6 +694,7 @@ def projects(request):
     }
     return render(request, 'apps/projects.html', context)
 
+
 def project_create(request):
     agent_type = request.GET.get('type', None)
     max_files = 6
@@ -838,6 +839,7 @@ def toggle_channel_active(request):
 
 
 def list_recipient(request):
+
     if request.method == 'POST':
         form = RecipientForm(request.POST, request.FILES)
         if form.is_valid():
@@ -845,32 +847,28 @@ def list_recipient(request):
             recipient.client = request.user
             recipient.save()
 
-            tg_ids = form.cleaned_data.get('tg_ids', [])
-            recipient.tg_id_set.all().delete()
-            for tg_id in tg_ids:
-                TgID.objects.create(recipient=recipient, tg_id=tg_id)
-
-            print('testetset')
             return redirect('/list-recipient/')
     else:
         form = RecipientForm()
 
     # Получаем словарь project_id -> название проекта
-    project_titles = {project.id: project.title for project in Project.objects.filter(client=request.user)}
+    #project_titles = {project.id: project.title for project in Project.objects.filter(client=request.user)}
 
     # Аннотация для подсчета количества контактов
-    projects = Recipient.objects.filter(client=request.user).annotate(
-        contact_count=Count('tg_id_set')
+    recipients = Recipient.objects.filter(client=request.user).annotate(
+        contact_count=Count('remote_ids')
     )
 
     # Аннотация для подсчета количества контактов, активных переписок, отправленных и оставшихся сообщений
-    projects = Recipient.objects.filter(client=request.user).annotate(
+    """
+        
+    projects = Chat.objects.filter(project=project).annotate(
         # Общее количество TG ID, связанных с получателем
-        contact_count=Count('tg_id_set', distinct=True),
+        contact_count=Count('user_id', distinct=True),
         
         # Количество активных переписок
         active_conversations=Count(
-            'tg_id_set', 
+            'chat_id',
             filter=Q(
                 tg_id_set__tg_id__in=Subquery(
                     Chat.objects.filter(
@@ -884,24 +882,25 @@ def list_recipient(request):
         ),
 
         # Отправлено: количество TG ID в TgID таблице
-        sent=Count('tg_id_set', filter=Q(tg_id_set__is_auto_active=True), distinct=True),
+        sent=Count('user_id', filter=Q(tg_id_set__is_auto_active=True), distinct=True),
 
         # Осталось: общее количество минус отправленные
-        remaining=F('contact_count') - Count('tg_id_set', filter=Q(tg_id_set__is_auto_active=True), distinct=True),
+        remaining=F('contact_count') - Count('chat_id', filter=Q(chat_id__is_auto_active=True), distinct=True),
     )
-    
+     """
     
     # Добавляем поле project_title в каждый объект
+    """
     for project in projects:
         project.project_title = project_titles.get(project.project_id, "Не привязан")
         
         # Получаем список всех TG IDs, связанных с этим списком
-        tg_ids = project.tg_id_set.values_list('tg_id', flat=True)  # Получаем только tg_id
-        project.tg_ids = list(tg_ids)  # Преобразуем в список для передачи в шаблон
-
+        chat_ids = project.chat.values_list('chat_id', flat=True)  # Получаем только tg_id
+        project.tg_ids = list(chat_ids)  # Преобразуем в список для передачи в шаблон
+    """
     context = {
         'form': form,
-        'lists': projects,
+        'lists': recipients,
     }
     return render(request, "apps/list_recipient.html", context)
 
@@ -961,56 +960,41 @@ def get_context_data(request, user_id=None, chats=None, messages=None, current_c
 
 
 def chat(request):
-    user_id = request.GET.get('user_id')
-    
-    projects = Project.objects.filter(client_id=request.user.id)
-    
+
+    chat_id = request.GET.get('chat_id')
+    user_id = request.user.id
+
+    chat = Chat.objects.filter(
+        id=chat_id
+    ).first()
+
+
+
     chats = Chat.objects.filter(
-        client_id=request.user.id
+        id=chat_id
     ).values(
         'user_id'
-    ).annotate(
-        id=Max('id'),
-        user_name=Max('user_name'),
-        project_id=Max('project_id'),
-        status=Max('status'),
-        message_count=Count('user_id'),
-        last_message_time=Max('created_at'),
-        last_message=Max('user_message'),
-        is_auto_active=Subquery(
-            TgID.objects.filter(
-                tg_id=OuterRef('user_id')
-            ).values('is_auto_active')[:1]
-        )
-    ).order_by('-last_message_time')
+    )
 
     current_messages = []
-    current_chat = None
-    if user_id:
-        current_messages = Chat.objects.filter(
-            client_id=request.user.id,
-            user_id=user_id
-        ).order_by('created_at')
-        current_chat = chats.filter(user_id=user_id).first()
-    else:
-        current_chat = chats.first()
-        if current_chat:
-            current_messages = Chat.objects.filter(
-                client_id=request.user.id,
-                user_id=current_chat['user_id']
-            ).order_by('created_at')
 
-    context = get_context_data(request, user_id, chats, current_messages, current_chat)
+    if chat:
+        current_messages = ChatMessages.objects.filter(
+            chat_id=chat_id,
+        ).order_by('created_at')
+
+    context = get_context_data(request, user_id, chats, current_messages, chat)
 
     return render(request, "apps/chat.html", context)
 
 def chat_messages(request):
-    user_id = request.GET.get('user_id', None)
+    chat_id = request.GET.get('chat_id', None)
+    user_id =  request.GET.get('user_id', None)
     
     if request.method == "POST":
         user_message = request.POST.get('user_message')
         if user_message:
-            current_chat = Chat.objects.filter(user_id=user_id).first()
+            current_chat = Chat.objects.filter(id=chat_id).first()
             if current_chat:
 
                 payload = json.dumps({
@@ -1033,11 +1017,10 @@ def chat_messages(request):
                     current_chat.client_id,
                     user_message,
                 )
-                Chat.objects.create(
-                    user_id=user_id,
+                ChatMessages.objects.create(
+                    chat_id=chat_id,
                     user_name=current_chat.user_name,
                     client_id=current_chat.client_id,
-                    project_id=current_chat.project_id,
                     user_message=user_message,
                     message_type='anwser',  # Изменено на 'question'
                 )
@@ -1045,31 +1028,14 @@ def chat_messages(request):
 
     chats = Chat.objects.filter(
         client_id=request.user.id
-    ).values(
-        'user_id'
-    ).annotate(
-        id=Max('id'),
-        user_name=Max('user_name'),
-        project_id=Max('project_id'),
-        status=Max('status'),
-        message_count=Count('user_id'),
-        last_message_time=Max('created_at'),
-        last_message=Max('user_message'),
-        is_auto_active=Subquery(
-            TgID.objects.filter(
-                tg_id=OuterRef('user_id')
-            ).values('is_auto_active')[:1]
-        )
     ).order_by('-last_message_time')
 
     messages = []
     current_chat = None
     if user_id:
-        messages = Chat.objects.filter(
-            user_id=user_id,
-            client_id=request.user.id
+        messages = ChatMessages.objects.filter(
+            chat_id=chat_id
         ).order_by('created_at')
-        current_chat = chats.filter(user_id=user_id).first()
 
     context = get_context_data(request, user_id, chats, messages, current_chat)
 

@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 from datetime import datetime
-from apps.home.models import Chat, TgID, Project, ProjectFile, ClientSettings
+from apps.home.models import Chat, Project, ProjectFile, ClientSettings, ChatMessages
 from PyPDF2 import PdfReader
 from docx import Document
 import re
@@ -14,13 +14,13 @@ client = OpenAI(
     api_key=OPENAI_API_KEY  # Рекомендуется использовать переменные окружения
 )
 class GPTAssistant:
-    def __init__(self, project, tgid_id=None, channel_phone=None, user_id=None,):
+    def __init__(self, project, chat_id=None, channel_phone=None, user_id=None,):
         """
         Инициализация ассистента на основе данных проекта.
         :param project: Экземпляр модели Project.
         """
         self.project = project
-        self.tgid_id = tgid_id
+        self.chat_id = chat_id
         self.is_auto_active = True
         self.client_id = None
         print(f"projectisis {self.project}")
@@ -34,7 +34,7 @@ class GPTAssistant:
         self.chat_history = []  # Здесь хранится история в формате [{"role": "user", ...}, {"role": "assistant", ...}]
         self.knowledge_texts = []  # Здесь хранится база знаний
         
-        if tgid_id:
+        if chat_id:
             self._load_chat_history()
         self._load_knowledge_base()
 
@@ -71,12 +71,12 @@ class GPTAssistant:
         """
         Загружает историю чата из базы данных на основе user_id.
         """
-        print(self.tgid_id)
-        tg = TgID.objects.filter(id=self.tgid_id).first()
-        print(f"ttttttttttttt {tg}")
-        if tg:
-            self.is_auto_active = tg.is_auto_active
-            chat_records = Chat.objects.filter(project=self.project, user_id=tg.tg_id).order_by("created_at")
+        print(self.chat_id)
+        chat = Chat.objects.filter(id=self.id).first()
+
+        if chat:
+            self.is_auto_active = chat.is_auto_active
+            chat_records = ChatMessages.objects.filter(project=self.project, user_id=user_id).order_by("created_at")
         else:
             chat_records = []
 
