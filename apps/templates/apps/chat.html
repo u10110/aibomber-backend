@@ -348,7 +348,7 @@ input:checked + .slider:before {
             </div>
           </div>
         </div>
-        <div class="card-body overflow-auto overflow-x-hidden">
+        <div class="card-body overflow-auto overflow-x-hidden" id="chat">
           <div class="chat-container">
             {% for message in messages %}
     {% if message.message_type == 'anwser' %}
@@ -477,14 +477,16 @@ function filterChats() {
         const matchesProject = !project || chatProject === project;
 
         if (matchesSearch && matchesStatus && matchesProject) {
-            chat.style.display = '';
             chat.style.opacity = '1';
             chat.style.transform = 'scale(1)';
             chat.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            chat.style.height = '';
+            chat.style.padding = '';
         } else {
-            chat.style.display = 'none';
             chat.style.opacity = '0';
             chat.style.transform = 'scale(0.95)';
+            chat.style.height = '0px';
+            chat.style.padding = '0px !important';
         }
     });
 }
@@ -592,8 +594,9 @@ function getCSRFToken() {
 // Автоматическая прокрутка чата вниз при загрузке и новых сообщениях
 function scrollChatToBottom() {
     const chatContainer = document.querySelector('.chat-container');
+    const chat = document.querySelector("#chat")
     if (chatContainer) {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        chat.scrollTop = chatContainer.scrollHeight;
     }
 }
 
