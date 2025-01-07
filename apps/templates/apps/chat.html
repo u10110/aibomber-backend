@@ -186,11 +186,15 @@ input:checked + .slider:before {
       background: linear-gradient(90deg, #28a745, #85e085); /* Зеленый градиент */
       border: none;
       color: white;
-      transition: background 0.3s ease;
+      transition: all 0.3s ease;
   }
-  {% comment %} btn bg-gradient-primary {% endcomment %}
   .btn.bg-gradient-primary:hover {
       background: linear-gradient(90deg, #218838, #6fcf6f); /* Темнее на hover */
+  }
+  .remove-user, .remove-user * {
+    height: 0;
+    padding: 0 !important;
+    overflow: hidden;
   }
 </style>
 {% endblock stylesheets %}
@@ -245,6 +249,9 @@ input:checked + .slider:before {
           </div>
         </div>
         <div class="card-body p-2">
+          <div id="usersNull" style="display: none; padding: 0; color: #ccc;">
+            Пользователей не найдено
+          </div>
           <div id="chat-list">
             {% for chat in chats %}
             <a href="javascript:;"
@@ -301,7 +308,7 @@ input:checked + .slider:before {
                   id="chat-toggle" 
                   data-chat-id="{{ chat.id }}" 
                   
-                  {% if chat.is_auto_active %}checked{% endif %} 
+                  {% comment %} {% if chat.is_auto_active %}checked{% endif %} {% endcomment %}
                   onchange="toggleChat(this)">
                 <label class="form-check-label ms-2 text-nowrap" for="chat-toggle" style="margin-bottom: 0;">
                  Включиться в диалог 
@@ -374,7 +381,7 @@ input:checked + .slider:before {
           </div>
         </div>
         <div class="card-footer d-block">
-          <form method="POST" class="align-items-center">
+          <form method="post" class="align-items-center">
             {% csrf_token %}
             <div class="d-flex">
               <div class="input-group">
@@ -410,7 +417,6 @@ input:checked + .slider:before {
     </div>
   </div>
 </div>
-
 
 {% endblock content %}
 
@@ -466,30 +472,43 @@ function filterChats() {
     const status = document.getElementById('status-filter').value;
     const project = document.getElementById('project-filter').value;
     const chats = document.querySelectorAll('.chat-item');
+    const usersNullEl = document.getElementById('usersNull')
+    let chatCounter = 0
+
 
     chats.forEach(chat => {
         const userName = chat.querySelector('h6').textContent.toLowerCase();
         const chatStatus = chat.getAttribute('data-status').trim();
         const chatProject = chat.getAttribute('data-project-id');
         
-        const matchesSearch = !search || userName.includes(search);
-        const matchesStatus = !status || chatStatus === status;
-        const matchesProject = !project || chatProject === project;
-
+        const matchesSearch = search ? userName.includes(search) : true;
+        const matchesStatus = status ? chatStatus === status : true;
+        const matchesProject = project ? chatProject === project : true ;
+        
+        chat.classList.remove('remove-user')
+        
         if (matchesSearch && matchesStatus && matchesProject) {
             chat.style.opacity = '1';
             chat.style.transform = 'scale(1)';
-            chat.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-            chat.style.height = '';
-            chat.style.padding = '';
+            chat.style.transition = 'all 0.3s ease';
+            
+
+            chatCounter+=1
         } else {
             chat.style.opacity = '0';
             chat.style.transform = 'scale(0.95)';
-            chat.style.height = '0px';
-            chat.style.padding = '0px !important';
+            chat.classList.add('remove-user')
         }
     });
+    if (chatCounter == 0) {
+      usersNullEl.style.display = '';
+      usersNullEl.style.padding = '5px';
+    } else {
+      usersNullEl.style.display = 'none';
+      usersNullEl.style.padding = '0px';
+    } 
 }
+
 
 // Функция сортировки чатов
 function sortChats() {
@@ -592,11 +611,34 @@ function getCSRFToken() {
 }
 
 // Автоматическая прокрутка чата вниз при загрузке и новых сообщениях
+function easeOutQuad(t) {
+    return t * (2 - t); // Формула замедления
+}
+
 function scrollChatToBottom() {
     const chatContainer = document.querySelector('.chat-container');
-    const chat = document.querySelector("#chat")
+    const chat = document.querySelector('#chat1');
     if (chatContainer) {
-        chat.scrollTop = chatContainer.scrollHeight;
+        const startPosition = chat.scrollTop;
+        const endPosition = chatContainer.scrollHeight;
+        const duration = 800; // Время анимации в миллисекундах
+        const startTime = performance.now();
+
+        function animateScroll(currentTime) {
+            const elapsedTime = currentTime - startTime;
+            const progress = Math.min(elapsedTime / duration, 1); // Прогресс от 0 до 1
+
+            // Применяем easing-функцию для плавного замедления
+            const easedProgress = easeOutQuad(progress);
+
+            chat.scrollTop = startPosition + (endPosition - startPosition) * easedProgress;
+
+            if (progress < 1) {
+                requestAnimationFrame(animateScroll); // Продолжаем анимацию
+            }
+        }
+
+        requestAnimationFrame(animateScroll);
     }
 }
 
