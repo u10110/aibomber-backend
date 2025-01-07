@@ -234,8 +234,8 @@ class Channel(models.Model):
     remaining_messages = models.IntegerField(default=50)
     last_reset_date = models.DateField(default=datetime.date.today)
     phone = models.CharField(max_length=55,)
-    tg_app_id = models.CharField(max_length=55, null=True, blank=True)
-    tg_app_hash = models.CharField(max_length=55, null=True, blank=True)
+    user_id = models.CharField(max_length=55, null=True, blank=True)
+    app_hash = models.CharField(max_length=55, null=True, blank=True)
     qr = models.TextField(null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
@@ -249,11 +249,13 @@ class Chat(models.Model):
         verbose_name = "Чаты"
         verbose_name_plural = "Чаты"
 
+    previous_status = None
+
     @staticmethod
     def post_save(sender, instance, created, **kwargs):
         if instance.previous_status != instance.status and instance.status != 'active':
             pipeline = CrmPipelines.objects.filter(
-                project_id=instance.recipient.project_id,
+                project_id=instance.project_id,
                 trigger=instance.status
             )
 
@@ -304,7 +306,7 @@ class Chat(models.Model):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     user_id = models.CharField(max_length=1000)
-    recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE, default=None)
+    user_name = models.CharField(max_length=1000, default='')
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, default=0)
     status = models.CharField(max_length=55, default="new")
     sex = models.IntegerField(null=True)
@@ -312,6 +314,7 @@ class Chat(models.Model):
     phone = models.CharField(max_length=55, null=True)
     is_auto_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+    last_message_time = models.DateTimeField(auto_now_add=False, null=True)
 
 
 post_save.connect(Chat.post_save, sender=Chat)
@@ -328,6 +331,14 @@ class ChatMessages(models.Model):
         ('incoming', 'Входящее'),
     ]
 
+    @staticmethod
+    def post_save(sender, instance, created, **kwargs):
+        chat = Chat.objects.filter(
+            id=instance.chat_id
+        ).first()
+        chat.last_message_time=instance.created_at
+        chat.save()
+
     chat_id = models.ForeignKey(Chat, on_delete=models.CASCADE)
     messageId = models.CharField(null=True, max_length=1000)
     message_type = models.CharField(
@@ -339,6 +350,9 @@ class ChatMessages(models.Model):
     user_name = models.CharField(max_length=55, )
     user_message = models.CharField(max_length=555, )
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+
+post_save.connect(ChatMessages.post_save, sender=Chat)
 
 
 class CrmPipelines(models.Model):
