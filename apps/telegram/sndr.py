@@ -243,7 +243,7 @@ class ProjectProcessor:
                         message
                 ):
                     ChatMessages.objects.create(
-                        user_id=chat.user_id,
+                        chat=chat,
                         user_name=channel.phone,
                         user_message=message,
                         message_type="anwser"
