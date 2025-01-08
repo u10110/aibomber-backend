@@ -28,7 +28,7 @@ COPY pyproject.toml ./
 RUN poetry lock
 
 # Install only main dependencies
-RUN poetry install --only main
+RUN poetry install
 
 # Set working directory
 WORKDIR /app
