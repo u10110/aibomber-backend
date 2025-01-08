@@ -72,14 +72,13 @@ class GPTAssistant:
         Загружает историю чата из базы данных на основе user_id.
         """
         print(self.chat_id)
-        chat = Chat.objects.filter(id=self.id).first()
+        chat = Chat.objects.filter(id=self.chat_id).first()
 
         if chat:
             self.is_auto_active = chat.is_auto_active
-            chat_records = ChatMessages.objects.filter(project=self.project, user_id=user_id).order_by("created_at")
+            chat_records = ChatMessages.objects.filter(chat_id=chat.id).order_by("created_at")
         else:
             chat_records = []
-
 
         if chat_records:
             self.chat_history = [
@@ -237,18 +236,14 @@ class GPTAssistant:
         """
         Сохраняет новый вопрос-ответ в базу данных.
         """
-        if not Chat.objects.filter(
-            project=self.project,
-            client=self.project.client,
-            user_id=self.tgid_id,
+        if not ChatMessages.objects.filter(
+            chat_id=self.chat_id,
             user_message=message_question
         ).exists():
             print(11111111111111)
             print(self.project.client)
-            Chat.objects.create(
-                project=self.project,
-                client=self.project.client,
-                user_id=self.user_id,
+            ChatMessages.objects.create(
+                chat_id=self.chat_id,
                 message_type="anwser",
                 user_name=self.channel_phone,
                 user_message=message_question,
