@@ -703,12 +703,16 @@ def project_create(request):
                                recipient.remote_ids.replace('\n', ',').split(',').strip()]
 
             for remote_chat_id in remote_chat_ids:
-                Chat.objects.get_or_create(
-                    project=project,
-                    client=request.user,
-                    user_id=remote_chat_id,
-                    channel=random.choice(channels)
-                )
+                try:
+                    Chat.objects.get(project=project,
+                                     user_id=remote_chat_id,
+                                     client=request.user)
+                except Chat.DoesNotExist:
+                    ch = Chat(project=project,
+                              user_id=remote_chat_id,
+                              client=request.user,
+                              channel=random.choice(channels))
+                    ch.save()
 
             for file_form in file_formset:
                 if file_form.cleaned_data.get('file'):
@@ -755,11 +759,17 @@ def project_edit(request, project_id):
                  recipient.remote_ids.replace('\n', ',').split(',')]
 
             for remote_chat_id in remote_chat_ids:
-                Chat.objects.get_or_create(
-                    project=project,
-                    user_id=remote_chat_id,
-                    channel=random.choice(channels)
-                )
+                try:
+                    Chat.objects.get(project=project,
+                                     user_id=remote_chat_id,
+                                     client=request.user)
+                except Chat.DoesNotExist:
+                    ch = Chat(project=project,
+                              user_id=remote_chat_id,
+                              client=request.user,
+                              channel=random.choice(channels))
+                    ch.save()
+
 
             return redirect("projects")  # После успешного сохранения возвращаемся к списку проектов
     else:
