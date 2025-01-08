@@ -352,7 +352,7 @@ class ChatMessages(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 
-post_save.connect(ChatMessages.post_save, sender=Chat)
+post_save.connect(ChatMessages.post_save, sender=ChatMessages)
 
 
 class CrmPipelines(models.Model):

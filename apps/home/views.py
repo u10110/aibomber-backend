@@ -705,12 +705,10 @@ def project_create(request):
             for remote_chat_id in remote_chat_ids:
                 try:
                     Chat.objects.get(project=project,
-                                     user_id=remote_chat_id,
-                                     client=request.user)
+                                     user_id=remote_chat_id)
                 except Chat.DoesNotExist:
                     ch = Chat(project=project,
                               user_id=remote_chat_id,
-                              client=request.user,
                               channel=random.choice(channels))
                     ch.save()
 
@@ -761,14 +759,14 @@ def project_edit(request, project_id):
 
             for remote_chat_id in remote_chat_ids:
                 try:
-                    Chat.objects.get(project=project,
-                                     user_id=remote_chat_id,)
+                    ch = Chat.objects.get(  project=project,
+                                            user_id=remote_chat_id
+                                          )
                 except Chat.DoesNotExist:
                     ch = Chat(project=project,
                               user_id=remote_chat_id,
                               channel=random.choice(channels))
                     ch.save()
-
 
             return redirect("projects")  # После успешного сохранения возвращаемся к списку проектов
     else:
