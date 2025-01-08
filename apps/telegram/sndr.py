@@ -141,6 +141,7 @@ class MessageProcessor:
             answer = assistant.ask_question(question)
             return answer
         except Exception as e:
+            print(e.format_exc())
             print(f"GPT Assistant connection error: {e}")
             return None
 

@@ -76,7 +76,7 @@ class GPTAssistant:
 
         if chat:
             self.is_auto_active = chat.is_auto_active
-            chat_records = ChatMessages.objects.filter(chat_id=chat.id).order_by("created_at")
+            chat_records = ChatMessages.objects.filter(chat_id=chat).order_by("created_at")
         else:
             chat_records = []
 
