@@ -1004,9 +1004,13 @@ def chat(request):
             chat_id=chat_id,
         ).order_by('created_at')
 
-    current_context = get_context_data(request, user_id, chats, current_messages, current_chat)
-    print(current_context)
-    return render(request, "apps/chat.html", current_context)
+    context = {
+        'chats': chats,
+        'messages': current_messages,
+        'chat': current_chat,
+        'projects': Project.objects.filter(client_id=user_id)
+    }
+    return render(request, "apps/chat.html", context)
 
 
 def chat_messages(request):
@@ -1039,7 +1043,7 @@ def chat_messages(request):
                     chat_id=current_chat,
                     user_name=current_chat.user_name,
                     user_message=user_message,
-                    message_type='anwser',  # Изменено на 'question'
+                    message_type='incoming',  # Изменено на 'question'
                 )
             return redirect(f'{reverse("messages")}?chat_id={chat_id}')
 
@@ -1051,10 +1055,15 @@ def chat_messages(request):
 
     if current_chat:
         messages = ChatMessages.objects.filter(
-            chat_id=chat_id
+            chat_id=current_chat
         ).order_by('created_at')
 
-    context = get_context_data(request, user_id, chats, messages, current_chat)
+    context = {
+        'chats': chats,
+        'messages': messages,
+        'chat': current_chat,
+        'projects': Project.objects.filter(client_id=user_id)
+    }
 
     return render(request, 'apps/chat.html', context)
 

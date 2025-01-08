@@ -251,6 +251,23 @@ class Chat(models.Model):
 
     previous_status = None
 
+    def message_count(self):
+        return ChatMessages.objects.filter(
+            chat_id=self,
+            message_type="incoming"
+        ).count()
+
+    def last_message(self):
+        last_message = ChatMessages.objects.filter(
+            chat_id=self,
+            message_type="incoming"
+        ).order_by('-created_at')\
+             .first()
+        if last_message is not None:
+            return last_message.user_message
+        else:
+            return ''
+
     @staticmethod
     def post_save(sender, instance, created, **kwargs):
         if instance.previous_status != instance.status and instance.status != 'active':
@@ -327,7 +344,7 @@ class ChatMessages(models.Model):
         verbose_name_plural = "Чаты"
 
     MESSAGE_TYPE = [
-        ('Outcoming', 'Исходящее'),
+        ('outcoming', 'Исходящее'),
         ('incoming', 'Входящее'),
     ]
 

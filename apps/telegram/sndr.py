@@ -105,12 +105,12 @@ class MessageProcessor:
         """
         last_answer = ChatMessages.objects.filter(
             chat_id=Chat,
-            message_type="anwser"
+            message_type="incoming"
         ).order_by('-created_at').first()
 
         query_filter = {
             'chat_id': Chat.id,
-            'message_type': "question"
+            'message_type': "outcoming"
         }
 
         if last_answer:
@@ -247,7 +247,7 @@ class ProjectProcessor:
                         chat_id=chat,
                         user_name=channel.phone,
                         user_message=message,
-                        message_type="anwser"
+                        message_type="incoming"
                     )
                 channel.remaining_messages = F('remaining_messages') - 1
                 channel.save()
@@ -304,7 +304,7 @@ class ProjectProcessor:
                     chat_id=chat,
                     user_name=channel.phone,
                     user_message=message,
-                    message_type="anwser"
+                    message_type="incoming"
                 )
             channel.remaining_messages = F('remaining_messages') - 1
             channel.save()

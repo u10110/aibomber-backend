@@ -351,7 +351,7 @@ input:checked + .slider:before {
         <div class="card-body overflow-auto overflow-x-hidden">
           <div class="chat-container">
             {% for message in messages %}
-    {% if message.message_type == 'anwser' %}
+    {% if message.message_type == 'incoming' %}
         <div class="message message-answer mb-3">
             <div class="d-flex justify-content-end">
                 <div class="message-content">
