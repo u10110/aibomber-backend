@@ -236,14 +236,16 @@ class GPTAssistant:
         """
         Сохраняет новый вопрос-ответ в базу данных.
         """
+
+        chat = Chat.objects.filter(id=self.chat_id).first()
         if not ChatMessages.objects.filter(
-            chat_id=self.chat_id,
+            chat_id=chat,
             user_message=message_question
         ).exists():
             print(11111111111111)
             print(self.project.client)
             ChatMessages.objects.create(
-                chat_id=self.chat_id,
+                chat_id=chat,
                 message_type="anwser",
                 user_name=self.channel_phone,
                 user_message=message_question,
