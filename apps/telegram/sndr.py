@@ -234,7 +234,7 @@ class ProjectProcessor:
                     project_id=project.id,
                     question="",  # Пустой вопрос для нового пользователя
                     channel_phone=channel.phone,
-                    user_id=new_chats.user_id
+                    user_id=chat.user_id
                 )
 
                 if message and message_processor.send_message_to_telegram(
