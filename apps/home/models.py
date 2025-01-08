@@ -333,7 +333,9 @@ class ChatMessages(models.Model):
 
     @staticmethod
     def post_save(sender, instance, created, **kwargs):
-        chat = instance.chat
+        chat = Chat.objects.filter(
+            id=instance.chat_id
+        ).first()
         chat.last_message_time=instance.created_at
         chat.save()
 
