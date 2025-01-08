@@ -27,6 +27,9 @@ from core.settings import MEDIA_ROOT
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
 
+from apps.telegram.sndr import ProjectProcessor
+from apps.telegram.prsr import process_project
+
 from .forms import *
 from .helper import Helper
 from .models import (
@@ -1221,7 +1224,7 @@ def send_code(request):
             if not phone_number.startswith('+'):
                 phone_number = '+' + phone_number  # Добавляем '+' в начало, если его нет
 
-            #producer = KafkaProducer(bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS, value_serializer=lambda m: json.dumps(m).encode('ascii'))
+            #producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS], value_serializer=lambda m: json.dumps(m).encode('ascii'))
 
             print(phone_number)
             # Отправка запроса в FastAPI
@@ -1419,10 +1422,12 @@ def save_google_link(request):
 @csrf_exempt
 def send_tg_messages(request, project_id):
     project = get_object_or_404(Project, id=project_id)
+    ProjectProcessor.process_project(project)
     return JsonResponse({'success': True})
 
 
 @csrf_exempt
 def get_tg_messages(request, project_id):
     project = get_object_or_404(Project, id=project_id)
+    process_project(project)
     return JsonResponse({'success': True})
