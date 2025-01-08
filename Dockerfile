@@ -23,17 +23,14 @@ RUN pip install --upgrade pip \
 # Copy project files
 COPY . .
 
-# Update poetry.lock if necessary
-COPY pyproject.toml ./
-
-# Install only main dependencies
-RUN poetry install
 
 # Set working directory
 WORKDIR /app
 
 # Copy application code
 COPY . .
+
+RUN pip3 install -r requirements.txt
 
 # Install additional Python dependencies
 RUN pip3 install python-dateutil
