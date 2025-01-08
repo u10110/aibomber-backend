@@ -196,6 +196,48 @@ input:checked + .slider:before {
     padding: 0 !important;
     overflow: hidden;
   }
+  .dropdown-menu li:before {
+    content: "";
+    transition: width ease 1s;
+    width: 2px;
+    height: 0px;
+    background: #0f0;
+  }
+  .dropdown-menu li:hover:before {
+    content: "";
+    width: 2px;
+    height: 30px;
+    position: absolute;
+    display: block;
+    margin-left: -5px;
+    transition: height ease 1s;
+  }
+  .status__success:before, .status__success {
+    background: #0f0 !important;
+  }
+  .status__contact_received:before, .status__contact_received {
+    background: #00feff !important;
+  }
+  .status__interest_shown:before, .status__interest_shown {
+    background: #fff200 !important;
+  }
+  .status__closed:before, .status__closed {
+    background: #8e00ff !important;
+  }
+  .status__deleted:hover:before, .status__deleted {
+    width: 0 !important;
+  }
+  .status-user  {
+    width: 4px;
+    height: 50%;
+    display: block;
+    transition: height ease 1s;
+    margin: 0 2px;
+    position: absolute;
+    transform: translate(0, 30%);
+    border-radius: 50px;
+    background: rgba(0, 0, 0, 0);
+  }
 </style>
 {% endblock stylesheets %}
 
@@ -262,6 +304,7 @@ input:checked + .slider:before {
             data-message-count="{{ chat.message_count }}"
             data-chat-id="{{ chat.id }}"
             data-last-message-time="{{ chat.last_message_time|date:'Y-m-d H:i:s' }}">
+            <div class="status__{{ chat.status }} status-user"></div>
     <div class="d-flex p-2">
         <div class="ms-3 flex-grow-1">
             <div class="d-flex justify-content-between align-items-center">
@@ -322,22 +365,22 @@ input:checked + .slider:before {
                   <i class="ni ni-settings"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end me-sm-n2 p-2" aria-labelledby="chatmsg">
-                  <li>
+                  <li class="status__success">
                     <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'success')">
                       Успех
                     </a>
                   </li>
-                  <li>
+                  <li class="status__contact_received">
                     <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'contact_received')">
                       Контакт получен
                     </a>
                   </li>
-                  <li>
+                  <li class="status__interest_shown">
                     <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'interest_shown')">
                       Проявлен интерес
                     </a>
                   </li>
-                  <li>
+                  <li class="status__closed">
                     <a class="dropdown-item border-radius-md" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'closed')">
                       Закрыть диалог
                     </a>
@@ -345,7 +388,7 @@ input:checked + .slider:before {
                   <li>
                     <hr class="dropdown-divider">
                   </li>
-                  <li>
+                  <li class="status__deleted">
                     <a class="dropdown-item border-radius-md text-danger" href="javascript:;" onclick="changeChatStatus('{{ chat.id }}', 'deleted')">
                       Удалить диалог
                     </a>
