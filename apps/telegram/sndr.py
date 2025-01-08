@@ -29,9 +29,10 @@ from apps.home.models import (
 PID_FILE = "sndr.lock"
 FASTAPI_HOST = os.getenv("FASTAPI_HOST")
 
+
 class ProcessLockManager:
     """Manages process locking to prevent multiple instances."""
-    
+
     @staticmethod
     def check_and_create_lock() -> bool:
         """
@@ -43,7 +44,7 @@ class ProcessLockManager:
         if os.path.exists(PID_FILE):
             print("sndr.py is already running.")
             return False
-            
+
         with open(PID_FILE, "w") as f:
             f.write(str(os.getpid()))
         return True
@@ -54,9 +55,10 @@ class ProcessLockManager:
         if os.path.exists(PID_FILE):
             os.remove(PID_FILE)
 
+
 class ClientManager:
     """Handles client-related operations."""
-    
+
     @staticmethod
     def get_active_clients() -> QuerySet:
         """
@@ -86,9 +88,10 @@ class ClientManager:
             time_end__gte=current_time,
         )
 
+
 class MessageProcessor:
     """Handles message processing and sending."""
-    
+
     @staticmethod
     def get_combined_messages(Chat: Chat) -> Optional[str]:
         """
@@ -109,21 +112,21 @@ class MessageProcessor:
             'chat_id': Chat.id,
             'message_type': "question"
         }
-        
+
         if last_answer:
             query_filter['created_at__gt'] = last_answer.created_at
 
         new_messages = ChatMessages.objects.filter(**query_filter).order_by('-created_at')
-        
+
         return "\n".join(new_messages.values_list("user_message", flat=True)) if new_messages.exists() else None
 
     @staticmethod
     def send_to_gpt_assistant(
-        chat_id: int,
-        project_id: int,
-        question: str,
-        channel_phone: str,
-        user_id: int
+            chat_id: int,
+            project_id: int,
+            question: str,
+            channel_phone: str,
+            user_id: int
     ) -> Optional[str]:
 
         # Получение объекта проекта
@@ -141,7 +144,6 @@ class MessageProcessor:
             print(f"GPT Assistant connection error: {e}")
             return None
 
-
     @staticmethod
     def send_message_to_telegram(phone: str, user_id: int, message: str) -> bool:
         """Send message via Telegram API."""
@@ -150,7 +152,7 @@ class MessageProcessor:
             "username": user_id,
             "message": message
         }
-        
+
         try:
             response = requests.post(
                 f"{FASTAPI_HOST}/send-message/",
@@ -163,10 +165,9 @@ class MessageProcessor:
             return False
 
 
-
 class ProjectProcessor:
     """Управляет обработкой проектов и их каналов."""
-    
+
     @staticmethod
     def process_project(project: Project) -> None:
         """
@@ -215,9 +216,9 @@ class ProjectProcessor:
     @staticmethod
     def _process_single_channel(channel: Channel, project: Project, chat_map: Dict[str, List[Chat]]) -> None:
         print(f"Обработка канала: {channel.id}, телефон: {channel.phone}")
-        
+
         message_processor = MessageProcessor()
-        
+
         try:
             # Получаем TG ID, у которых нет сообщений
             new_chats = Chat.objects.filter(
@@ -227,30 +228,28 @@ class ProjectProcessor:
 
             # Обрабатываем новых пользователей
             for chat in new_chats:
-                print(f"Новый получатель {chat.tg_id}" )
+                print(f"Новый получатель {chat.user_id}")
                 message = message_processor.send_to_gpt_assistant(
-                    tgid_id=tgid.id,
+                    chat_id=chat.id,
                     project_id=project.id,
                     question="",  # Пустой вопрос для нового пользователя
                     channel_phone=channel.phone,
-                    user_id=tgid.tg_id
+                    user_id=new_chats.user_id
                 )
 
                 if message and message_processor.send_message_to_telegram(
-                    channel.phone,
-                    tgid.tg_id,
-                    message
+                        channel.phone,
+                        chat.user_id,
+                        message
                 ):
-                    # Chat.objects.create(
-                    #     user_id=tgid.tg_id,
-                    #     user_name=channel.phone,
-                    #     client_id=project.client_id,
-                    #     project_id=project.id,
-                    #     user_message=message,
-                    #     message_type="anwser"
-                    # )
-                    channel.remaining_messages = F('remaining_messages') - 1
-                    channel.save()
+                    ChatMessages.objects.create(
+                        user_id=chat.user_id,
+                        user_name=channel.phone,
+                        user_message=message,
+                        message_type="anwser"
+                    )
+                channel.remaining_messages = F('remaining_messages') - 1
+                channel.save()
 
             # Обрабатываем существующие чаты
             chat_list = chat_map.get(channel.phone, [])
@@ -259,7 +258,7 @@ class ProjectProcessor:
                 return
 
             print(f"Обработка канала {channel.title} {channel.phone} "
-                f"для чатов: {len(chat_list)} чатов")
+                  f"для чатов: {len(chat_list)} чатов")
 
             for chat in chat_list:
                 ProjectProcessor._process_chat(
@@ -274,21 +273,18 @@ class ProjectProcessor:
 
     @staticmethod
     def _process_chat(
-        chat: Chat,
-        channel: Channel,
-        project: Project,
-        message_processor: MessageProcessor
+            chat: Chat,
+            channel: Channel,
+            project: Project,
+            message_processor: MessageProcessor
     ) -> None:
-        tgid = TgID.objects.filter(tg_id=chat.user_id).first()
-        if not tgid:
-            return
 
         combined_message = message_processor.get_combined_messages(chat)
         if not combined_message:
             return
 
         message = message_processor.send_to_gpt_assistant(
-            tgid_id=tgid.id,
+            chat_id=chat.id,
             project_id=project.id,
             question=combined_message,
             channel_phone=channel.phone,
@@ -297,21 +293,19 @@ class ProjectProcessor:
 
         if message:
             if message_processor.send_message_to_telegram(
-                channel.phone,
-                chat.user_id,
-                message
+                    channel.phone,
+                    chat.user_id,
+                    message
             ):
-                # Chat.objects.create(
-                #     user_id=chat.user_id,
-                #     user_name=channel.phone,
-                #     client_id=project.client_id,
-                #     project_id=project.id,
-                #     user_message=message,
-                #     message_type="anwser"
-                # )
-                channel.remaining_messages = F('remaining_messages') - 1
-                channel.save()
-                
+                ChatMessages.objects.create(
+                    user_id=chat.user_id,
+                    user_name=channel.phone,
+                    user_message=message,
+                    message_type="anwser"
+                )
+            channel.remaining_messages = F('remaining_messages') - 1
+            channel.save()
+
 
 def main_runner():
     """Главная функция выполнения задачи."""
@@ -325,13 +319,14 @@ def main_runner():
         for client in clients:
             print(f"Обработка клиента {client.client_id}")
             projects = ClientManager.get_active_projects(client, current_time)
-            
+
             project_processor = ProjectProcessor()
             for project in projects:
                 project_processor.process_project(project)
-                
+
     finally:
         ProcessLockManager.remove_lock()
+
 
 # Run the script
 if __name__ == "__main__":

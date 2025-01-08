@@ -346,7 +346,7 @@ class ChatMessages(models.Model):
         choices=MESSAGE_TYPE,
         default=None,
     )
-    status = models.CharField(max_length=55, default="active")
+    status = models.CharField(max_length=55, default="active") #TODO del
     user_name = models.CharField(max_length=55, )
     user_message = models.CharField(max_length=555, )
     created_at = models.DateTimeField(auto_now_add=True, null=True)
