@@ -992,9 +992,6 @@ def chat(request):
 
     chats = Chat.objects.filter(
         project__in=Project.objects.filter(client_id=request.user.id)
-    ).values(
-        'user_id',
-        'id'
     )
 
     current_messages = []
