@@ -1043,7 +1043,7 @@ def chat_messages(request):
                     chat_id=current_chat,
                     user_name=current_chat.user_name,
                     user_message=user_message,
-                    message_type='incoming',  # Изменено на 'question'
+                    message_type='outcoming',  # Изменено на 'question'
                 )
             return redirect(f'{reverse("messages")}?chat_id={chat_id}')
 
