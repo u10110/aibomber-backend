@@ -35,7 +35,6 @@ RUN pip3 install -r requirements.txt
 # Install additional Python dependencies
 RUN pip3 install python-dateutil
 
-RUN pip3 install python-kafka
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
