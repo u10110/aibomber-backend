@@ -753,13 +753,12 @@ def project_edit(request, project_id):
 
             # Обновляем project_id для связанных получателей
             recipients = form.cleaned_data.get('recipients', [])
-
+            remote_chat_ids = []
             for recipient in recipients:
                 recipient.project_id = project.id
                 recipient.save()
-
-            remote_chat_ids = [recipient.remote_ids.replace('\n', ',').split(',').strip() for recipient in recipients if
-                               recipient.remote_ids.replace('\n', ',').split(',').strip()]
+                [remote_chat_ids.append(recipient) for recipient in
+                 recipient.remote_ids.replace('\n', ',').split(',')]
 
             for remote_chat_id in remote_chat_ids:
                 try:
