@@ -49,6 +49,7 @@ ALLOWED_HOSTS = [
     "localhost.localdomain"
 ]
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -164,6 +165,8 @@ DATABASES = {
         "options": "-c statement_timeout=300000",
     },
 }
+
+
 
 # DATABASES['default'] = DATABASES['sqlite3']
 

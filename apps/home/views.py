@@ -1,27 +1,8 @@
-import codecs
-import csv
-import datetime
-import hashlib
-import json
-import locale
-import random
-import re
-import string
-import time
-from calendar import c
-from datetime import timedelta, timezone
-from http import client
-from io import BytesIO
-from multiprocessing import context
-from sqlite3 import IntegrityError
-from struct import pack_into
-from urllib import response
 
-import numpy as np
-import requests
-import xlsxwriter
-from django import template
-from django.contrib import messages
+import string
+from decouple import config
+from sqlite3 import IntegrityError
+
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.core.files.storage import FileSystemStorage
 from django.db.utils import IntegrityError
@@ -43,8 +24,8 @@ from apps.billing.models import Limits, Order, Paid, UnicTariff
 from apps.users_control.models import ReferalCounter, UsersAgreement
 from core.settings import MEDIA_ROOT
 
-from apps.telegram.prsr import process_project
-from apps.telegram.sndr import ProjectProcessor
+from kafka import KafkaProducer
+from kafka.errors import KafkaError
 
 from .forms import *
 from .helper import Helper
@@ -75,6 +56,8 @@ from .services.gpt_assistant import GPTAssistant
 from django.db.models import Count, Max, Subquery, OuterRef, IntegerField, Case, When
 import random
 
+KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
+FASTAPI_URL = config("FASTAPI_URL")
 
 def error(request):
     return render(request, "errors/technical_break.html")
@@ -1000,7 +983,8 @@ def chat(request):
     chats = Chat.objects.filter(
         project__in=Project.objects.filter(client_id=request.user.id)
     ).values(
-        'user_id'
+        'user_id',
+        'id'
     )
 
     current_messages = []
@@ -1011,21 +995,25 @@ def chat(request):
         ).order_by('created_at')
 
     current_context = get_context_data(request, user_id, chats, current_messages, current_chat)
-
+    print(current_context)
     return render(request, "apps/chat.html", current_context)
 
 
 def chat_messages(request):
     chat_id = request.GET.get('chat_id', None)
     user_id = request.GET.get('user_id', None)
-    current_chat = Chat.objects.filter(id=chat_id).first()
+    if chat_id is not None:
+        current_chat = Chat.objects.filter(id=chat_id).first()
+    else:
+        current_chat = None
+
     if request.method == "POST":
         user_message = request.POST.get('user_message')
         if user_message:
 
             if current_chat:
                 payload = json.dumps({
-                    "phone": current_chat.user_name,
+                    "phone": current_chat.phone,
                     "username": current_chat.user_id,
                     "message": user_message
                 })
@@ -1038,12 +1026,12 @@ def chat_messages(request):
                     data=payload
                 )
                 ChatMessages.objects.create(
-                    chat_id=chat_id,
+                    chat_id=current_chat,
                     user_name=current_chat.user_name,
                     user_message=user_message,
                     message_type='anwser',  # Изменено на 'question'
                 )
-            return redirect(f'{reverse("messages")}?user_id={user_id}')
+            return redirect(f'{reverse("messages")}?chat_id={chat_id}')
 
     chats = Chat.objects.filter(
         project__in=Project.objects.filter(client_id=request.user.id)
@@ -1057,7 +1045,7 @@ def chat_messages(request):
         ).order_by('created_at')
 
     context = get_context_data(request, user_id, chats, messages, current_chat)
-    print(current_chat)
+
     return render(request, 'apps/chat.html', context)
 
 
@@ -1181,11 +1169,6 @@ def toggle_auto_active(request, chat_id):
 
             # Получаем объекты Chat и TgID
             chat = get_object_or_404(Chat, id=chat_id)
-            tg = get_object_or_404(TgID, tg_id=chat.user_id)  # Предполагается связь через user_id
-
-            # Обновляем значения is_auto_active
-            tg.is_auto_active = is_auto_active
-            tg.save()
 
             chat.is_auto_active = is_auto_active
             chat.save()
@@ -1217,11 +1200,6 @@ def change_status(request, chat_id):
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
-# FASTAPI_URL = "http://fastapi_app:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
-# FASTAPI_URL = "http://127.0.0.1:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
-FASTAPI_URL = "http://91.197.96.240:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
-
-
 @csrf_exempt
 def send_code(request):
     if request.method == 'POST':
@@ -1235,6 +1213,8 @@ def send_code(request):
             phone_number = re.sub(r'[^\d+]', '', phone_number.strip())
             if not phone_number.startswith('+'):
                 phone_number = '+' + phone_number  # Добавляем '+' в начало, если его нет
+
+            producer = KafkaProducer(bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS, value_serializer=lambda m: json.dumps(m).encode('ascii'))
 
             print(phone_number)
             # Отправка запроса в FastAPI
