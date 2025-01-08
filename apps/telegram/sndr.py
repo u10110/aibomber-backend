@@ -269,7 +269,8 @@ class ProjectProcessor:
                 )
 
         except Exception as e:
-            print(f"Ошибка при обработке канала {channel.title}: {e}")
+            print(e.format_exc())
+            print(f"Ошибка при обработке канала {channel.title}: ")
 
     @staticmethod
     def _process_chat(
