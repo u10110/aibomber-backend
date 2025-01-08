@@ -24,10 +24,10 @@ from apps.home.models import (
     Chat,
     ChatMessages
 )
-
+from decouple import config
 # Constants
 PID_FILE = "sndr.lock"
-FASTAPI_HOST = os.getenv("FASTAPI_HOST")
+FASTAPI_HOST = config("FASTAPI_HOST")
 
 
 class ProcessLockManager:

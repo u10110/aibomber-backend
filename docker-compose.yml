@@ -11,7 +11,7 @@ services:
     # depends_on:
     #   - fastapi-app
     environment:
-      - FASTAPI_URL=http://fastapi_app:8001
+      - FASTAPI_HOST=http://fastapi_app:8001
     ports:
       - "80:80"
 

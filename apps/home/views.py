@@ -60,7 +60,7 @@ from django.db.models import Count, Max, Subquery, OuterRef, IntegerField, Case,
 import random
 
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
-FASTAPI_URL = config("FASTAPI_URL")
+FASTAPI_HOST = config("FASTAPI_HOST")
 
 def error(request):
     return render(request, "errors/technical_break.html")
@@ -1031,7 +1031,7 @@ def chat_messages(request):
                     'Content-Type': 'application/json'
                 }
                 response = requests.post(
-                    f"{FASTAPI_URL}/send-message/",
+                    f"{FASTAPI_HOST}/send-message/",
                     headers=headers,
                     data=payload
                 )
@@ -1229,7 +1229,7 @@ def send_code(request):
             print(phone_number)
             # Отправка запроса в FastAPI
             response = requests.post(
-                f"{FASTAPI_URL}/send-code/",
+                f"{FASTAPI_HOST}/send-code/",
                 params={"phone": phone_number},
             )
 
@@ -1258,7 +1258,7 @@ def verify_code(request):
             # Отправка запроса в FastAPI
             print({"phone": phone_number, "code": code})
             response = requests.post(
-                f"{FASTAPI_URL}/verify-code/",
+                f"{FASTAPI_HOST}/verify-code/",
                 json={"phone": phone_number, "code": code},
             )
 
