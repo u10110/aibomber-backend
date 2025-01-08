@@ -220,19 +220,14 @@ class ProjectProcessor:
         
         try:
             # Получаем TG ID, у которых нет сообщений
-            new_tgids = TgID.objects.filter(
-            recipient__project_id=project.id  # Связь через таблицу Recipient
-            ).exclude(
-                tg_id__in=Chat.objects.filter(
-                    message_type="anwser",
-                    project_id=project.id
-                    # user_name=channel.phone,
-                ).values('user_id')
+            new_chats = Chat.objects.filter(
+                project=project,  # Связь через таблицу Recipient
+                last_message_time=None
             )
 
             # Обрабатываем новых пользователей
-            for tgid in new_tgids:
-                print(f"Новый получатель {tgid.tg_id}" )
+            for chat in new_chats:
+                print(f"Новый получатель {chat.tg_id}" )
                 message = message_processor.send_to_gpt_assistant(
                     tgid_id=tgid.id,
                     project_id=project.id,
