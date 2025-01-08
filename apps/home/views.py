@@ -736,7 +736,8 @@ def project_create(request):
 
 
 def project_edit(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
+    project = get_object_or_404(Project, id=project_id,
+                                client=request.user)
 
     if request.method == "POST":
         form = ProjectForm(request.POST, request.FILES, instance=project)
@@ -761,12 +762,10 @@ def project_edit(request, project_id):
             for remote_chat_id in remote_chat_ids:
                 try:
                     Chat.objects.get(project=project,
-                                     user_id=remote_chat_id,
-                                     client=request.user)
+                                     user_id=remote_chat_id,)
                 except Chat.DoesNotExist:
                     ch = Chat(project=project,
                               user_id=remote_chat_id,
-                              client=request.user,
                               channel=random.choice(channels))
                     ch.save()
 
