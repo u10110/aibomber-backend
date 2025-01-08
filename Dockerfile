@@ -25,6 +25,7 @@ COPY . .
 
 # Update poetry.lock if necessary
 COPY pyproject.toml ./
+
 RUN poetry lock --no-update
 
 # Install only main dependencies
