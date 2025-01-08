@@ -1024,7 +1024,7 @@ def chat_messages(request):
 
             if current_chat:
                 payload = json.dumps({
-                    "phone": current_chat.phone,
+                    "phone": current_chat.channel.phone,
                     "username": current_chat.user_id,
                     "message": user_message
                 })
@@ -1036,11 +1036,12 @@ def chat_messages(request):
                     headers=headers,
                     data=payload
                 )
-                print(response.status_code, response.text)
+                print(response.status_code, response.t)
                 ChatMessages.objects.create(
                     chat_id=current_chat,
                     user_name=current_chat.user_name,
                     user_message=user_message,
+                    phone=current_chat.channel.phone,
                     message_type='outcoming',  # Изменено на 'question'
                 )
             return redirect(f'{reverse("messages")}?chat_id={chat_id}')
