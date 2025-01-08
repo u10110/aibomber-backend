@@ -104,7 +104,7 @@ class MessageProcessor:
             Optional[str]: Combined messages or None if no new messages
         """
         last_answer = ChatMessages.objects.filter(
-            chat_id=Chat.id,
+            chat_id=Chat,
             message_type="anwser"
         ).order_by('-created_at').first()
 
@@ -244,7 +244,7 @@ class ProjectProcessor:
                         message
                 ):
                     ChatMessages.objects.create(
-                        chat=chat,
+                        chat_id=chat,
                         user_name=channel.phone,
                         user_message=message,
                         message_type="anwser"
@@ -301,6 +301,7 @@ class ProjectProcessor:
             ):
                 ChatMessages.objects.create(
                     user_id=chat.user_id,
+                    chat_id=chat,
                     user_name=channel.phone,
                     user_message=message,
                     message_type="anwser"

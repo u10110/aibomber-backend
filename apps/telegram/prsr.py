@@ -153,7 +153,7 @@ def process_project(project):
         return
 
     # Шаг 5: Получаем пользователей (TG ID) для проекта
-    recipients = Recipient.objects.filter(project_id=project.id)
+    recipients = Chat.objects.filter(project_id=project.id)
     if not recipients.exists():
         print(f"Проект {project.id} не имеет получателей")
         return
