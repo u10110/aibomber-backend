@@ -1036,6 +1036,7 @@ def chat_messages(request):
                     headers=headers,
                     data=payload
                 )
+                print(response)
                 ChatMessages.objects.create(
                     chat_id=current_chat,
                     user_name=current_chat.user_name,
