@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.forms import fields
 from django import forms
-from .models import Project, Recipient, TgID, Channel, ProjectFile, CrmPipelines
+from .models import Project, Recipient, Channel, ProjectFile, CrmPipelines, Chat
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.db.models import Q
@@ -476,49 +476,49 @@ class ChannelForm(forms.ModelForm):
 
 
 class RecipientForm(forms.ModelForm):
-    tg_ids = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'rows': 4,
-            'placeholder': 'Введите список Telegram ID или имен пользователей, разделяя их запятыми или с новой строки'
-        }),
-        label="Telegram IDs or Usernames",
-        required=False
-    )
+    """
+remote_ids = forms.CharField(
+    widget=forms.Textarea(attrs={
+        'class': 'form-control',
+        'rows': 4,
+        'placeholder': 'Введите список Telegram ID или имен пользователей, разделяя их запятыми или с новой строки'
+    }),
+    label="Telegram IDs or Usernames",
+    required=False
+)
 
-    def clean_tg_ids(self):
-        ids = self.cleaned_data.get('tg_ids', '')
-        if not ids:
-            return []
+def clean_remote_ids(self):
+    ids = self.cleaned_data.get('remote_ids', '')
+    if not ids:
+        return []
 
-        # Разделяем идентификаторы по запятой или новой строке
-        tg_ids = [id.strip() for id in ids.replace('\n', ',').split(',') if id.strip()]
+    # Разделяем идентификаторы по запятой или новой строке
+    remote_ids = [id.strip() for id in ids.replace('\n', ',').split(',') if id.strip()]
 
-        if not tg_ids:
-            raise forms.ValidationError("Введите хотя бы один Telegram ID или имя пользователя.")
+    if not remote_ids:
+        raise forms.ValidationError("Введите хотя бы один Telegram ID или имя пользователя.")
 
-        return tg_ids
-
+    return remote_ids
+"""
     def save(self, commit=True):
         recipient = super().save(commit=commit)
-        tg_ids = self.cleaned_data.get('tg_ids', [])
-        if commit:
-            # Удаляем старые записи, связанные с этим Recipient
-            TgID.objects.filter(recipient=recipient).delete()
-            # Создаем новые записи
-            TgID.objects.bulk_create(
-                [TgID(recipient=recipient, tg_id=tg_id) for tg_id in tg_ids]
-            )
         return recipient
 
     class Meta:
         model = Recipient
         fields = [
             'title',
+            'remote_ids'
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название списка'}),
+            'remote_ids': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Введите список Telegram ID или имен пользователей, разделяя их запятыми или с новой строки'
+            })
         }
         labels = {
             'title': 'Название списка',
+            'remote_ids': 'Telegram IDs or Usernames'
         }

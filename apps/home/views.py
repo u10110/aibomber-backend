@@ -1,27 +1,8 @@
-import codecs
-import csv
-import datetime
-import hashlib
-import json
-import locale
-import random
-import re
-import string
-import time
-from calendar import c
-from datetime import timedelta, timezone
-from http import client
-from io import BytesIO
-from multiprocessing import context
-from sqlite3 import IntegrityError
-from struct import pack_into
-from urllib import response
 
-import numpy as np
-import requests
-import xlsxwriter
-from django import template
-from django.contrib import messages
+import string
+from decouple import config
+from sqlite3 import IntegrityError
+
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.core.files.storage import FileSystemStorage
 from django.db.utils import IntegrityError
@@ -43,6 +24,12 @@ from apps.billing.models import Limits, Order, Paid, UnicTariff
 from apps.users_control.models import ReferalCounter, UsersAgreement
 from core.settings import MEDIA_ROOT
 
+from kafka import KafkaProducer
+from kafka.errors import KafkaError
+
+from apps.telegram.sndr import ProjectProcessor
+from apps.telegram.prsr import process_project
+
 from .forms import *
 from .helper import Helper
 from .models import (
@@ -52,7 +39,8 @@ from .models import (
     ClientSettings,
     Channel,
     Chat,
-    Phone
+    Phone,
+    ChatMessages
 )
 from .module import *
 from .services.services import MinioService
@@ -66,18 +54,20 @@ from django.http import JsonResponse
 from telethon import TelegramClient
 from telethon.errors import SessionPasswordNeededError
 
-from .models import Project, TgID
+from .models import Project
 from .services.gpt_assistant import GPTAssistant
 from django.db.models import Count, Max, Subquery, OuterRef, IntegerField, Case, When
+import random
 
+KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
+FASTAPI_HOST = config("FASTAPI_HOST")
 
 def error(request):
     return render(request, "errors/technical_break.html")
 
-def dynamic_page(request,page_name):
+
+def dynamic_page(request, page_name):
     return render(request, f'home/{page_name}.html')
-
-
 
 
 def password_update(request):
@@ -167,7 +157,7 @@ def personal_room(request):
 
     date_now = datetime.datetime.now(timezone.utc)
     if Limits.objects.filter(
-        client=user, start_date__lte=date_now, end_date__gte=date_now
+            client=user, start_date__lte=date_now, end_date__gte=date_now
     ).exists():
         user_limits = {}
         limits = Limits.objects.filter(
@@ -341,6 +331,7 @@ def set_sms_type(request):
         ).update(pay_type=sms_type, tg_start_date=start_time, tg_end_date=end_time)
     return JsonResponse({"resp": "ok"}, status="200")
 
+
 def faq(request):
     return render(request, "apps/faq.html")
 
@@ -350,7 +341,7 @@ def lessons(request):
         pass
 
     if not request.user.id or not BHelper(request.user.id).get_max_limit(
-        "course_autobuy"
+            "course_autobuy"
     ):
         return HttpResponseRedirect("/")
     request2 = Object()
@@ -362,14 +353,13 @@ def lessons(request):
     return render(request, "apps/lessons.html", {"is_tariff": json.dumps(is_tariff)})
 
 
-
 def pricing(request):
     context = {}
     date_now = datetime.datetime.now(datetime.timezone.utc)
     if Paid.objects.filter(client=request.user).exists():
         if (
-            Paid.objects.filter(client=request.user).latest("end_date").end_date
-            >= date_now.date()
+                Paid.objects.filter(client=request.user).latest("end_date").end_date
+                >= date_now.date()
         ):
             context["have_subscribe"] = True
     if "have_subscribe" not in context:
@@ -447,8 +437,6 @@ def account(request):
     return render(request, "apps/account.html", context=context)
 
 
-
-
 def upload(request):
     if request.method == "POST" and request.FILES.get("file"):
         # upload = request.FILES['upload']
@@ -469,7 +457,6 @@ def auto_pay_stop(request, group):
     return HttpResponseRedirect(f"/buyout?status=active&group={group}")
 
 
-
 def add_question(request):
     return render(request, "apps/add-question.html")
 
@@ -480,7 +467,6 @@ def add_to_cart(request):
 
 def add_to_waiting(request):
     return render(request, "apps/add-to-waiting.html")
-
 
 
 def index(request):
@@ -544,7 +530,6 @@ def error_500(request, *args, **argv):
     )
 
 
-
 def get_segment(request):
     try:
 
@@ -559,19 +544,19 @@ def get_segment(request):
             active_menu = "dashboard"
 
         if (
-            segment.startswith("account-")
-            or segment.startswith("users-")
-            or segment.startswith("profile-")
-            or segment.startswith("projects-")
+                segment.startswith("account-")
+                or segment.startswith("users-")
+                or segment.startswith("profile-")
+                or segment.startswith("projects-")
         ):
             active_menu = "pages"
 
         if (
-            segment.startswith("notifications")
-            or segment.startswith("sweet-alerts")
-            or segment.startswith("charts.html")
-            or segment.startswith("widgets")
-            or segment.startswith("pricing")
+                segment.startswith("notifications")
+                or segment.startswith("sweet-alerts")
+                or segment.startswith("charts.html")
+                or segment.startswith("widgets")
+                or segment.startswith("pricing")
         ):
             active_menu = "pages"
 
@@ -581,8 +566,6 @@ def get_segment(request):
         return "index", "dashboard"
 
 
-
-    
 def services(request):
     return render(request, "apps/services.html")
 
@@ -653,8 +636,6 @@ def contact_request(request):
     return JsonResponse({"error": "Некорректный запрос"}, status=400)
 
 
-
-
 def projects(request):
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES, user=request.user)  # Передаём user для фильтрации
@@ -681,8 +662,6 @@ def projects(request):
 
     projects = Project.objects.filter(client=request.user)
 
-
-    
     # Получаем все проекты из модели, принадлежащие текущему пользователю
     client_settings = ClientSettings.objects.get(client=request.user)
     current_balance = client_settings.balance
@@ -694,13 +673,15 @@ def projects(request):
     }
     return render(request, 'apps/projects.html', context)
 
+
 def project_create(request):
     agent_type = request.GET.get('type', None)
     max_files = 6
     uploaded_files = 0  # Если редактируется проект, здесь можно подсчитать уже загруженные файлы
 
     if request.method == 'POST':
-        form = ProjectForm(request.POST, request.FILES, user=request.user, agent_type=agent_type)  # Передаём user для фильтрации
+        form = ProjectForm(request.POST, request.FILES, user=request.user,
+                           agent_type=agent_type)  # Передаём user для фильтрации
         file_formset = ProjectFileFormSet(request.POST, request.FILES, queryset=ProjectFile.objects.none())
 
         if form.is_valid() and file_formset.is_valid():
@@ -720,13 +701,25 @@ def project_create(request):
             for recipient in recipients:
                 recipient.project_id = project.id
                 recipient.save()
-            
+
+            remote_chat_ids = [recipient.remote_ids.replace('\n', ',').split(',').strip() for recipient in recipients if
+                               recipient.remote_ids.replace('\n', ',').split(',').strip()]
+
+            for remote_chat_id in remote_chat_ids:
+                try:
+                    Chat.objects.get(project=project,
+                                     user_id=remote_chat_id)
+                except Chat.DoesNotExist:
+                    ch = Chat(project=project,
+                              user_id=remote_chat_id,
+                              channel=random.choice(channels))
+                    ch.save()
+
             for file_form in file_formset:
                 if file_form.cleaned_data.get('file'):
                     project_file = file_form.save(commit=False)
                     project_file.project = project
                     project_file.save()
-
 
             return redirect('/projects/')
         else:
@@ -738,17 +731,46 @@ def project_create(request):
         form = ProjectForm(user=request.user)
         file_formset = ProjectFileFormSet(queryset=ProjectFile.objects.none())
 
-    return render(request, 'apps/project_create.html', {'form': form, 'agent_type': agent_type, 'file_formset': file_formset, 'max_files': max_files, 'uploaded_files': uploaded_files,})
-
+    return render(request, 'apps/project_create.html',
+                  {'form': form, 'agent_type': agent_type, 'file_formset': file_formset, 'max_files': max_files,
+                   'uploaded_files': uploaded_files, })
 
 
 def project_edit(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
+    project = get_object_or_404(Project, id=project_id,
+                                client=request.user)
 
     if request.method == "POST":
         form = ProjectForm(request.POST, request.FILES, instance=project)
         if form.is_valid():
             form.save()
+
+            # Обновляем project_id для связанных каналов
+            channels = form.cleaned_data.get('channel', [])
+            for channel in channels:
+                channel.project_id = project.id
+                channel.save()
+
+            # Обновляем project_id для связанных получателей
+            recipients = form.cleaned_data.get('recipients', [])
+            remote_chat_ids = []
+            for recipient in recipients:
+                recipient.project_id = project.id
+                recipient.save()
+                [remote_chat_ids.append(recipient) for recipient in
+                 recipient.remote_ids.replace('\n', ',').split(',')]
+
+            for remote_chat_id in remote_chat_ids:
+                try:
+                    ch = Chat.objects.get(  project=project,
+                                            user_id=remote_chat_id
+                                          )
+                except Chat.DoesNotExist:
+                    ch = Chat(project=project,
+                              user_id=remote_chat_id,
+                              channel=random.choice(channels))
+                    ch.save()
+
             return redirect("projects")  # После успешного сохранения возвращаемся к списку проектов
     else:
         form = ProjectForm(instance=project)  # Предзаполняем форму данными проекта
@@ -782,17 +804,20 @@ def toggle_project_active(request):
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
     return JsonResponse({'success': False, 'message': 'Неверный метод запроса'}, status=400)
 
+
 def project_start(request, pk):
     project = get_object_or_404(Project, pk=pk, client=request.user)
     project.status = "active"  # Укажите соответствующее значение
     project.save()
     return redirect('projects')
 
+
 def project_stop(request, pk):
     project = get_object_or_404(Project, pk=pk, client=request.user)
     project.status = "stopped"  # Укажите соответствующее значение
     project.save()
     return redirect('projects')
+
 
 def project_delete(request, pk):
     project = get_object_or_404(Project, pk=pk, client=request.user)
@@ -808,16 +833,19 @@ def channel_start(request, pk):
     project.save()
     return redirect('channels')
 
+
 def channel_stop(request, pk):
     project = get_object_or_404(Channel, pk=pk, client=request.user)
     project.status = "stopped"  # Укажите соответствующее значение
     project.save()
     return redirect('channels')
 
+
 def channel_delete(request, pk):
     project = get_object_or_404(Channel, pk=pk, client=request.user)
     project.delete()
     return redirect('channels')
+
 
 @csrf_exempt
 def toggle_channel_active(request):
@@ -845,32 +873,28 @@ def list_recipient(request):
             recipient.client = request.user
             recipient.save()
 
-            tg_ids = form.cleaned_data.get('tg_ids', [])
-            recipient.tg_id_set.all().delete()
-            for tg_id in tg_ids:
-                TgID.objects.create(recipient=recipient, tg_id=tg_id)
-
-            print('testetset')
             return redirect('/list-recipient/')
     else:
         form = RecipientForm()
 
     # Получаем словарь project_id -> название проекта
-    project_titles = {project.id: project.title for project in Project.objects.filter(client=request.user)}
+    # project_titles = {project.id: project.title for project in Project.objects.filter(client=request.user)}
 
     # Аннотация для подсчета количества контактов
-    projects = Recipient.objects.filter(client=request.user).annotate(
-        contact_count=Count('tg_id_set')
+    recipients = Recipient.objects.filter(client=request.user).annotate(
+        contact_count=Count('remote_ids')
     )
 
     # Аннотация для подсчета количества контактов, активных переписок, отправленных и оставшихся сообщений
-    projects = Recipient.objects.filter(client=request.user).annotate(
+    """
+        
+    projects = Chat.objects.filter(project=project).annotate(
         # Общее количество TG ID, связанных с получателем
-        contact_count=Count('tg_id_set', distinct=True),
+        contact_count=Count('user_id', distinct=True),
         
         # Количество активных переписок
         active_conversations=Count(
-            'tg_id_set', 
+            'chat_id',
             filter=Q(
                 tg_id_set__tg_id__in=Subquery(
                     Chat.objects.filter(
@@ -884,34 +908,33 @@ def list_recipient(request):
         ),
 
         # Отправлено: количество TG ID в TgID таблице
-        sent=Count('tg_id_set', filter=Q(tg_id_set__is_auto_active=True), distinct=True),
+        sent=Count('user_id', filter=Q(tg_id_set__is_auto_active=True), distinct=True),
 
         # Осталось: общее количество минус отправленные
-        remaining=F('contact_count') - Count('tg_id_set', filter=Q(tg_id_set__is_auto_active=True), distinct=True),
+        remaining=F('contact_count') - Count('chat_id', filter=Q(chat_id__is_auto_active=True), distinct=True),
     )
-    
-    
+     """
+
     # Добавляем поле project_title в каждый объект
+    """
     for project in projects:
         project.project_title = project_titles.get(project.project_id, "Не привязан")
         
         # Получаем список всех TG IDs, связанных с этим списком
-        tg_ids = project.tg_id_set.values_list('tg_id', flat=True)  # Получаем только tg_id
-        project.tg_ids = list(tg_ids)  # Преобразуем в список для передачи в шаблон
-
+        chat_ids = project.chat.values_list('chat_id', flat=True)  # Получаем только tg_id
+        project.tg_ids = list(chat_ids)  # Преобразуем в список для передачи в шаблон
+    """
     context = {
         'form': form,
-        'lists': projects,
+        'lists': recipients,
     }
     return render(request, "apps/list_recipient.html", context)
-
-
 
 
 def list_recipient_edit(request, id):
     recipient = get_object_or_404(Recipient, id=id, client=request.user)
 
-    if request.method == 'POST': 
+    if request.method == 'POST':
         form = RecipientForm(request.POST, instance=recipient)
         print(f" form {form}")
         if form.is_valid():
@@ -941,7 +964,6 @@ def save_recipients(request):
     return render(request, 'apps\list_recipient.html', {'form': form})
 
 
-
 def list_recipient_delete(request, pk):
     list_recipient = get_object_or_404(Recipient, pk=pk, client=request.user)
     list_recipient.delete()
@@ -950,133 +972,98 @@ def list_recipient_delete(request, pk):
 
 def get_context_data(request, user_id=None, chats=None, messages=None, current_chat=None):
     projects = Project.objects.filter(client_id=request.user.id)
-    
+
     context = {
         'chats': chats,
         'messages': messages,
         'chat': current_chat,
-        'projects': projects,  
+        'projects': projects,
     }
     return context
 
 
 def chat(request):
-    user_id = request.GET.get('user_id')
-    
-    projects = Project.objects.filter(client_id=request.user.id)
-    
+    chat_id = request.GET.get('chat_id')
+    user_id = request.user.id
+
+    current_chat = Chat.objects.filter(
+        id=chat_id
+    ).first()
+
     chats = Chat.objects.filter(
-        client_id=request.user.id
-    ).values(
-        'user_id'
-    ).annotate(
-        id=Max('id'),
-        user_name=Max('user_name'),
-        project_id=Max('project_id'),
-        status=Max('status'),
-        message_count=Count('user_id'),
-        last_message_time=Max('created_at'),
-        last_message=Max('user_message'),
-        is_auto_active=Subquery(
-            TgID.objects.filter(
-                tg_id=OuterRef('user_id')
-            ).values('is_auto_active')[:1]
-        )
-    ).order_by('-last_message_time')
+        project__in=Project.objects.filter(client_id=request.user.id)
+    )
 
     current_messages = []
-    current_chat = None
-    if user_id:
-        current_messages = Chat.objects.filter(
-            client_id=request.user.id,
-            user_id=user_id
+
+    if chat:
+        current_messages = ChatMessages.objects.filter(
+            chat_id=chat_id,
         ).order_by('created_at')
-        current_chat = chats.filter(user_id=user_id).first()
-    else:
-        current_chat = chats.first()
-        if current_chat:
-            current_messages = Chat.objects.filter(
-                client_id=request.user.id,
-                user_id=current_chat['user_id']
-            ).order_by('created_at')
 
-    context = get_context_data(request, user_id, chats, current_messages, current_chat)
-
+    context = {
+        'chats': chats,
+        'messages': current_messages,
+        'chat': current_chat,
+        'projects': Project.objects.filter(client_id=user_id)
+    }
     return render(request, "apps/chat.html", context)
 
+
 def chat_messages(request):
+    chat_id = request.GET.get('chat_id', None)
     user_id = request.GET.get('user_id', None)
-    
+    if chat_id is not None:
+        current_chat = Chat.objects.filter(id=chat_id).first()
+    else:
+        current_chat = None
+
     if request.method == "POST":
         user_message = request.POST.get('user_message')
         if user_message:
-            current_chat = Chat.objects.filter(user_id=user_id).first()
-            if current_chat:
 
+            if current_chat:
                 payload = json.dumps({
-                "phone": current_chat.user_name,
-                "username": user_id,
-                "message": user_message
+                    "phone": current_chat.channel.phone,
+                    "username": current_chat.user_id,
+                    "message": user_message
                 })
                 headers = {
-                'Content-Type': 'application/json'
+                    'Content-Type': 'application/json'
                 }
                 response = requests.post(
-                    f"{FASTAPI_URL}/send-message/",
+                    f"{FASTAPI_HOST}/send-message/",
                     headers=headers,
                     data=payload
                 )
-                print(response.text)
-                print(
-                    user_id,
-                    current_chat.user_name,
-                    current_chat.client_id,
-                    user_message,
-                )
-                Chat.objects.create(
-                    user_id=user_id,
+                print(response.status_code, response.text)
+                ChatMessages.objects.create(
+                    chat_id=current_chat,
                     user_name=current_chat.user_name,
-                    client_id=current_chat.client_id,
-                    project_id=current_chat.project_id,
                     user_message=user_message,
-                    message_type='anwser',  # Изменено на 'question'
+                    message_type='outcoming',  # Изменено на 'question'
                 )
-            return redirect(f'{reverse("messages")}?user_id={user_id}')
+            return redirect(f'{reverse("messages")}?chat_id={chat_id}')
 
     chats = Chat.objects.filter(
-        client_id=request.user.id
-    ).values(
-        'user_id'
-    ).annotate(
-        id=Max('id'),
-        user_name=Max('user_name'),
-        project_id=Max('project_id'),
-        status=Max('status'),
-        message_count=Count('user_id'),
-        last_message_time=Max('created_at'),
-        last_message=Max('user_message'),
-        is_auto_active=Subquery(
-            TgID.objects.filter(
-                tg_id=OuterRef('user_id')
-            ).values('is_auto_active')[:1]
-        )
+        project__in=Project.objects.filter(client_id=request.user.id)
     ).order_by('-last_message_time')
 
     messages = []
-    current_chat = None
-    if user_id:
-        messages = Chat.objects.filter(
-            user_id=user_id,
-            client_id=request.user.id
-        ).order_by('created_at')
-        current_chat = chats.filter(user_id=user_id).first()
 
-    context = get_context_data(request, user_id, chats, messages, current_chat)
+    if current_chat:
+        messages = ChatMessages.objects.filter(
+            chat_id=current_chat
+        ).order_by('created_at')
+
+    context = {
+        'chats': chats,
+        'messages': messages,
+        'chat': current_chat,
+        'projects': Project.objects.filter(client_id=user_id)
+    }
 
     return render(request, 'apps/chat.html', context)
-
-
-
 
 
 def channels(request):
@@ -1088,21 +1075,19 @@ def channels(request):
             return redirect('/channels/')
         else:
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
-            
+
 
     else:
         form = ChannelForm(request.POST, initial={'client': request.user})
 
-
     # Получаем все проекты из модели
     projects = Channel.objects.filter(client=request.user)
-    
+
     project_titles = {project.id: project.title for project in Project.objects.filter(client=request.user)}
 
     # Добавляем название проекта к каждому каналу
     for channel in projects:
         channel.project_title = project_titles.get(channel.project_id, "Не привязан")
-
 
     # Передаем данные в шаблон
     context = {
@@ -1112,9 +1097,8 @@ def channels(request):
     return render(request, 'apps/channels.html', context)
 
 
-
-
 BASE_URL = "https://my.telegram.org"
+
 
 def create_app_internal(session):
     """
@@ -1153,7 +1137,6 @@ def create_app_internal(session):
         }
 
 
-
 @csrf_exempt
 def create_app(request):
     if request.method == 'POST':
@@ -1188,6 +1171,9 @@ def create_app(request):
                 return JsonResponse({'success': False, 'error': 'Ошибка при создании приложения.'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
+    else:
+        return JsonResponse({'success': False, 'error': ''})
+
 
 
 @csrf_exempt
@@ -1203,11 +1189,6 @@ def toggle_auto_active(request, chat_id):
 
             # Получаем объекты Chat и TgID
             chat = get_object_or_404(Chat, id=chat_id)
-            tg = get_object_or_404(TgID, tg_id=chat.user_id)  # Предполагается связь через user_id
-
-            # Обновляем значения is_auto_active
-            tg.is_auto_active = is_auto_active
-            tg.save()
 
             chat.is_auto_active = is_auto_active
             chat.save()
@@ -1231,18 +1212,12 @@ def change_status(request, chat_id):
         chat.status = new_status
         chat.save()
 
-       # tg_id = TgID.objects.get(tg_id=chat.user_id)
-       # tg_id.status = new_status
-       # tg_id.save()
+        # tg_id = TgID.objects.get(tg_id=chat.user_id)
+        # tg_id.status = new_status
+        # tg_id.save()
 
         return JsonResponse({'status': chat.status})
     return JsonResponse({'error': 'Invalid request method'}, status=400)
-
-
-
-# FASTAPI_URL = "http://fastapi_app:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
-# FASTAPI_URL = "http://127.0.0.1:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
-FASTAPI_URL = "http://91.197.96.240:8001"  # URL FastAPI-сервиса (имя сервиса в Docker)
 
 
 @csrf_exempt
@@ -1259,13 +1234,15 @@ def send_code(request):
             if not phone_number.startswith('+'):
                 phone_number = '+' + phone_number  # Добавляем '+' в начало, если его нет
 
+            #producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS], value_serializer=lambda m: json.dumps(m).encode('ascii'))
+
             print(phone_number)
             # Отправка запроса в FastAPI
             response = requests.post(
-                f"{FASTAPI_URL}/send-code/",
+                f"{FASTAPI_HOST}/send-code/",
                 params={"phone": phone_number},
             )
-            
+
             if response.status_code == 200:
                 return JsonResponse(response.json())
             else:
@@ -1274,8 +1251,6 @@ def send_code(request):
             return JsonResponse({"message": str(e), "success": False})
 
     return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
-
-
 
 
 # Шаг 2: Подтверждаем код авторизации
@@ -1293,10 +1268,10 @@ def verify_code(request):
             # Отправка запроса в FastAPI
             print({"phone": phone_number, "code": code})
             response = requests.post(
-                f"{FASTAPI_URL}/verify-code/",
+                f"{FASTAPI_HOST}/verify-code/",
                 json={"phone": phone_number, "code": code},
             )
-            
+
             if response.status_code == 200:
                 # Если успех, обновляем статус в базе данных
                 channel, created = Channel.objects.get_or_create(phone=phone_number)
@@ -1310,9 +1285,6 @@ def verify_code(request):
             return JsonResponse({"message": str(e), "success": False})
 
     return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
-
-
-
 
 
 @csrf_exempt
@@ -1350,7 +1322,6 @@ def create_project_chat(request):
             # Ограничиваем длину истории (например, 10 пар сообщений)
             formatted_history = formatted_history[-20:]  # 10 вопросов и 10 ответов
 
-
             # Инициализируем GPTAssistant с историей чата
             assistant = GPTAssistant(project)
             # Передаём историю в GPTAssistant
@@ -1375,9 +1346,6 @@ def create_project_chat(request):
     return JsonResponse({"error": "Метод не поддерживается."}, status=405)
 
 
-
-
-
 @csrf_exempt
 def gpt_assistant(request):
     """
@@ -1387,10 +1355,10 @@ def gpt_assistant(request):
         return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
 
     # Получение user_id, project_id и question из тела запроса
-    tgid_id = request.POST.get('tgid_id')
+    chat_id = request.POST.get('chat_id')
     project_id = request.POST.get('project_id')
     question = request.POST.get('question')
-    
+
     channel_phone = request.POST.get('channel_phone')
     user_id = request.POST.get('user_id')
 
@@ -1402,7 +1370,7 @@ def gpt_assistant(request):
     print(project)
 
     # Создание экземпляра GPTAssistant
-    assistant = GPTAssistant(project=project, tgid_id=tgid_id, channel_phone=channel_phone, user_id=user_id)
+    assistant = GPTAssistant(project=project, chat_id=chat_id, channel_phone=channel_phone, user_id=user_id)
 
     # Получение ответа от GPT
     try:
@@ -1410,9 +1378,7 @@ def gpt_assistant(request):
         return JsonResponse({"anwser": answer})
     except Exception as e:
         return JsonResponse({"error": f"Failed to process the request: {str(e)}"}, status=500)
-    
-    
-    
+
 
 @csrf_exempt
 def validate_google_link(request):
@@ -1461,3 +1427,23 @@ def save_google_link(request):
             return JsonResponse({'success': False, 'message': str(e)})
 
     return JsonResponse({'success': False, 'message': 'Только POST-запросы'})
+
+
+@csrf_exempt
+def send_tg_messages(request):
+
+    active_projects = Project.objects.filter(is_active=True)
+    for project in active_projects:
+        ProjectProcessor.process_project(project)
+
+    return JsonResponse({'success': True})
+
+
+@csrf_exempt
+def get_tg_messages(request):
+
+    active_projects = Project.objects.filter(is_active=True)
+    for project in active_projects:
+        process_project(project)
+
+    return JsonResponse({'success': True})

@@ -23,12 +23,6 @@ RUN pip install --upgrade pip \
 # Copy project files
 COPY . .
 
-# Update poetry.lock if necessary
-COPY pyproject.toml ./
-RUN poetry lock --no-update
-
-# Install only main dependencies
-RUN poetry install --only main
 
 # Set working directory
 WORKDIR /app
@@ -36,8 +30,11 @@ WORKDIR /app
 # Copy application code
 COPY . .
 
+RUN pip3 install -r requirements.txt
+
 # Install additional Python dependencies
 RUN pip3 install python-dateutil
+
 
 # Collect static files
 RUN python manage.py collectstatic --noinput

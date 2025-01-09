@@ -1,6 +1,6 @@
 services:
-  appseed-app:
-    container_name: appseed_app
+  eliment-web:
+    container_name: eliment_web
     image: registry.mplab.io/eliment-web:latest
     restart: always
     env_file: .env
@@ -10,8 +10,6 @@ services:
       - /mnt/media/images:/app/apps/media/images
     # depends_on:
     #   - fastapi-app
-    environment:
-      - FASTAPI_URL=http://fastapi_app:8001
     ports:
       - "80:80"
 
