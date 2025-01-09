@@ -23,8 +23,6 @@ import sys
 FASTAPI_HOST = os.getenv("FASTAPI_HOST")
 
 
-
-
 def get_active_clients():
     """
     Получает всех клиентов с положительным балансом.
@@ -117,12 +115,9 @@ def save_messages(user_id, messages, project, chat_map, channel_name):
 
         if not existing_chat:
             # Создаём новое сообщение в базе
-            Chat.objects.create(
-                project_id=project.id,
-                client_id=project.client_id,
-                # user_id=user_id,
-                user_id=_USER_NAME,
-                message_type="anwser" if user_name == "GPT Assistant" else "question",
+            ChatMessages.objects.create(
+                chat_id=existing_chat,
+                message_type="incoming" if user_name == "GPT Assistant" else "outcoming",
                 user_name=channel_name,
                 user_message=message_text,
                 messageId=message_id,  # Сохраняем ID сообщения
@@ -152,25 +147,12 @@ def process_project(project):
         print(f"Проект {project.id} не имеет активных каналов")
         return
 
-    # Шаг 5: Получаем пользователей (TG ID) для проекта
-    recipients = Chat.objects.filter(project_id=project.id)
-    if not recipients.exists():
-        print(f"Проект {project.id} не имеет получателей")
-        return
-
-    tgid_list = Chat.objects.filter(
-        recipient_id__in=recipients.values_list("id", flat=True),
-        is_auto_active=True,
-    )
-    # if not tgid_list.exists():
-    #     print(f"Проект {project.id} не имеет активных TG ID")
-    #     return
 
     # Шаг 6: Получаем существующие чаты для TG ID
-    if tgid_list.exists():
-        chat_map = get_existing_chats(tgid_list)
-    else:
-        chat_map = {}
+    chat_map = {}
+    for channel in channels:
+        chats = Chat.objects.filter(channel=channel).distinct('user_name', 'user_id')
+        chat_map[channel.phone] = list(chats) if chats.exists() else []
 
     # Шаг 7: Обрабатываем каналы
     for channel in channels:
@@ -228,7 +210,3 @@ def get_messages(phone, user_id):
         return {}
 
 
-
-
-if __name__ == "__main__":
-    main_runner()
