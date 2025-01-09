@@ -42,7 +42,7 @@ def get_active_projects(client, current_time):
     )
 
 
-def process_channel(channel, chat_map, project):
+def process_channel(channel , project):
     """
     Обрабатывает один канал:
     - Получает пользователей через get-users
@@ -69,7 +69,7 @@ def process_channel(channel, chat_map, project):
 
             if messages:
                 print(f"Сохранение сообщений для пользователя {user_id}")
-                save_messages(user_id, messages, project, chat_map, channel)
+                save_messages(user_id, messages, project, channel)
             else:
                 print(f"Нет новых сообщений для пользователя {user_id}")
 
@@ -81,15 +81,10 @@ def process_channel(channel, chat_map, project):
         print(f"Ошибка обработки канала {channel.title}: {e}")
 
 
-def save_messages(user_id, messages, project, chat_map, channel):
+def save_messages(user_id, messages, project, channel):
     """
     Сохраняет каждое сообщение из списка в базу данных, проверяя уникальность.
     """
-    if user_id in chat_map:
-        print(f"Существующий чат найден для {user_id}")
-    else:
-        print(f"Создание нового чата для {user_id}")
-
 
     _USER_NAME = next((message.get("username") for message in messages if message.get("username")), None)
 
@@ -100,7 +95,7 @@ def save_messages(user_id, messages, project, chat_map, channel):
         message_id = message.get("id", None)  # ID сообщения
         sender_id = message.get("user_id", None)  # ID отправителя
         message_date = message.get("date", None)  # Дата сообщения от Telethon
-        user_id = message.get('username')
+        message_user_id = message.get('username')
 
         print(message)
         if not message_text or not message_id or not sender_id or not message_date:
@@ -115,10 +110,10 @@ def save_messages(user_id, messages, project, chat_map, channel):
         ).exists()
 
         if not existing_message:
-            print(user_id, channel, project)
+            print(user_id, channel.id, project, message_user_id)
             chat = Chat.objects.get(
                 project=project,
-                user_id=user_id,
+                user_id=message_user_id,
                 channel=channel)
             if chat:
                 # Создаём новое сообщение в базе
