@@ -3,7 +3,7 @@ import os
 import datetime
 import requests
 from django.db.models import F
-
+from decouple import config
 # Import models after Django configuration
 from apps.home.models import (
     Project,
@@ -20,7 +20,7 @@ import sys
 # Загружаем переменные окружения из файла .env
 
 
-FASTAPI_HOST = os.getenv("FASTAPI_HOST")
+FASTAPI_HOST = config("FASTAPI_HOST")
 
 
 def get_active_clients():
@@ -110,11 +110,12 @@ def save_messages(user_id, messages, project, channel):
         ).exists()
 
         if not existing_message:
-            print(user_id, channel.id, project, message_user_id)
-            chat = Chat.objects.get(
-                project=project,
+
+            chat = Chat.objects.filter(
+                project_id=project.id,
                 user_id=message_user_id,
-                channel=channel)
+                channel_id=channel.id).first()
+
             if chat:
                 # Создаём новое сообщение в базе
                 ChatMessages.objects.create(
@@ -152,16 +153,11 @@ def process_project(project):
         return
 
 
-    # Шаг 6: Получаем существующие чаты для TG ID
-    chat_map = {}
-    for channel in channels:
-        chats = Chat.objects.filter(channel=channel).distinct('user_name', 'user_id')
-        chat_map[channel.phone] = list(chats) if chats.exists() else []
 
     # Шаг 7: Обрабатываем каналы
     for channel in channels:
         print(f"Обработка канала {channel.title}")
-        process_channel(channel, chat_map, project)
+        process_channel(channel, project)
 
 
 def get_existing_chats(tgid_list):
