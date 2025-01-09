@@ -77,6 +77,7 @@ def process_channel(channel, chat_map, project):
         channel.remaining_messages = F('remaining_messages') - 1
         channel.save()
     except Exception as e:
+        print(e.format_exc())
         print(f"Ошибка обработки канала {channel.title}: {e}")
 
 
