@@ -100,7 +100,7 @@ def save_messages(user_id, messages, project, chat_map, channel):
         message_id = message.get("id", None)  # ID сообщения
         sender_id = message.get("user_id", None)  # ID отправителя
         message_date = message.get("date", None)  # Дата сообщения от Telethon
-        user_name = message.get('username')
+        user_id = message.get('username')
 
         print(message)
         if not message_text or not message_id or not sender_id or not message_date:
@@ -115,10 +115,10 @@ def save_messages(user_id, messages, project, chat_map, channel):
         ).exists()
 
         if not existing_message:
-            print(user_name)
+            print(user_id)
             chat = Chat.objects.get(
                 project=project,
-                user_id=user_name,
+                user_id=user_id,
                 channel=channel)
             if chat:
                 # Создаём новое сообщение в базе
