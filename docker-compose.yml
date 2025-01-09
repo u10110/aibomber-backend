@@ -1,6 +1,6 @@
 services:
-  appseed-app:
-    container_name: appseed_app
+  eliment-web:
+    container_name: eliment_web
     image: registry.mplab.io/eliment-web:latest
     restart: always
     env_file: .env

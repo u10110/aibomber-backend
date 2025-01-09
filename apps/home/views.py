@@ -1171,6 +1171,9 @@ def create_app(request):
                 return JsonResponse({'success': False, 'error': 'Ошибка при создании приложения.'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
+    else:
+        return JsonResponse({'success': False, 'error': ''})
+
 
 
 @csrf_exempt
