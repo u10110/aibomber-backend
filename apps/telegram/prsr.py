@@ -115,20 +115,21 @@ def save_messages(user_id, messages, project, chat_map, channel):
         ).exists()
 
         if not existing_message:
-            chat = Chat.objects.get(
-                project=project,  # Связь через таблицу Recipient
-                channel=channel,
-                user_id=user_name
-            )
-            # Создаём новое сообщение в базе
-            ChatMessages.objects.create(
-                chat_id=chat,
-                message_type="incoming" if user_name == "GPT Assistant" else "outcoming",
-                user_name=sender_id,
-                user_message=message_text,
-                messageId=message_id,  # Сохраняем ID сообщения
-                created_at=message_date,
-            )
+            chat = Chat(project=project,
+                        user_id=user_name,
+                        channel=channel)
+            if chat:
+                # Создаём новое сообщение в базе
+                ChatMessages.objects.create(
+                    chat_id=chat,
+                    message_type="incoming" if user_name == "GPT Assistant" else "outcoming",
+                    user_name=sender_id,
+                    user_message=message_text,
+                    messageId=message_id,  # Сохраняем ID сообщения
+                    created_at=message_date,
+                )
+            else:
+                print(f"chat not found {user_name} {channel}")
             print(f"Сообщение сохранено для пользователя {user_id}: {message_text}")
         else:
             print(f"Сообщение уже существует для пользователя {user_id}: {message_text}")
