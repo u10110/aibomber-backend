@@ -102,37 +102,39 @@ def save_messages(user_id, messages, project, channel):
         user_name = "GPT Assistant" if sender_id != user_id else str(sender_id)
 
         try:
-            chat = Chat.objects.filter(
+            chat = Chat.objects.get(
                 project=project,
                 user_id=_USER_NAME,
-                channel=channel).get()
-
-            # Проверяем, существует ли сообщение в базе
-            existing_message = ChatMessages.objects.filter(
-                messageId=message_id,  # Проверка по ID сообщения
-            ).exists()
-
-            if not existing_message:
-
-                # Создаём новое сообщение в базе
-                ChatMessages.objects.create(
-                    chat_id=chat,
-                    message_type="incoming" if user_name == "GPT Assistant" else "outcoming",
-                    user_name=sender_id,
-                    user_message=message_text,
-                    messageId=message_id,  # Сохраняем ID сообщения
-                    created_at=message_date,
-                )
-
-                print(f"Сообщение сохранено для пользователя {message_user_id}: {message_text}")
-            else:
-                print(f"Сообщение уже существует для пользователя {user_id}: {message_text}")
-
+                channel=channel
+            )
         except Chat.DoesNotExist:
-                print(f"chat not found {_USER_NAME} {channel.id} {project.id}")
+            chat = Chat(
+                project=project,
+                user_id=_USER_NAME,
+                channel=channel
+            )
+            chat.save()
 
+        # Проверяем, существует ли сообщение в базе
+        existing_message = ChatMessages.objects.filter(
+            messageId=message_id,  # Проверка по ID сообщения
+        ).exists()
 
+        if not existing_message:
 
+            # Создаём новое сообщение в базе
+            ChatMessages.objects.create(
+                chat_id=chat,
+                message_type="incoming" if user_name == "GPT Assistant" else "outcoming",
+                user_name=sender_id,
+                user_message=message_text,
+                messageId=message_id,  # Сохраняем ID сообщения
+                created_at=message_date,
+            )
+
+            print(f"Сообщение сохранено для пользователя {message_user_id}: {message_text}")
+        else:
+            print(f"Сообщение уже существует для пользователя {user_id}: {message_text}")
 
 
 def process_project(project):
