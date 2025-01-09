@@ -1012,7 +1012,7 @@ def chat(request):
 
 def chat_messages(request):
     chat_id = request.GET.get('chat_id', None)
-    user_id = request.GET.get('user_id', None)
+    client_id = request.GET.get('user_id', None)
     if chat_id is not None:
         current_chat = Chat.objects.filter(id=chat_id).first()
     else:
@@ -1060,7 +1060,7 @@ def chat_messages(request):
         'chats': chats,
         'messages': messages,
         'chat': current_chat,
-        'projects': Project.objects.filter(client_id=user_id)
+        'projects': Project.objects.filter(client_id=client_id)
     }
 
     return render(request, 'apps/chat.html', context)
