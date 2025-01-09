@@ -69,7 +69,7 @@ def process_channel(channel, chat_map, project):
 
             if messages:
                 print(f"Сохранение сообщений для пользователя {user_id}")
-                save_messages(user_id, messages, project, chat_map, channel.phone)
+                save_messages(user_id, messages, project, chat_map, channel)
             else:
                 print(f"Нет новых сообщений для пользователя {user_id}")
 
@@ -81,7 +81,7 @@ def process_channel(channel, chat_map, project):
         print(f"Ошибка обработки канала {channel.title}: {e}")
 
 
-def save_messages(user_id, messages, project, chat_map, channel_name):
+def save_messages(user_id, messages, project, chat_map, channel):
     """
     Сохраняет каждое сообщение из списка в базу данных, проверяя уникальность.
     """
@@ -93,11 +93,14 @@ def save_messages(user_id, messages, project, chat_map, channel_name):
 
     _USER_NAME = next((message.get("username") for message in messages if message.get("username")), None)
 
+
+
     for message in messages:
         message_text = message.get("text", "")
         message_id = message.get("id", None)  # ID сообщения
         sender_id = message.get("user_id", None)  # ID отправителя
         message_date = message.get("date", None)  # Дата сообщения от Telethon
+        user_name = message.get('username')
 
         print(message)
         if not message_text or not message_id or not sender_id or not message_date:
@@ -112,11 +115,16 @@ def save_messages(user_id, messages, project, chat_map, channel_name):
         ).exists()
 
         if not existing_message:
+            chat = Chat.objects.filter(
+                project=project,  # Связь через таблицу Recipient
+                channel=channel,
+                user_id=user_name
+            )
             # Создаём новое сообщение в базе
             ChatMessages.objects.create(
-                chat_id=existing_chat,
+                chat_id=chat,
                 message_type="incoming" if user_name == "GPT Assistant" else "outcoming",
-                user_name=channel_name,
+                user_name=sender_id,
                 user_message=message_text,
                 messageId=message_id,  # Сохраняем ID сообщения
                 created_at=message_date,
