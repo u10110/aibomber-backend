@@ -246,7 +246,7 @@ class GPTAssistant:
             print(self.project.client)
             ChatMessages.objects.create(
                 chat_id=chat,
-                message_type="anwser",
+                message_type="outcoming",
                 user_name=self.channel_phone,
                 user_message=message_question,
             )
