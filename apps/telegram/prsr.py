@@ -107,11 +107,11 @@ def save_messages(user_id, messages, project, chat_map, channel_name):
         user_name = "GPT Assistant" if sender_id != user_id else str(sender_id)
 
         # Проверяем, существует ли сообщение в базе
-        existing_chat = Chat.objects.filter(
+        existing_message = ChatMessages.objects.filter(
             messageId=message_id,  # Проверка по ID сообщения
         ).exists()
 
-        if not existing_chat:
+        if not existing_message:
             # Создаём новое сообщение в базе
             ChatMessages.objects.create(
                 chat_id=existing_chat,
