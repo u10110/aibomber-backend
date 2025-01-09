@@ -210,7 +210,7 @@ class ProjectProcessor:
         """
         chat_map = {}
         for channel in channels:
-            chats = Chat.objects.filter(phone=channel.phone).distinct('user_name', 'user_id')
+            chats = Chat.objects.filter(channel=channel).distinct('user_name', 'user_id')
             chat_map[channel.phone] = list(chats) if chats.exists() else []
         return chat_map
 
