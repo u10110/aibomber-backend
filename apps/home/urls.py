@@ -9,6 +9,11 @@ from apps.billing import views as b_views
 from apps.home import views
 
 urlpatterns = [
+
+
+    path('project/send-tg-messages/', views.send_tg_messages, name='send_tg_messages'),
+    path('project/get-tg-messages/', views.get_tg_messages, name='get_tg_messages'),
+
     path("", login_required(views.index), name="home"),
     # path("upload/", login_required(views.upload), name="upload"),
     path("pricing/", login_required(views.pricing), name="pricing"),
@@ -138,10 +143,8 @@ urlpatterns = [
     path('channels/verify-code/', views.verify_code, name='verify_code'),
     path('channels/create-app/', views.create_app, name='create_app'),
 
-    path('project/send-tg-messages/', views.send_tg_messages, name='send_tg_messages'),
-    path('project/get-tg-messages/', views.get_tg_messages, name='get_tg_messages'),
     
-    
+
     path('create-project-chat/', views.create_project_chat, name='create_project_chat'),
     path('validate-google-link/', views.validate_google_link, name='validate_google_link'),
 
