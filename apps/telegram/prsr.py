@@ -115,7 +115,7 @@ def save_messages(user_id, messages, project, chat_map, channel):
         ).exists()
 
         if not existing_message:
-            print(user_id)
+            print(user_id, channel, project)
             chat = Chat.objects.get(
                 project=project,
                 user_id=user_id,
