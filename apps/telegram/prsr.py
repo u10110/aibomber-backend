@@ -88,8 +88,6 @@ def save_messages(user_id, messages, project, channel):
 
     _USER_NAME = next((message.get("username") for message in messages if message.get("username")), None)
 
-
-
     for message in messages:
         message_text = message.get("text", "")
         message_id = message.get("id", None)  # ID сообщения
@@ -97,26 +95,25 @@ def save_messages(user_id, messages, project, channel):
         message_date = message.get("date", None)  # Дата сообщения от Telethon
         message_user_id = message.get('username')
 
-        print(message)
         if not message_text or not message_id or not sender_id or not message_date:
             continue  # Пропускаем сообщения с отсутствующими полями
 
         # Определяем, кто отправил сообщение: GPT Assistant или другой пользователь
         user_name = "GPT Assistant" if sender_id != user_id else str(sender_id)
 
-        # Проверяем, существует ли сообщение в базе
-        existing_message = ChatMessages.objects.filter(
-            messageId=message_id,  # Проверка по ID сообщения
-        ).exists()
-
-        if not existing_message:
-
+        try:
             chat = Chat.objects.filter(
-                project_id=project.id,
-                user_id=message_user_id,
-                channel_id=channel.id).first()
+                project=project,
+                user_id=_USER_NAME,
+                channel=channel).get()
 
-            if chat:
+            # Проверяем, существует ли сообщение в базе
+            existing_message = ChatMessages.objects.filter(
+                messageId=message_id,  # Проверка по ID сообщения
+            ).exists()
+
+            if not existing_message:
+
                 # Создаём новое сообщение в базе
                 ChatMessages.objects.create(
                     chat_id=chat,
@@ -126,11 +123,15 @@ def save_messages(user_id, messages, project, channel):
                     messageId=message_id,  # Сохраняем ID сообщения
                     created_at=message_date,
                 )
+
+                print(f"Сообщение сохранено для пользователя {message_user_id}: {message_text}")
             else:
-                print(f"chat not found {user_name} {channel}")
-            print(f"Сообщение сохранено для пользователя {user_id}: {message_text}")
-        else:
-            print(f"Сообщение уже существует для пользователя {user_id}: {message_text}")
+                print(f"Сообщение уже существует для пользователя {user_id}: {message_text}")
+
+        except Chat.DoesNotExist:
+                print(f"chat not found {_USER_NAME} {channel.id} {project.id}")
+
+
 
 
 
