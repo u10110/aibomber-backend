@@ -1430,14 +1430,20 @@ def save_google_link(request):
 
 
 @csrf_exempt
-def send_tg_messages(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
-    ProjectProcessor.process_project(project)
+def send_tg_messages(request):
+
+    active_projects = Project.objects.filter(is_active=True)
+    for project in active_projects:
+        ProjectProcessor.process_project(project)
+
     return JsonResponse({'success': True})
 
 
 @csrf_exempt
-def get_tg_messages(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
-    process_project(project)
+def get_tg_messages(request):
+
+    active_projects = Project.objects.filter(is_active=True)
+    for project in active_projects:
+        process_project(project)
+
     return JsonResponse({'success': True})

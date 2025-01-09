@@ -138,8 +138,8 @@ urlpatterns = [
     path('channels/verify-code/', views.verify_code, name='verify_code'),
     path('channels/create-app/', views.create_app, name='create_app'),
 
-    path('project/<int:project_id>/send-tg-messages/', views.send_tg_messages, name='send_tg_messages'),
-    path('project/<int:project_id>/get-tg-messages/', views.get_tg_messages, name='get_tg_messages'),
+    path('project/send-tg-messages/', views.send_tg_messages, name='send_tg_messages'),
+    path('project/get-tg-messages/', views.get_tg_messages, name='get_tg_messages'),
     
     
     path('create-project-chat/', views.create_project_chat, name='create_project_chat'),
