@@ -1012,7 +1012,9 @@ def chat(request):
 
 def chat_messages(request):
     chat_id = request.GET.get('chat_id', None)
-    client_id = request.GET.get('user_id', None)
+    user_id = request.GET.get('user_id', None)
+    client_id = request.user.id
+
     if chat_id is not None:
         current_chat = Chat.objects.filter(id=chat_id).first()
     else:
