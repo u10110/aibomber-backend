@@ -98,7 +98,7 @@ def save_messages(user_id, messages, project, chat_map, channel_name):
         sender_id = message.get("user_id", None)  # ID отправителя
         message_date = message.get("date", None)  # Дата сообщения от Telethon
 
-
+        print(message)
         if not message_text or not message_id or not sender_id or not message_date:
             continue  # Пропускаем сообщения с отсутствующими полями
 
@@ -107,10 +107,7 @@ def save_messages(user_id, messages, project, chat_map, channel_name):
 
         # Проверяем, существует ли сообщение в базе
         existing_chat = Chat.objects.filter(
-            user_id=_USER_NAME,
-            user_message=message_text,
-            user_name=channel_name,
-            # messageId=message_id,  # Проверка по ID сообщения
+            messageId=message_id,  # Проверка по ID сообщения
         ).exists()
 
         if not existing_chat:
