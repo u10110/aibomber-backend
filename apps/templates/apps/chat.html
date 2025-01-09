@@ -212,19 +212,19 @@ input:checked + .slider:before {
     margin-left: -5px;
     transition: height ease 1s;
   }
-  .status__success:before, .status__success {
+  .status__success:before, .status__success:not(li) {
     background: #0f0 !important;
   }
-  .status__contact_received:before, .status__contact_received {
+  .status__contact_received:before, .status__contact_received:not(li) {
     background: #00feff !important;
   }
-  .status__interest_shown:before, .status__interest_shown {
+  .status__interest_shown:before, .status__interest_shown:not(li) {
     background: #fff200 !important;
   }
-  .status__closed:before, .status__closed {
+  .status__closed:before, .status__closed:not(li) {
     background: #8e00ff !important;
   }
-  .status__deleted:hover:before, .status__deleted {
+  .status__deleted:hover:before, .status__deleted:not(li) {
     width: 0 !important;
   }
   .status-user  {
