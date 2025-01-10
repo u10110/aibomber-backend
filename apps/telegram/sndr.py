@@ -105,12 +105,12 @@ class MessageProcessor:
         """
         last_answer = ChatMessages.objects.filter(
             chat_id=Chat,
-            message_type="incoming"
+            message_type="outcoming"
         ).order_by('-created_at').first()
 
         query_filter = {
             'chat_id': Chat.id,
-            'message_type': "outcoming"
+            'message_type': "incoming"
         }
 
         if last_answer:
@@ -238,17 +238,23 @@ class ProjectProcessor:
                     user_id=chat.user_id
                 )
 
-                if message and message_processor.send_message_to_telegram(
+                message_processor.send_message_to_telegram(
                         channel.phone,
                         chat.user_id,
                         message
-                ):
-                    ChatMessages.objects.create(
-                        chat_id=chat,
-                        user_name=channel.phone,
-                        user_message=message,
-                        message_type="outcoming"
                     )
+
+                #if message and message_processor.send_message_to_telegram(
+                #        channel.phone,
+                #        chat.user_id,
+                #        message
+                #):
+                #    ChatMessages.objects.create(
+                #        chat_id=chat,
+                #        user_name=channel.phone,
+                #        user_message=message,
+                #        message_type="outcoming"
+                #    )
                 channel.remaining_messages = F('remaining_messages') - 1
                 channel.save()
 
@@ -282,6 +288,7 @@ class ProjectProcessor:
     ) -> None:
 
         combined_message = message_processor.get_combined_messages(chat)
+        print(combined_message)
         if not combined_message:
             return
 
