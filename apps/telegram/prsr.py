@@ -97,7 +97,7 @@ def save_messages(user_id, messages, project, channel):
 
         if not message_text or not message_id or not sender_id or not message_date:
             continue  # Пропускаем сообщения с отсутствующими полями
-
+        print(message)
         # Определяем, кто отправил сообщение: GPT Assistant или другой пользователь
         user_name = "GPT Assistant" if sender_id != user_id else str(sender_id)
 
