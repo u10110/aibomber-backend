@@ -133,11 +133,11 @@ def save_messages(user_id, messages, project, channel, user_view_name):
             # Получение ответа от GPT
             try:
                 text_status = assistant.ask_chat_status()
-                chat.status = text_status
-                chat.save()
+                if Chat.CHAT_STATUS[text_status] is not None:
+                    chat.status = text_status
+                    chat.save()
             except Exception as e:
-                print(e.format_exc())
-                print(f"GPT Assistant  error: {e}")
+                print(f"text_status get error : {text_status}")
                 return None
 
             # Проверяем, существует ли сообщение в базе
