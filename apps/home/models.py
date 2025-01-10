@@ -311,8 +311,6 @@ class Chat(models.Model):
     def remember_state(sender, instance, **kwargs):
         instance.previous_state = instance
 
-
-
     CHAT_STATUS = [
         ('new', 'Новый'),
         ('success', 'Успешные диалоги'),
@@ -363,9 +361,8 @@ class ChatMessages(models.Model):
         choices=MESSAGE_TYPE,
         default=None,
     )
-    status = models.CharField(max_length=55, default="active") #TODO del
     user_name = models.CharField(max_length=55, )
-    user_message = models.CharField(max_length=555, )
+    user_message = models.CharField(max_length=55555, )
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 

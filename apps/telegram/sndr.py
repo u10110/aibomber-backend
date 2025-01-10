@@ -288,7 +288,7 @@ class ProjectProcessor:
     ) -> None:
 
         combined_message = message_processor.get_combined_messages(chat)
-        print(combined_message)
+
         if not combined_message:
             return
 

@@ -93,7 +93,7 @@ class GPTAssistant:
         """
         Загружает базу знаний из текста и файлов.
         """
-        print(f"know {self.project.knowledge_base_text}")
+        #print(f"know {self.project.knowledge_base_text}")
         if self.project.knowledge_base_text:
             self.knowledge_texts.append(self.project.knowledge_base_text)
 
@@ -105,7 +105,7 @@ class GPTAssistant:
 
             # Выполняем обработку файла в зависимости от его расширения
             self.knowledge_texts += self._extract_text_from_file(file_path, ext)
-        print(self.knowledge_texts)
+        #print(self.knowledge_texts)
 
 
     @staticmethod
@@ -157,6 +157,7 @@ class GPTAssistant:
             else:
                 return {"status": "уже отправляли хелоу", "anwser": ""}
 
+        full_context = f"{self.project.prompt}\n\n" + "\n".join(self.knowledge_texts)
 
 
         if not question:
@@ -179,7 +180,6 @@ class GPTAssistant:
                 # Обновляем баланс пользователя
                 if self.client_id:
                     self._update_user_balance(cost)
-                
             
                 self._save_to_db(answer)
                 return response.choices[0].message.content
@@ -187,11 +187,10 @@ class GPTAssistant:
                 print(f"Ошибка API OpenAI: {type(e).__name__}: {e}")
                 return f"Ошибка OpenAI API: {str(e)}"
 
-        full_context = f"{self.project.prompt}\n\n" + "\n".join(self.knowledge_texts)
         messages = [{"role": "system", "content": full_context}] + self.chat_history + [
             {"role": "user", "content": question}
         ]
-        print(f"messages {messages}")
+        #print(f"messages {messages}")
 
         # Отправляем запрос в OpenAI API
         try:
@@ -210,7 +209,6 @@ class GPTAssistant:
             # Обновляем баланс пользователя
             if self.client_id:
                 self._update_user_balance(cost)
-            
 
             if save_to_db:
                 self._save_to_db(answer, question)
@@ -237,21 +235,19 @@ class GPTAssistant:
         Сохраняет новый вопрос-ответ в базу данных.
         """
 
-        chat = Chat.objects.filter(id=self.chat_id).first()
-        if not ChatMessages.objects.filter(
-            chat_id=chat,
-            user_message=message_question
-        ).exists():
-            print(11111111111111)
-            print(self.project.client)
-            ChatMessages.objects.create(
-                chat_id=chat,
-                message_type="outcoming",
-                user_name=self.channel_phone,
-                user_message=message_question,
-            )
-        else:
-            return False
+        #chat = Chat.objects.filter(id=self.chat_id).first()
+        #if not ChatMessages.objects.filter(
+        #    chat_id=chat,
+        #    user_message=message_question
+        #).exists():
+        #    ChatMessages.objects.create(
+        #        chat_id=chat,
+        #        message_type="outcoming",
+        #        user_name=self.channel_phone,
+        #        user_message=message_question,
+        #    )
+        #else:
+        #    return False
         return True
 
 
@@ -265,3 +261,31 @@ class GPTAssistant:
             return "gpt-4o-mini"
         else:
             return "gpt-3.5-turbo"
+
+    def ask_chat_status(self):
+
+        question = "Выбери статус нашего общения Успешные диалоги success,Контакт получен contact_received, " \
+                   "Проявлен интерес interest_shown, Неудача closed. Ответь кодом в скобках. "
+
+        full_context = f"{self.project.prompt}\n\n" + "\n".join(self.knowledge_texts)
+        messages = [{"role": "system", "content": full_context}] + self.chat_history + [
+            {"role": "user", "content": question}
+        ]
+
+        # Отправляем запрос в OpenAI API
+        try:
+            response = client.chat.completions.create(
+                model=self._get_gpt_version(),  # Версия GPT: "gpt-4o" или "gpt-3.5-turbo"
+                messages=messages,
+                temperature=0.7  # Регулирует креативность ответов
+            )
+            answer = response.choices[0].message.content
+        except Exception as e:
+            # Обработка ошибок
+            print(f"Ошибка API OpenAI: {type(e).__name__}: {e}")
+            return f"Ошибка OpenAI API: {str(e)}"
+
+        return answer
+
+
+
