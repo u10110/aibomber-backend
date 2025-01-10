@@ -62,6 +62,8 @@ def process_channel(channel , project):
         # Шаг 3.2: Получаем сообщения для каждого пользователя
         for user in users_response["users"]:
             user_id = user["id"]
+            user_view_name = user["name"]
+            print(user)
             print(f"Получение сообщений для пользователя {user_id}")
 
             messages_response = get_messages(phone, user_id)
@@ -69,7 +71,7 @@ def process_channel(channel , project):
 
             if messages:
                 print(f"Сохранение сообщений для пользователя {user_id}")
-                save_messages(user_id, messages, project, channel)
+                save_messages(user_id, messages, project, channel, user_view_name)
             else:
                 print(f"Нет новых сообщений для пользователя {user_id}")
 
@@ -81,60 +83,69 @@ def process_channel(channel , project):
         print(f"Ошибка обработки канала {channel.title}: {e}")
 
 
-def save_messages(user_id, messages, project, channel):
+def save_messages(user_id, messages, project, channel, user_view_name):
     """
     Сохраняет каждое сообщение из списка в базу данных, проверяя уникальность.
     """
 
     _USER_NAME = next((message.get("username") for message in messages if message.get("username")), None)
 
+
     for message in messages:
         message_text = message.get("text", "")
         message_id = message.get("id", None)  # ID сообщения
         sender_id = message.get("user_id", None)  # ID отправителя
         message_date = message.get("date", None)  # Дата сообщения от Telethon
-        message_user_id = message.get('username')
+        user_name = message.get('username', None)
+        from_id = message.get("from_id", None)
+        to_id = message.get("to_id", None)
 
         if not message_text or not message_id or not sender_id or not message_date or sender_id == 777000:
             continue  # Пропускаем сообщения с отсутствующими полями
         print(message)
+        print(user_id,sender_id, user_name, to_id, from_id)
         # Определяем, кто отправил сообщение: GPT Assistant или другой пользователь
-        user_name = "GPT Assistant" if sender_id != user_id else str(sender_id)
-
-        try:
-            chat = Chat.objects.get(
-                project=project,
-                user_id=_USER_NAME,
-                channel=channel
-            )
-        except Chat.DoesNotExist:
-            chat = Chat(
-                project=project,
-                user_id=_USER_NAME,
-                channel=channel
-            )
-            chat.save()
-
-        # Проверяем, существует ли сообщение в базе
-        existing_message = ChatMessages.objects.filter(
-            messageId=message_id,  # Проверка по ID сообщения
-        ).exists()
-
-        if not existing_message:
-
-            # Создаём новое сообщение в базе
-            ChatMessages.objects.create(
-                chat_id=chat,
-                message_type="incoming" if user_name == "GPT Assistant" else "outcoming",
-                user_name=sender_id,
-                user_message=message_text,
-                messageId=message_id,  # Сохраняем ID сообщения
-                created_at=message_date,
-            )
-
-            print(f"Сообщение сохранено для пользователя {message_user_id}: {message_text}")
+        if sender_id != user_id and user_name is None:
+            user_name = "GPT Assistant"
         else:
-            print(f"Сообщение уже существует для пользователя {user_id}: {message_text}")
+            user_name = _USER_NAME
+
+        if user_name:
+            try:
+                chat = Chat.objects.get(
+                    project=project,
+                    user_id=user_name,
+                    channel=channel,
+                )
+            except Chat.DoesNotExist:
+                chat = Chat(
+                    project=project,
+                    user_id=user_name,
+                    channel=channel,
+                    user_name=user_view_name
+                )
+                chat.save()
+
+            # Проверяем, существует ли сообщение в базе
+            existing_message = ChatMessages.objects.filter(
+                messageId=message_id,  # Проверка по ID сообщения
+            ).exists()
+
+            if not existing_message:
+
+                # Создаём новое сообщение в базе
+                ChatMessages.objects.create(
+                    chat_id=chat,
+                    message_type="incoming" if to_id is None else "outcoming",
+                    user_name=sender_id,
+                    user_message=message_text,
+                    messageId=message_id,  # Сохраняем ID сообщения
+                    created_at=message_date,
+                )
+
+                print(f"Сообщение сохранено для пользователя {user_name}: {message_text}")
+            else:
+                print(f"Сообщение уже существует для пользователя {user_id}: {message_text}")
 
 
 def process_project(project):

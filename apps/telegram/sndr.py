@@ -294,17 +294,22 @@ class ProjectProcessor:
         )
 
         if message:
-            if message_processor.send_message_to_telegram(
-                    channel.phone,
-                    chat.user_id,
-                    message
-            ):
-                ChatMessages.objects.create(
-                    chat_id=chat,
-                    user_name=channel.phone,
-                    user_message=message,
-                    message_type="outcoming"
-                )
+            message_processor.send_message_to_telegram(
+                channel.phone,
+                chat.user_id,
+                message
+            )
+            #if message_processor.send_message_to_telegram(
+            #       channel.phone,
+            #        chat.user_id,
+            #        message
+            #):
+                #ChatMessages.objects.create(
+                #    chat_id=chat,
+                #    user_name=channel.phone,
+                #    user_message=message,
+                #    message_type="outcoming"
+                #)
             channel.remaining_messages = F('remaining_messages') - 1
             channel.save()
 
