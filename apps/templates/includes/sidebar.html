@@ -1,311 +1,261 @@
 {% load limits_bar %}
 {% load static %}
 
+<style>
+  /* Изменение цвета заголовка бокового меню */
+  .sidenav-footer #sidenavCard {
+    background: linear-gradient(90deg, #28a745, #85e085); /* Зеленый градиент */
+    color: #fff;
+  }
 
-  
-  <style scoped>
-    .button {
-      background: linear-gradient(90deg, #28a745, #85e085);
-      border: none;
-      color: white;
-      transition: background 0.3s ease;
-      letter-spacing: -0.025rem;
-      text-transform: uppercase;
-      box-shadow: 0 4px 7px -1px rgba(0, 0, 0, 0.11), 0 2px 4px -1px rgba(0, 0, 0, 0.07);
-      font-weight: 700;
-      cursor: pointer;
-      padding: 0.75rem 1.5rem;
-      font-size: 0.75rem;
-      border-radius: 0.5rem;
-   }
-   .button:hover {
-      background: linear-gradient(90deg, #218838, #6fcf6f);
-   }
-    nav *{
-        transition: all ease 0.5s;
+  .sidenav-footer .btn:hover {
+    background: linear-gradient(90deg, #218838, #6fcf6f); /* Темнее при наведении */
+    color: #fff;
+  }
+  .nav-link.active .icon {
+    background: linear-gradient(90deg, #28a745, #85e085) !important; /* Зеленый градиент для иконки */
+    color: #fff; /* Белый цвет для иконки */
+    border-radius: 50%; /* Закругляем фон иконки */
+  }
+  .nav-link.active svg {
+    fill: #fff; /* Белый цвет для SVG-иконки */
+  }
+
+
+
+  .nav-link.active path {
+    fill: #fff !important;
+    color: #fff;
+  }
+  .nav-link.active i {
+    filter: invert(1) contrast(2.5);
+    opacity: 1;
+  }
+  .limit-left, .limit-max {
+    font-weight: 600;
+  }
+  .limit-progressbar {
+    width: 100%;
+    background: #c7c7c7;;
+    height: 12px;
+    border-radius: 40px;
+    opacity: 0.7;
+  }
+  .limit-progressbar__filled {
+    border-radius: 40px;
+    opacity: 1.5;
+    width: 0;
+    background: #fff;
+    height: 12px;
+    position: absolute;
+    bottom: 0;
+    box-shadow: 0 0 10px 0 #fff;
+    transition: all 1.2s ease;
+    opacity: 0.75;
+  }
+  .limit {
+    position: relative;
+  }
+  @media (max-width: 767px) {
+    .limits {
+      max-width: 300px;
+      margin-left: 25px !important;
+      margin-right: 0 !important;
     }
-    .links-link__telegram {
-        background: linear-gradient(90deg, #28a745, #85e085) !important;
-        color: #fff;
-        padding: 1rem;
-        cursor: default !important;
+  }
+  .limit-more:hover {
+    text-decoration: underline !important;
+  }
+    @media (max-width: 1024px) {
+    .sidebar-banner {
+      width: 90%;
+      margin: 0 auto;
     }
-    .expanded .links-link__telegram {
-        cursor: pointer !important
+  }
+  @media (max-width: 767px) {
+    .sidebar-banner {
+      margin: 0 0 0 25px;
+      max-width: 300px;
+      margin-right: 7px;
     }
-    .telegram-button {
-        background: #fff;
-        color: #000;
-    }
-    .telegram-button:hover {
-        color: #fff;
-    }
-    .expanded .links-link__telegram {
-        background: #fff !important;
-        color: #fff;
-        padding: 0;
-    }
-    .links-link__telegram .links-link__text {
-        color: #fff;
-    }
-    .link__telegram-header {
-        display: flex;
-        align-items: center;
-        gap:20px;
-    }
-    .links-link__telegram .links-link__container {
-        display: block;
-    }
-    .link__telegram-button {
-        width: 100%;
-        margin-top: 20px;
-    }
-    .link__telegram-button button {
-        width: 100%;
-    }
-    .expanded .sidebar-logo {
-        margin: 0 auto;
-        margin-top: 10px;
-        width: 40px;
-    }
-    
-    .sidebar-logo {
-        width: 100px;
-        display: flex;
-        gap: 5px;
-        margin-left:15px;
-        margin-top: 10px;
-        align-items: center;
-        justify-content: start;
-    }
-    .sidebar-logo .logo-text {
-        color: #93FFC0;
-        font-size: 68px;
-    }
-    .nav-dark {
-        width: 100vw;
-        height: 100vh;
-        position: fixed;
-        z-index: -1;
-        opacity: 0;
-        transition: opacity ease 0.5s;
-    }
-    .nav-dark.active {
-        
-        z-index: 1030;
-        /* background: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,0.5)); */
-        background: rgba(0, 0, 0, 0.3);
-        opacity: 1;
-    }
-    .sidebar {
-        /* border-right: 1px solid rgba(0, 0, 0, 0.3); */
-        position: fixed;
-        z-index: 1035;
-        display: inline-block;
-        left: 0;
-        top: 0;
-        height: 100vh;
-        box-shadow: 1px 0 10px -3px #000;
-        background: #fff;
-        width: 450px;
-        overflow-y: auto;
-    }
-    .sidebar.expanded {
-        width: inherit;
-    }
-    .sidebar.expanded .links-link {
-        margin: 0;
-        padding: 0;
-        box-shadow: 0 0 0 #000;
-        border-radius: 0;
-    }
-    .expanded .links {
-        margin: 5px;
-        
-    }
-    .links {
-        margin: 0 25px;
-        display: inline-flex;
-        flex-direction: column;
-        width: 85%;
-    }
-    .expanded .links {
-        width: inherit;
-    }
-    .line {
-        background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0));
-        margin: 10px 0;
-        height: 1px;
-    }
-    .expanded .line {
-        margin: 0;
-        height: 0;
-    }
-    .links__title {
-    }
-    .expanded .links-link.active {
-        border-bottom: 1px solid #93FFC0;
-    }
-    .links-link.active .links-link__icon {
-        background: linear-gradient(90deg, #28a745, #85e085);
-        border-radius: 50%;
-    }
-    .links-link.active .links-link__icon svg {
-        fill: #fff
-    }
-    .links-link__icon {
-        padding: 5px;
-        background: #fff;
-        box-shadow: 0 0.25rem 0.375rem -0.0625rem rgba(20, 20, 20, 0.12), 0 0.125rem 0.25rem -0.0625rem rgba(20, 20, 20, 0.07) ;
-        width: 40px;
-        height: 40px;
-        border-radius: 5px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-    .expanded .links-link__icon {
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        box-shadow: 0 0 0 0 #000;
-        border-radius: 0px;
-        margin: 5px 0;
-    }
-    .expanded .links-link:not(.active):hover .links-link__icon {
-        border-bottom: 4px solid #85e085;
-    }
-    .links-link__icon svg {
-        width: 80%;
-        height: 80%;
-        fill: #67748e;
-    }
-    .links-link__telegram .links-link__icon svg {
-        width: 100%;
-        height: 100%;
-    }
-    .links-link__text {
-        
-    }
-    .links-link {
-        cursor: pointer;
-        margin: 8px 0;
-        display: inline-block;
-        padding: 15px;
-        background: #fff;
-        box-shadow: 0 0 10px -5px #000;
-        border-radius: 10px;
-    }
-    .links-link:hover {
-        box-shadow: 0 0 15px -5px #000;
-    }
-    .links-link.active {
-        box-shadow: 0 0 10px -2px #85e085;
-    }
-    .links-link__container {
-        display: flex;
-        /* justify-content: space-between; */
-        align-items: center;
-        gap:10px
-    
-    }
-    .links__container {
-        display: inline-flex;
-        flex-direction: column;
-    }
-    .main-content {
-      margin-left: 50px;
-    }
-    @media (max-width: 768px) {
-        .expanded {
-            left: -100%;
-            width: 0%;
-        }
-        .sidebar {
-            width: 100vw;
-            transition: left ease 0.5s;
-        }
-        .links {
-            width: calc(100% - 50px);
-        }
-        .sidebar-logo {
-            width: 20vw;
-        }
-        .logo-text {
-            font-size: 15vw !important;
-        }
-        .sidebar__exit {
-          position: absolute;
-          left: calc(100% - 24px);
-          width: 24px;
-          height: 24px;
-          cursor: pointer;
-        }
-    
-        .sidebar__exit::before,
-        .sidebar__exit::after {
-          content: '';
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 20px;
-          height: 2px;
-          background-color: #67748e;
-        }
-    
-        .sidebar__exit::before {
-          transform: translate(-50%, -50%) rotate(45deg);
-        }
-    
-        .sidebar__exit::after {
-          transform: translate(-50%, -50%) rotate(-45deg);
-        }
-        .main-content {
-          margin-left: 0px;
-        }
-    }
-    .isExpand {
+  }
+  .sidebar-banner {
+      border-radius: 10px;
+      display: block;
+  }
+  .anim-img.img-mobile {
       display: none;
     }
-    
-   
-    </style>
-  
-  
-  <div class="nav-dark isExpand" ></div>
-  
-    <nav  class="sidebar expanded">
-      <div  class="sidebar__exit"></div><div  class="sidebar-logo"><img  src="{% static 'images/logoIcon.png' %}" alt=""><span  class="logo-text isExpand">ELIMENT</span></div><div  class="links"><div  class="links__container"><div  class="line"></div><!--v-if--><div  class="links-link links-link__projects {% if 'projects' in request.get_full_path %} active {% endif %}" href="{% url 'projects' %}"><div  class="links-link__container"><div  class="links-link__icon"><svg  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder" viewBox="0 0 16 16"><path d="M9.828 4a3 3 0 0 0-2.12-.879H1.5A1.5 1.5 0 0 0 0 4.5v7A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5V6.5A1.5 1.5 0 0 0 14.5 5h-4.672a3 3 0 0 0-.879-1z"></path></svg></div><div  class="links-link__text isExpand">Проекты</div></div></div><div  class="links-link links-link__Mailings"><div  class="links-link__container"><div  class="links-link__icon"><svg  width="12px" height="12px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><title>document</title><g id="Basic-Elements" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="Rounded-Icons" transform="translate(-1870.000000, -591.000000)" fill="#344767" fill-rule="nonzero"><g id="Icons-with-opacity" transform="translate(1716.000000, 291.000000)"><g id="document" transform="translate(154.000000, 300.000000)"><path d="M40,40 L36.3636364,40 L36.3636364,3.63636364 L5.45454545,3.63636364 L5.45454545,0 L38.1818182,0 C39.1854545,0 40,0.814545455 40,1.81818182 L40,40 Z" id="Path" opacity="0.603585379"></path><path d="M30.9090909,7.27272727 L1.81818182,7.27272727 C0.814545455,7.27272727 0,8.08727273 0,9.09090909 L0,41.8181818 C0,42.8218182 0.814545455,43.6363636 1.81818182,43.6363636 L30.9090909,43.6363636 C31.9127273,43.6363636 32.7272727,42.8218182 32.7272727,41.8181818 L32.7272727,9.09090909 C32.7272727,8.08727273 31.9127273,7.27272727 30.9090909,7.27272727 Z M18.1818182,34.5454545 L7.27272727,34.5454545 L7.27272727,30.9090909 L18.1818182,30.9090909 L18.1818182,34.5454545 Z M25.4545455,27.2727273 L7.27272727,27.2727273 L7.27272727,23.6363636 L25.4545455,23.6363636 L25.4545455,27.2727273 Z M25.4545455,20 L7.27272727,20 L7.27272727,16.3636364 L25.4545455,16.3636364 L25.4545455,20 Z" id="Shape"></path></g></g></g></g></svg></div><div  class="links-link__text isExpand" >Рассылки</div></div></div><div  class="links-link links-link__channels {% if '/channels' in request.get_full_path %} active {% endif %}" href="{% url 'channels' %}"><div  class="links-link__container"><div  class="links-link__icon"><svg  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-link" viewBox="0 0 16 16"><path d="M6.354 5.5H4a2.5 2.5 0 0 0 0 5h2.354a.5.5 0 0 1 0 1H4a3.5 3.5 0 0 1 0-7h2.354a.5.5 0 0 1 0 1zM9.646 5.5H12a3.5 3.5 0 0 1 0 7H9.646a.5.5 0 1 1 0-1H12a2.5 2.5 0 0 0 0-5H9.646a.5.5 0 1 1 0-1z"></path><path d="M6 8.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"></path></svg></div><div  class="links-link__text isExpand" >Каналы</div></div></div><div  class="links-link links-link__dialogs {% if 'chat' in request.get_full_path %} active {% endif %}" href="{% url 'chat' %}"><div  class="links-link__container"><div  class="links-link__icon"><svg  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-left-dots" viewBox="0 0 16 16"><path d="M14 1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4.414L1.707 14.707A1 1 0 0 1 0 14V2a1 1 0 0 1 1-1h13z"></path><path d="M3 8a1 1 0 1 0 2 0 1 1 0 0 0-2 0zm4 0a1 1 0 1 0 2 0 1 1 0 0 0-2 0zm4 0a1 1 0 1 0 2 0 1 1 0 0 0-2 0z"></path></svg></div><div  class="links-link__text isExpand">Диалоги</div></div></div><div  class="line"></div><div  class="links__title isExpand" >Информация</div><div  class="links-link links-link__rate {% if request.get_full_path == '/tariffs/' %} active {% endif %}" href="/tariffs/"><div  class="links-link__container"><div  class="links-link__icon"><svg  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-coin" viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"></path><path d="M6.5 5.5v5h2a2.5 2.5 0 1 0 0-5h-2zm1.25 4H7V6h.75a1.5 1.5 0 0 1 0 3z"></path></svg></div><div  class="links-link__text isExpand">Тарифы</div></div></div><div  class="links-link links-link__baseKnowledge"><div  class="links-link__container"><div  class="links-link__icon"><svg  xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-book-fill" viewBox="0 0 16 16"><path d="M1 2.828c.885-.37 2.154-.77 3.5-.78 1.243-.009 2.52.316 3.5.937V13.5c-.98-.62-2.257-.946-3.5-.937-1.346.01-2.615.41-3.5.78V2.828z"></path><path d="M9 2.828c.885-.37 2.154-.77 3.5-.78 1.243-.009 2.52.316 3.5.937V13.5c-.98-.62-2.257-.946-3.5-.937-1.346.01-2.615.41-3.5.78V2.828z"></path></svg></div><div  class="links-link__text isExpand">База знаний</div></div></div><div  class="links-link links-link__telegram active"><div  class="links-link__container"><div  class="link__telegram-header"><div  class="links-link__icon"><svg  xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 48 48"><path fill="#fff" d="M24 4A20 20 0 1 0 24 44A20 20 0 1 0 24 4Z"></path><path fill="#29b6f6" d="M33.95,15l-3.746,19.126c0,0-0.161,0.874-1.245,0.874c-0.576,0-0.873-0.274-0.873-0.274l-8.114-6.733 l-3.97-2.001l-5.095-1.355c0,0-0.907-0.262-0.907-1.012c0-0.625,0.933-0.923,0.933-0.923l21.316-8.468 c-0.001-0.001,0.651-0.235,1.126-0.234C33.667,14,34,14.125,34,14.5C34,14.75,33.95,15,33.95,15z"></path><path fill="#fff" d="M23,30.505l-3.426,3.374c0,0-0.149,0.115-0.348,0.12c-0.069,0.002-0.143-0.009-0.219-0.043 l0.964-5.965L23,30.505z"></path><path fill="#fff" d="M29.897,18.196c-0.169-0.22-0.481-0.26-0.701-0.093L16,26c0,0,2.106,5.892,2.427,6.912 c0.322,1.021,0.58,1.045,0.58,1.045l0.964-5.965l9.832-9.096C30.023,18.729,30.064,18.416,29.897,18.196z"></path></svg></div><div  class="links-link__text isExpand"> Telegram канал</div></div><div  class="link__telegram-button isExpand"><button  class="button telegram-button">перейти</button></div></div></div></div></div></nav>
-      
-      <script>
-        let isExpand = false
-        function expanded() {
-          isExpand = !isExpand
-          document.querySelectorAll('.isExpand').forEach(element => {
-            element.style = isExpand ? 'display: inherit' : 'display: none'
-          })
-          if (!isExpand) {
-            document.querySelector('.sidebar').classList.add('expanded')
-            document.querySelector('.nav-dark').classList.remove('active')
-          } else {
-            document.querySelector('.sidebar').classList.remove('expanded')
-            document.querySelector('.nav-dark').classList.add('active')
-          }
-        }
-        let button = document.querySelector('.sidenav-toggler')
-        let navDark = document.querySelector('.nav-dark')
-        let sidebarX = document.querySelector('.sidebar__exit')
-        button.addEventListener('click', expanded);
-        navDark.addEventListener('click', expanded);
-        sidebarX.addEventListener('click', expanded);
-        function refToTg(event) {
-          console.log(isExpanded, event.target.tagName);
-          if (!isExpanded || (isExpanded && event.target.tagName == 'BUTTON')){
-              console.log('link');
-              window.open('https://t.me/elimentai', '_blank');
-          }
-        }
-        function refLink (event) {
-          window.open(window.location.href + event.target.getAttribute('href'))
-        }
-        document.querySelectorAll('.links-link').forEach(refLink)
-      </script>
+
+  @media (max-width: 1150px) {
+    .navbar-banner {
+      width: 95%
+    }
+  }
+  .nav-item .nav-item {
+    position: relative;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+  .new-style {
+    position: absolute;
+    width: 40px;
+    top: 0;
+    right: 16px;
+    transform: rotate(40deg);
+  }
+</style>
+<!-- ___________________КРЕСТИК_____________________ -->
+<div class="exit-sidenav-mobile">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width: 30px;"><path fill="#ebebeb" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+</div>
+<!-- ___________________КРЕСТИК_____________________ -->
+
+
+  <aside class="sidenav sidenav-primary navbar navbar-vertical navbar-expand-xs navbar-expand-sm navbar-expand-md navbar-expand-lg border-0 border-radius-xl my-3 fixed-start ms-3 sm-12" id="sidenav-main">
+
+    <div class="sidenav-header">
+
+      <a href="/" id="logo">
+        <img src="/static/assets/img/logo.png" id="logo" style="position: inherit; margin-bottom: -60px; margin-right: 20px;" class='w-md-90' width="100" height="45"  alt="main_logo">
+        {% comment %} <img src="/static/assets/img/logo.png"
+     id="logo"
+     style="position: inherit;
+            margin-bottom: -60px;
+            margin-left: auto;
+            margin-right: 20px; /* Смещение вправо */
+            display: block;
+            width: 80px; /* Уменьшение ширины */
+            height: auto;" /* Пропорциональная высота */
+     class='w-md-90'
+     alt="main_logo"> {% endcomment %}
+
+      </a>
+    </div>
+    <hr class="horizontal dark">
+    <div class="collapse {% if 'buyout' in segment %} show {% else %} false {% endif %} navbar-collapse  w-auto h-auto h-100" id="sidenav-collapse-main">
+      <ul class="navbar-nav w-100">
+        {% comment %}
+        <li class="nav-item">
+          <a href="https://t.me/+lygorZzTeFdmYjVi" target="_blank" class="sidebar-banner" style="overflow: hidden">
+            <img src="{% static 'images/banner-mobile7.png' %}" class="anim-img img-mobile" alt="" style="width: 100%;transition: all 0.4s ease;cursor: pointer;">
+          </a>
+        </li>
+        {% endcomment %}
+
+
+        {% comment %} <li class="nav-item {% if 'delivery.html' in segment %} active {% endif %}"> {% endcomment %}
+        <li class="nav-item guide5">
+          <a class="nav-link {% if "projects" in request.get_full_path %} active {% endif %}" href="{% url 'projects' %}">
+            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder" viewBox="0 0 16 16">
+                <path d="M9.828 4a3 3 0 0 0-2.12-.879H1.5A1.5 1.5 0 0 0 0 4.5v7A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5V6.5A1.5 1.5 0 0 0 14.5 5h-4.672a3 3 0 0 0-.879-1z"/>
+              </svg>
+
+            </div>
+            <span class="nav-link-text ms-1">Проекты</span>
+          </a>
+        </li>
+
+        <li class="nav-item guide5">
+          <a class="nav-link {% if "list-recipient" in request.get_full_path %} active {% endif %}" href="{% url 'list-recipient' %}">
+            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <svg width="12px" height="12px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><title>document</title><g id="Basic-Elements" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="Rounded-Icons" transform="translate(-1870.000000, -591.000000)" fill="#344767" fill-rule="nonzero"><g id="Icons-with-opacity" transform="translate(1716.000000, 291.000000)"><g id="document" transform="translate(154.000000, 300.000000)"><path d="M40,40 L36.3636364,40 L36.3636364,3.63636364 L5.45454545,3.63636364 L5.45454545,0 L38.1818182,0 C39.1854545,0 40,0.814545455 40,1.81818182 L40,40 Z" id="Path" opacity="0.603585379"></path><path d="M30.9090909,7.27272727 L1.81818182,7.27272727 C0.814545455,7.27272727 0,8.08727273 0,9.09090909 L0,41.8181818 C0,42.8218182 0.814545455,43.6363636 1.81818182,43.6363636 L30.9090909,43.6363636 C31.9127273,43.6363636 32.7272727,42.8218182 32.7272727,41.8181818 L32.7272727,9.09090909 C32.7272727,8.08727273 31.9127273,7.27272727 30.9090909,7.27272727 Z M18.1818182,34.5454545 L7.27272727,34.5454545 L7.27272727,30.9090909 L18.1818182,30.9090909 L18.1818182,34.5454545 Z M25.4545455,27.2727273 L7.27272727,27.2727273 L7.27272727,23.6363636 L25.4545455,23.6363636 L25.4545455,27.2727273 Z M25.4545455,20 L7.27272727,20 L7.27272727,16.3636364 L25.4545455,16.3636364 L25.4545455,20 Z" id="Shape"></path></g></g></g></g></svg>
+            </div>
+            <span class="nav-link-text ms-1">Получатели</span>
+          </a>
+        </li>
+
+
+
+        <li class="nav-item guide6">
+          <a class="nav-link {% if "/channels" in request.get_full_path %} active {% endif %}" href="{% url 'channels' %}">
+            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-link" viewBox="0 0 16 16">
+                <path d="M6.354 5.5H4a2.5 2.5 0 0 0 0 5h2.354a.5.5 0 0 1 0 1H4a3.5 3.5 0 0 1 0-7h2.354a.5.5 0 0 1 0 1zM9.646 5.5H12a3.5 3.5 0 0 1 0 7H9.646a.5.5 0 1 1 0-1H12a2.5 2.5 0 0 0 0-5H9.646a.5.5 0 1 1 0-1z"/>
+                <path d="M6 8.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/>
+              </svg>
+
+            </div>
+            <span class="nav-link-text ms-1">Каналы</span>
+          </a>
+        </li>
+        <li class="nav-item guide4" id='guide4'>
+          <a class="nav-link {% if "chat" in request.get_full_path %} active {% endif %}" href="{% url 'chat' %}">
+            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-left-dots" viewBox="0 0 16 16">
+                <path d="M14 1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4.414L1.707 14.707A1 1 0 0 1 0 14V2a1 1 0 0 1 1-1h13z"/>
+                <path d="M3 8a1 1 0 1 0 2 0 1 1 0 0 0-2 0zm4 0a1 1 0 1 0 2 0 1 1 0 0 0-2 0zm4 0a1 1 0 1 0 2 0 1 1 0 0 0-2 0z"/>
+              </svg>
+
+            </div>
+            <span class="nav-link-text ms-1">Диалоги</span>
+          </a>
+        </li>
+
+        <hr class="horizontal dark">
+        <span class="MuiTypography-root MuiTypography-caption css-6m4tm1" style="margin-left: 30px;">Информация</span>
+        <li class="nav-item guide4" id='guide4'>
+          <a class="nav-link {% if request.get_full_path == "/tariffs/" %} active {% endif %}" href="/tariffs/">
+            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-coin" viewBox="0 0 16 16">
+                <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"/>
+                <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/>
+                <path d="M6.5 5.5v5h2a2.5 2.5 0 1 0 0-5h-2zm1.25 4H7V6h.75a1.5 1.5 0 0 1 0 3z"/>
+              </svg>
+            </div>
+            <span class="nav-link-text ms-1">Тарифы</span>
+          </a>
+        </li>
+
+
+
+<li class="nav-item guide4" id='guide4'>
+  <a class="nav-link" href="http://wiki.eliment.ai/" target="_blank">
+    <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-book-fill" viewBox="0 0 16 16">
+        <path d="M1 2.828c.885-.37 2.154-.77 3.5-.78 1.243-.009 2.52.316 3.5.937V13.5c-.98-.62-2.257-.946-3.5-.937-1.346.01-2.615.41-3.5.78V2.828z"/>
+        <path d="M9 2.828c.885-.37 2.154-.77 3.5-.78 1.243-.009 2.52.316 3.5.937V13.5c-.98-.62-2.257-.946-3.5-.937-1.346.01-2.615.41-3.5.78V2.828z"/>
+      </svg>
+    </div>
+    <span class="nav-link-text ms-1">База знаний</span>
+  </a>
+</li>
+
+
+        {% if limits.course_autobuy %}
+        <li class="nav-item">
+          <a class="nav-link {% if "/lessons" in request.get_full_path %} active {% endif %}" href="{% url 'lessons' %}"
+             target="blank">
+            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center  me-2 d-flex align-items-center justify-content-center" style="padding: 7px;">
+              <svg width="20px" height="20px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="#525774" d="M623.1 136.9l-282.7-101.2c-13.73-4.91-28.7-4.91-42.43 0L16.05 136.9C6.438 140.4 0 149.6 0 160s6.438 19.65 16.05 23.09L76.07 204.6c-11.89 15.8-20.26 34.16-24.55 53.95C40.05 263.4 32 274.8 32 288c0 9.953 4.814 18.49 11.94 24.36l-24.83 149C17.48 471.1 25 480 34.89 480H93.11c9.887 0 17.41-8.879 15.78-18.63l-24.83-149C91.19 306.5 96 297.1 96 288c0-10.29-5.174-19.03-12.72-24.89c4.252-17.76 12.88-33.82 24.94-47.03l190.6 68.23c13.73 4.91 28.7 4.91 42.43 0l282.7-101.2C633.6 179.6 640 170.4 640 160S633.6 140.4 623.1 136.9zM351.1 314.4C341.7 318.1 330.9 320 320 320c-10.92 0-21.69-1.867-32-5.555L142.8 262.5L128 405.3C128 446.6 213.1 480 320 480c105.1 0 192-33.4 192-74.67l-14.78-142.9L351.1 314.4z"/></svg>
+            </div>
+            <span class="nav-link-text ms-1">Уроки</span>
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+
+    </div>
+
+
+    <div class="sidenav-footer mx-3 mt-3 pt-3">
+      <div class="card shadow-none" style="background-color: #039be5;" id="sidenavCard">
+        <div class="card-body text-start p-3 w-100">
+            <div class="icon icon-shape icon-sm bg-white shadow text-center mb-3 d-flex align-items-center justify-content-center border-radius-md" style='float: left;'>
+              <i class="fab fa-telegram-plane text-dark text-gradient text-lg top-0" aria-hidden="true" id="sidenavCardIcon"></i>
+            </div>
+            <p class="text-xs font-weight-bold text-center" style='color: #FFFFFF; margin-top: 0.5rem;'>Телеграм канал</p>
+
+
+          <div class="docs-info">
+            <a href="https://t.me/elimentai"
+               target="_blank" class="btn btn-white btn-sm w-100 mb-0">Перейти</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+
