@@ -95,7 +95,7 @@ def save_messages(user_id, messages, project, channel):
         message_date = message.get("date", None)  # Дата сообщения от Telethon
         message_user_id = message.get('username')
 
-        if not message_text or not message_id or not sender_id or not message_date:
+        if not message_text or not message_id or not sender_id or not message_date or sender_id == 777000:
             continue  # Пропускаем сообщения с отсутствующими полями
         print(message)
         # Определяем, кто отправил сообщение: GPT Assistant или другой пользователь
