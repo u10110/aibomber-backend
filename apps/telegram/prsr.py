@@ -133,6 +133,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
             # Получение ответа от GPT
             try:
                 text_status = assistant.ask_chat_status()
+                print(f"Chat status is  {text_status}")
                 if Chat.CHAT_STATUS[text_status] is not None:
                     chat.status = text_status
                     chat.save()
