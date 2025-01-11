@@ -264,8 +264,8 @@ class GPTAssistant:
 
     def ask_chat_status(self):
 
-        question = "Выбери статус нашего общения Успешные диалоги - success,Контакт получен - contact_received, " \
-                   "Проявлен интерес - interest_shown, Неудача closed. Ответь кодом."
+        question = "Выбери статус нашего общения Успешные диалоги success,Контакт получен (contact_received), " \
+                   "Проявлен интерес (interest_shown), Неудача (closed). Ответь кодом в скобках. "
 
         full_context = f"{self.project.prompt}\n\n" + "\n".join(self.knowledge_texts)
         messages = [{"role": "system", "content": full_context}] + self.chat_history + [
@@ -279,7 +279,7 @@ class GPTAssistant:
                 messages=messages,
                 temperature=0.7  # Регулирует креативность ответов
             )
-            answer = response.choices[0].message.content
+            answer = response.choices[0].message.content.replace('(', '').replace(')', '')
         except Exception as e:
             # Обработка ошибок
             print(f"Ошибка API OpenAI: {type(e).__name__}: {e}")
