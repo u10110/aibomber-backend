@@ -216,7 +216,7 @@ class Channel(models.Model):
     ]
 
     client = models.ForeignKey(User, on_delete=models.CASCADE)
-    project_id = models.IntegerField(null=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
     title = models.CharField(max_length=1000)
     is_active = models.BooleanField(default=False)
     source = models.CharField(

@@ -84,85 +84,82 @@ def process_channel(channel , project):
         print(f"Ошибка обработки канала {channel.title}: {e}")
 
 
-def save_messages(user_id, messages, project, channel, user_view_name):
+def save_messages(user_id, messages, channel, user_view_name):
     """
     Сохраняет каждое сообщение из списка в базу данных, проверяя уникальность.
     """
-
-    _USER_NAME = next((message.get("username") for message in messages if message.get("username")), None)
-
-
     for message in messages:
-        message_text = message.get("text", "")
-        message_id = message.get("id", None)  # ID сообщения
-        sender_id = message.get("user_id", None)  # ID отправителя
-        message_date = message.get("date", None)  # Дата сообщения от Telethon
-        user_name = message.get('username', None)
-        from_id = message.get("from_id", None)
-        to_id = message.get("to_id", None)
+        save_messages(message, user_id, channel, user_view_name)
 
-        if not message_text or not message_id or not sender_id or not message_date or sender_id == 777000:
-            continue  # Пропускаем сообщения с отсутствующими полями
-       # print(message)
-        print(user_id,sender_id, user_name, to_id, from_id)
-        # Определяем, кто отправил сообщение: GPT Assistant или другой пользователь
-        if sender_id != user_id and user_name is None:
-            user_name = "GPT Assistant"
-        else:
-            user_name = _USER_NAME
 
-        if user_name:
-            try:
-                chat = Chat.objects.get(
-                    project=project,
-                    user_id=user_name,
-                    channel=channel,
-                )
-            except Chat.DoesNotExist:
-                chat = Chat(
-                    project=project,
-                    user_id=user_name,
-                    channel=channel,
-                    user_name=user_view_name
-                )
+def save_message(message, user_id, channel, user_view_name):
+    message_text = message.get("text", "")
+    message_id = message.get("id", None)  # ID сообщения
+    sender_id = message.get("user_id", None)  # ID отправителя
+    message_date = message.get("date", None)  # Дата сообщения от Telethon
+    user_name = message.get('username', None)
+    from_id = message.get("from_id", None)
+    to_id = message.get("to_id", None)
+
+    if not message_text or not message_id or not sender_id or not message_date or sender_id == 777000:
+        return
+    # print(message)
+    print(user_id,sender_id, user_name, to_id, from_id)
+    # Определяем, кто отправил сообщение: GPT Assistant или другой пользователь
+    if sender_id != user_id and user_name is None:
+        user_name = "Assistant"
+
+    if user_name:
+        try:
+            chat = Chat.objects.get(
+                project=channel.project,
+                user_id=user_name,
+                channel=channel,
+            )
+        except Chat.DoesNotExist:
+            chat = Chat(
+                project=channel.project,
+                user_id=user_name,
+                channel=channel,
+                user_name=user_view_name
+            )
+            chat.save()
+
+        # Создание экземпляра GPTAssistant
+        assistant = GPTAssistant(project=channel.project, chat_id=chat.id, channel_phone=channel.phone, user_id=user_id)
+        print(f"Получение статуса общения {user_id}")
+        # Получение ответа от GPT
+        try:
+            text_status = assistant.ask_chat_status()
+            print(f"Chat status is  {text_status}")
+            statuses = dict(Chat.CHAT_STATUS)
+            if statuses[text_status] is not None:
+                chat.status = text_status
                 chat.save()
+        except Exception as e:
+            print(f"text_status get error : {text_status}")
+            return None
 
-            # Создание экземпляра GPTAssistant
-            assistant = GPTAssistant(project=project, chat_id=chat.id, channel_phone=channel.phone, user_id=user_id)
-            print(f"Получение статуса общения {user_id}")
-            # Получение ответа от GPT
-            try:
-                text_status = assistant.ask_chat_status()
-                print(f"Chat status is  {text_status}")
-                statuses = dict(Chat.CHAT_STATUS)
-                if statuses[text_status] is not None:
-                    chat.status = text_status
-                    chat.save()
-            except Exception as e:
-                print(f"text_status get error : {text_status}")
-                return None
+        # Проверяем, существует ли сообщение в базе
+        existing_message = ChatMessages.objects.filter(
+            messageId=message_id,  # Проверка по ID сообщения
+        ).exists()
 
-            # Проверяем, существует ли сообщение в базе
-            existing_message = ChatMessages.objects.filter(
-                messageId=message_id,  # Проверка по ID сообщения
-            ).exists()
+        if not existing_message:
 
-            if not existing_message:
+            # Создаём новое сообщение в базе
+            ChatMessages.objects.create(
+                chat_id=chat,
+                message_type="incoming" if to_id is None else "outcoming",
+                user_name=sender_id,
+                user_message=message_text,
+                messageId=message_id,  # Сохраняем ID сообщения
+                created_at=message_date,
+            )
 
-                # Создаём новое сообщение в базе
-                ChatMessages.objects.create(
-                    chat_id=chat,
-                    message_type="incoming" if to_id is None else "outcoming",
-                    user_name=sender_id,
-                    user_message=message_text,
-                    messageId=message_id,  # Сохраняем ID сообщения
-                    created_at=message_date,
-                )
-
-                print(f"Сообщение сохранено для пользователя {user_name}: {message_id}")
-            else:
-                print(f"Сообщение уже существует для пользователя {user_id}: {message_id}")
-
+            print(f"Сообщение сохранено для пользователя {user_name}: {message_id}")
+        else:
+            print(f"Сообщение уже существует для пользователя {user_id}: {message_id}")
 
 def process_project(project):
     """
