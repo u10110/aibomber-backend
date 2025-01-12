@@ -14,6 +14,8 @@ urlpatterns = [
     path('project/send-tg-messages/', views.send_tg_messages, name='send_tg_messages'),
     path('project/get-tg-messages/', views.get_tg_messages, name='get_tg_messages'),
 
+    path('api/chats/new-message-event/', views.new_message_event, name='gpt_assistant'),
+
     path("", login_required(views.index), name="home"),
     # path("upload/", login_required(views.upload), name="upload"),
     path("pricing/", login_required(views.pricing), name="pricing"),
@@ -131,7 +133,7 @@ urlpatterns = [
     path('messages/', views.chat_messages, name='messages'),
     path('api/chats/<int:chat_id>/toggle_auto_active/', views.toggle_auto_active, name='toggle_auto_active'),
     path('api/chats/<int:chat_id>/change_status/', views.change_status, name='change_status'),
-    path('api/chats/new-message-event', views.new_message_event, name='gpt_assistant'),
+
 
 
     path("get-tochka-phone/", views.get_tochka_phone, name="get-tochka-phone"),
