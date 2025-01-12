@@ -57,7 +57,7 @@ prod:
     - docker compose -f docker-compose.yml down
     - docker compose -f docker-compose.yml -p eliment-web down --timeout 10
     - docker compose -f docker-compose.yml  pull eliment-web
-    - docker compose -f docker-compose.yml -p eliment-web up -d
+    - docker compose -f docker-compose.yml  up -d eliment-web
     - docker image prune -a -f
     - docker builder prune -f
     - docker image prune -a -f
