@@ -1472,5 +1472,5 @@ def new_message_event(request):
             logger.error(e)
             pass
 
-        return JsonResponse({"message": ""})
+        return JsonResponse({"message": "Ok"}, status=200)
     return JsonResponse({"error": "Некорректный запрос"}, status=404)

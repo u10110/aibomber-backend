@@ -14,7 +14,7 @@ urlpatterns = [
     path('project/send-tg-messages/', views.send_tg_messages, name='send_tg_messages'),
     path('project/get-tg-messages/', views.get_tg_messages, name='get_tg_messages'),
 
-    path('api/chats/new-message-event/', views.new_message_event, name='gpt_assistant'),
+    path('api/chats/new-message-event/', views.new_message_event, name='new_message_event'),
 
     path("", login_required(views.index), name="home"),
     # path("upload/", login_required(views.upload), name="upload"),
