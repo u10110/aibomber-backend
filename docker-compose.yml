@@ -4,6 +4,7 @@ services:
     image: registry.mplab.io/eliment-web:latest
     restart: always
     env_file: .env
+    dockerfile: .Dockerfile
     networks:
       - web_network
     volumes:
@@ -13,18 +14,15 @@ services:
     ports:
       - "80:80"
 
-  # fastapi-app:
-  #   container_name: fastapi_app
-  #   build:
-  #     context: ./fastapi
-  #   restart: always
-  #   networks:
-  #     - web_network
-  #   volumes:
-  #     - ./fastapi:/app
-  #     - /sessions:/app/sessions
-  #   ports:
-  #     - "8001:8001"
+  eliment-cli:
+    container_name: eliment-cli
+    image: registry.mplab.io/eliment-cli:latest
+    restart: always
+    env_file: .env
+    networks:
+     - web_network
+    dockerfile: .CliDockerfile
+    command: python manage.py kafka_consumer
 
 networks:
   web_network:
