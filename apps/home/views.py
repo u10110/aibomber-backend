@@ -30,6 +30,8 @@ from kafka.errors import KafkaError
 from apps.telegram.sndr import ProjectProcessor
 from apps.telegram.prsr import process_project
 
+import json
+
 from .forms import *
 from .helper import Helper
 from .models import (
@@ -1449,3 +1451,26 @@ def get_tg_messages(request):
         process_project(project)
 
     return JsonResponse({'success': True})
+
+
+@csrf_exempt
+def new_message_event(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        print(data)
+        logger.info(KAFKA_BOOTSTRAP_SERVERS)
+        producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS])
+
+        future = producer.send('new-message-events', json.dumps(data).encode('utf-8'))
+
+        # Block for 'synchronous' sends
+        try:
+            record_metadata = future.get(timeout=10)
+        except KafkaError as e:
+            # Decide what to do if produce request failed...
+            logger.error(e)
+            pass
+
+        return JsonResponse({"message": ""})
+    return JsonResponse({"error": "Некорректный запрос"}, status=404)

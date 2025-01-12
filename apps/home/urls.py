@@ -131,7 +131,7 @@ urlpatterns = [
     path('messages/', views.chat_messages, name='messages'),
     path('api/chats/<int:chat_id>/toggle_auto_active/', views.toggle_auto_active, name='toggle_auto_active'),
     path('api/chats/<int:chat_id>/change_status/', views.change_status, name='change_status'),
-
+    path('api/chats/new-message-event', views.new_message_event, name='gpt_assistant'),
 
 
     path("get-tochka-phone/", views.get_tochka_phone, name="get-tochka-phone"),
@@ -149,5 +149,6 @@ urlpatterns = [
     path('validate-google-link/', views.validate_google_link, name='validate_google_link'),
 
     path('api/v1/gpt-assistant/', views.gpt_assistant, name='gpt_assistant'),
+
 ]
 
