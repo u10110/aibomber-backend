@@ -1457,34 +1457,36 @@ def get_tg_messages(request):
 def new_message_event(request):
     if request.method == "POST":
         data = json.loads(request.body)
+        try:
+            print(message)
+            #logger.info(KAFKA_BOOTSTRAP_SERVERS)
+            #producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS])
 
-        print(message)
-        #logger.info(KAFKA_BOOTSTRAP_SERVERS)
-        #producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS])
+            #future = producer.send('new-message-events', json.dumps(data).encode('utf-8'))
 
-        #future = producer.send('new-message-events', json.dumps(data).encode('utf-8'))
+            # Block for 'synchronous' sends
+            #try:
+            #    record_metadata = future.get(timeout=10)
+            #except KafkaError as e:
+            #    # Decide what to do if produce request failed...
+            #    logger.error(e)
+            #    pass#
 
-        # Block for 'synchronous' sends
-        #try:
-        #    record_metadata = future.get(timeout=10)
-        #except KafkaError as e:
-        #    # Decide what to do if produce request failed...
-        #    logger.error(e)
-        #    pass#
+            channel = Channel.objects.get(phone=data.get('channel_phone'))
 
-        channel = Channel.objects.get(phone=data.get('channel_phone'))
+            users_response = get_users(data.get('channel_phone'))
+            if not users_response.get("users"):
+                logger.info(f"Нет пользователей для телефона {data.get('channel_phone')}")
+                return
+            user_view_name = ''
+            # Шаг 3.2: Получаем сообщения для каждого пользователя
+            for user in users_response["users"]:
+                if user["id"] == data.get('user_id'):
+                    user_view_name = user["name"]
 
-        users_response = get_users(data.get('channel_phone'))
-        if not users_response.get("users"):
-            logger.info(f"Нет пользователей для телефона {data.get('channel_phone')}")
-            return
-        user_view_name = ''
-        # Шаг 3.2: Получаем сообщения для каждого пользователя
-        for user in users_response["users"]:
-            if user["id"] == data.get('user_id'):
-                user_view_name = user["name"]
-
-        save_message(data, data.get('user_id'), channel, user_view_name)
-
+            save_message(data, data.get('user_id'), channel, user_view_name)
+        except Exception as e:
+            logger.error(e)
+            return JsonResponse({"error": f"Failed to process the request: {str(e)}"}, status=500)
         return JsonResponse({"message": "Ok"}, status=200)
     return JsonResponse({"error": "Некорректный запрос"}, status=404)
