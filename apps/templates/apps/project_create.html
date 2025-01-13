@@ -1043,7 +1043,8 @@
         const setPipelineSteps = (select, status) => {
             const currentProjectPipelines = JSON.parse( projectPipelinesInput.value || '[]' );
             const selectedStep  = select.value;
-            const fullStepData = remotePipelineSteps.find(step => step.id === selectedStep);
+            const fullStepData = remotePipelineSteps
+                .find(step => step.id.toString() === selectedStep.toString());
 
             const currentStatusIndex = currentProjectPipelines.findIndex(pipeline => pipeline.status === status);
             const pipelineToSet = {
