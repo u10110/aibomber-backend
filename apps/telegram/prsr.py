@@ -236,4 +236,3 @@ def get_messages(phone, user_id):
         print(f"Ошибка соединения с get-messages: {e}")
         return {}
 
-
