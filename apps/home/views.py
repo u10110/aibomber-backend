@@ -2,7 +2,7 @@
 import string
 from decouple import config
 from sqlite3 import IntegrityError
-
+from apps.telegram.prsr import save_message, get_users
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.core.files.storage import FileSystemStorage
 from django.db.utils import IntegrityError
@@ -1456,21 +1456,35 @@ def get_tg_messages(request):
 @csrf_exempt
 def new_message_event(request):
     if request.method == "POST":
-        data = json.loads(request.body)
+        message = json.loads(request.body)
 
-        print(data)
-        logger.info(KAFKA_BOOTSTRAP_SERVERS)
-        producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS])
+        print(message)
+        #logger.info(KAFKA_BOOTSTRAP_SERVERS)
+        #producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS])
 
-        future = producer.send('new-message-events', json.dumps(data).encode('utf-8'))
+        #future = producer.send('new-message-events', json.dumps(data).encode('utf-8'))
 
         # Block for 'synchronous' sends
-        try:
-            record_metadata = future.get(timeout=10)
-        except KafkaError as e:
-            # Decide what to do if produce request failed...
-            logger.error(e)
-            pass
+        #try:
+        #    record_metadata = future.get(timeout=10)
+        #except KafkaError as e:
+        #    # Decide what to do if produce request failed...
+        #    logger.error(e)
+        #    pass#
+
+        channel = Channel.objects.get(phone=message.channel_phone)
+
+        users_response = get_users(message.channel_phone)
+        if not users_response.get("users"):
+            logger.info(f"Нет пользователей для телефона {message.channel_phone}")
+            return
+        user_view_name = ''
+        # Шаг 3.2: Получаем сообщения для каждого пользователя
+        for user in users_response["users"]:
+            if user["id"] == message.user_id:
+                user_view_name = user["name"]
+
+        save_message(message, message.user_id, channel, user_view_name)
 
         return JsonResponse({"message": "Ok"}, status=200)
     return JsonResponse({"error": "Некорректный запрос"}, status=404)
