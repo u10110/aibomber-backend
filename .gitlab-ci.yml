@@ -55,9 +55,8 @@ prod:
   script:
     - docker network create web_network || true
     - docker compose -f docker-compose.yml down
-    - docker compose -f docker-compose.yml -p eliment-web down --timeout 10
-    - docker compose -f docker-compose.yml  pull eliment-web
-    - docker compose -f docker-compose.yml  up -d eliment-web
+    - docker compose -f docker-compose.yml pull
+    - docker compose -f docker-compose.yml up -d
     - docker image prune -a -f
     - docker builder prune -f
     - docker image prune -a -f
