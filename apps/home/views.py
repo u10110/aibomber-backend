@@ -1,4 +1,3 @@
-
 import string
 from decouple import config
 from sqlite3 import IntegrityError
@@ -63,6 +62,7 @@ import random
 
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
 TELETHON_HOST = config("TELETHON_HOST")
+
 
 def error(request):
     return render(request, "errors/technical_break.html")
@@ -764,8 +764,8 @@ def project_edit(request, project_id):
 
             for remote_chat_id in remote_chat_ids:
                 try:
-                    ch = Chat.objects.get(  project=project,
-                                            user_id=remote_chat_id
+                    ch = Chat.objects.get(project=project,
+                                          user_id=remote_chat_id
                                           )
                 except Chat.DoesNotExist:
                     ch = Chat(project=project,
@@ -1179,7 +1179,6 @@ def create_app(request):
         return JsonResponse({'success': False, 'error': ''})
 
 
-
 @csrf_exempt
 def toggle_auto_active(request, chat_id):
     if request.method == 'POST':
@@ -1238,7 +1237,7 @@ def send_code(request):
             if not phone_number.startswith('+'):
                 phone_number = '+' + phone_number  # Добавляем '+' в начало, если его нет
 
-            #producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS], value_serializer=lambda m: json.dumps(m).encode('ascii'))
+            # producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS], value_serializer=lambda m: json.dumps(m).encode('ascii'))
 
             print(phone_number)
             # Отправка запроса в FastAPI
@@ -1435,7 +1434,6 @@ def save_google_link(request):
 
 @csrf_exempt
 def send_tg_messages(request):
-
     active_projects = Project.objects.filter(is_active=True)
     for project in active_projects:
         ProjectProcessor.process_project(project)
@@ -1445,7 +1443,6 @@ def send_tg_messages(request):
 
 @csrf_exempt
 def get_tg_messages(request):
-
     active_projects = Project.objects.filter(is_active=True)
     for project in active_projects:
         process_project(project)
@@ -1459,19 +1456,19 @@ def new_message_event(request):
         data = json.loads(request.body)
         try:
             print(data)
-            #logger.info(KAFKA_BOOTSTRAP_SERVERS)
-            #producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS])
+            # logger.info(KAFKA_BOOTSTRAP_SERVERS)
+            # producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS])
 
-            #future = producer.send('new-message-events', json.dumps(data).encode('utf-8'))
+            # future = producer.send('new-message-events', json.dumps(data).encode('utf-8'))
 
             # Block for 'synchronous' sends
-            #try:
+            # try:
             #    record_metadata = future.get(timeout=10)
-            #except KafkaError as e:
+            # except KafkaError as e:
             #    # Decide what to do if produce request failed...
             #    logger.error(e)
             #    pass#
-            phone=f"+{data.get('channel_phone')}"
+            phone = "+" + data.get('channel_phone')
             logger.info(phone)
             channel = Channel.objects.get(phone=phone)
 
