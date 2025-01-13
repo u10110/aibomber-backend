@@ -26,36 +26,35 @@ class NewChatMessageListener(threading.Thread):
     class Consumer(threading.Thread):
         def __init__(self):
             threading.Thread.__init__(self)
-            self.stop_event = threading.Event()
+            self.consumer = KafkaConsumer(
+               bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+               auto_offset_reset='earliest',
+               consumer_timeout_ms=1000)
 
-    def stop(self):
-        self.stop_event.set()
+        def run(self):
+            try:
+                self.consumer.consumer.subscribe(['new-chat-message'])
+                while running:
+                    for message in self.consumer:
+                        #  message = json.loads(msg.value().decode('utf-8'))
+                        channel = Channel.objects.get(phone=message.channel_phone)
 
-    def run(self):
+                        users_response = get_users(message.channel_phone)
+                        if not users_response.get("users"):
+                            print(f"Нет пользователей для телефона {message.channel_phone}")
+                            return
+                        user_view_name = ''
+                        # Шаг 3.2: Получаем сообщения для каждого пользователя
+                        for user in users_response["users"]:
+                            if user["id"] == message.user_id:
+                                user_view_name = user["name"]
 
-        consumer = KafkaConsumer(bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-                                 auto_offset_reset='earliest',
-                                 consumer_timeout_ms=1000)
-        consumer.subscribe(['new-chat-message'])
-        while not self.stop_event.is_set():
-            for message in consumer:
-                channel = Channel.objects.get(phone=message.channel_phone)
-
-                users_response = get_users(message.channel_phone)
-                if not users_response.get("users"):
-                    print(f"Нет пользователей для телефона {message.channel_phone}")
-                    return
-                user_view_name = ''
-                # Шаг 3.2: Получаем сообщения для каждого пользователя
-                for user in users_response["users"]:
-                    if user["id"] == message.user_id:
-                        user_view_name = user["name"]
-
-                save_message(message, message.user_id, channel, user_view_name)
-                if self.stop_event.is_set():
-                    break
-
-        consumer.close()
+                        save_message(message, message.user_id, channel, user_view_name)
+                        if self.stop_event.is_set():
+                            break
+            finally:
+                # Close down consumer to commit final offsets.
+                self.consumer.close()
 
 
 class Command(BaseCommand):
