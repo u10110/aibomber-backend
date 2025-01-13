@@ -1472,6 +1472,7 @@ def new_message_event(request):
             #    logger.error(e)
             #    pass#
             phone=f"+7{data.get('channel_phone')}"
+            logger.info(phone)
             channel = Channel.objects.get(phone=phone)
 
             users_response = get_users(phone)
