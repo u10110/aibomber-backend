@@ -1456,7 +1456,7 @@ def get_tg_messages(request):
 @csrf_exempt
 def new_message_event(request):
     if request.method == "POST":
-        message = json.loads(request.body)
+        data = json.loads(request.body)
 
         print(message)
         #logger.info(KAFKA_BOOTSTRAP_SERVERS)
@@ -1472,19 +1472,19 @@ def new_message_event(request):
         #    logger.error(e)
         #    pass#
 
-        channel = Channel.objects.get(phone=message.channel_phone)
+        channel = Channel.objects.get(phone=data.get('channel_phone'))
 
-        users_response = get_users(message.channel_phone)
+        users_response = get_users(data.get('channel_phone'))
         if not users_response.get("users"):
-            logger.info(f"Нет пользователей для телефона {message.channel_phone}")
+            logger.info(f"Нет пользователей для телефона {data.get('channel_phone')}")
             return
         user_view_name = ''
         # Шаг 3.2: Получаем сообщения для каждого пользователя
         for user in users_response["users"]:
-            if user["id"] == message.user_id:
+            if user["id"] == data.get('user_id'):
                 user_view_name = user["name"]
 
-        save_message(message, message.user_id, channel, user_view_name)
+        save_message(data, data.get('user_id'), channel, user_view_name)
 
         return JsonResponse({"message": "Ok"}, status=200)
     return JsonResponse({"error": "Некорректный запрос"}, status=404)
