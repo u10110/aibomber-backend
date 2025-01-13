@@ -105,7 +105,7 @@ class MessageProcessor:
         """
         last_answer = ChatMessages.objects.filter(
             chat_id=Chat,
-            message_type="outcoming"
+            message_type="incoming"
         ).order_by('-created_at').first()
 
         query_filter = {

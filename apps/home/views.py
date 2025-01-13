@@ -1471,7 +1471,7 @@ def new_message_event(request):
             #    # Decide what to do if produce request failed...
             #    logger.error(e)
             #    pass#
-            phone=f"+7{data.get('channel_phone')}"
+            phone=f"+{data.get('channel_phone')}"
             logger.info(phone)
             channel = Channel.objects.get(phone=phone)
 
