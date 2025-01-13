@@ -33,7 +33,7 @@ class NewChatMessageListener(threading.Thread):
 
         def run(self):
             try:
-                self.consumer.consumer.subscribe(['new-chat-message'])
+                self.consumer.consumer.subscribe(['new-message-events'])
                 while running:
                     for message in self.consumer:
                         #  message = json.loads(msg.value().decode('utf-8'))
