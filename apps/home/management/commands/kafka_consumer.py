@@ -6,7 +6,7 @@ from kafka import KafkaConsumer
 from django.core.management.base import BaseCommand, CommandError
 from dotenv import load_dotenv
 from apps.telegram.prsr import save_message, get_users
-
+from loguru import logger
 from apps.home.models import (
     Project,
     Channel,
@@ -36,12 +36,13 @@ class NewChatMessageListener(threading.Thread):
                 self.consumer.consumer.subscribe(['new-message-events'])
                 while running:
                     for message in self.consumer:
+                        logger.info('new message from new-message-events')
                         #  message = json.loads(msg.value().decode('utf-8'))
                         channel = Channel.objects.get(phone=message.channel_phone)
 
                         users_response = get_users(message.channel_phone)
                         if not users_response.get("users"):
-                            print(f"Нет пользователей для телефона {message.channel_phone}")
+                            logger.info(f"Нет пользователей для телефона {message.channel_phone}")
                             return
                         user_view_name = ''
                         # Шаг 3.2: Получаем сообщения для каждого пользователя
@@ -50,8 +51,9 @@ class NewChatMessageListener(threading.Thread):
                                 user_view_name = user["name"]
 
                         save_message(message, message.user_id, channel, user_view_name)
-                        if self.stop_event.is_set():
-                            break
+            except Exception as e:
+                print(e.format_exc())
+                logger.error(e)
             finally:
                 # Close down consumer to commit final offsets.
                 self.consumer.close()
@@ -62,4 +64,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         td = NewChatMessageListener()
         td.start()
-        self.stdout.write("Started Consumer Thread")
+        logger.info('Launches Listener for new-chat-message message : Kafka')
