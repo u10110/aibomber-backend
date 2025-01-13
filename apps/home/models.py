@@ -362,7 +362,7 @@ class ChatMessages(models.Model):
         default=None,
     )
     user_name = models.CharField(max_length=55, )
-    user_message = models.CharField(max_length=55555, )
+    user_message = models.CharField(max_length=555, )
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 
