@@ -1471,10 +1471,10 @@ def new_message_event(request):
             #    # Decide what to do if produce request failed...
             #    logger.error(e)
             #    pass#
+            phone=f"+7{data.get('channel_phone')}"
+            channel = Channel.objects.get(phone=phone)
 
-            channel = Channel.objects.get(phone=data.get('channel_phone'))
-
-            users_response = get_users(data.get('channel_phone'))
+            users_response = get_users(phone)
             if not users_response.get("users"):
                 logger.info(f"Нет пользователей для телефона {data.get('channel_phone')}")
                 return
