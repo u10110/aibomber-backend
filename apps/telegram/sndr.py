@@ -27,7 +27,7 @@ from apps.home.models import (
 from decouple import config
 # Constants
 PID_FILE = "sndr.lock"
-FASTAPI_HOST = config("FASTAPI_HOST")
+TELETHON_HOST = config("TELETHON_HOST")
 
 
 class ProcessLockManager:
@@ -156,7 +156,7 @@ class MessageProcessor:
 
         try:
             response = requests.post(
-                f"{FASTAPI_HOST}/send-message/",
+                f"{TELETHON_HOST}/send-message/",
                 json=payload,
                 headers={"Content-Type": "application/json"}
             )
