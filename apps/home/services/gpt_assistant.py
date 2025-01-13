@@ -7,9 +7,9 @@ from docx import Document
 import re
 import random
 from django.shortcuts import get_object_or_404
+from decouple import config
 
-
-OPENAI_API_KEY="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"
+OPENAI_API_KEY = config("OPENAI_API_KEY")
 client = OpenAI(
     api_key=OPENAI_API_KEY  # Рекомендуется использовать переменные окружения
 )
