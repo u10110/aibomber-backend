@@ -1458,7 +1458,7 @@ def new_message_event(request):
     if request.method == "POST":
         data = json.loads(request.body)
         try:
-            print(message)
+            print(data)
             #logger.info(KAFKA_BOOTSTRAP_SERVERS)
             #producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS])
 
@@ -1489,4 +1489,4 @@ def new_message_event(request):
             logger.error(e)
             return JsonResponse({"error": f"Failed to process the request: {str(e)}"}, status=500)
         return JsonResponse({"message": "Ok"}, status=200)
-    return JsonResponse({"error": "Некорректный запрос"}, status=404)
+    return JsonResponse({"info": "!"}, status=200)
