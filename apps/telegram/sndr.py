@@ -105,7 +105,7 @@ class MessageProcessor:
         """
         last_answer = ChatMessages.objects.filter(
             chat_id=Chat,
-            message_type="outcoming"
+            message_type="incoming"
         ).order_by('-created_at').first()
 
         query_filter = {
@@ -126,7 +126,7 @@ class MessageProcessor:
             project_id: int,
             question: str,
             channel_phone: str,
-            user_id: int
+            user_id: str
     ) -> Optional[str]:
 
         # Получение объекта проекта
@@ -146,8 +146,11 @@ class MessageProcessor:
             return None
 
     @staticmethod
-    def send_message_to_telegram(phone: str, user_id: int, message: str) -> bool:
+    def send_message_to_telegram(phone: str, user_id: str, message: str) -> bool:
         """Send message via Telegram API."""
+
+        if not user_id.startsWith('@'): user_id = '@' + user_id
+
         payload = {
             "phone": phone,
             "username": user_id,
@@ -228,19 +231,19 @@ class ProjectProcessor:
             )
 
             # Обрабатываем новых пользователей
-            for chat in new_chats:
-                print(f"Новый получатель {chat.user_id}")
+            for new_chat in new_chats:
+                print(f"Новый получатель {new_chat.user_id}")
                 message = message_processor.send_to_gpt_assistant(
-                    chat_id=chat.id,
+                    chat_id=new_chat.id,
                     project_id=project.id,
                     question="",  # Пустой вопрос для нового пользователя
                     channel_phone=channel.phone,
-                    user_id=chat.user_id
+                    user_id=new_chat.user_id
                 )
 
                 message_processor.send_message_to_telegram(
                         channel.phone,
-                        chat.user_id,
+                        new_chat.user_id,
                         message
                     )
 
