@@ -285,7 +285,7 @@ class Chat(models.Model):
                         'remote_lead_id': instance.remote_lead_id,
                         'user_name': instance.user_name,
                         'phone':  instance.phone,
-                    })
+                    }, verify=False)
                     if r.status_code == 200 and instance.remote_lead_id is None:
                         lead_action_response=json.loads(r.content)
                         instance.remote_lead_id = lead_action_response.lead_id
@@ -299,7 +299,7 @@ class Chat(models.Model):
                         'remote_lead_id': instance.remote_lead_id,
                         'user_name': instance.user_name,
                         'phone':  instance.phone,
-                    })
+                    }, verify=False)
                     if r.status_code == 200 and instance.remote_lead_id is None:
                         lead_action_response=json.loads(r.content)
                         instance.remote_lead_id = lead_action_response.lead_id
