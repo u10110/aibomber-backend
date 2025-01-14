@@ -1025,9 +1025,13 @@ def chat_messages(request):
         if user_message:
 
             if current_chat:
+                user_id = current_chat.user_id
+                if not current_chat.user_id.startsWith('@'):
+                    user_id = '@' + user_id
+
                 payload = json.dumps({
                     "phone": current_chat.channel.phone,
-                    "username": current_chat.user_id,
+                    "username": user_id,
                     "message": user_message
                 })
                 headers = {
