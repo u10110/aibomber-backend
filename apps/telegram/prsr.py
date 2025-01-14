@@ -90,7 +90,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
     """
 
     _USER_NAME = next((message.get("username") for message in messages if message.get("username")), None)
-
+    chat = None
 
     for message in messages:
         message_text = message.get("text", "")
@@ -149,7 +149,6 @@ def save_messages(user_id, messages, project, channel, user_view_name):
                 print(f"Сообщение сохранено для пользователя {user_name}: {message_id}")
             else:
                 print(f"Сообщение уже существует для пользователя {user_id}: {message_id}")
-
 
     if chat:
         # Создание экземпляра GPTAssistant
