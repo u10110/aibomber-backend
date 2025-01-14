@@ -274,7 +274,7 @@ class Chat(models.Model):
             pipeline = CrmPipelines.objects.filter(
                 project_id=instance.project_id,
                 trigger=instance.status
-            ).get()
+            ).first()
 
             if pipeline is not None and pipeline.project is not None:
                 integration_name = pipeline.project.integrations
