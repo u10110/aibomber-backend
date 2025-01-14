@@ -283,7 +283,7 @@ class Chat(models.Model):
                         'pipeline_id': pipeline.remote_pipeline_id,
                         'remote_step_id': pipeline.remote_step_id,
                         'remote_lead_id': instance.remote_lead_id,
-                        'user_name': instance.tg_id,
+                        'user_name': instance.user_name,
                         'phone':  instance.phone,
                     })
                     if r.status_code == 200 and instance.remote_lead_id is None:
@@ -297,7 +297,7 @@ class Chat(models.Model):
                         'pipeline_id': pipeline.remote_pipeline_id,
                         'remote_step_id': pipeline.remote_step_id,
                         'remote_lead_id': instance.remote_lead_id,
-                        'user_name': instance.tg_id,
+                        'user_name': instance.user_name,
                         'phone':  instance.phone,
                     })
                     if r.status_code == 200 and instance.remote_lead_id is None:
