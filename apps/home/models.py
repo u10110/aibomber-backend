@@ -276,7 +276,7 @@ class Chat(models.Model):
                 trigger=instance.status
             )
 
-            if pipeline:
+            if pipeline is not None and pipeline.project is not None:
                 integration_name = pipeline.project.integrations
                 if integration_name == 'amo_crm':
                     r = requests.get(url="https://integration.eliment.ai/amo/lead", params={
