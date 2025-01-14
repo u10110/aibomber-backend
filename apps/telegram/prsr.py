@@ -151,6 +151,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
                 print(f"Сообщение уже существует для пользователя {user_id}: {message_id}")
 
 
+    if chat:
         # Создание экземпляра GPTAssistant
         assistant = GPTAssistant(project=project, chat_id=chat.id, channel_phone=channel.phone, user_id=user_id)
         print(f"Получение статуса общения {user_id}")
