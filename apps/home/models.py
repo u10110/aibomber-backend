@@ -309,7 +309,7 @@ class Chat(models.Model):
 
     @staticmethod
     def remember_state(sender, instance, **kwargs):
-        instance.previous_state = instance
+        instance.previous_status = instance.status
 
     CHAT_STATUS = [
         ('new', 'Новый'),
