@@ -503,8 +503,11 @@
                                     <div class="row">
 
                                         <h5>Выберите  CRM для интеграции: </h5>
-                                        <input type="radio" name="integrations" id="id_integrations_0"
-                                               class="d-none imgbgchk" value=""  style="display: none" >
+                                        <div class='col text-center'>
+                                            <h6>Не выбрано</h6>
+                                            <input type="radio" name="integrations" id="id_integrations_0"
+                                                   value="null"   >
+                                        </div>
                                         <div class='col text-center'>
                                             <input type="radio" name="integrations" id="id_integrations_1"
                                                    class="d-none imgbgchk" value="amo_crm" >
@@ -1253,6 +1256,25 @@
                 break;
 
         }
+
+
+        clearIntegrationRadio.addEventListener('change', () => {
+            projectPipelinesInput.value = '';
+            successDialogsSelect.innerHTML = "";
+            contactReceivedSelect.innerHTML = "";
+            interestShownSelect.innerHTML = "";
+            closedPipelineSelect.innerHTML = "";
+            addOption(successDialogsSelect, {name: "Выберите из списка" });
+            addOption(contactReceivedSelect, {name: "Выберите из списка" });
+            addOption(interestShownSelect, {name: "Выберите из списка" });
+            addOption(closedPipelineSelect, {name: "Выберите из списка" });
+            successDialogsSelect.disabled = true;
+            contactReceivedSelect.disabled = true;
+            interestShownSelect.disabled = true;
+            closedPipelineSelect.disabled = true;
+        });
+
+
 
         amoIntegrationRadio.addEventListener('change', () => {
             projectPipelinesInput.value = '';
