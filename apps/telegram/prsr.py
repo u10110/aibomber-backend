@@ -127,20 +127,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
                 )
                 chat.save()
 
-            # Создание экземпляра GPTAssistant
-            #assistant = GPTAssistant(project=project, chat_id=chat.id, channel_phone=channel.phone, user_id=user_id)
-            #print(f"Получение статуса общения {user_id}")
-            # Получение ответа от GPT
-            #try:
-            #   text_status = assistant.ask_chat_status()
-            #    print(f"Chat status is  {text_status}")
-            #    statuses = dict(Chat.CHAT_STATUS)
-            #    if statuses[text_status] is not None:
-            #        chat.status = text_status
-            #        chat.save()
-            #except Exception as e:
-            #    print(f"text_status get error : {text_status}")
-            #    return None
+
 
             # Проверяем, существует ли сообщение в базе
             existing_message = ChatMessages.objects.filter(
@@ -162,6 +149,22 @@ def save_messages(user_id, messages, project, channel, user_view_name):
                 print(f"Сообщение сохранено для пользователя {user_name}: {message_id}")
             else:
                 print(f"Сообщение уже существует для пользователя {user_id}: {message_id}")
+
+
+        # Создание экземпляра GPTAssistant
+        assistant = GPTAssistant(project=project, chat_id=chat.id, channel_phone=channel.phone, user_id=user_id)
+        print(f"Получение статуса общения {user_id}")
+        # Получение ответа от GPT
+        try:
+            text_status = assistant.ask_chat_status()
+            print(f"Chat status is  {text_status}")
+            statuses = dict(Chat.CHAT_STATUS)
+            if statuses[text_status] is not None:
+                chat.status = text_status
+                chat.save()
+        except Exception as e:
+            print(f"text_status get error : {text_status}")
+            return None
 
 
 def process_project(project):
