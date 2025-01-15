@@ -9,6 +9,8 @@ import datetime
 import requests
 from django.db.models import F, QuerySet
 from django.shortcuts import get_object_or_404
+from django.db.models.aggregates import Min
+
 
 from apps.home.services.gpt_assistant import GPTAssistant
 
@@ -193,57 +195,52 @@ class ProjectProcessor:
             print(f"Проект {project.id}  {project.title} не имеет активных каналов")
             return
 
-        # Получаем чаты для всех каналов проекта
-        chat_map = ProjectProcessor._get_existing_chats_by_phone(channels)
-
         # Обрабатываем каждый канал
         for channel in channels:
-            ProjectProcessor._process_single_channel(channel, project, chat_map)
+            ProjectProcessor._process_single_channel_for_new_message(channel, project)
+
 
     @staticmethod
-    def _get_existing_chats_by_phone(channels: QuerySet) -> Dict[str, List[Chat]]:
-        """
-        Получает существующие чаты для каналов по номеру телефона.
-
-        Args:
-            channels: QuerySet каналов для обработки
-
-        Returns:
-            Dict[str, List[Chat]]: Словарь чатов, где ключ - номер телефона
-        """
-        chat_map = {}
-        for channel in channels:
-            chats = Chat.objects.filter(channel=channel).distinct('user_name', 'user_id')
-            chat_map[channel.phone] = list(chats) if chats.exists() else []
-        return chat_map
-
-    @staticmethod
-    def _process_single_channel(channel: Channel, project: Project, chat_map: Dict[str, List[Chat]]) -> None:
+    def _process_single_channel_for_new_message(channel: Channel, project: Project) -> None:
         print(f"Обработка канала: {channel.id}, телефон: {channel.phone}")
 
         message_processor = MessageProcessor()
 
+        today_send_new_messages = ChatMessages.objects.filter(
+            chat_id__in=Chat.objects.filter(channel=channel),
+            created_at__gte=(datetime.datetime.now() - datetime.timedelta(days=1))
+        ).values('chat_id_id').annotate(min_created_at=Min('min_created')).count()
+
+        if today_send_new_messages>=channel.max_daily_messages:
+            print(f"У канала: {channel.id}, телефон: {channel.phone} достигнут дневной лимит новых сообщений")
+
+
         try:
             # Получаем TG ID, у которых нет сообщений
-            new_chats = Chat.objects.filter(
+            chat_for_current_channel_message = Chat.objects.filter(
                 project=project,  # Связь через таблицу Recipient
-                last_message_time=None
-            )
+                is_auto_active=True
+            ).first()
+
+            # Обрабатываем существующий
+            if not chat_for_current_channel_message:
+                print(f"Нет новых активных чатов для телефона {channel.phone}")
+                return
 
             # Обрабатываем новых пользователей
-            for new_chat in new_chats:
-                print(f"Новый получатель {new_chat.user_id}")
+            if chat_for_current_channel_message.last_message_time is None:
+                print(f"Новый получатель {chat_for_current_channel_message.user_id}")
                 message = message_processor.send_to_gpt_assistant(
-                    chat_id=new_chat.id,
+                    chat_id=chat_for_current_channel_message.id,
                     project_id=project.id,
                     question="",  # Пустой вопрос для нового пользователя
                     channel_phone=channel.phone,
-                    user_id=new_chat.user_id
+                    user_id=chat_for_current_channel_message.user_id
                 )
 
                 message_processor.send_message_to_telegram(
                         channel.phone,
-                        new_chat.user_id,
+                        chat_for_current_channel_message.user_id,
                         message
                     )
 
@@ -260,32 +257,12 @@ class ProjectProcessor:
                 #    )
                 #channel.remaining_messages = F('remaining_messages') - 1
                 #channel.save()
-
-            # Обрабатываем существующие чаты
-            chat_list = chat_map.get(channel.phone, [])
-            if not chat_list:
-                print(f"Нет активных чатов для телефона {channel.phone}")
-                return
-
-            print(f"Обработка канала {channel.title} {channel.phone} "
-                  f"для чатов: {len(chat_list)} чатов")
-
-            for chat in chat_list:
-                ProjectProcessor._process_chat(
-                    chat=chat,
-                    channel=channel,
-                    project=project,
-                    message_processor=message_processor
-                )
-
         except Exception as e:
             print(f"Ошибка при обработке канала {channel.title}: ")
 
     @staticmethod
-    def _process_chat(
+    def process_chat(
             chat: Chat,
-            channel: Channel,
-            project: Project,
             message_processor: MessageProcessor
     ) -> None:
 
@@ -296,15 +273,15 @@ class ProjectProcessor:
 
         message = message_processor.send_to_gpt_assistant(
             chat_id=chat.id,
-            project_id=project.id,
+            project_id=chat.channel.project.id,
             question=combined_message,
-            channel_phone=channel.phone,
+            channel_phone=chat.channel,
             user_id=chat.user_id
         )
 
         if message:
             message_processor.send_message_to_telegram(
-                channel.phone,
+                chat.channel.phone,
                 chat.user_id,
                 message
             )
@@ -323,7 +300,7 @@ class ProjectProcessor:
             #channel.save()
 
 
-def main_runner():
+def new_chat_messages():
     """Главная функция выполнения задачи."""
     # if not ProcessLockManager.check_and_create_lock():
     #     sys.exit(1)
@@ -343,7 +320,3 @@ def main_runner():
     finally:
         ProcessLockManager.remove_lock()
 
-
-# Run the script
-if __name__ == "__main__":
-    main_runner()

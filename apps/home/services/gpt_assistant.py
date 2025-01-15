@@ -264,8 +264,8 @@ class GPTAssistant:
 
     def ask_chat_status(self):
 
-        question = "Выбери статус нашего общения Успешные диалоги success,Контакт получен (contact_received), " \
-                   "Проявлен интерес (interest_shown), Неудача (closed). Ответь соответствующим кодом на латинице. "
+        question = "На каком их этапе из нижеперечисленных находится наше общение? С тобой ведетя упещный диалог (success); Тобою получен номер телефона или другой личный контакт для связи (contact_received); " \
+                   "Проявлен интерес к твоему предлоржению (interest_shown), Твое предложение проигнорировали (closed). Ответь соответствующим кодом из скобок. "
 
         full_context = f"{self.project.prompt}\n\n" + "\n".join(self.knowledge_texts)
         messages = [{"role": "system", "content": full_context}] + self.chat_history + [

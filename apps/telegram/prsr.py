@@ -172,6 +172,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
         except Exception as e:
             print(f"text_status get error : {text_status}")
             return None
+    return chat
 
 
 def process_project(project):
