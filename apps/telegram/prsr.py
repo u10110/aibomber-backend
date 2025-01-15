@@ -220,7 +220,7 @@ def get_users(phone):
         return {}
 
 
-def get_messages(phone, user_id):
+def get_messages(phone, user_id, offset_date):
     """
     Отправляет запрос для получения сообщений от пользователя.
     """
@@ -228,7 +228,7 @@ def get_messages(phone, user_id):
     payload = {
         "phone": phone,
         "user_id": user_id,
-        "limit": 50,
+        "offset_date":  offset_date,
     }
     print(payload)
     try:

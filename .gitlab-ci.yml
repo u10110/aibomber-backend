@@ -30,6 +30,20 @@ build:
   - docker push ${CONTAINER_IMAGE_LATEST}
   - docker system prune -f -a
 
+build:eliment-cli:
+  #allow_failure: true
+  stage: build
+  image: docker
+  only:
+    - main
+  variables:
+    CONTAINER_IMAGE: registry.mplab.io/eliment-cli:${CI_COMMIT_SHORT_SHA}
+    CONTAINER_IMAGE_LATEST: registry.mplab.io/eliment-cli:latest
+  script:
+    - docker build -f Dockerfile -t ${CONTAINER_IMAGE} .
+    - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
+    - docker push ${CONTAINER_IMAGE_LATEST}
+
 
 prod:
   stage: prod
@@ -41,7 +55,9 @@ prod:
   script:
     - docker network create web_network || true
     - docker compose -f docker-compose.yml down
-    - docker compose -f docker-compose.yml pull
-    - docker compose -f docker-compose.yml up -d
+    - docker compose -f docker-compose.yml -p eliment-web down --timeout 10
+    - docker compose -f docker-compose.yml  pull eliment-web
+    - docker compose -f docker-compose.yml  up -d eliment-web
+    - docker image prune -a -f
     - docker builder prune -f
     - docker image prune -a -f

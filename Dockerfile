@@ -38,6 +38,3 @@ RUN pip3 install python-dateutil
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
-
-# Gunicorn configuration
-CMD ["gunicorn", "--config", "gunicorn-cfg.py", "core.wsgi", "--workers", "12", "--threads", "12", "--timeout", "300", "--graceful-timeout", "300", "--max-requests", "1000", "--max-requests-jitter", "50"]
