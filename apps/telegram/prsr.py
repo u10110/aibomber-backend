@@ -67,7 +67,14 @@ def process_channel(channel , project):
             print(user)
             print(f"Получение сообщений для пользователя {user_id}")
 
-            messages_response = get_messages(phone, user_id)
+            last_message = ChatMessages.objects.filter(
+                chat_id__in=Chat.objects.filter(user_id=user_id, channel=channel),
+            ).order_by('-created_at').first()
+            offset_date = datetime.datetime.now() - datetime.timedelta(days=1)
+            if last_message is not None:
+                offset_date = last_message.created_at
+
+            messages_response = get_messages(phone, user_id, offset_date)
             messages = messages_response.get("messages", [])  # Ожидаем массив сообщений
 
             if messages:
@@ -228,7 +235,8 @@ def get_messages(phone, user_id, offset_date):
     payload = {
         "phone": phone,
         "user_id": user_id,
-        "limit": 50,
+        "offset_date": offset_date.isoformat(),
+        'limit': 10
     }
     print(payload)
     try:
