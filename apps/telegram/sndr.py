@@ -105,12 +105,12 @@ class MessageProcessor:
         """
         last_answer = ChatMessages.objects.filter(
             chat_id=Chat,
-            message_type="outcoming"
+            message_type="incoming"
         ).order_by('-created_at').first()
 
         query_filter = {
             'chat_id': Chat.id,
-            'message_type': "incoming"
+            'message_type': "outcoming"
         }
 
         if last_answer:
@@ -141,7 +141,7 @@ class MessageProcessor:
             answer = assistant.ask_question(question)
             return answer
         except Exception as e:
-            print(e.format_exc())
+
             print(f"GPT Assistant connection error: {e}")
             return None
 
@@ -279,7 +279,6 @@ class ProjectProcessor:
                 )
 
         except Exception as e:
-            print(e.format_exc())
             print(f"Ошибка при обработке канала {channel.title}: ")
 
     @staticmethod
