@@ -149,7 +149,7 @@ class MessageProcessor:
     def send_message_to_telegram(phone: str, user_id: str, message: str) -> bool:
         """Send message via Telegram API."""
 
-        if not user_id.startsWith('@'): user_id = '@' + user_id
+        if not user_id.startswith('@'): user_id = '@' + user_id
 
         payload = {
             "phone": phone,
