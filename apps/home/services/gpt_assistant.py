@@ -55,7 +55,7 @@ class GPTAssistant:
             client_settings = ClientSettings.objects.get(client_id=self.client_id)
             # Проверка на достаточность баланса
             if client_settings.balance < cost:
-                raise ValueError("Недостаточно средств на балансе.")
+                raise ValueError(f"Недостаточно средств на балансе клиента {client_settings.client.phone}.")
             
             # Уменьшение баланса
             client_settings.balance -= cost

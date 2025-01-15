@@ -190,7 +190,7 @@ class ProjectProcessor:
         )
 
         if not channels.exists():
-            print(f"Проект {project.id} не имеет активных каналов")
+            print(f"Проект {project.id}  {project.title} не имеет активных каналов")
             return
 
         # Получаем чаты для всех каналов проекта
@@ -258,8 +258,8 @@ class ProjectProcessor:
                 #        user_message=message,
                 #        message_type="outcoming"
                 #    )
-                channel.remaining_messages = F('remaining_messages') - 1
-                channel.save()
+                #channel.remaining_messages = F('remaining_messages') - 1
+                #channel.save()
 
             # Обрабатываем существующие чаты
             chat_list = chat_map.get(channel.phone, [])
@@ -319,8 +319,8 @@ class ProjectProcessor:
                 #    user_message=message,
                 #    message_type="outcoming"
                 #)
-            channel.remaining_messages = F('remaining_messages') - 1
-            channel.save()
+            #channel.remaining_messages = F('remaining_messages') - 1
+            #channel.save()
 
 
 def main_runner():
