@@ -30,20 +30,37 @@ build:
   - docker push ${CONTAINER_IMAGE_LATEST}
   - docker system prune -f -a
 
-build:eliment-cli:
+build:eliment-cli-kafka-message-reply:
   #allow_failure: true
   stage: build
   image: docker
   only:
     - main
   variables:
-    CONTAINER_IMAGE: registry.mplab.io/eliment-cli:${CI_COMMIT_SHORT_SHA}
-    CONTAINER_IMAGE_LATEST: registry.mplab.io/eliment-cli:latest
+    CONTAINER_IMAGE: registry.mplab.io/eliment-cli-kafka-message-reply:${CI_COMMIT_SHORT_SHA}
+    CONTAINER_IMAGE_LATEST: registry.mplab.io/eliment-cli-kafka-message-reply:latest
   script:
     - docker build -f Dockerfile -t ${CONTAINER_IMAGE} .
     - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
     - docker push ${CONTAINER_IMAGE_LATEST}
 
+
+prod:eliment-cli-kafka-message-reply:
+  stage: prod
+  tags: [app-ea]
+  when: manual
+  image:
+    name: docker/compose
+    entrypoint: ["/bin/sh", "-c"]
+  script:
+    - docker network create web_network || true
+    - docker compose -f docker-compose.yml down
+    - docker compose -f docker-compose.yml -p eliment-cli-kafka-message-reply down --timeout 10
+    - docker compose -f docker-compose.yml  pull eliment-cli-kafka-message-reply
+    - docker compose -f docker-compose.yml  up -d eliment-cli-kafka-message-reply
+    - docker image prune -a -f
+    - docker builder prune -f
+    - docker image prune -a -f
 
 prod:
   stage: prod

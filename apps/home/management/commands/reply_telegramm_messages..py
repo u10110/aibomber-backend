@@ -1,6 +1,7 @@
 import json
 import sys
 import os
+import time
 import threading
 from kafka import KafkaConsumer
 from django.core.management.base import BaseCommand, CommandError
@@ -52,7 +53,7 @@ class NewChatMessageListener(threading.Thread):
                                 user_view_name = user["name"]
 
                         chat = save_messages(message, message.user_id, channel, user_view_name)
-
+                        time.sleep(10)
                         ProjectProcessor.process_chat(chat, message)
             finally:
                 # Close down consumer to commit final offsets.

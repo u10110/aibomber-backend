@@ -219,7 +219,8 @@ class ProjectProcessor:
             # Получаем TG ID, у которых нет сообщений
             chat_for_current_channel_message = Chat.objects.filter(
                 project=project,  # Связь через таблицу Recipient
-                is_auto_active=True
+                is_auto_active=True,
+                last_message_time=None
             ).first()
 
             # Обрабатываем существующий
@@ -228,35 +229,35 @@ class ProjectProcessor:
                 return
 
             # Обрабатываем новых пользователей
-            if chat_for_current_channel_message.last_message_time is None:
-                print(f"Новый получатель {chat_for_current_channel_message.user_id}")
-                message = message_processor.send_to_gpt_assistant(
-                    chat_id=chat_for_current_channel_message.id,
-                    project_id=project.id,
-                    question="",  # Пустой вопрос для нового пользователя
-                    channel_phone=channel.phone,
-                    user_id=chat_for_current_channel_message.user_id
+
+            print(f"Новый получатель {chat_for_current_channel_message.user_id}")
+            message = message_processor.send_to_gpt_assistant(
+                chat_id=chat_for_current_channel_message.id,
+                project_id=project.id,
+                question="",  # Пустой вопрос для нового пользователя
+                channel_phone=channel.phone,
+                user_id=chat_for_current_channel_message.user_id
+            )
+
+            message_processor.send_message_to_telegram(
+                    channel.phone,
+                    chat_for_current_channel_message.user_id,
+                    message
                 )
 
-                message_processor.send_message_to_telegram(
-                        channel.phone,
-                        chat_for_current_channel_message.user_id,
-                        message
-                    )
-
-                #if message and message_processor.send_message_to_telegram(
-                #        channel.phone,
-                #        chat.user_id,
-                #        message
-                #):
-                #    ChatMessages.objects.create(
-                #        chat_id=chat,
-                #        user_name=channel.phone,
-                #        user_message=message,
-                #        message_type="outcoming"
-                #    )
-                #channel.remaining_messages = F('remaining_messages') - 1
-                #channel.save()
+            #if message and message_processor.send_message_to_telegram(
+            #        channel.phone,
+            #        chat.user_id,
+            #        message
+            #):
+            #    ChatMessages.objects.create(
+            #        chat_id=chat,
+            #        user_name=channel.phone,
+            #        user_message=message,
+            #        message_type="outcoming"
+            #    )
+            #channel.remaining_messages = F('remaining_messages') - 1
+            #channel.save()
         except Exception as e:
             print(f"Ошибка при обработке канала {channel.title}: ")
 

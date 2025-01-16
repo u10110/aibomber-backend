@@ -22,6 +22,15 @@ services:
     env_file: .env
     networks:
      - web_network
+  eliment-cli-kafka-message-reply:
+    container_name: eliment-cli-kafka-message-reply
+    image: registry.mplab.io/eliment-cli:latest
+    restart: always
+    env_file: .env
+    networks:
+      - web_network
+    command: python manage.py reply_telegramm_messages.py
+
 
 networks:
   web_network:
