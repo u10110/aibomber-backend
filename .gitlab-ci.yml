@@ -1,6 +1,7 @@
 stages:
     - build
     - deploy
+    - prod
 
 variables:
   COMPOSE_DOCKER_CLI_BUILD: 1
