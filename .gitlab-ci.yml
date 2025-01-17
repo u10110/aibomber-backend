@@ -92,7 +92,7 @@ deploy_dev:
     entrypoint: ["/bin/sh", "-c"]
   script:
     - docker compose -f docker-compose.yml -p eliment-web down --timeout 10
-    - docker compose -f docker-compose.yml  pull -e IMAGE_TAG=latest eliment-web
+    # - docker compose -f docker-compose.yml  pull -e IMAGE_TAG=latest eliment-web
     - docker compose -f docker-compose.yml  up -d -e IMAGE_TAG=latest eliment-web 
     - docker image prune -a -f
     - docker builder prune -f
