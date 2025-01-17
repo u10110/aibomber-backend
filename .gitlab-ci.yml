@@ -82,7 +82,7 @@ prod:
 
 deploy_dev:
   stage: deploy
-  tags: [eliment_dev]
+  tags: [eliment-dev]
   only:
     - main
   image:
