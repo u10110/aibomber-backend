@@ -21,7 +21,7 @@ import sys
 # Загружаем переменные окружения из файла .env
 
 
-FASTAPI_HOST = config("FASTAPI_HOST")
+TELETHON_HOST = config("TELETHON_HOST")
 
 
 def get_active_clients():
@@ -215,7 +215,7 @@ def get_users(phone):
     """
     Отправляет запрос для получения списка пользователей.
     """
-    url = f"{FASTAPI_HOST}/get-users/?phone={phone}"
+    url = f"{TELETHON_HOST}/get-users/?phone={phone}"
     try:
         response = requests.get(url)
         if response.status_code == 200:
@@ -232,7 +232,7 @@ def get_messages(phone, user_id, offset_date):
     """
     Отправляет запрос для получения сообщений от пользователя.
     """
-    url = f"{FASTAPI_HOST}/get-messages/"
+    url = f"{TELETHON_HOST}/get-messages/"
     payload = {
         "phone": phone,
         "user_id": user_id,
