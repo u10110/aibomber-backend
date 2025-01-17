@@ -18,9 +18,10 @@ services:
     image: registry.mplab.io/eliment-cli:latest
     restart: always
     env_file: .env
+
   eliment-cli-kafka-message-reply:
     container_name: eliment-cli-kafka-message-reply
-    image: registry.mplab.io/eliment-cli:latest
+    image: registry.mplab.io/eliment-cli-kafka-message-reply:latest
     restart: always
     env_file: .env
     command: python manage.py reply_telegram_messages
