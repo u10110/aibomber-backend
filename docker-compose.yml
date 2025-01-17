@@ -29,7 +29,7 @@ services:
     env_file: .env
     networks:
       - web_network
-    command: python manage.py reply_telegramm_messages.py
+    command: python manage.py reply_telegramm_messages
 
 
 networks:
