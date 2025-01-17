@@ -15,12 +15,12 @@ services:
 
   eliment-cli:
     container_name: eliment-cli
-    image: registry.mplab.io/eliment-cli:${IMAGE_TAG}
+    image: registry.mplab.io/eliment-cli:latest
     restart: always
     env_file: .env
   eliment-cli-kafka-message-reply:
     container_name: eliment-cli-kafka-message-reply
-    image: registry.mplab.io/eliment-cli:${IMAGE_TAG}
+    image: registry.mplab.io/eliment-cli:latest
     restart: always
     env_file: .env
     command: python manage.py reply_telegramm_messages
