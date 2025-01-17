@@ -54,7 +54,6 @@ prod:eliment-cli-kafka-message-reply:
     entrypoint: ["/bin/sh", "-c"]
   script:
     - docker network create web_network || true
-    - docker compose -f docker-compose.yml down
     - docker compose -f docker-compose.yml -p eliment-cli-kafka-message-reply down --timeout 10
     - docker compose -f docker-compose.yml  pull eliment-cli-kafka-message-reply
     - docker compose -f docker-compose.yml  up -d eliment-cli-kafka-message-reply
@@ -71,7 +70,6 @@ prod:
     entrypoint: ["/bin/sh", "-c"]
   script:
     - docker network create web_network || true
-    - docker compose -f docker-compose.yml down
     - docker compose -f docker-compose.yml -p eliment-web down --timeout 10
     - docker compose -f docker-compose.yml  pull eliment-web
     - docker compose -f docker-compose.yml  up -d eliment-web
