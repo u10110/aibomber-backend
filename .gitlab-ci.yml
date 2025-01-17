@@ -1,6 +1,6 @@
 stages:
     - build
-    - prod
+    - deploy
 
 variables:
   COMPOSE_DOCKER_CLI_BUILD: 1
@@ -77,3 +77,19 @@ prod:
     - docker image prune -a -f
     - docker builder prune -f
     - docker image prune -a -f
+
+
+deploy_dev:
+  stage: deploy
+  tags: [eliment_dev]
+  only:
+    - main
+  image:
+    name: docker/compose
+    entrypoint: ["/bin/sh", "-c"]
+  script:
+    - docker compose -f docker-compose.yml -p eliment-web down --timeout 10 -e IMAGE_TAG=latest
+    - docker compose -f docker-compose.yml  pull eliment-web -e IMAGE_TAG=latest
+    - docker compose -f docker-compose.yml  up -d eliment-web -e IMAGE_TAG=latest
+    - docker image prune -a -f
+    - docker builder prune -f
