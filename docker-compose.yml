@@ -1,11 +1,9 @@
 services:
   eliment-web:
     container_name: eliment_web
-    image: registry.mplab.io/eliment-web:latest
+    image: registry.mplab.io/eliment-web:${IMAGE_TAG}
     restart: always
     env_file: .env
-    networks:
-      - web_network
     volumes:
       - /mnt/media/images:/app/apps/media/images
     # depends_on:
@@ -17,22 +15,12 @@ services:
 
   eliment-cli:
     container_name: eliment-cli
-    image: registry.mplab.io/eliment-cli:latest
+    image: registry.mplab.io/eliment-cli:${IMAGE_TAG}
     restart: always
     env_file: .env
-    networks:
-     - web_network
   eliment-cli-kafka-message-reply:
     container_name: eliment-cli-kafka-message-reply
-    image: registry.mplab.io/eliment-cli:latest
+    image: registry.mplab.io/eliment-cli:${IMAGE_TAG}
     restart: always
     env_file: .env
-    networks:
-      - web_network
     command: python manage.py reply_telegramm_messages
-
-
-networks:
-  web_network:
-    external: true
-    name: web_network
