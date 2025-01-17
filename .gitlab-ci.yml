@@ -43,6 +43,7 @@ build:eliment-cli-kafka-message-reply:
     - docker build -f Dockerfile -t ${CONTAINER_IMAGE} .
     - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
     - docker push ${CONTAINER_IMAGE_LATEST}
+    - docker system prune -f -a
 
 
 prod:eliment-cli-kafka-message-reply:
