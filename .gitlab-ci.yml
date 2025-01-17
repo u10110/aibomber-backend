@@ -20,9 +20,9 @@ build:
   allow_failure: true
   stage: build
   image: docker
-  # only:
-  # - main
-  when: manual
+  only:
+  - main
+  # when: manual
   variables:
     CONTAINER_IMAGE: registry.mplab.io/eliment-web:${CI_COMMIT_SHORT_SHA}
     CONTAINER_IMAGE_LATEST: registry.mplab.io/eliment-web:latest
@@ -36,9 +36,9 @@ build:eliment-cli-kafka-message-reply:
   #allow_failure: true
   stage: build
   image: docker
-  when: manual
-  # only:
-  #   - main
+  # when: manual
+  only:
+    - main
   variables:
     CONTAINER_IMAGE: registry.mplab.io/eliment-cli-kafka-message-reply:${CI_COMMIT_SHORT_SHA}
     CONTAINER_IMAGE_LATEST: registry.mplab.io/eliment-cli-kafka-message-reply:latest
@@ -85,8 +85,9 @@ prod:
 deploy_dev:
   stage: deploy
   tags: [eliment-dev]
-  only:
-    - main
+  # only:
+  #   - main
+  when: manual
   image:
     name: docker/compose
     entrypoint: ["/bin/sh", "-c"]
