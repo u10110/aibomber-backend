@@ -85,9 +85,9 @@ prod:
 deploy_dev:
   stage: deploy
   tags: [eliment-dev]
-  # only:
-  #   - main
-  when: manual
+  only:
+    - main
+  # when: manual
   image:
     name: docker/compose
     entrypoint: ["/bin/sh", "-c"]
