@@ -24,6 +24,15 @@ KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
 running=True
 
 
+class Command(BaseCommand):
+    help = 'Launches Listener for new-chat-message message : Kafka'
+
+    def handle(self, *args, **options):
+        td = NewChatMessageListener()
+        td.start()
+        logger.info('Launches Listener for new-chat-message message : Kafka')
+
+
 class NewChatMessageListener(threading.Thread):
     class Consumer(threading.Thread):
         def __init__(self):
@@ -58,11 +67,3 @@ class NewChatMessageListener(threading.Thread):
             finally:
                 # Close down consumer to commit final offsets.
                 self.consumer.close()
-
-
-class Command(BaseCommand):
-    help = 'Launches Listener for new-chat-message message : Kafka'
-    def handle(self, *args, **options):
-        td = NewChatMessageListener()
-        td.start()
-        logger.info('Launches Listener for new-chat-message message : Kafka')

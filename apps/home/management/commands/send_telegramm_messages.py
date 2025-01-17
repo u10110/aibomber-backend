@@ -8,8 +8,8 @@ from apps.home.models import (
 
 
 class Command(BaseCommand):
-    help = 'Launches Listener for new-chat-message message : Kafka'
+    help = 'Launches send messages to new telegram  recipients'
 
     def handle(self, *args, **options):
         new_chat_messages()
-        logger.info('Launches Listener for new-chat-message message : Kafka')
+        logger.info('Launches  new_chat_messages')
