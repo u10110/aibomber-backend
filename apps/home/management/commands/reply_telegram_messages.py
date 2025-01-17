@@ -44,7 +44,7 @@ class NewChatMessageListener(threading.Thread):
 
         def run(self):
             try:
-                self.consumer.consumer.subscribe(['new-message-events'])
+                self.consumer.subscribe(['new-message-events'])
                 while running:
                     for msg in self.consumer:
                         logger.info('new message from new-message-events')
