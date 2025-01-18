@@ -1,0 +1,27 @@
+services:
+  eliment-web:
+    container_name: eliment_web
+    image: registry.mplab.io/eliment-web:${IMAGE_TAG}
+    restart: always
+    env_file: .env-dev
+    volumes:
+      - /mnt/media/images:/app/apps/media/images
+    # depends_on:
+    #   - fastapi-app
+    ports:
+      - "80:80"
+    command: gunicorn --config gunicorn-cfg.py core.wsgi --workers 12 --threads 12 --timeout 300 --graceful-timeout 300 --max-requests 1000 --max-requests-jitter 50
+
+
+  eliment-cli:
+    container_name: eliment-cli
+    image: registry.mplab.io/eliment-cli:latest
+    restart: always
+    env_file: .env-dev
+
+  eliment-cli-kafka-message-reply:
+    container_name: eliment-cli-kafka-message-reply
+    image: registry.mplab.io/eliment-cli-kafka-message-reply:latest
+    restart: always
+    env_file: .env-dev
+    command: python manage.py reply_telegram_messages
