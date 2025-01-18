@@ -5,11 +5,14 @@ from apps.telegram.sndr import new_chat_messages
 from apps.home.models import (
     Project
 )
+import time
 
 
 class Command(BaseCommand):
     help = 'Launches send messages to new telegram  recipients'
 
     def handle(self, *args, **options):
-        new_chat_messages()
+        while True:
+            new_chat_messages()
+            time.sleep(120)
         logger.info('Launches  new_chat_messages')

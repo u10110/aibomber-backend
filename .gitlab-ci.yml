@@ -81,6 +81,23 @@ prod:eliment-cli-kafka-message-reply:
     - docker builder prune -f
     - docker image prune -a -f
 
+
+prod:eliment-cli-new-message-send:
+  stage: prod
+  tags: [app-ea]
+  when: manual
+  image:
+    name: docker/compose
+    entrypoint: ["/bin/sh", "-c"]
+  script:
+    - docker network create web_network || true
+    - docker compose -f docker-compose.yml -p eliment-cli-new-message-send down --timeout 10
+    - docker compose -f docker-compose.yml  pull eliment-cli-new-message-send
+    - docker compose -f docker-compose.yml  up -d eliment-cli-new-message-send
+    - docker image prune -a -f
+    - docker builder prune -f
+    - docker image prune -a -f
+
 prod:
   stage: prod
   tags: [app-ea]
