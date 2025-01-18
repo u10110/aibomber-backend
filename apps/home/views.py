@@ -745,7 +745,7 @@ def project_edit(request, project_id):
     if request.method == "POST":
         form = ProjectForm(request.POST, request.FILES, instance=project)
         file_formset = ProjectFileFormSet(request.POST, request.FILES, queryset=ProjectFile.objects.none())
-        if form.is_valid() and file_formset.is_valid():
+        if form.is_valid() :
             form.save()
 
             # Обновляем project_id для связанных каналов
@@ -774,11 +774,12 @@ def project_edit(request, project_id):
                               channel=random.choice(channels))
                     ch.save()
 
-            for file_form in file_formset:
-                if file_form.cleaned_data.get('file'):
-                    project_file = file_form.save(commit=False)
-                    project_file.project = project
-                    project_file.save()
+            if file_formset.is_valid():
+                for file_form in file_formset:
+                    if file_form.cleaned_data.get('file'):
+                        project_file = file_form.save(commit=False)
+                        project_file.project = project
+                        project_file.save()
 
 
             return redirect("projects")  # После успешного сохранения возвращаемся к списку проектов
