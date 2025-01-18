@@ -2,7 +2,7 @@
 Telegram Message Sender Service
 This module handles automated message sending via Telegram based on client settings and projects.
 """
-
+from loguru import logger
 from typing import List, Dict, Optional
 import os
 import datetime
@@ -10,6 +10,7 @@ import requests
 from django.db.models import F, QuerySet
 from django.shortcuts import get_object_or_404
 from django.db.models.aggregates import Min
+from django.utils import timezone
 
 
 from apps.home.services.gpt_assistant import GPTAssistant
@@ -183,6 +184,7 @@ class ProjectProcessor:
         Args:
             project: Объект проекта для обработки
         """
+        logger.info(f"Обработка Проекта  {project.id}")
         # Получаем активные каналы проекта
         channels = Channel.objects.filter(
             client=project.client_id,
@@ -202,14 +204,14 @@ class ProjectProcessor:
 
     @staticmethod
     def _process_single_channel_for_new_message(channel: Channel, project: Project) -> None:
-        print(f"Обработка канала: {channel.id}, телефон: {channel.phone}")
+        logger.info(f"Обработка канала: {channel.id}, телефон: {channel.phone}")
 
         message_processor = MessageProcessor()
 
         today_send_new_messages = ChatMessages.objects.filter(
             chat_id__in=Chat.objects.filter(channel=channel),
-            created_at__gte=(datetime.datetime.now() - datetime.timedelta(days=1))
-        ).values('chat_id_id').annotate(min_created_at=Min('min_created')).count()
+            created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(days=1))
+        ).values('chat_id_id').annotate(min_created_at=Min('created_at')).count()
 
         if today_send_new_messages>=channel.max_daily_messages:
             print(f"У канала: {channel.id}, телефон: {channel.phone} достигнут дневной лимит новых сообщений")
@@ -311,9 +313,10 @@ def new_chat_messages():
         clients = ClientManager.get_active_clients()
 
         for client in clients:
-            print(f"Обработка клиента {client.client_id}")
+            logger.info(f"Обработка клиента {client.client_id}")
             projects = ClientManager.get_active_projects(client, current_time)
-
+            if projects.count() == 0:
+                logger.info(f"клиент {client.client_id} не имеет проектов для выполнения на данный момент")
             project_processor = ProjectProcessor()
             for project in projects:
                 project_processor.process_project(project)
