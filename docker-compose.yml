@@ -13,11 +13,12 @@ services:
     command: gunicorn --config gunicorn-cfg.py core.wsgi --workers 12 --threads 12 --timeout 300 --graceful-timeout 300 --max-requests 1000 --max-requests-jitter 50
 
 
-  eliment-cli:
-    container_name: eliment-cli
+  eliment-cli-new-message-send:
+    container_name: eliment-cli-new-message-send
     image: registry.mplab.io/eliment-cli:latest
     restart: always
     env_file: .env
+    command: python manage.py send_telegramm_messages
 
   eliment-cli-kafka-message-reply:
     container_name: eliment-cli-kafka-message-reply
