@@ -48,6 +48,22 @@ build:eliment-cli-kafka-message-reply:
     - docker push ${CONTAINER_IMAGE_LATEST}
     - docker system prune -f -a
 
+build:eliment-cli-new-message-send:
+  #allow_failure: true
+  stage: build
+  image: docker
+  # when: manual
+  only:
+    - main
+  variables:
+    CONTAINER_IMAGE: registry.mplab.io/eliment-cli-new-message-send:${CI_COMMIT_SHORT_SHA}
+    CONTAINER_IMAGE_LATEST: registry.mplab.io/eliment-cli-new-message-send:latest
+  script:
+    - docker build -f Dockerfile -t ${CONTAINER_IMAGE} .
+    - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
+    - docker push ${CONTAINER_IMAGE_LATEST}
+    - docker system prune -f -a
+
 
 prod:eliment-cli-kafka-message-reply:
   stage: prod

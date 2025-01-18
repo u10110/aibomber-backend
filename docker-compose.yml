@@ -15,7 +15,7 @@ services:
 
   eliment-cli-new-message-send:
     container_name: eliment-cli-new-message-send
-    image: registry.mplab.io/eliment-cli:latest
+    image: registry.mplab.io/eliment-cli-new-message-send:latest
     restart: always
     env_file: .env
     command: python manage.py send_telegramm_messages
