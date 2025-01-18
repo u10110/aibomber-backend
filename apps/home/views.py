@@ -697,18 +697,20 @@ def project_create(request):
                 channel.save()
 
             # Обновляем project_id для связанных получателей
+            # Обновляем project_id для связанных получателей
             recipients = form.cleaned_data.get('recipients', [])
+            remote_chat_ids = []
             for recipient in recipients:
                 recipient.project_id = project.id
                 recipient.save()
-
-            remote_chat_ids = [recipient.remote_ids.replace('\n', ',').split(',').strip() for recipient in recipients if
-                               recipient.remote_ids.replace('\n', ',').split(',').strip()]
+                [remote_chat_ids.append(recipient) for recipient in
+                 recipient.remote_ids.replace('\n', ',').split(',')]
 
             for remote_chat_id in remote_chat_ids:
                 try:
-                    Chat.objects.get(project=project,
-                                     user_id=remote_chat_id)
+                    ch = Chat.objects.get(  project=project,
+                                            user_id=remote_chat_id
+                                            )
                 except Chat.DoesNotExist:
                     ch = Chat(project=project,
                               user_id=remote_chat_id,
@@ -742,7 +744,8 @@ def project_edit(request, project_id):
 
     if request.method == "POST":
         form = ProjectForm(request.POST, request.FILES, instance=project)
-        if form.is_valid():
+        file_formset = ProjectFileFormSet(request.POST, request.FILES, queryset=ProjectFile.objects.none())
+        if form.is_valid() and file_formset.is_valid():
             form.save()
 
             # Обновляем project_id для связанных каналов
@@ -770,6 +773,13 @@ def project_edit(request, project_id):
                               user_id=remote_chat_id,
                               channel=random.choice(channels))
                     ch.save()
+
+            for file_form in file_formset:
+                if file_form.cleaned_data.get('file'):
+                    project_file = file_form.save(commit=False)
+                    project_file.project = project
+                    project_file.save()
+
 
             return redirect("projects")  # После успешного сохранения возвращаемся к списку проектов
     else:
