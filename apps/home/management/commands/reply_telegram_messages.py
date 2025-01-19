@@ -8,7 +8,7 @@ from confluent_kafka import Consumer
 from django.core.management.base import BaseCommand, CommandError
 from dotenv import load_dotenv
 from apps.telegram.prsr import save_messages, get_users
-from apps.telegram.sndr import ProjectProcessor
+from apps.telegram.sndr import ProjectProcessor, MessageProcessor
 from loguru import logger
 from apps.home.models import (
     Project,
@@ -31,7 +31,7 @@ class Command(BaseCommand):
                              'auto.offset.reset': 'earliest'})
         try:
             consumer.subscribe(['new-message-events'])
-
+            logger.info("subscribed  to new-message-events")
             while True:
                 msg = consumer.poll(1.0)  # Wait for 1 second
                 if msg is None:
@@ -58,7 +58,8 @@ class Command(BaseCommand):
 
                 chat = save_messages(message.get('user_id'), [message], project, channel, user_view_name)
                 time.sleep(10)
-                ProjectProcessor.process_chat(chat, message)
+                message_processor = MessageProcessor()
+                ProjectProcessor.process_chat(chat, message_processor)
 
                 print(f"Received message: {chat.id}")
         except Exception as e:
