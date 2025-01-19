@@ -40,10 +40,11 @@ class NewChatMessageListener(threading.Thread):
             self.consumer = KafkaConsumer(
                 bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
                 auto_offset_reset='earliest',
-                consumer_timeout_ms=1000)
+                consumer_timeout_ms=10000)
 
         def run(self):
             try:
+                logger.info('new message consumer new-message-events')
                 self.consumer.subscribe(['new-message-events'])
                 while running:
                     for msg in self.consumer:
@@ -64,6 +65,8 @@ class NewChatMessageListener(threading.Thread):
                         chat = save_messages(message, message.user_id, channel, user_view_name)
                         time.sleep(10)
                         ProjectProcessor.process_chat(chat, message)
+            except Exception as e:
+                logger.error(f"consumer error: {e}")
             finally:
                 # Close down consumer to commit final offsets.
                 self.consumer.close()
