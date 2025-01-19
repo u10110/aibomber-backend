@@ -40,7 +40,7 @@ class Command(BaseCommand):
                     logger.info("Consumer error: {}".format(msg.error()))
                     continue
 
-                logger.info('new message from new-message-events')
+                logger.info(f"new message from new-message-events {message.get('channel_phone')}")
                 message = json.loads(msg.value().decode('utf-8'))
                 channel = Channel.objects.get(phone=message.get('channel_phone'))
 
