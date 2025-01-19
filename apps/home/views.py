@@ -24,8 +24,6 @@ from apps.billing.models import Limits, Order, Paid, UnicTariff
 from apps.users_control.models import ReferalCounter, UsersAgreement
 from core.settings import MEDIA_ROOT
 
-from kafka import KafkaProducer
-from kafka.errors import KafkaError
 
 from apps.telegram.sndr import ProjectProcessor
 from apps.telegram.prsr import process_project
@@ -59,7 +57,7 @@ from .services.gpt_assistant import GPTAssistant
 from django.db.models import Count, Max, Subquery, OuterRef, IntegerField, Case, When
 import random
 
-KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
+
 TELETHON_HOST = config("TELETHON_HOST")
 
 def error(request):
@@ -1250,8 +1248,6 @@ def send_code(request):
             phone_number = re.sub(r'[^\d+]', '', phone_number.strip())
             if not phone_number.startswith('+'):
                 phone_number = '+' + phone_number  # Добавляем '+' в начало, если его нет
-
-            #producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS], value_serializer=lambda m: json.dumps(m).encode('ascii'))
 
             print(phone_number)
             # Отправка запроса в FastAPI
