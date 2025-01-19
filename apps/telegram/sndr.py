@@ -241,25 +241,19 @@ class ProjectProcessor:
                 user_id=chat_for_current_channel_message.user_id
             )
 
-            message_processor.send_message_to_telegram(
+            if message and message_processor.send_message_to_telegram(
                     channel.phone,
                     chat_for_current_channel_message.user_id,
                     message
+            ):
+                ChatMessages.objects.create(
+                    chat_id=chat_for_current_channel_message,
+                    user_name=channel.phone,
+                    user_message=message,
+                    message_type="outcoming"
                 )
-
-            #if message and message_processor.send_message_to_telegram(
-            #        channel.phone,
-            #        chat.user_id,
-            #        message
-            #):
-            #    ChatMessages.objects.create(
-            #        chat_id=chat,
-            #        user_name=channel.phone,
-            #        user_message=message,
-            #        message_type="outcoming"
-            #    )
-            #channel.remaining_messages = F('remaining_messages') - 1
-            #channel.save()
+            channel.remaining_messages = F('remaining_messages') - 1
+            channel.save()
         except Exception as e:
             logger.info(f"Ошибка при обработке канала {channel.title}: ")
 
