@@ -30,7 +30,7 @@ class ClientSettings(models.Model):
     )
     tg_chat_id = models.TextField(null=True, blank=True)
     tg_token = models.TextField(null=True, blank=True)
-    balance = models.IntegerField(max_length=55, default=0)
+    balance = models.IntegerField(default=0)
     # wb_token = models.TextField(null=True, blank=True)
     updated_at = models.DateTimeField(null=True, auto_now_add=True)
     # tochka_number = models.ForeignKey(
