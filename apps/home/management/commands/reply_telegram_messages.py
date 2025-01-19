@@ -3,7 +3,7 @@ import sys
 import os
 import time
 import threading
-from kafka import KafkaConsumer
+from confluent_kafka import Consumer
 from django.core.management.base import BaseCommand, CommandError
 from dotenv import load_dotenv
 from apps.telegram.prsr import save_messages, get_users
@@ -37,36 +37,39 @@ class NewChatMessageListener(threading.Thread):
     class Consumer(threading.Thread):
         def __init__(self):
             threading.Thread.__init__(self)
-            self.consumer = KafkaConsumer(
-                bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-                auto_offset_reset='earliest',
-                consumer_timeout_ms=10000)
+            self.consumer = Consumer({'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS})
+            logger.info('new message consumer new-message-events')
 
         def run(self):
             try:
-                logger.info('new message consumer new-message-events')
-                self.consumer.subscribe(['new-message-events'])
-                while running:
-                    for msg in self.consumer:
-                        logger.info('new message from new-message-events')
-                        message = json.loads(msg.value().decode('utf-8'))
-                        channel = Channel.objects.get(phone=message.channel_phone)
+                while True:
+                    msg = self.consumer(1.0)  # Wait for 1 second
+                    if msg is None:
+                        continue
+                    if msg.error():
+                        print("Consumer error: {}".format(msg.error()))
+                        continue
 
-                        users_response = get_users(message.channel_phone)
-                        if not users_response.get("users"):
-                            logger.info(f"Нет пользователей для телефона {message.channel_phone}")
-                            return
-                        user_view_name = ''
-                        # Шаг 3.2: Получаем сообщения для каждого пользователя
-                        for user in users_response["users"]:
-                            if user["id"] == message.user_id:
-                                user_view_name = user["name"]
+                    data = json.loads(msg.value().decode('utf-8'))
 
-                        chat = save_messages(message, message.user_id, channel, user_view_name)
-                        time.sleep(10)
-                        ProjectProcessor.process_chat(chat, message)
-            except Exception as e:
-                logger.error(f"consumer error: {e}")
+                    logger.info('new message from new-message-events')
+                    message = json.loads(msg.value().decode('utf-8'))
+                    channel = Channel.objects.get(phone=message.channel_phone)
+
+                    users_response = get_users(message.channel_phone)
+                    if not users_response.get("users"):
+                        logger.info(f"Нет пользователей для телефона {message.channel_phone}")
+                        return
+                    user_view_name = ''
+                    # Шаг 3.2: Получаем сообщения для каждого пользователя
+                    for user in users_response["users"]:
+                        if user["id"] == message.user_id:
+                            user_view_name = user["name"]
+
+                    chat = save_messages(message, message.user_id, channel, user_view_name)
+                    time.sleep(10)
+                    ProjectProcessor.process_chat(chat, message)
+
+                    print(f"Received message: {data}")
             finally:
-                # Close down consumer to commit final offsets.
                 self.consumer.close()
