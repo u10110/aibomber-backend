@@ -42,19 +42,19 @@ class Command(BaseCommand):
 
                 logger.info('new message from new-message-events')
                 message = json.loads(msg.value().decode('utf-8'))
-                channel = Channel.objects.get(phone=message.channel_phone)
+                channel = Channel.objects.get(phone=message.get('channel_phone'))
 
-                users_response = get_users(message.channel_phone)
+                users_response = get_users(message.get('channel_phone'))
                 if not users_response.get("users"):
-                    logger.info(f"Нет пользователей для телефона {message.channel_phone}")
+                    logger.info(f"Нет пользователей для телефона {message.get('channel_phone')}")
                     return
                 user_view_name = ''
                 # Шаг 3.2: Получаем сообщения для каждого пользователя
                 for user in users_response["users"]:
-                    if user["id"] == message.user_id:
+                    if user["id"] == message.get('user_id'):
                         user_view_name = user["name"]
 
-                chat = save_messages(message, message.user_id, channel, user_view_name)
+                chat = save_messages(message, message.get('user_id'), channel, user_view_name)
                 time.sleep(10)
                 ProjectProcessor.process_chat(chat, message)
 
