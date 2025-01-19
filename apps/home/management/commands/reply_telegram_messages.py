@@ -54,7 +54,9 @@ class Command(BaseCommand):
                     if user["id"] == message.get('user_id'):
                         user_view_name = user["name"]
 
-                chat = save_messages(message, message.get('user_id'), channel, user_view_name)
+                project = Project.objects.filter(id=channel.project_id).get()
+
+                chat = save_messages(message.get('user_id'), [message], project, channel, user_view_name)
                 time.sleep(10)
                 ProjectProcessor.process_chat(chat, message)
 
