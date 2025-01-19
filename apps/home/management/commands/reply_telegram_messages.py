@@ -3,6 +3,7 @@ import sys
 import os
 import time
 import threading
+import traceback
 from confluent_kafka import Consumer
 from django.core.management.base import BaseCommand, CommandError
 from dotenv import load_dotenv
@@ -47,7 +48,7 @@ class NewChatMessageListener(threading.Thread):
                     if msg is None:
                         continue
                     if msg.error():
-                        print("Consumer error: {}".format(msg.error()))
+                        logger.info("Consumer error: {}".format(msg.error()))
                         continue
 
                     data = json.loads(msg.value().decode('utf-8'))
@@ -71,5 +72,8 @@ class NewChatMessageListener(threading.Thread):
                     ProjectProcessor.process_chat(chat, message)
 
                     print(f"Received message: {data}")
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error(e)
             finally:
                 self.consumer.close()
