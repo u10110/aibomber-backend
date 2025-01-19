@@ -45,7 +45,7 @@ class ProcessLockManager:
             bool: True if lock was created, False if process is already running
         """
         if os.path.exists(PID_FILE):
-            print("sndr.py is already running.")
+            logger.info("sndr.py is already running.")
             return False
 
         with open(PID_FILE, "w") as f:
@@ -134,7 +134,7 @@ class MessageProcessor:
 
         # Получение объекта проекта
         project = get_object_or_404(Project, id=project_id)
-        print(project)
+        logger.info(project)
 
         # Создание экземпляра GPTAssistant
         assistant = GPTAssistant(project=project, chat_id=chat_id, channel_phone=channel_phone, user_id=user_id)
@@ -145,7 +145,7 @@ class MessageProcessor:
             return answer
         except Exception as e:
 
-            print(f"GPT Assistant connection error: {e}")
+            logger.error(f"GPT Assistant connection error: {e}")
             return None
 
     @staticmethod
@@ -168,7 +168,7 @@ class MessageProcessor:
             )
             return response.status_code == 200
         except Exception as e:
-            print(f"Telegram API error: {e}")
+            logger.error(f"Telegram API error: {e}")
             return False
 
 
@@ -194,7 +194,7 @@ class ProjectProcessor:
         )
 
         if not channels.exists():
-            print(f"Проект {project.id}  {project.title} не имеет активных каналов")
+            logger.info(f"Проект {project.id}  {project.title} не имеет активных каналов")
             return
 
         # Обрабатываем каждый канал
@@ -214,7 +214,7 @@ class ProjectProcessor:
         ).values('chat_id_id').annotate(min_created_at=Min('created_at')).count()
 
         if today_send_new_messages>=channel.max_daily_messages:
-            print(f"У канала: {channel.id}, телефон: {channel.phone} достигнут дневной лимит новых сообщений")
+            logger.info(f"У канала: {channel.id}, телефон: {channel.phone} достигнут дневной лимит новых сообщений")
 
 
         try:
@@ -227,12 +227,12 @@ class ProjectProcessor:
 
             # Обрабатываем существующий
             if not chat_for_current_channel_message:
-                print(f"Нет новых активных чатов для телефона {channel.phone}")
+                logger.info(f"Нет новых активных чатов для телефона {channel.phone}")
                 return
 
             # Обрабатываем новых пользователей
 
-            print(f"Новый получатель {chat_for_current_channel_message.user_id}")
+            logger.info(f"Новый получатель {chat_for_current_channel_message.user_id}")
             message = message_processor.send_to_gpt_assistant(
                 chat_id=chat_for_current_channel_message.id,
                 project_id=project.id,
@@ -261,7 +261,7 @@ class ProjectProcessor:
             #channel.remaining_messages = F('remaining_messages') - 1
             #channel.save()
         except Exception as e:
-            print(f"Ошибка при обработке канала {channel.title}: ")
+            logger.info(f"Ошибка при обработке канала {channel.title}: ")
 
     @staticmethod
     def process_chat(
