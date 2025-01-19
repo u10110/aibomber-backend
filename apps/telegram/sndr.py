@@ -70,7 +70,7 @@ class ClientManager:
         Returns:
             QuerySet: Active clients with balance > 0
         """
-        return ClientSettings.objects.filter(balance__gt=0)
+        return ClientSettings.objects.filter(is_active=True)
 
     @staticmethod
     def get_active_projects(client: ClientSettings, current_time: datetime.time) -> QuerySet:
@@ -314,12 +314,16 @@ def new_chat_messages():
 
         for client in clients:
             logger.info(f"Обработка клиента {client.client_id}")
-            projects = ClientManager.get_active_projects(client, current_time)
-            if projects.count() == 0:
-                logger.info(f"клиент {client.client_id} не имеет проектов для выполнения на данный момент")
-            project_processor = ProjectProcessor()
-            for project in projects:
-                project_processor.process_project(project)
+            if client.balance >0:
+                logger.info(f"Баланс клиента {client.balance}")
+                projects = ClientManager.get_active_projects(client, current_time)
+                if projects.count() == 0:
+                    logger.info(f"клиент {client.client_id} не имеет проектов для выполнения на данный момент")
+                project_processor = ProjectProcessor()
+                for project in projects:
+                    project_processor.process_project(project)
+            else:
+                logger.info(f"Нулевой баланс у клиента {client.balance}")
 
     finally:
         ProcessLockManager.remove_lock()
