@@ -30,6 +30,8 @@ class Command(BaseCommand):
                              'group.id': 'group-1',
                              'auto.offset.reset': 'earliest'})
         try:
+            consumer.subscribe(['new-message-events'])
+
             while True:
                 msg = consumer.poll(1.0)  # Wait for 1 second
                 if msg is None:
