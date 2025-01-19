@@ -55,8 +55,12 @@ class Command(BaseCommand):
                         user_view_name = user["name"]
 
                 project = Project.objects.filter(id=channel.project_id).get()
-
-                chat = save_messages(message.get('user_id'), [message], project, channel, user_view_name)
+                try:
+                    logger.info(f"saving message {message.get('user_id')}")
+                    chat = save_messages(message.get('user_id'), [message], project, channel, user_view_name)
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error(e)
                 time.sleep(10)
                 message_processor = MessageProcessor()
                 ProjectProcessor.process_chat(chat, message_processor)
