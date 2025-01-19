@@ -31,7 +31,7 @@ class Command(BaseCommand):
                              'auto.offset.reset': 'earliest'})
         try:
             while True:
-                msg = consumer(1.0)  # Wait for 1 second
+                msg = consumer.poll(1.0)  # Wait for 1 second
                 if msg is None:
                     continue
                 if msg.error():
