@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
                 logger.info(f"new message from new-message-events {message.get('channel_phone')}")
                 message = json.loads(msg.value().decode('utf-8'))
-                channel = Channel.objects.get(phone=message.get('channel_phone'))
+                channel = Channel.objects.get(phone='+' + message.get('channel_phone'))
 
                 users_response = get_users(message.get('channel_phone'))
                 if not users_response.get("users"):
