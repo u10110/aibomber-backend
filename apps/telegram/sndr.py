@@ -70,7 +70,8 @@ class ClientManager:
         Returns:
             QuerySet: Active clients with balance > 0
         """
-        return ClientSettings.objects.filter(is_active=True)
+        clients = ClientSettings.objects.all()
+        return clients
 
     @staticmethod
     def get_active_projects(client: ClientSettings, current_time: datetime.time) -> QuerySet:
