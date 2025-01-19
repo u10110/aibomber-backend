@@ -26,7 +26,9 @@ class Command(BaseCommand):
     help = 'Launches Listener for new-chat-message message : Kafka'
 
     def handle(self, *args, **options):
-        consumer = Consumer({'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS})
+        consumer = Consumer({'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS,
+                             'group.id': 'group-1',
+                             'auto.offset.reset': 'earliest'})
         try:
             while True:
                 msg = consumer(1.0)  # Wait for 1 second
