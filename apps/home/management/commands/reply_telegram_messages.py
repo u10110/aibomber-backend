@@ -38,8 +38,6 @@ class Command(BaseCommand):
                     logger.info("Consumer error: {}".format(msg.error()))
                     continue
 
-                data = json.loads(msg.value().decode('utf-8'))
-
                 logger.info('new message from new-message-events')
                 message = json.loads(msg.value().decode('utf-8'))
                 channel = Channel.objects.get(phone=message.channel_phone)
@@ -58,7 +56,7 @@ class Command(BaseCommand):
                 time.sleep(10)
                 ProjectProcessor.process_chat(chat, message)
 
-                print(f"Received message: {data}")
+                print(f"Received message: {chat.id}")
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error(e)
