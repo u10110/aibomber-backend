@@ -6,6 +6,7 @@ from django.db.models import F
 from decouple import config
 from apps.home.services.gpt_assistant import GPTAssistant
 # Import models after Django configuration
+from loguru import logger
 from apps.home.models import (
     Project,
     Channel,
@@ -111,7 +112,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
         if not message_text or not message_id or not sender_id or not message_date or sender_id == 777000:
             continue  # Пропускаем сообщения с отсутствующими полями
        # print(message)
-        print(user_id,sender_id, user_name, to_id, from_id)
+        logger.debug(user_id,sender_id, user_name, to_id, from_id)
         # Определяем, кто отправил сообщение: GPT Assistant или другой пользователь
         if sender_id != user_id and user_name is None:
             user_name = "GPT Assistant"
@@ -153,24 +154,24 @@ def save_messages(user_id, messages, project, channel, user_view_name):
                     created_at=message_date,
                 )
 
-                print(f"Сообщение сохранено для пользователя {user_name}: {message_id}")
+                logger.info(f"Сообщение сохранено для пользователя {user_name}: {message_id}")
             else:
-                print(f"Сообщение уже существует для пользователя {user_id}: {message_id}")
+                logger.info(f"Сообщение уже существует для пользователя {user_id}: {message_id}")
 
     if chat:
         # Создание экземпляра GPTAssistant
         assistant = GPTAssistant(project=project, chat_id=chat.id, channel_phone=channel.phone, user_id=user_id)
-        print(f"Получение статуса общения {user_id}")
+        logger.info(f"Получение статуса общения {user_id}")
         # Получение ответа от GPT
         try:
             text_status = assistant.ask_chat_status()
-            print(f"Chat status is  {text_status}")
+            logger.info(f"Chat status is  {text_status}")
             statuses = dict(Chat.CHAT_STATUS)
             if statuses[text_status] is not None:
                 chat.status = text_status
                 chat.save()
         except Exception as e:
-            print(f"text_status get error : {text_status}")
+            logger.info(f"text_status get error : {text_status}")
             return None
     return chat
 
