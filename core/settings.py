@@ -46,7 +46,8 @@ ALLOWED_HOSTS = [
     "192.168.122.200",
     "192.168.122.26",
     config("SERVER", default="192.168.122.200"),
-    "localhost.localdomain"
+    "localhost.localdomain",
+    'localhost:5173'
 ]
 
 
@@ -285,3 +286,5 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
 }
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']

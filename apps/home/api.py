@@ -60,8 +60,14 @@ import random
 from django.contrib.auth import authenticate, get_user_model, login
 from django.http import JsonResponse
 
-
 TELETHON_HOST = config("TELETHON_HOST")
+
+from django.utils.decorators import method_decorator
+
+from django_telegram_login.authentication import verify_telegram_authentication
+from django.middleware.csrf import get_token
+
+
 
 
 def projects(request):
@@ -81,11 +87,12 @@ def projects(request):
 def is_ajax(request):
     return request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
 
-
+@csrf_exempt
 def auth_login(request):
-    if is_ajax(request=request) and request.method == "POST":
-        phone = request.get("phone")
-        password = request.get("password")
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        phone = data.get("phone")
+        password = data.get("password")
         phone = (
             phone.replace("(", "")
                 .replace(")", "")
@@ -103,9 +110,15 @@ def auth_login(request):
             return JsonResponse({"error": "not_reg"}, status=400)
         if (user is not None) and user.is_active:
             login(request, user)
-            return JsonResponse({"accessToken": request.csrf_token, "userData,": user}, status=200)
+            session_user = {
+                'phone': user.phone,
+                'username': user.username
+            }
+            return JsonResponse({"accessToken":get_token(request), "userData,": json.dumps(session_user)}, status=200)
         else:
             msg = "Invalid credentials"
             return JsonResponse({"error": msg}, status=400)
+    else:
+        return HttpResponse(status=404)
 
 
