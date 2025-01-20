@@ -11,7 +11,7 @@ from django.db.models import F, QuerySet
 from django.shortcuts import get_object_or_404
 from django.db.models.aggregates import Min
 from django.utils import timezone
-
+import time
 
 from apps.home.services.gpt_assistant import GPTAssistant
 
@@ -281,6 +281,8 @@ class ProjectProcessor:
 
                 if sent == 'SENT_ERROR':
                     logger.info(f"Ошибка отправки {chat_for_current_channel_message.user_id} ")
+
+                time.sleep(120)
 
             else:
                 logger.info(f"Ошибка при генерации сообщения {chat_for_current_channel_message.user_id} ")
