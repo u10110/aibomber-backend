@@ -117,7 +117,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
             try:
                 chat = Chat.objects.get(
                     project=project,
-                    user_id=_USER_NAME,
+                    user_id__iendswith=_USER_NAME,
                     channel=channel,
                 )
             except Chat.DoesNotExist:
