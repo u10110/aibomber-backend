@@ -109,12 +109,12 @@ class MessageProcessor:
         """
         last_answer = ChatMessages.objects.filter(
             chat_id=Chat,
-            message_type="incoming"
+            message_type="outcoming"
         ).order_by('-created_at').first()
 
         query_filter = {
             'chat_id': Chat.id,
-            'message_type': "outcoming"
+            'message_type': "incoming"
         }
 
         if last_answer:
@@ -265,7 +265,7 @@ class ProjectProcessor:
     ) -> None:
 
         combined_message = message_processor.get_combined_messages(chat)
-
+        logger.debug(combined_message)
         if not combined_message:
             return
 
