@@ -241,20 +241,32 @@ class ProjectProcessor:
                 channel_phone=channel.phone,
                 user_id=chat_for_current_channel_message.user_id
             )
-
-            if message and message_processor.send_message_to_telegram(
+            logger.info(message)
+            if message:
+                sent = message_processor.send_message_to_telegram(
                     channel.phone,
                     chat_for_current_channel_message.user_id,
-                    message
-            ):
-                ChatMessages.objects.create(
-                    chat_id=chat_for_current_channel_message,
-                    user_name=channel.phone,
-                    user_message=message[:555],
-                    message_type="outcoming"
-                )
-            channel.remaining_messages = F('remaining_messages') - 1
-            channel.save()
+                    message)
+                logger.info(sent)
+                if sent:
+                    ChatMessages.objects.create(
+                        chat_id=chat_for_current_channel_message,
+                        user_name=channel.phone,
+                        user_message=message[:555],
+                        message_type="outcoming"
+                    )
+                    channel.remaining_messages = F('remaining_messages') - 1
+                    channel.save()
+                else:
+                    chat = Chat.objects.filter(
+                        id=chat_for_current_channel_message.id
+                    ).first()
+                    chat.status = 'error'
+                    chat.last_message_time = datetime.datetime.now(tz=timezone.utc)
+                    chat.save()
+                    logger.info(f"Ошибка отправки сообщения {chat_for_current_channel_message.user_id} ")
+            else:
+                logger.info(f"Ошибка при генерации сообщения {chat_for_current_channel_message.user_id} ")
         except Exception as e:
             logger.info(f"Ошибка при обработке канала {channel.title}: ")
 

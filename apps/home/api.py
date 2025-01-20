@@ -114,7 +114,7 @@ def auth_login(request):
                 'phone': user.phone,
                 'username': user.username
             }
-            return JsonResponse({"accessToken":get_token(request), "userData,": json.dumps(session_user)}, status=200)
+            return JsonResponse({"accessToken": get_token(request), "userData": json.dumps(session_user)}, status=200)
         else:
             msg = "Invalid credentials"
             return JsonResponse({"error": msg}, status=400)
