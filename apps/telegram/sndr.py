@@ -32,6 +32,12 @@ from decouple import config
 PID_FILE = "sndr.lock"
 TELETHON_HOST = config("TELETHON_HOST")
 
+MESSAGE_SENT_STATUSES = [
+    'SENT',
+    'ERROR',
+    'USER_DOESNT_EXIST'
+]
+
 
 class ProcessLockManager:
     """Manages process locking to prevent multiple instances."""
@@ -150,7 +156,7 @@ class MessageProcessor:
             return None
 
     @staticmethod
-    def send_message_to_telegram(phone: str, user_id: str, message: str) -> bool:
+    def send_message_to_telegram(phone: str, user_id: str, message: str) -> str:
         """Send message via Telegram API."""
 
         if not user_id.startswith('@'): user_id = '@' + user_id
@@ -167,7 +173,14 @@ class MessageProcessor:
                 json=payload,
                 headers={"Content-Type": "application/json"}
             )
-            return response.status_code == 200
+            logger.debug(response)
+            if response.status_code == 200:
+                return 'SENT'
+            if response.status_code == 404:
+                return 'USER_DOESNT_EXIST'
+            if response.status_code == 500:
+                return 'SENT_ERROR'
+
         except Exception as e:
             logger.error(f"Telegram API error: {e}")
             return False
@@ -248,7 +261,7 @@ class ProjectProcessor:
                     chat_for_current_channel_message.user_id,
                     message)
                 logger.info(sent)
-                if sent:
+                if sent == 'SENT':
                     ChatMessages.objects.create(
                         chat_id=chat_for_current_channel_message,
                         user_name=channel.phone,
@@ -257,14 +270,18 @@ class ProjectProcessor:
                     )
                     channel.remaining_messages = F('remaining_messages') - 1
                     channel.save()
-                else:
+                if sent == 'USER_DOESNT_EXIST':
                     chat = Chat.objects.filter(
                         id=chat_for_current_channel_message.id
                     ).first()
-                    chat.status = 'error'
+                    chat.status = 'user_doesnt_exist'
                     chat.last_message_time = datetime.datetime.now(tz=timezone.utc)
                     chat.save()
-                    logger.info(f"Ошибка отправки сообщения {chat_for_current_channel_message.user_id} ")
+                    logger.info(f"user_doesnt_exist {chat_for_current_channel_message.user_id} ")
+
+                if sent == 'SENT_ERROR':
+                    logger.info(f"Ошибка отправки {chat_for_current_channel_message.user_id} ")
+
             else:
                 logger.info(f"Ошибка при генерации сообщения {chat_for_current_channel_message.user_id} ")
         except Exception as e:

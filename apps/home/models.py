@@ -317,7 +317,7 @@ class Chat(models.Model):
         ('contact_received', 'Контакт получен'),
         ('interest_shown', 'Проявлен интерес'),
         ('closed', 'Закрыт'),
-        ('error', 'Ошибка отправки'),
+        ('user_doesnt_exist', 'Пользователь не найден'),
     ]
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
