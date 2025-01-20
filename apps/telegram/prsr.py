@@ -103,7 +103,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
     for message in messages:
         message_text = message.get("text", "")
         message_id = message.get("id", None)  # ID сообщения
-        sender_id = message.get("user_id", None)  # ID отправителя
+        sender_id = message.get("sender_id", None)  # ID отправителя
         message_date = message.get("date", None)  # Дата сообщения от Telethon
         user_name = message.get('username', None)
         from_id = message.get("from_id", None)
