@@ -250,7 +250,7 @@ class ProjectProcessor:
                 ChatMessages.objects.create(
                     chat_id=chat_for_current_channel_message,
                     user_name=channel.phone,
-                    user_message=message,
+                    user_message=message[:555],
                     message_type="outcoming"
                 )
             channel.remaining_messages = F('remaining_messages') - 1
@@ -286,7 +286,7 @@ class ProjectProcessor:
                 ChatMessages.objects.create(
                     chat_id=chat,
                     user_name=chat.channel.phone,
-                    user_message=message,
+                    user_message=message[:555],
                     message_type="outcoming"
                 )
             chat.channel.remaining_messages = F('remaining_messages') - 1
