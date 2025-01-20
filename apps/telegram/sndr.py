@@ -271,7 +271,7 @@ class ProjectProcessor:
 
         message = message_processor.send_to_gpt_assistant(
             chat_id=chat.id,
-            project_id=chat.channel.project.id,
+            project_id=chat.channel.project_id,
             question=combined_message,
             channel_phone=chat.channel,
             user_id=chat.user_id

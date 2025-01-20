@@ -137,6 +137,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
 
             # Проверяем, существует ли сообщение в базе
             existing_message = ChatMessages.objects.filter(
+                chat_id=chat,
                 messageId=message_id,  # Проверка по ID сообщения
             ).exists()
 
