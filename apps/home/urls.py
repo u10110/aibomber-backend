@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from apps.billing import views as b_views
 from apps.home import views
+from apps.home import api
 
 urlpatterns = [
 
@@ -90,6 +91,7 @@ urlpatterns = [
     
     
     path("projects/", views.projects, name="projects"),
+    path("api/projects/", api.projects, name="api_projects"),
     path('projects/create/', views.project_create, name='project-create'),
     path('save-google-link/', views.save_google_link, name='save-google-link'),
 
