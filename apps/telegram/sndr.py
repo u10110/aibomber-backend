@@ -237,8 +237,7 @@ class ProjectProcessor:
 
             # Обрабатываем существующий
             if not next_user_name:
-                logger.info(f"Нет новых активных чатов для телефона {channel.phone} "
-                            f"создаем и отправляем первое сообщение")
+                logger.info(f"создаем и отправляем первое сообщение")
                 # Обрабатываем новых пользователей
 
 
@@ -286,7 +285,8 @@ class ProjectProcessor:
                     time.sleep(120)
 
             else:
-                logger.info(f"Ошибка при генерации сообщения {chat_for_current_channel_message.user_id} ")
+                logger.info(f"Нет новых активных чатов для телефона {channel.phone} "
+                            f"создаем и отправляем первое сообщение")
         except Exception as e:
             logger.info(f"Ошибка при обработке канала {channel.title}: ")
 
