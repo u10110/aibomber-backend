@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models.aggregates import Min
 from django.utils import timezone
 import time
-
+import traceback
 from apps.home.services.gpt_assistant import GPTAssistant
 
 # Import models after Django configuration
@@ -288,6 +288,7 @@ class ProjectProcessor:
                 logger.info(f"Нет новых активных чатов для телефона {channel.phone} "
                             f"создаем и отправляем первое сообщение")
         except Exception as e:
+            logger.error(traceback.format_exc())
             logger.info(f"Ошибка при обработке канала {channel.title}: ")
 
     @staticmethod
