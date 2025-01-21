@@ -112,7 +112,7 @@ urlpatterns = [
     # path("project-create/", views.project_create, name="project-create"),
     
     path("list-recipient/", views.list_recipient, name="list-recipient"),
-    path("api/recipients/", login_required(api.recipients), name="list-recipient"),
+    path("api/recipients/", login_required(api.recipients), name="api-recipient"),
 
 
     path('list-recipient-delete/<int:pk>/', views.list_recipient_delete, name='list-recipient-delete'),
@@ -120,6 +120,9 @@ urlpatterns = [
     path('list-recipient-edit/<int:id>/', views.list_recipient_edit, name='list-recipient-edit'),
 
     path("channels/", views.channels, name="channels"),
+
+    path("api/channels/", login_required(api.channels), name="api-channels"),
+
     path('channel-start/<int:pk>/', views.channel_start, name='channel-start'),
     path('channel-stop/<int:pk>/', views.channel_stop, name='channel-stop'),
     path('channel-delete/<int:pk>/', views.channel_delete, name='channel-delete'),

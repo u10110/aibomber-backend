@@ -94,6 +94,29 @@ def recipients(request):
     return JsonResponse(data, safe=False)
 
 
+def channels(request):
+
+    channel_list = Channel.objects.filter(project_id__in=Project.objects.filter(client=request.user))
+
+    data = []
+    for channel in channel_list:
+
+        project = Project.objects.filter(id=channel.project_id).first()
+        data.append({
+            'title': channel.title,
+            'status': channel.status,
+            'phone': channel.phone,
+            'max_daily_messages': channel.max_daily_messages,
+            'id': channel.id,
+            'remaining_messages': channel.remaining_messages,
+            'is_active': channel.is_active,
+            'source': channel.source,
+            'project_title': project.title
+        })
+
+    return JsonResponse(data, safe=False)
+
+
 def is_ajax(request):
     return request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
 
