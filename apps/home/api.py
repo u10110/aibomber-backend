@@ -63,11 +63,8 @@ from django.http import JsonResponse
 TELETHON_HOST = config("TELETHON_HOST")
 
 from django.utils.decorators import method_decorator
-
 from django_telegram_login.authentication import verify_telegram_authentication
 from django.middleware.csrf import get_token
-
-
 
 
 def projects(request):
@@ -84,8 +81,22 @@ def projects(request):
     return JsonResponse(data, safe=False)
 
 
+def recipients(request):
+
+    recipient_list = Recipient.objects.filter(project_id__in=Project.objects.filter(client=request.user)).values(
+        'title',
+        'work_option',
+        'status',
+        'remote_ids',
+        'id')
+
+    data = list(recipient_list)
+    return JsonResponse(data, safe=False)
+
+
 def is_ajax(request):
     return request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
+
 
 @csrf_exempt
 def auth_login(request):

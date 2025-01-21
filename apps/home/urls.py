@@ -91,7 +91,7 @@ urlpatterns = [
     
     
     path("projects/", views.projects, name="projects"),
-    path("api/projects/", api.projects, name="api_projects"),
+    path("api/projects/", login_required(api.projects), name="api_projects"),
     path('projects/create/', views.project_create, name='project-create'),
     path('save-google-link/', views.save_google_link, name='save-google-link'),
 
@@ -112,6 +112,9 @@ urlpatterns = [
     # path("project-create/", views.project_create, name="project-create"),
     
     path("list-recipient/", views.list_recipient, name="list-recipient"),
+    path("api/recipients/", login_required(api.recipients), name="list-recipient"),
+
+
     path('list-recipient-delete/<int:pk>/', views.list_recipient_delete, name='list-recipient-delete'),
     path('save-recipients/', views.save_recipients, name='save_recipients'),
     path('list-recipient-edit/<int:id>/', views.list_recipient_edit, name='list-recipient-edit'),
