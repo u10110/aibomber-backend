@@ -64,7 +64,7 @@ class Command(BaseCommand):
                     ProjectProcessor.process_chat(chat, message_processor)
                 else:
                     logger.error(f"Сообщение получено но не обработано, нехватает "
-                          f"данных или недопустмый отправитель: {chat.id}")
+                          f"данных или недопустмый отправитель: {message.get('text', '')}")
                 logger.debug(f"Received message: {chat.id}")
         except Exception as e:
             logger.error(traceback.format_exc())
