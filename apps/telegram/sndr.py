@@ -25,7 +25,8 @@ from apps.home.models import (
     Project,
     Channel,
     Chat,
-    ChatMessages
+    ChatMessages,
+    Recipient
 )
 from decouple import config
 
@@ -328,7 +329,8 @@ class ProjectProcessor:
     @staticmethod
     def get_next_new_recipient(project: Project) -> str:
         remote_chat_ids = []
-        for recipient in project.recipients:
+        recipients = Recipient.objects.filter(project_id=project.id)
+        for recipient in recipients:
             [remote_chat_ids.append(recipient) for recipient in
              recipient.remote_ids.replace('\n', ',').split(',')]
 

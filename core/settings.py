@@ -288,3 +288,5 @@ REST_FRAMEWORK = {
 }
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:5173','https://eliment.ai', 'https://dev.eliment.ai']
+CORS_ALLOWED_ORIGINS = ['http://localhost:5173','https://eliment.ai', 'https://dev.eliment.ai']
+
