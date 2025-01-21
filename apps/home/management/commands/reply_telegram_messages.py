@@ -58,11 +58,14 @@ class Command(BaseCommand):
 
                 logger.info(f"saving message {message.get('user_id')}")
                 chat = save_messages(message.get('user_id'), [message], project, channel, user_view_name)
-                time.sleep(10)
-                message_processor = MessageProcessor()
-                ProjectProcessor.process_chat(chat, message_processor)
-
-                print(f"Received message: {chat.id}")
+                if chat:
+                    time.sleep(10)
+                    message_processor = MessageProcessor()
+                    ProjectProcessor.process_chat(chat, message_processor)
+                else:
+                    logger.error(f"Сообщение получено но не обработано, нехватает "
+                          f"данных или недопустмый отправитель: {chat.id}")
+                logger.debug(f"Received message: {chat.id}")
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error(e)

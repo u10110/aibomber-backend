@@ -112,7 +112,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
         if not message_text or not message_id or not sender_id or not message_date or sender_id == 777000:
             continue  # Пропускаем сообщения с отсутствующими полями
         # Определяем, кто отправил сообщение: GPT Assistant или другой пользователь
-
+        logger.info(f"Сообщение получено {user_name}: {message_id}")
         if user_name:
             try:
                 chat = Chat.objects.get(
