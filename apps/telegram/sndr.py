@@ -28,6 +28,7 @@ from apps.home.models import (
     ChatMessages
 )
 from decouple import config
+
 # Constants
 PID_FILE = "sndr.lock"
 TELETHON_HOST = config("TELETHON_HOST")
@@ -215,7 +216,6 @@ class ProjectProcessor:
         for channel in channels:
             ProjectProcessor._process_single_channel_for_new_message(channel, project)
 
-
     @staticmethod
     def _process_single_channel_for_new_message(channel: Channel, project: Project) -> None:
         logger.info(f"Обработка канала: {channel.id}, телефон: {channel.phone}")
@@ -227,62 +227,67 @@ class ProjectProcessor:
             created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(days=1))
         ).values('chat_id_id').annotate(min_created_at=Min('created_at')).count()
 
-        if today_send_new_messages>=channel.max_daily_messages:
+        if today_send_new_messages >= channel.max_daily_messages:
             logger.info(f"У канала: {channel.id}, телефон: {channel.phone} достигнут дневной лимит новых сообщений")
 
-
         try:
+
             # Получаем TG ID, у которых нет сообщений
             chat_for_current_channel_message = Chat.objects.filter(
-                project=project,  # Связь через таблицу Recipient
+                project=project,
                 is_auto_active=True,
-                last_message_time=None
+                channel=channel
             ).first()
 
             # Обрабатываем существующий
             if not chat_for_current_channel_message:
-                logger.info(f"Нет новых активных чатов для телефона {channel.phone}")
-                return
+                logger.info(f"Нет новых активных чатов для телефона {channel.phone} "
+                            f"создаем и отправляем первое сообщение")
+                # Обрабатываем новых пользователей
 
-            # Обрабатываем новых пользователей
+                next_user_name = ProjectProcessor.get_next_new_recipient(project)
+                chat_for_current_channel_message = Chat(
+                    project=project,
+                    user_id=next_user_name,
+                    channel=channel
+                )
+                chat_for_current_channel_message.save()
+                logger.info(f"Создан новый чат для {chat_for_current_channel_message.id} {next_user_name} ")
 
-            logger.info(f"Новый получатель {chat_for_current_channel_message.user_id}")
-            message = message_processor.send_to_gpt_assistant(
-                chat_id=chat_for_current_channel_message.id,
-                project_id=project.id,
-                question="",  # Пустой вопрос для нового пользователя
-                channel_phone=channel.phone,
-                user_id=chat_for_current_channel_message.user_id
-            )
-            logger.info(message)
-            if message:
-                sent = message_processor.send_message_to_telegram(
-                    channel.phone,
-                    chat_for_current_channel_message.user_id,
-                    message)
-                logger.info(sent)
-                if sent == 'SENT':
-                    ChatMessages.objects.create(
-                        chat_id=chat_for_current_channel_message,
-                        user_name=channel.phone,
-                        user_message=message[:555],
-                        message_type="outcoming"
-                    )
-                    channel.remaining_messages = F('remaining_messages') - 1
-                    channel.save()
-                if sent == 'USER_DOESNT_EXIST':
-                    chat = Chat.objects.filter(
-                        id=chat_for_current_channel_message.id
-                    ).first()
-                    chat.status = 'user_doesnt_exist'
-                    chat.last_message_time = datetime.datetime.now(tz=timezone.utc)
-                    chat.save()
-                    logger.info(f"user_doesnt_exist {chat_for_current_channel_message.user_id} ")
+                message = message_processor.send_to_gpt_assistant(
+                    chat_id=chat_for_current_channel_message.id,
+                    project_id=project.id,
+                    question="",  # Пустой вопрос для нового пользователя
+                    channel_phone=channel.phone,
+                    user_id=chat_for_current_channel_message.user_id
+                )
+                logger.info(message)
+                if message:
+                    sent = message_processor.send_message_to_telegram(
+                        channel.phone,
+                        chat_for_current_channel_message.user_id,
+                        message)
+                    logger.info(sent)
+                    if sent == 'SENT':
+                        ChatMessages.objects.create(
+                            chat_id=chat_for_current_channel_message,
+                            user_name=channel.phone,
+                            user_message=message[:555],
+                            message_type="outcoming"
+                        )
+                        channel.remaining_messages = F('remaining_messages') - 1
+                        channel.save()
+                    if sent == 'USER_DOESNT_EXIST':
 
-                if sent == 'SENT_ERROR':
-                    logger.info(f"Ошибка отправки {chat_for_current_channel_message.user_id} ")
+                        chat_for_current_channel_message.status = 'user_doesnt_exist'
+                        chat_for_current_channel_message.last_message_time = datetime.datetime.now(tz=timezone.utc)
+                        chat_for_current_channel_message.save()
+                        logger.info(f"user_doesnt_exist {chat_for_current_channel_message.user_id} ")
 
-                time.sleep(120)
+                    if sent == 'SENT_ERROR':
+                        logger.info(f"Ошибка отправки {chat_for_current_channel_message.user_id} ")
+
+                    time.sleep(120)
 
             else:
                 logger.info(f"Ошибка при генерации сообщения {chat_for_current_channel_message.user_id} ")
@@ -310,9 +315,9 @@ class ProjectProcessor:
 
         if message:
             if message_processor.send_message_to_telegram(
-                   chat.channel.phone,
-                   chat.user_id,
-                   message
+                    chat.channel.phone,
+                    chat.user_id,
+                    message
             ):
                 ChatMessages.objects.create(
                     chat_id=chat,
@@ -322,6 +327,20 @@ class ProjectProcessor:
                 )
             chat.channel.remaining_messages = F('remaining_messages') - 1
             chat.channel.save()
+
+    @staticmethod
+    def get_next_new_recipient(project: Project) -> str:
+        remote_chat_ids = []
+        for recipient in project.recipients:
+            [remote_chat_ids.append(recipient) for recipient in
+             recipient.remote_ids.replace('\n', ',').split(',')]
+
+        for remote_chat_id in remote_chat_ids:
+            try:
+                Chat.objects.get(project=project,
+                                 user_id=remote_chat_id)
+            except Chat.DoesNotExist:
+                return remote_chat_id
 
 
 def new_chat_messages():
@@ -335,7 +354,7 @@ def new_chat_messages():
 
         for client in clients:
             logger.info(f"Обработка клиента {client.client_id}")
-            if client.balance >0:
+            if client.balance > 0:
                 logger.info(f"Баланс клиента {client.balance}")
                 projects = ClientManager.get_active_projects(client, current_time)
                 if projects.count() == 0:
@@ -348,4 +367,3 @@ def new_chat_messages():
 
     finally:
         ProcessLockManager.remove_lock()
-

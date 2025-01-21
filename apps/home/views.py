@@ -697,23 +697,10 @@ def project_create(request):
             # Обновляем project_id для связанных получателей
             # Обновляем project_id для связанных получателей
             recipients = form.cleaned_data.get('recipients', [])
-            remote_chat_ids = []
+
             for recipient in recipients:
                 recipient.project_id = project.id
                 recipient.save()
-                [remote_chat_ids.append(recipient) for recipient in
-                 recipient.remote_ids.replace('\n', ',').split(',')]
-
-            for remote_chat_id in remote_chat_ids:
-                try:
-                    ch = Chat.objects.get(  project=project,
-                                            user_id=remote_chat_id
-                                            )
-                except Chat.DoesNotExist:
-                    ch = Chat(project=project,
-                              user_id=remote_chat_id,
-                              channel=random.choice(channels))
-                    ch.save()
 
             for file_form in file_formset:
                 if file_form.cleaned_data.get('file'):
@@ -754,23 +741,9 @@ def project_edit(request, project_id):
 
             # Обновляем project_id для связанных получателей
             recipients = form.cleaned_data.get('recipients', [])
-            remote_chat_ids = []
             for recipient in recipients:
                 recipient.project_id = project.id
                 recipient.save()
-                [remote_chat_ids.append(recipient) for recipient in
-                 recipient.remote_ids.replace('\n', ',').split(',')]
-
-            for remote_chat_id in remote_chat_ids:
-                try:
-                    ch = Chat.objects.get(  project=project,
-                                            user_id=remote_chat_id
-                                          )
-                except Chat.DoesNotExist:
-                    ch = Chat(project=project,
-                              user_id=remote_chat_id,
-                              channel=random.choice(channels))
-                    ch.save()
 
             if file_formset.is_valid():
                 for file_form in file_formset:
@@ -778,7 +751,6 @@ def project_edit(request, project_id):
                         project_file = file_form.save(commit=False)
                         project_file.project = project
                         project_file.save()
-
 
             return redirect("projects")  # После успешного сохранения возвращаемся к списку проектов
     else:
