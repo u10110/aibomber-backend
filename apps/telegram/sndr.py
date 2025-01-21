@@ -9,7 +9,7 @@ import datetime
 import requests
 from django.db.models import F, QuerySet
 from django.shortcuts import get_object_or_404
-from django.db.models.aggregates import Min
+from django.db.models.aggregates import Min, Max
 from django.utils import timezone
 import time
 import traceback
@@ -227,20 +227,34 @@ class ProjectProcessor:
             chat_id__in=Chat.objects.filter(channel=channel),
             created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(days=1))
         ).values('chat_id_id').annotate(min_created_at=Min('created_at')).count()
-
+        logger.debug(today_send_new_messages)
         if today_send_new_messages >= channel.max_daily_messages:
             logger.info(f"У канала: {channel.id}, телефон: {channel.phone} достигнут дневной лимит новых сообщений")
 
         try:
 
+            new_chat_in_120_sec = Chat.objects.filter(
+                project=project,
+                channel=channel,
+                created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(seconds=120))
+            ).annotate(max_created_at=Max('created_at')).count()
+
+
+
             # Получаем TG ID, у которых нет сообщений
             next_user_name = ProjectProcessor.get_next_new_recipient(project)
+            logger.info(next_user_name)
+            # Обрабатываем существующий\
 
-            # Обрабатываем существующий
+            if new_chat_in_120_sec > 0:
+                logger.info(f"ждем 2 минуты для нового сообщения {project.title}  {channel.phone}")
+                return
+
             if not next_user_name:
+                logger.info(f"Нет новых получателей  для проекта {project.title} ")
+            else:
                 logger.info(f"создаем и отправляем первое сообщение")
-                # Обрабатываем новых пользователей
-
+                # Обрабатываем новых пользователе
 
                 chat_for_current_channel_message = Chat(
                     project=project,
@@ -274,7 +288,6 @@ class ProjectProcessor:
                         channel.remaining_messages = F('remaining_messages') - 1
                         channel.save()
                     if sent == 'USER_DOESNT_EXIST':
-
                         chat_for_current_channel_message.status = 'user_doesnt_exist'
                         chat_for_current_channel_message.last_message_time = datetime.datetime.now(tz=timezone.utc)
                         chat_for_current_channel_message.save()
@@ -283,11 +296,6 @@ class ProjectProcessor:
                     if sent == 'SENT_ERROR':
                         logger.info(f"Ошибка отправки {chat_for_current_channel_message.user_id} ")
 
-                    time.sleep(120)
-
-            else:
-                logger.info(f"Нет новых активных чатов для телефона {channel.phone} "
-                            f"создаем и отправляем первое сообщение")
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.info(f"Ошибка при обработке канала {channel.title}: ")
@@ -336,10 +344,13 @@ class ProjectProcessor:
 
         for remote_chat_id in remote_chat_ids:
             try:
-                Chat.objects.get(project=project,
-                                 user_id=remote_chat_id)
+                Chat.objects.filter(project=project,
+                                    user_id__endswith=remote_chat_id).first()
             except Chat.DoesNotExist:
-                return remote_chat_id
+                user_name = remote_chat_id
+                if remote_chat_id.startswith('@'):
+                    user_name = "@" + remote_chat_id
+                return user_name
         return None
 
 
