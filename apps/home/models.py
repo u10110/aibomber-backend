@@ -1,6 +1,7 @@
 from http import client
 
 from django.db import models
+from django_softdelete.models import SoftDeleteModel
 from django.db.models.signals import post_save, post_init
 from apps.authentication.models import User
 import datetime
@@ -74,7 +75,7 @@ class AmoCrm(models.Model):
     tg = models.JSONField()
 
 
-class Project(models.Model):
+class Project(SoftDeleteModel):
     class Meta:
         verbose_name = "Проект"
         verbose_name_plural = "Проекты"
@@ -164,7 +165,7 @@ class Project(models.Model):
         return dict(self.AGENT_TYPES).get(self.agent_type, self.agent_type)
 
 
-class ProjectFile(models.Model):
+class ProjectFile(SoftDeleteModel):
     project = models.ForeignKey(Project, related_name="files", on_delete=models.CASCADE)
     file = models.FileField(
         upload_to="uploads/files/",
@@ -173,7 +174,7 @@ class ProjectFile(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
 
-class Recipient(models.Model):
+class Recipient(SoftDeleteModel):
     class Meta:
         verbose_name = "Получатели"
         verbose_name_plural = "Получатели"
@@ -196,7 +197,7 @@ class Recipient(models.Model):
         return self.title
 
 
-class Channel(models.Model):
+class Channel(SoftDeleteModel):
     class Meta:
         verbose_name = "Канал"
         verbose_name_plural = "Каналы"
@@ -244,7 +245,7 @@ class Channel(models.Model):
         return f"{self.title} ({self.phone})"
 
 
-class Chat(models.Model):
+class Chat(SoftDeleteModel):
     class Meta:
         verbose_name = "Чаты"
         verbose_name_plural = "Чаты"
@@ -337,7 +338,7 @@ post_save.connect(Chat.post_save, sender=Chat)
 post_init.connect(Chat.remember_state, sender=Chat)
 
 
-class ChatMessages(models.Model):
+class ChatMessages(SoftDeleteModel):
     class Meta:
         verbose_name = "Чаты"
         verbose_name_plural = "Чаты"
@@ -370,7 +371,7 @@ class ChatMessages(models.Model):
 post_save.connect(ChatMessages.post_save, sender=ChatMessages)
 
 
-class CrmPipelines(models.Model):
+class CrmPipelines(SoftDeleteModel):
     class Meta:
         verbose_name = "Воронки проектов в CRМ"
         verbose_name_plural = "Воронки"
