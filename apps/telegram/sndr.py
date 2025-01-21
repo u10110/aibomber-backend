@@ -233,19 +233,15 @@ class ProjectProcessor:
         try:
 
             # Получаем TG ID, у которых нет сообщений
-            chat_for_current_channel_message = Chat.objects.filter(
-                project=project,
-                is_auto_active=True,
-                channel=channel
-            ).first()
+            next_user_name = ProjectProcessor.get_next_new_recipient(project)
 
             # Обрабатываем существующий
-            if not chat_for_current_channel_message:
+            if not next_user_name:
                 logger.info(f"Нет новых активных чатов для телефона {channel.phone} "
                             f"создаем и отправляем первое сообщение")
                 # Обрабатываем новых пользователей
 
-                next_user_name = ProjectProcessor.get_next_new_recipient(project)
+
                 chat_for_current_channel_message = Chat(
                     project=project,
                     user_id=next_user_name,
@@ -341,6 +337,7 @@ class ProjectProcessor:
                                  user_id=remote_chat_id)
             except Chat.DoesNotExist:
                 return remote_chat_id
+        return None
 
 
 def new_chat_messages():
