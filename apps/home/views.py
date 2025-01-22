@@ -776,9 +776,17 @@ def toggle_project_active(request):
 
             project = Project.objects.get(id=project_id, client=request.user)
             project.is_active = is_active
+            if is_active:
+                project.status = 'active'
+            else:
+                project.status = 'paused'
             project.save()
 
-            return JsonResponse({'success': True, 'message': 'Состояние обновлено', 'is_active': project.is_active})
+            return JsonResponse({'success': True,
+                                 'message': 'Состояние обновлено',
+                                 'is_active': project.is_active,
+                                 'status': project.status})
+
         except Project.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Проект не найден'}, status=404)
         except Exception as e:
@@ -789,13 +797,15 @@ def toggle_project_active(request):
 def project_start(request, pk):
     project = get_object_or_404(Project, pk=pk, client=request.user)
     project.status = "active"  # Укажите соответствующее значение
+    project.is_active = True
     project.save()
     return redirect('projects')
 
 
 def project_stop(request, pk):
     project = get_object_or_404(Project, pk=pk, client=request.user)
-    project.status = "stopped"  # Укажите соответствующее значение
+    project.status = "paused"  # Укажите соответствующее значение
+    project.is_active = False
     project.save()
     return redirect('projects')
 
