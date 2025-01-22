@@ -91,7 +91,7 @@ urlpatterns = [
     
     
     path("projects/", views.projects, name="projects"),
-    path("api/projects/", login_required(api.projects), name="api_projects"),
+
     path('projects/create/', views.project_create, name='project-create'),
     path('save-google-link/', views.save_google_link, name='save-google-link'),
 
@@ -112,7 +112,7 @@ urlpatterns = [
     # path("project-create/", views.project_create, name="project-create"),
     
     path("list-recipient/", views.list_recipient, name="list-recipient"),
-    path("api/recipients/", login_required(api.recipients), name="api-recipient"),
+
 
 
     path('list-recipient-delete/<int:pk>/', views.list_recipient_delete, name='list-recipient-delete'),
@@ -121,7 +121,7 @@ urlpatterns = [
 
     path("channels/", views.channels, name="channels"),
 
-    path("api/channels/", login_required(api.channels), name="api-channels"),
+
 
     path('channel-start/<int:pk>/', views.channel_start, name='channel-start'),
     path('channel-stop/<int:pk>/', views.channel_stop, name='channel-stop'),
@@ -156,6 +156,16 @@ urlpatterns = [
     path('create-project-chat/', views.create_project_chat, name='create_project_chat'),
     path('validate-google-link/', views.validate_google_link, name='validate_google_link'),
 
+
+
     path('api/v1/gpt-assistant/', views.gpt_assistant, name='gpt_assistant'),
+
+    path("api/channels/", login_required(api.channels), name="api-channels"),
+
+    path("api/projects/", login_required(api.projects), name="api_projects"),
+    path('api/projects/toggle-active/', views.toggle_project_active, name='toggle-project-active'),
+
+    path("api/recipients/", login_required(api.recipients), name="api-recipient"),
+
 ]
 
