@@ -67,6 +67,75 @@ from django_telegram_login.authentication import verify_telegram_authentication
 from django.middleware.csrf import get_token
 
 
+
+def chat_messages(request, chat_id):
+
+    if not chat_id:
+        return HttpResponse(status=404)
+
+    current_chat = Chat.objects.filter(
+        id=chat_id,
+        project__in=Project.objects.filter(client_id=request.user.id)
+    ).first()
+
+    current_messages = []
+
+    if current_chat:
+        current_messages = ChatMessages.objects.filter(
+            chat_id=chat_id,
+        ).order_by('created_at')
+
+    messages_data = []
+    for message in current_messages:
+        messages_data.append({
+            'message': message.user_message,
+            'time': message.created_at.isoformat(),
+            'senderId': current_chat.user_id,
+            'user_name': message.user_name,
+            'message_type': message.message_type,
+            'feedback': {
+                'isSent': True,
+                'isDelivered': True,
+                'isSeen': True
+            },
+        })
+
+    last_messages = ChatMessages.objects.filter(chat_id=current_chat).values(
+        'message_type',
+        'user_name',
+        'user_message',
+        'created_at'
+    ).order_by('-created_at').first()
+
+    chat_data = {
+        'id': current_chat.id,
+        'lastMessage':   {
+            'message': last_messages.get('user_message'),
+            'time': last_messages.get('created_at').isoformat(),
+            'feedback': {
+                'isSent': True,
+                'isDelivered': True,
+                'isSeen': True
+            },
+        },
+        'status': current_chat.status,
+        'is_auto_active': current_chat.is_auto_active,
+        'channel_id': current_chat.channel_id,
+        'messages': messages_data,
+    }
+
+    return JsonResponse({
+        'chat': chat_data,
+        'contact': {
+            'fullName': current_chat.user_name,
+            'role': current_chat.user_id,
+            'about': last_messages.get('user_message'),
+            'avatar': '',
+            'id': current_chat.user_id,
+        }
+    }, safe=False)
+
+
 def chats(request):
     statuses = request.GET.get("status", '')
 
@@ -76,19 +145,17 @@ def chats(request):
     if len(statuses) > 0:
         chats_list = chats_list.filter(status__in=statuses.split(','))
 
-    data = []
+    chat_contacts = []
+    contacts = []
     for chat in chats_list:
-
         last_messages = ChatMessages.objects.filter(chat_id=chat).values(
             'message_type',
             'user_name',
             'user_message',
             'created_at'
         ).order_by('-created_at').first()
-        data.append({
+        chat_contacts.append({
             'id': chat.id,
-            'fullName': chat.user_name,
-            'role': chat.user_id,
             'lastMessage':   {
                 'message': last_messages.get('user_message'),
                 'time': last_messages.get('created_at').isoformat(),
@@ -98,14 +165,19 @@ def chats(request):
                     'isSeen': True
                 },
             },
-            'about': last_messages.get('user_message'),
+            'fullName': chat.user_name,
+            'role': chat.user_id,
             'avatar': '',
+            'about': last_messages.get('user_message'),
             'status': chat.status,
             'is_auto_active': chat.is_auto_active,
             'channel_id': chat.channel_id
         })
+        contacts.append({
+            'id':  chat.user_id,
+        })
 
-    return JsonResponse(data, safe=False)
+    return JsonResponse({'chatsContacts': chat_contacts, 'contacts': contacts}, safe=False)
 
 
 def projects(request):
