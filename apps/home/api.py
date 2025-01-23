@@ -59,12 +59,87 @@ from django.db.models import Count, Max, Subquery, OuterRef, IntegerField, Case,
 import random
 from django.contrib.auth import authenticate, get_user_model, login
 from django.http import JsonResponse
+from apps.telegram.sndr import MessageProcessor
 import traceback
 TELETHON_HOST = config("TELETHON_HOST")
 
 from django.utils.decorators import method_decorator
 from django_telegram_login.authentication import verify_telegram_authentication
 from django.middleware.csrf import get_token
+
+
+def send_chat_messages(request, chat_id):
+    if not chat_id:
+        return HttpResponse(status=404)
+    if request.method == 'POST':
+
+        data = json.loads(request.body.decode("utf-8"))
+        message = data.get('message')
+        logger.debug(message)
+        current_chat = Chat.objects.filter(
+            id=chat_id,
+            project__in=Project.objects.filter(client_id=request.user.id)
+        ).first()
+
+        current_channel = Channel.objects.filter(id=current_chat.channel_id).first()
+
+        message_processor = MessageProcessor()
+
+        sent = message_processor.send_message_to_telegram(
+            current_channel.phone,
+            current_chat.user_id,
+            message)
+        logger.info(sent)
+        if sent == 'SENT':
+            new_message = ChatMessages.objects.create(
+                chat_id=current_chat,
+                user_name=current_channel.phone,
+                user_message=message[:555],
+                message_type="outcoming"
+            )
+            current_channel.remaining_messages = F('remaining_messages') - 1
+            current_channel.save()
+
+            return JsonResponse({
+                'msg':
+                    {
+                        'message': new_message.user_message,
+                        'time': new_message.created_at.isoformat(),
+                        'senderId': current_chat.user_id,
+                        'user_name': new_message.user_name,
+                        'message_type': new_message.message_type,
+                        'feedback': {
+                            'isSent': True,
+                            'isDelivered': True,
+                            'isSeen': True
+                        },
+                    }, 'chat': {
+                        'id': current_chat.id,
+                        'lastMessage':   {
+                            'message': new_message.user_message,
+                            'time': new_message.created_at.isoformat(),
+                            'feedback': {
+                                'isSent': True,
+                                'isDelivered': True,
+                                'isSeen': True
+                            },
+                        },
+                        'status': current_chat.status,
+                        'is_auto_active': current_chat.is_auto_active,
+                        'channel_id': current_chat.channel_id,
+                        }
+                }, safe=False)
+
+        if sent == 'USER_DOESNT_EXIST':
+            current_chat.status = 'user_doesnt_exist'
+            current_chat.last_message_time = datetime.datetime.now(tz=timezone.utc)
+            current_chat.save()
+            logger.info(f"user_doesnt_exist {current_chat.user_id} ")
+            return JsonResponse({'success': False, 'error': 'Пользователь не найден '}, safe=False)
+
+        if sent == 'SENT_ERROR':
+            logger.info(f"Ошибка отправки {current_chat.user_id} ")
+            return JsonResponse({'success': False, 'error': 'Ошибка отправки '}, safe=False)
 
 
 
