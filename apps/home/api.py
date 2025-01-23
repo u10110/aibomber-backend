@@ -194,9 +194,8 @@ def projects(request):
     return JsonResponse(data, safe=False)
 
 
-def project_save(request):
+def project_get_or_save(request, project_id):
     user = request.user
-    project_id = request.POST.get('project_id', None)
 
     if request.method == 'POST':
         data = json.loads(request.body.decode("utf-8"))
@@ -209,7 +208,7 @@ def project_save(request):
                     is_active=False
                 )
             else:
-                project_to_save = data.get(id=project_id)
+                project_to_save = Project.objects.filter(id=project_id).get()
 
             project_to_save.title = data.get('name', '')
             project_to_save.agent_type = data.get('agent_type', None)
@@ -231,70 +230,47 @@ def project_save(request):
             project_to_save.save()
 
             # Обработка каналов
-            new_channels = data.get('channel', [])
+            new_channels = data.get('channels', [])
             if not project_id:  # Если это редактирование существующего проекта
                 Channel.objects.filter(id__in=[c.id for c in new_channels]).update(project_id=project_to_save.id)
             else:
+                new_channels_set = set(Channel.objects.filter(id__in=[c.get('id') for c in new_channels]))
                 # Для нового проекта просто привязываем все выбранные каналы
 
                 # Получаем текущие каналы проекта
                 current_channels = set(Channel.objects.filter(project_id=project_to_save.id))
 
                 # Находим каналы, которые нужно освободить (убрать project_id)
-                channels_to_free = current_channels - new_channels
+                channels_to_free = current_channels - new_channels_set
                 Channel.objects.filter(id__in=[c.id for c in channels_to_free]).update(project_id=None)
 
                 # Находим новые каналы, которые нужно привязать
-                channels_to_assign = new_channels - current_channels
+                channels_to_assign = new_channels_set - current_channels
                 Channel.objects.filter(id__in=[c.id for c in channels_to_assign]).update(project_id=project_to_save.id)
 
-            # Аналогичная обработка для получателей
-            new_recipients = data.get('recipients', [])
-
-            if not project_id:
-                Recipient.objects.filter(id__in=[r.id for r in new_recipients]).update(project_id=project_to_save.id)
-            else:
-                # Для нового проекта привязываем всех выбранных получателей
-
-                current_recipients = set(Recipient.objects.filter(project_id=project_to_save.id))
-
-                # Освобождаем старых получателей
-                recipients_to_free = current_recipients - new_recipients
-                Recipient.objects.filter(id__in=[r.id for r in recipients_to_free]).update(project_id=None)
-
-                # Привязываем новых получателей
-                recipients_to_assign = new_recipients - current_recipients
-                Recipient.objects.filter(id__in=[r.id for r in recipients_to_assign]).update(project_id=project_to_save.id)
 
             # Обработка пайплайнов
-            pipelines = data.get('pipelines', [])
+            #pipelines = data.get('pipelines', [])
 
-            CrmPipelines.objects.filter(project_id=project_to_save.id).delete()
-            crm_pipelines = [
-                CrmPipelines(
-                    project_id=project_to_save.id,
-                    remote_name=pipeline['remote_name'],
-                    remote_step_id=pipeline['remote_step_id'],
-                    remote_pipeline_id=pipeline['remote_pipeline_id'],
-                    trigger=pipeline['trigger']
-                ) for pipeline in pipelines
-            ]
-            CrmPipelines.objects.bulk_create(crm_pipelines)
+            #CrmPipelines.objects.filter(project_id=project_to_save.id).delete()
+            #crm_pipelines = [
+            #    CrmPipelines(
+            #        project_id=project_to_save.id,
+            ##        remote_name=pipeline['remote_name'],
+            #        remote_step_id=pipeline['remote_step_id'],
+            #        remote_pipeline_id=pipeline['remote_pipeline_id'],
+            #        trigger=pipeline['trigger']
+            #    ) for pipeline in pipelines
+            #]
+            #CrmPipelines.objects.bulk_create(crm_pipelines)
 
 
             # Обновляем project_id для связанных каналов
-            channels = data.get('channel', [])
-            for channel in channels:
-                channel.project_id = project_to_save.id
-                channel.save()
+            #channels = data.get('channel', [])
+            #for channel in channels:
+            #    channel.project_id = project_to_save.id
+            #    channel.save()
 
-                # Обновляем project_id для связанных получателей
-                # Обновляем project_id для связанных получателей
-            recipients = data.get('recipients', [])
-
-            for recipient in recipients:
-                recipient.project_id = project_to_save.id
-                recipient.save()
 
             #for file_form in file_formset:
             #    if file_form.cleaned_data.get('file'):
@@ -306,8 +282,48 @@ def project_save(request):
             logger.error(traceback.format_exc())
             logger.error("project save error")
             return HttpResponse(status=500)
+    else:
+        if project_id:
+            project = Project.objects.filter(
+                id=project_id,
+                client_id=request.user.id
+            ).first()
 
-    return HttpResponse(status=404)
+            channel_list = Channel.objects.filter(project_id=project.id)
+
+            channels_data = []
+            for channel in channel_list:
+                channels_data.append({
+                    'title': channel.title,
+                    'id': channel.id,
+                })
+
+            files_list = ProjectFile.objects.filter(project_id=project.id)
+
+            files_data = []
+            for file in files_list:
+                files_data.append({
+                    'title': file.title,
+                    'id': file.id,
+                })
+
+            project_data = {
+                'name': project.title,
+                'workOption': project.work_option,
+                'gptVersion': project.gpt_version,
+                'limitForOneChat': project.per_conversation_limit,
+                'limitForDay': project.message_limit,
+                'timeStart': project.time_start,
+                'timeEnd': project.time_end,
+                'helloMessage': project.hello_text,
+                'promptText': project.prompt,
+                'knownBaseText': project.knowledge_base_text,
+                'knownBaseFiles': files_data,
+                'channels': channels_data
+            }
+            return JsonResponse(project_data, safe=False)
+        else:
+            return HttpResponse(status=404)
 
 
 def recipients(request):
