@@ -67,6 +67,47 @@ from django_telegram_login.authentication import verify_telegram_authentication
 from django.middleware.csrf import get_token
 
 
+def chats(request):
+    statuses = request.GET.get("status", '')
+
+    chats_list = Chat.objects.filter(
+        project_id__in=Project.objects.filter(client=request.user))
+    logger.debug(statuses)
+    if len(statuses) > 0:
+        chats_list = chats_list.filter(status__in=statuses.split(','))
+
+    data = []
+    for chat in chats_list:
+
+        last_messages = ChatMessages.objects.filter(chat_id=chat).values(
+            'message_type',
+            'user_name',
+            'user_message',
+            'created_at'
+        ).order_by('-created_at').first()
+        data.append({
+            'id': chat.id,
+            'fullName': chat.user_name,
+            'role': chat.user_id,
+            'lastMessage':   {
+                'message': last_messages.get('user_message'),
+                'time': last_messages.get('created_at').isoformat(),
+                'feedback': {
+                    'isSent': True,
+                    'isDelivered': True,
+                    'isSeen': True
+                },
+            },
+            'about': last_messages.get('user_message'),
+            'avatar': '',
+            'status': chat.status,
+            'is_auto_active': chat.is_auto_active,
+            'channel_id': chat.channel_id
+        })
+
+    return JsonResponse(data, safe=False)
+
+
 def projects(request):
 
     projects_list = Project.objects.filter(client=request.user).values(
@@ -78,7 +119,6 @@ def projects(request):
         'id')
 
     data = list(projects_list)
-    print(data)
     return JsonResponse(data, safe=False)
 
 

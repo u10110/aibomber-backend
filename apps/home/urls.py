@@ -158,6 +158,8 @@ urlpatterns = [
 
 
 
+    path("api/chats/", login_required(api.chats), name="chats_list"),
+
     path('api/v1/gpt-assistant/', views.gpt_assistant, name='gpt_assistant'),
 
     path("api/channels/", login_required(api.channels), name="api-channels"),
