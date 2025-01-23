@@ -105,6 +105,7 @@ class Project(SoftDeleteModel):
     ]
 
     STATUS_CHOICES = [
+        ('new', 'Новый'),
         ('active', 'В работе'),
         ('completed', 'Завершен'),
         ('paused', 'Пауза')

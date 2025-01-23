@@ -59,7 +59,7 @@ from django.db.models import Count, Max, Subquery, OuterRef, IntegerField, Case,
 import random
 from django.contrib.auth import authenticate, get_user_model, login
 from django.http import JsonResponse
-
+import traceback
 TELETHON_HOST = config("TELETHON_HOST")
 
 from django.utils.decorators import method_decorator
@@ -78,7 +78,124 @@ def projects(request):
         'id')
 
     data = list(projects_list)
+    print(data)
     return JsonResponse(data, safe=False)
+
+
+def project_save(request):
+    user = request.user
+    project_id = request.POST.get('project_id', None)
+
+    if request.method == 'POST':
+        data = json.loads(request.body.decode("utf-8"))
+
+        try:
+            if project_id is None:
+                project_to_save = Project(
+                    status='new',
+                    client=user,
+                    is_active=False
+                )
+            else:
+                project_to_save = data.get(id=project_id)
+
+            project_to_save.title = data.get('name', '')
+            project_to_save.agent_type = data.get('agent_type', None)
+            project_to_save.work_option = data.get('work_option', 1)
+            project_to_save.gpt_version = data.get('gpt_version', 1)
+            project_to_save.prompt = data.get('promptText')
+            project_to_save.hello_text = data.get('hello_text')
+
+            #project_to_save.outgoing_limit = request.POST.get('', 10)
+            project_to_save.per_conversation_limit = data.get('limitForOneChat', 10)
+            project_to_save.message_limit = data.get('limitForDay', 10)
+
+            project_to_save.time_end = data.get('timeStart')
+            project_to_save.time_start = data.get('timeEnd')
+            project_to_save.knowledge_base_text = data.get('knownBaseText')
+
+            project_to_save.integrations = data.get('knownBaseText')
+
+            project_to_save.save()
+
+            # Обработка каналов
+            new_channels = data.get('channel', [])
+            if not project_id:  # Если это редактирование существующего проекта
+                Channel.objects.filter(id__in=[c.id for c in new_channels]).update(project_id=project_to_save.id)
+            else:
+                # Для нового проекта просто привязываем все выбранные каналы
+
+                # Получаем текущие каналы проекта
+                current_channels = set(Channel.objects.filter(project_id=project_to_save.id))
+
+                # Находим каналы, которые нужно освободить (убрать project_id)
+                channels_to_free = current_channels - new_channels
+                Channel.objects.filter(id__in=[c.id for c in channels_to_free]).update(project_id=None)
+
+                # Находим новые каналы, которые нужно привязать
+                channels_to_assign = new_channels - current_channels
+                Channel.objects.filter(id__in=[c.id for c in channels_to_assign]).update(project_id=project_to_save.id)
+
+            # Аналогичная обработка для получателей
+            new_recipients = data.get('recipients', [])
+
+            if not project_id:
+                Recipient.objects.filter(id__in=[r.id for r in new_recipients]).update(project_id=project_to_save.id)
+            else:
+                # Для нового проекта привязываем всех выбранных получателей
+
+                current_recipients = set(Recipient.objects.filter(project_id=project_to_save.id))
+
+                # Освобождаем старых получателей
+                recipients_to_free = current_recipients - new_recipients
+                Recipient.objects.filter(id__in=[r.id for r in recipients_to_free]).update(project_id=None)
+
+                # Привязываем новых получателей
+                recipients_to_assign = new_recipients - current_recipients
+                Recipient.objects.filter(id__in=[r.id for r in recipients_to_assign]).update(project_id=project_to_save.id)
+
+            # Обработка пайплайнов
+            pipelines = data.get('pipelines', [])
+
+            CrmPipelines.objects.filter(project_id=project_to_save.id).delete()
+            crm_pipelines = [
+                CrmPipelines(
+                    project_id=project_to_save.id,
+                    remote_name=pipeline['remote_name'],
+                    remote_step_id=pipeline['remote_step_id'],
+                    remote_pipeline_id=pipeline['remote_pipeline_id'],
+                    trigger=pipeline['trigger']
+                ) for pipeline in pipelines
+            ]
+            CrmPipelines.objects.bulk_create(crm_pipelines)
+
+
+            # Обновляем project_id для связанных каналов
+            channels = data.get('channel', [])
+            for channel in channels:
+                channel.project_id = project_to_save.id
+                channel.save()
+
+                # Обновляем project_id для связанных получателей
+                # Обновляем project_id для связанных получателей
+            recipients = data.get('recipients', [])
+
+            for recipient in recipients:
+                recipient.project_id = project_to_save.id
+                recipient.save()
+
+            #for file_form in file_formset:
+            #    if file_form.cleaned_data.get('file'):
+            #        project_file = file_form.save(commit=False)
+            #       project_file.project = project
+            #        project_file.save()
+            return JsonResponse({'success': True}, safe=False)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error("project save error")
+            return HttpResponse(status=500)
+
+    return HttpResponse(status=404)
 
 
 def recipients(request):
@@ -146,7 +263,8 @@ def auth_login(request):
             login(request, user)
             session_user = {
                 'phone': user.phone,
-                'username': user.username
+                'username': user.username,
+                'user_id': user.id
             }
             return JsonResponse({"accessToken": get_token(request), "userData": json.dumps(session_user)}, status=200)
         else:
