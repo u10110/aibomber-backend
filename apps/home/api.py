@@ -138,12 +138,18 @@ def chat_messages(request, chat_id):
 
 def chats(request):
     statuses = request.GET.get("status", '')
+    project = request.GET.get("project", '')
+    projects_filter = Project.objects.filter(client=request.user)
+
+    if len(project) > 0:
+        projects_filter = projects_filter.filter(id__in=project.split(','))
 
     chats_list = Chat.objects.filter(
-        project_id__in=Project.objects.filter(client=request.user))
-    logger.debug(statuses)
+        project_id__in=projects_filter)
     if len(statuses) > 0:
         chats_list = chats_list.filter(status__in=statuses.split(','))
+
+
 
     chat_contacts = []
     contacts = []
@@ -171,10 +177,15 @@ def chats(request):
             'about': last_messages.get('user_message'),
             'status': chat.status,
             'is_auto_active': chat.is_auto_active,
-            'channel_id': chat.channel_id
+            'channel_id': chat.channel_id,
+            'project_id': chat.project_id
         })
         contacts.append({
             'id':  chat.user_id,
+            'fullName': chat.user_name,
+            'role': chat.user_id,
+            'avatar': '',
+            'about': last_messages.get('user_message'),
         })
 
     return JsonResponse({'chatsContacts': chat_contacts, 'contacts': contacts}, safe=False)
