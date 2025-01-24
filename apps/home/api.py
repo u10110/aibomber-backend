@@ -334,6 +334,10 @@ def projects(request):
     return JsonResponse(data, safe=False)
 
 
+def project_create(request):
+    return project_get_or_save(request, None)
+
+
 def project_get_or_save(request, project_id):
     user = request.user
 
@@ -371,10 +375,11 @@ def project_get_or_save(request, project_id):
 
             # Обработка каналов
             new_channels = data.get('channels', [])
-            if not project_id:  # Если это редактирование существующего проекта
-                Channel.objects.filter(id__in=[c.id for c in new_channels]).update(project_id=project_to_save.id)
+            if project_id is None:  # Если это редактирование существующего проекта
+                new_channels_set = set(Channel.objects.filter(id__in=[c for c in new_channels]))
+                Channel.objects.filter(id__in=[c.id for c in new_channels_set]).update(project_id=project_to_save.id)
             else:
-                new_channels_set = set(Channel.objects.filter(id__in=[c.get('id') for c in new_channels]))
+                new_channels_set = set(Channel.objects.filter(id__in=[c for c in new_channels]))
                 # Для нового проекта просто привязываем все выбранные каналы
 
                 # Получаем текущие каналы проекта
@@ -414,7 +419,7 @@ def project_get_or_save(request, project_id):
             #        project_file = file_form.save(commit=False)
             #       project_file.project = project
             #        project_file.save()
-            return JsonResponse({'success': True}, safe=False)
+            return JsonResponse({'success': True, 'created': True}, safe=False)
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error("project save error")
@@ -462,9 +467,60 @@ def project_get_or_save(request, project_id):
         else:
             return HttpResponse(status=404)
 
+def recipient_create(request):
+    return recipient_get_or_save(request, None)
+
+
+def recipient_get_or_save(request, recipient_id):
+    user = request.user
+
+    if request.method == 'POST':
+        data = json.loads(request.body.decode("utf-8"))
+
+        try:
+            if recipient_id is None:
+                recipient_to_save = Recipient(
+                    client=user
+                )
+            else:
+                recipient_to_save = Project.objects.filter(id=recipient_id).get()
+
+            recipient_to_save.title = data.get('name')
+            recipient_to_save.project_id = data.get('project_id')
+
+            recipient_to_save.remote_ids = data.get('mailingData')
+            recipient_to_save.start_date = data.get('date')
+
+            recipient_to_save.save()
+            return JsonResponse({'success': True, 'created': True}, safe=False)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error("recipient save error")
+            return HttpResponse(status=500)
+    else:
+        if recipient_id:
+            recipient = Recipient.objects.filter(
+                id=recipient_id,
+                client_id=request.user.id
+            ).first()
+
+            if recipient:
+
+                recipient_data = {
+                    'name': recipient.title,
+                    'project_id': recipient.project_id,
+                    'mailingData': recipient.remote_ids,
+                    'date': recipient.start_date,
+                    'isDate': recipient.start_date is not None,
+                }
+
+                return JsonResponse(recipient_data, safe=False)
+            else:
+                return HttpResponse(status=404)
+
 
 def recipients(request):
-    recipient_list = Recipient.objects.filter(project_id__in=Project.objects.filter(client=request.user)).values(
+    recipient_list = Recipient.objects.filter(client=request.user).values(
         'title',
         'work_option',
         'status',
