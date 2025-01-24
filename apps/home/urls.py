@@ -168,15 +168,18 @@ urlpatterns = [
     path("api/channels/", login_required(api.channels), name="api-channels"),
     path('api/channel/', login_required(api.channel_create), name='api-channel-create'),
     path('api/channel/<int:channel_id>/', login_required(api.channel_get_or_save), name='api-channel-save'),
+    path('api/channel/<int:channel_id>/delete', login_required(api.channel_delete), name='api-channel-delete'),
 
     path("api/projects/", login_required(api.projects), name="api_projects"),
     path('api/projects/toggle-active/', views.toggle_project_active, name='api-toggle-project-active'),
     path('api/project/', login_required(api.project_create), name='api-project-create'),
     path('api/project/<int:project_id>/', login_required(api.project_get_or_save), name='api-project-save'),
+    path('api/project/<int:project_id>/delete', login_required(api.project_delete), name='api-project-delete'),
 
     path("api/recipients/", login_required(api.recipients), name="api-recipient"),
     path('api/recipient/', login_required(api.recipient_create), name='api-recipient-create'),
     path('api/recipient/<int:recipient_id>/', login_required(api.recipient_get_or_save), name='api-recipient-save'),
+    path('api/recipient/<int:recipient_id>/delete', login_required(api.recipient_delete), name='api-recipient-delete'),
 
 ]
 

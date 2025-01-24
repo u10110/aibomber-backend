@@ -321,6 +321,15 @@ def chats(request):
     return JsonResponse({'chatsContacts': chat_contacts, 'contacts': contacts}, safe=False)
 
 
+def project_delete(request, project_id):
+    user = request.user
+    project_to_delete = Recipient.objects.filter(id=project_id, client=user).get()
+    if not project_to_delete:
+        return HttpResponse(status=404)
+    else:
+        project_to_delete.delete()
+
+
 def projects(request):
     projects_list = Project.objects.filter(client=request.user).values(
         'title',
@@ -352,7 +361,10 @@ def project_get_or_save(request, project_id):
                     is_active=False
                 )
             else:
-                project_to_save = Project.objects.filter(id=project_id).get()
+                project_to_save = Project.objects.filter(id=project_id, client=user).get()
+
+            if not project_to_save:
+                return HttpResponse(status=404)
 
             project_to_save.title = data.get('name', '')
             project_to_save.agent_type = data.get('agent_type', None)
@@ -484,7 +496,10 @@ def recipient_get_or_save(request, recipient_id):
                     client=user
                 )
             else:
-                recipient_to_save = Project.objects.filter(id=recipient_id).get()
+                recipient_to_save = Project.objects.filter(id=recipient_id, client=user).get()
+
+            if not recipient_to_save:
+                return HttpResponse(status=404)
 
             recipient_to_save.title = data.get('name')
             recipient_to_save.project_id = data.get('project_id')
@@ -520,6 +535,15 @@ def recipient_get_or_save(request, recipient_id):
                 return HttpResponse(status=404)
 
 
+def recipient_delete(request, recipient_id):
+    user = request.user
+    recipient_to_delete = Recipient.objects.filter(id=recipient_id, client=user).get()
+    if not recipient_to_delete:
+        return HttpResponse(status=404)
+    else:
+        recipient_to_delete.delete()
+
+
 def recipients(request):
     recipient_list = Recipient.objects.filter(client=request.user).values(
         'title',
@@ -549,7 +573,10 @@ def channel_get_or_save(request, channel_id):
                     is_active=False
                 )
             else:
-                channel_to_save = Project.objects.filter(id=channel_id).get()
+                channel_to_save = Channel.objects.filter(id=channel_id, client=user).get()
+
+            if not channel_to_save:
+                return HttpResponse(status=404)
 
             phone_number = re.sub(r'[^\d+]', '', data.get('phone').strip())
             if not phone_number.startswith('+'):
@@ -584,6 +611,14 @@ def channel_get_or_save(request, channel_id):
             else:
                 return HttpResponse(status=404)
 
+
+def channel_delete(request, channel_id):
+    user = request.user
+    channel_to_delete = Channel.objects.filter(id=channel_id, client=user).get()
+    if not channel_to_delete:
+        return HttpResponse(status=404)
+    else:
+        channel_to_delete.delete()
 
 def channels(request):
     channel_list = Channel.objects.filter(client=request.user)
