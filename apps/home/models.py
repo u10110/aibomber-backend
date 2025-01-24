@@ -188,9 +188,10 @@ class Recipient(SoftDeleteModel):
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     project_id = models.IntegerField(null=True)
     title = models.CharField(max_length=1000)
-    status = models.CharField(max_length=55, default="active")
+    status = models.CharField(max_length=55, default="new")
     work_option = models.IntegerField(choices=OPTIONS, default=1)
     remote_ids = models.TextField(default='')
+    start_date = models.DateTimeField(null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 

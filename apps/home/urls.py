@@ -168,11 +168,13 @@ urlpatterns = [
     path("api/channels/", login_required(api.channels), name="api-channels"),
 
     path("api/projects/", login_required(api.projects), name="api_projects"),
-    path('api/projects/toggle-active/', views.toggle_project_active, name='toggle-project-active'),
-    path('api/project/', login_required(api.project_create), name='project-create'),
-    path('api/project/<int:project_id>/', login_required(api.project_get_or_save), name='project-save'),
+    path('api/projects/toggle-active/', views.toggle_project_active, name='api-toggle-project-active'),
+    path('api/project/', login_required(api.project_create), name='api-project-create'),
+    path('api/project/<int:project_id>/', login_required(api.project_get_or_save), name='api-project-save'),
 
     path("api/recipients/", login_required(api.recipients), name="api-recipient"),
+    path('api/recipient/', login_required(api.recipient_create), name='api-recipient-create'),
+    path('api/recipient/<int:recipient_id>/', login_required(api.recipient_get_or_save), name='api-recipient-save'),
 
 ]
 
