@@ -291,7 +291,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'https://eliment.ai',
     'https://dev.eliment.ai',
-    'https://neurounit.ai'
+    'https://neurounit.ai',
+    'https://dev.neurounit.ai'
 ]
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
