@@ -1,4 +1,3 @@
-
 import string
 from decouple import config
 from sqlite3 import IntegrityError
@@ -23,7 +22,6 @@ from apps.billing.helper import Helper as BHelper
 from apps.billing.models import Limits, Order, Paid, UnicTariff
 from apps.users_control.models import ReferalCounter, UsersAgreement
 from core.settings import MEDIA_ROOT
-
 
 from apps.telegram.sndr import ProjectProcessor
 from apps.telegram.prsr import process_project
@@ -61,11 +59,72 @@ from django.contrib.auth import authenticate, get_user_model, login
 from django.http import JsonResponse
 from apps.telegram.sndr import MessageProcessor
 import traceback
+
 TELETHON_HOST = config("TELETHON_HOST")
 
 from django.utils.decorators import method_decorator
 from django_telegram_login.authentication import verify_telegram_authentication
 from django.middleware.csrf import get_token
+
+
+def send_to_gpt(request):
+    """
+    Обрабатывает запросы чата на этапе создания проекта.
+    """
+    if request.method == "POST":
+        try:
+            # Парсим данные формы
+            data = json.loads(request.body.decode("utf-8"))
+            logger.debug(data)
+            project = Project(
+                id=None,
+                title=data.get("title"),
+                agent_type=data.get("agent_type"),
+                work_option=int(data.get("work_option")),
+                gpt_version=int(data.get("gpt_version")),
+                knowledge_base_text=data.get("knowledge_base_text"),
+                hello_text=data.get("hello_text"),
+                prompt=data.get("prompt"),
+            )
+
+            # Форматируем историю чата
+            chat = data.get("chat_history", [])
+            formatted_history = []
+            chat_history = chat[:-1]
+            question = chat[:1]
+            # Форматируем историю чата
+            for item in chat_history:
+                logger.debug(item)
+                if item.get('bot'):
+                    formatted_history.append({"role": "assistant", "content": item.get('message')})
+                else:
+                    formatted_history.append({"role": "user", "content": item.get('message')})
+
+            # Ограничиваем длину истории (например, 10 пар сообщений)
+            formatted_history = formatted_history[-20:]  # 10 вопросов и 10 ответов
+            logger.debug(formatted_history)
+            # Инициализируем GPTAssistant с историей чата
+            assistant = GPTAssistant(project)
+            # Передаём историю в GPTAssistant
+            assistant.chat_history = formatted_history
+
+            # Получаем вопрос
+            question = question[0].get('message', False)
+            if not question:
+                return JsonResponse({"error": "Вопрос не предоставлен."}, status=400)
+            logger.debug(question)
+            # Получаем ответ от GPT
+            response = assistant.ask_question(question, False)
+
+            return JsonResponse({
+                "question": question,
+                "response": response
+            }, status=200)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Метод не поддерживается."}, status=405)
 
 
 def send_chat_messages(request, chat_id):
@@ -114,21 +173,21 @@ def send_chat_messages(request, chat_id):
                             'isSeen': True
                         },
                     }, 'chat': {
-                        'id': current_chat.id,
-                        'lastMessage':   {
-                            'message': new_message.user_message,
-                            'time': new_message.created_at.isoformat(),
-                            'feedback': {
-                                'isSent': True,
-                                'isDelivered': True,
-                                'isSeen': True
-                            },
+                    'id': current_chat.id,
+                    'lastMessage': {
+                        'message': new_message.user_message,
+                        'time': new_message.created_at.isoformat(),
+                        'feedback': {
+                            'isSent': True,
+                            'isDelivered': True,
+                            'isSeen': True
                         },
-                        'status': current_chat.status,
-                        'is_auto_active': current_chat.is_auto_active,
-                        'channel_id': current_chat.channel_id,
-                        }
-                }, safe=False)
+                    },
+                    'status': current_chat.status,
+                    'is_auto_active': current_chat.is_auto_active,
+                    'channel_id': current_chat.channel_id,
+                }
+            }, safe=False)
 
         if sent == 'USER_DOESNT_EXIST':
             current_chat.status = 'user_doesnt_exist'
@@ -142,9 +201,7 @@ def send_chat_messages(request, chat_id):
             return JsonResponse({'success': False, 'error': 'Ошибка отправки '}, safe=False)
 
 
-
 def chat_messages(request, chat_id):
-
     if not chat_id:
         return HttpResponse(status=404)
 
@@ -184,7 +241,7 @@ def chat_messages(request, chat_id):
 
     chat_data = {
         'id': current_chat.id,
-        'lastMessage':   {
+        'lastMessage': {
             'message': last_messages.get('user_message'),
             'time': last_messages.get('created_at').isoformat(),
             'feedback': {
@@ -224,8 +281,6 @@ def chats(request):
     if len(statuses) > 0:
         chats_list = chats_list.filter(status__in=statuses.split(','))
 
-
-
     chat_contacts = []
     contacts = []
     for chat in chats_list:
@@ -237,7 +292,7 @@ def chats(request):
         ).order_by('-created_at').first()
         chat_contacts.append({
             'id': chat.id,
-            'lastMessage':   {
+            'lastMessage': {
                 'message': last_messages.get('user_message'),
                 'time': last_messages.get('created_at').isoformat(),
                 'feedback': {
@@ -256,7 +311,7 @@ def chats(request):
             'project_id': chat.project_id
         })
         contacts.append({
-            'id':  chat.user_id,
+            'id': chat.user_id,
             'fullName': chat.user_name,
             'role': chat.user_id,
             'avatar': '',
@@ -267,7 +322,6 @@ def chats(request):
 
 
 def projects(request):
-
     projects_list = Project.objects.filter(client=request.user).values(
         'title',
         'work_option',
@@ -303,7 +357,7 @@ def project_get_or_save(request, project_id):
             project_to_save.prompt = data.get('promptText')
             project_to_save.hello_text = data.get('hello_text')
 
-            #project_to_save.outgoing_limit = request.POST.get('', 10)
+            # project_to_save.outgoing_limit = request.POST.get('', 10)
             project_to_save.per_conversation_limit = data.get('limitForOneChat', 10)
             project_to_save.message_limit = data.get('limitForDay', 10)
 
@@ -334,12 +388,11 @@ def project_get_or_save(request, project_id):
                 channels_to_assign = new_channels_set - current_channels
                 Channel.objects.filter(id__in=[c.id for c in channels_to_assign]).update(project_id=project_to_save.id)
 
-
             # Обработка пайплайнов
-            #pipelines = data.get('pipelines', [])
+            # pipelines = data.get('pipelines', [])
 
-            #CrmPipelines.objects.filter(project_id=project_to_save.id).delete()
-            #crm_pipelines = [
+            # CrmPipelines.objects.filter(project_id=project_to_save.id).delete()
+            # crm_pipelines = [
             #    CrmPipelines(
             #        project_id=project_to_save.id,
             ##        remote_name=pipeline['remote_name'],
@@ -347,18 +400,16 @@ def project_get_or_save(request, project_id):
             #        remote_pipeline_id=pipeline['remote_pipeline_id'],
             #        trigger=pipeline['trigger']
             #    ) for pipeline in pipelines
-            #]
-            #CrmPipelines.objects.bulk_create(crm_pipelines)
-
+            # ]
+            # CrmPipelines.objects.bulk_create(crm_pipelines)
 
             # Обновляем project_id для связанных каналов
-            #channels = data.get('channel', [])
-            #for channel in channels:
+            # channels = data.get('channel', [])
+            # for channel in channels:
             #    channel.project_id = project_to_save.id
             #    channel.save()
 
-
-            #for file_form in file_formset:
+            # for file_form in file_formset:
             #    if file_form.cleaned_data.get('file'):
             #        project_file = file_form.save(commit=False)
             #       project_file.project = project
@@ -413,7 +464,6 @@ def project_get_or_save(request, project_id):
 
 
 def recipients(request):
-
     recipient_list = Recipient.objects.filter(project_id__in=Project.objects.filter(client=request.user)).values(
         'title',
         'work_option',
@@ -426,12 +476,10 @@ def recipients(request):
 
 
 def channels(request):
-
     channel_list = Channel.objects.filter(project_id__in=Project.objects.filter(client=request.user))
 
     data = []
     for channel in channel_list:
-
         project = Project.objects.filter(id=channel.project_id).first()
         data.append({
             'title': channel.title,
@@ -486,5 +534,3 @@ def auth_login(request):
             return JsonResponse({"error": msg}, status=400)
     else:
         return HttpResponse(status=404)
-
-

@@ -1323,11 +1323,11 @@ def create_project_chat(request):
             assistant.chat_history = formatted_history
 
             # Получаем вопрос
-            print(assistant.chat_history)
+            logger.debug(assistant.chat_history)
             question = data.get("question")
             if not question:
                 return JsonResponse({"error": "Вопрос не предоставлен."}, status=400)
-            print(question)
+            logger.debug(question)
             # Получаем ответ от GPT
             response = assistant.ask_question(question, False)
 
