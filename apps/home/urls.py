@@ -169,7 +169,7 @@ urlpatterns = [
 
     path("api/projects/", login_required(api.projects), name="api_projects"),
     path('api/projects/toggle-active/', views.toggle_project_active, name='toggle-project-active'),
-    path('api/project/', login_required(api.project_get_or_save), name='project-create'),
+    path('api/project/', login_required(api.project_create), name='project-create'),
     path('api/project/<int:project_id>/', login_required(api.project_get_or_save), name='project-save'),
 
     path("api/recipients/", login_required(api.recipients), name="api-recipient"),
