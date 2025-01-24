@@ -467,6 +467,7 @@ def project_get_or_save(request, project_id):
         else:
             return HttpResponse(status=404)
 
+
 def recipient_create(request):
     return recipient_get_or_save(request, None)
 
@@ -531,12 +532,69 @@ def recipients(request):
     return JsonResponse(data, safe=False)
 
 
+def channel_create(request):
+    return channel_get_or_save(request, None)
+
+
+def channel_get_or_save(request, channel_id):
+    user = request.user
+
+    if request.method == 'POST':
+        data = json.loads(request.body.decode("utf-8"))
+
+        try:
+            if channel_id is None:
+                channel_to_save = Channel(
+                    client=user,
+                    is_active=False
+                )
+            else:
+                channel_to_save = Project.objects.filter(id=channel_id).get()
+
+            phone_number = re.sub(r'[^\d+]', '', data.get('phone').strip())
+            if not phone_number.startswith('+'):
+                phone_number = '+' + phone_number
+
+            channel_to_save.title = data.get('name')
+            channel_to_save.source = data.get('source')
+            channel_to_save.phone = phone_number
+
+            channel_to_save.save()
+            return JsonResponse({'success': True, 'created': True}, safe=False)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error("recipient save error")
+            return HttpResponse(status=500)
+    else:
+        if channel_id:
+            channel = Channel.objects.filter(
+                id=channel_id,
+                client_id=request.user.id
+            ).first()
+
+            if channel:
+
+                channel_data = {
+                    'name': channel.title,
+                    'source': channel.source,
+                    'phone': channel.phone
+                }
+
+                return JsonResponse(channel_data, safe=False)
+            else:
+                return HttpResponse(status=404)
+
+
 def channels(request):
-    channel_list = Channel.objects.filter(project_id__in=Project.objects.filter(client=request.user))
+    channel_list = Channel.objects.filter(client=request.user)
 
     data = []
     for channel in channel_list:
         project = Project.objects.filter(id=channel.project_id).first()
+        project_title = ''
+        if project :
+            project_title=project.title
+
         data.append({
             'title': channel.title,
             'status': channel.status,
@@ -546,7 +604,7 @@ def channels(request):
             'remaining_messages': channel.remaining_messages,
             'is_active': channel.is_active,
             'source': channel.source,
-            'project_title': project.title
+            'project_title': project_title
         })
 
     return JsonResponse(data, safe=False)

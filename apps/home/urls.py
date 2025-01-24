@@ -166,6 +166,8 @@ urlpatterns = [
     path('api/v1/gpt-assistant/', views.gpt_assistant, name='gpt_assistant'),
 
     path("api/channels/", login_required(api.channels), name="api-channels"),
+    path('api/channel/', login_required(api.channel_create), name='api-channel-create'),
+    path('api/channel/<int:channel_id>/', login_required(api.channel_get_or_save), name='api-channel-save'),
 
     path("api/projects/", login_required(api.projects), name="api_projects"),
     path('api/projects/toggle-active/', views.toggle_project_active, name='api-toggle-project-active'),
