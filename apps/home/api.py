@@ -265,6 +265,7 @@ def chat_messages(request, chat_id):
             'role': current_chat.user_id,
             'about': last_messages.get('user_message'),
             'avatar': '',
+            'status': current_chat.status,
             'id': current_chat.user_id,
         }
     }, safe=False)
@@ -317,6 +318,7 @@ def chats(request):
             'fullName': chat.user_name,
             'role': chat.user_id,
             'avatar': '',
+            'status': chat.status,
             'about': last_messages.get('user_message'),
         })
 
