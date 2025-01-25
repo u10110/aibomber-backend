@@ -328,6 +328,7 @@ def project_delete(request, project_id):
         return HttpResponse(status=404)
     else:
         project_to_delete.delete()
+        return HttpResponse(status=200)
 
 
 def projects(request):
@@ -496,13 +497,13 @@ def recipient_get_or_save(request, recipient_id):
                     client=user
                 )
             else:
-                recipient_to_save = Project.objects.filter(id=recipient_id, client=user).get()
+                recipient_to_save = Recipient.objects.filter(id=recipient_id, client=user).get()
 
             if not recipient_to_save:
                 return HttpResponse(status=404)
 
             recipient_to_save.title = data.get('name')
-            recipient_to_save.project_id = data.get('project_id')
+            recipient_to_save.project_id = data.get('project')
 
             recipient_to_save.remote_ids = data.get('mailingData')
             recipient_to_save.start_date = data.get('date')
@@ -524,7 +525,7 @@ def recipient_get_or_save(request, recipient_id):
 
                 recipient_data = {
                     'name': recipient.title,
-                    'project_id': recipient.project_id,
+                    'project': recipient.project_id,
                     'mailingData': recipient.remote_ids,
                     'date': recipient.start_date,
                     'isDate': recipient.start_date is not None,
@@ -542,6 +543,7 @@ def recipient_delete(request, recipient_id):
         return HttpResponse(status=404)
     else:
         recipient_to_delete.delete()
+        return HttpResponse(status=200)
 
 
 def recipients(request):
@@ -619,6 +621,8 @@ def channel_delete(request, channel_id):
         return HttpResponse(status=404)
     else:
         channel_to_delete.delete()
+        return HttpResponse(status=200)
+
 
 def channels(request):
     channel_list = Channel.objects.filter(client=request.user)
