@@ -241,9 +241,17 @@ def chat_messages(request, chat_id):
         'created_at'
     ).order_by('-created_at').first()
 
-    chat_data = {
-        'id': current_chat.id,
-        'lastMessage': {
+    last_messages = ChatMessages.objects.filter(chat_id=chat).values(
+        'message_type',
+        'user_name',
+        'user_message',
+        'created_at'
+    ).order_by('-created_at').first()
+
+    last_message = {}
+    last_user_message = ''
+    if last_messages:
+        last_message = {
             'message': last_messages.get('user_message'),
             'time': last_messages.get('created_at').isoformat(),
             'feedback': {
@@ -251,7 +259,12 @@ def chat_messages(request, chat_id):
                 'isDelivered': True,
                 'isSeen': True
             },
-        },
+        }
+        last_user_message = last_messages.get('user_message')
+
+    chat_data = {
+        'id': current_chat.id,
+        'lastMessage':last_message,
         'status': current_chat.status,
         'is_auto_active': current_chat.is_auto_active,
         'channel_id': current_chat.channel_id,
@@ -263,7 +276,7 @@ def chat_messages(request, chat_id):
         'contact': {
             'fullName': current_chat.user_name,
             'role': current_chat.user_id,
-            'about': last_messages.get('user_message'),
+            'about': last_user_message,
             'avatar': '',
             'status': current_chat.status,
             'id': current_chat.id,
