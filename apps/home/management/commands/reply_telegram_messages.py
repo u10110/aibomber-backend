@@ -59,9 +59,12 @@ class Command(BaseCommand):
                 logger.info(f"saving message {message.get('user_id')}")
                 chat = save_messages(message.get('user_id'), [message], project, channel, user_view_name)
                 if chat:
-                    time.sleep(10)
-                    message_processor = MessageProcessor()
-                    ProjectProcessor.process_chat(chat, message_processor)
+                    if chat.is_auto_active:
+                        time.sleep(10)
+                        message_processor = MessageProcessor()
+                        ProjectProcessor.process_chat(chat, message_processor)
+                    else:
+                        logger.info(f"Сообщение получено но не обработано, is_auto_active false")
                 else:
                     logger.error(f"Сообщение получено но не обработано, нехватает "
                           f"данных или недопустмый сообщение: {message.get('text', '')} {message.get('channel_phone', '')}")
