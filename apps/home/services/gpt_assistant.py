@@ -8,7 +8,8 @@ import re
 import random
 from django.shortcuts import get_object_or_404
 from decouple import config
-
+import urllib.request
+from urllib.parse import urlparse
 OPENAI_API_KEY = config("OPENAI_API_KEY")
 client = OpenAI(
     api_key=OPENAI_API_KEY  # Рекомендуется использовать переменные окружения
@@ -100,33 +101,42 @@ class GPTAssistant:
 
         project_files = ProjectFile.objects.filter(project=self.project)
         for project_file in project_files:
-            file_path = project_file.file.path
-            ext = os.path.splitext(file_path)[1].lower()
-
             # Выполняем обработку файла в зависимости от его расширения
-            self.knowledge_texts += self._extract_text_from_file(file_path, ext)
-        #print(self.knowledge_texts)
-
+            self.knowledge_texts += GPTAssistant.load_file_as_text(project_file.file)
 
     @staticmethod
-    def _extract_text_from_file(file_path, ext):
+    def load_file_as_text(url):
+
+        try:
+            resource = urllib.request.urlopen(url)
+            content = resource.read().decode(resource.headers.get_content_charset())
+            domain = urlparse(url).netloc
+            path = urlparse(url).path
+            ext = os.path.splitext(path)[1].lower()
+        except Exception as e:
+            print(f"Error request {url}: {e}")
+            return ''
+        # Выполняем обработку файла в зависимости от его расширения
+        return GPTAssistant._extract_text_from_file(content, ext, domain)
+
+    @staticmethod
+    def _extract_text_from_file(file_path, ext, domain):
         """
         Извлекает текст из файлов различных форматов.
         """
+
         try:
-            if ext == ".txt":
-                with open(file_path, "r", encoding="utf-8") as f:
-                    return [f.read()]
-            elif ext == ".pdf":
+            if ext == ".pdf":
                 reader = PdfReader(file_path)
                 return [page.extract_text() for page in reader.pages]
-            elif ext == ".docx":
+            elif ext == ".docx" or domain == 'docs.google.com':
                 doc = Document(file_path)
                 return [p.text for p in doc.paragraphs]
             else:
-                raise ValueError(f"Unsupported file format: {ext}")
+                with open(file_path, "r", encoding="utf-8") as f:
+                    return [f.read()]
         except Exception as e:
-            print(f"Error extracting text from file {file_path}: {e}")
+            print(e)
             return []
 
     def _process_spintax(self, text):
@@ -158,7 +168,6 @@ class GPTAssistant:
                 return {"status": "уже отправляли хелоу", "anwser": ""}
 
         full_context = f"{self.project.prompt}\n\n" + "\n".join(self.knowledge_texts)
-
 
         if not question:
             try:

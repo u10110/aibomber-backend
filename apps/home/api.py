@@ -86,32 +86,34 @@ def send_to_gpt(request):
                 hello_text=data.get("hello_text"),
                 prompt=data.get("prompt"),
             )
+            #files=data.get("knownBaseFiles")
+            #f files:
+            #    for project_file in files:
+            #        project.knowledge_base_text+= '\r' + project_file.get('name')
 
             # Форматируем историю чата
             chat = data.get("chat_history", [])
             formatted_history = []
-            chat_history = chat[:-1]
-            question = chat[:1]
+            question = ''
             # Форматируем историю чата
-            for item in chat_history:
-                logger.debug(item)
+            for item in chat:
                 if item.get('bot'):
                     formatted_history.append({"role": "assistant", "content": item.get('message')})
                 else:
                     formatted_history.append({"role": "user", "content": item.get('message')})
+                    question=item.get('message')
 
             # Ограничиваем длину истории (например, 10 пар сообщений)
             formatted_history = formatted_history[-20:]  # 10 вопросов и 10 ответов
-            logger.debug(formatted_history)
+
             # Инициализируем GPTAssistant с историей чата
             assistant = GPTAssistant(project)
             # Передаём историю в GPTAssistant
-            assistant.chat_history = formatted_history
+            assistant.chat_history = formatted_history[:-1]
 
-            # Получаем вопрос
-            question = question[0].get('message', False)
             if not question:
                 return JsonResponse({"error": "Вопрос не предоставлен."}, status=400)
+            logger.debug(assistant.chat_history)
             logger.debug(question)
             # Получаем ответ от GPT
             response = assistant.ask_question(question, False)
@@ -390,7 +392,7 @@ def project_get_or_save(request, project_id):
             new_channels = data.get('channels', [])
             if project_id is None:  # Если это редактирование существующего проекта
                 new_channels_set = set(Channel.objects.filter(id__in=[c for c in new_channels]))
-                Channel.objects.filter(id__in=[c.id for c in new_channels_set]).update(project_id=project_to_save.id)
+                Channel.objects.filter(id__in=[c for c in new_channels_set]).update(project_id=project_to_save.id)
             else:
                 new_channels_set = set(Channel.objects.filter(id__in=[c for c in new_channels]))
                 # Для нового проекта просто привязываем все выбранные каналы
@@ -426,12 +428,17 @@ def project_get_or_save(request, project_id):
             # for channel in channels:
             #    channel.project_id = project_to_save.id
             #    channel.save()
+            new_files = data.get('knownBaseFiles', [])
+            not_in_delete = []
+            for file in new_files:
+                project_file = ProjectFile.objects.filter(project=project_to_save, file=file.get('name')).first()
+                if not project_file:
+                    project_file = ProjectFile(project=project_to_save, file=file.get('name'))
+                    project_file.save()
+                not_in_delete.append(project_file.id)
 
-            # for file_form in file_formset:
-            #    if file_form.cleaned_data.get('file'):
-            #        project_file = file_form.save(commit=False)
-            #       project_file.project = project
-            #        project_file.save()
+            ProjectFile.objects.filter(project=project_to_save).exclude(id__in=not_in_delete).delete()
+
             return JsonResponse({'success': True, 'created': True}, safe=False)
         except Exception as e:
             logger.error(traceback.format_exc())
@@ -448,17 +455,14 @@ def project_get_or_save(request, project_id):
 
             channels_data = []
             for channel in channel_list:
-                channels_data.append({
-                    'title': channel.title,
-                    'id': channel.id,
-                })
+                channels_data.append(channel.id)
 
             files_list = ProjectFile.objects.filter(project_id=project.id)
 
             files_data = []
             for file in files_list:
                 files_data.append({
-                    'title': file.title,
+                    'name': file.file,
                     'id': file.id,
                 })
 
