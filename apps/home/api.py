@@ -263,11 +263,14 @@ def chat_messages(request, chat_id):
         'channel_id': current_chat.channel_id,
         'messages': messages_data,
     }
+    user_name = current_chat.user_name
+    if len(current_chat.user_name) == 0:
+        user_name = current_chat.user_id
 
     return JsonResponse({
         'chat': chat_data,
         'contact': {
-            'fullName': current_chat.user_name,
+            'fullName': user_name,
             'role': current_chat.user_id,
             'about': last_user_message,
             'avatar': '',
@@ -314,10 +317,14 @@ def chats(request):
                     }
             last_user_message = last_messages.get('user_message')
 
+        user_name = current_chat.user_name
+        if len(current_chat.user_name) == 0:
+            user_name = current_chat.user_id
+
         chat_contacts.append({
             'id': chat.id,
             'lastMessage': last_message,
-            'fullName': chat.user_name,
+            'fullName': user_name,
             'role': chat.user_id,
             'avatar': '',
             'about': last_user_message,
@@ -328,7 +335,7 @@ def chats(request):
         })
         contacts.append({
             'id': chat.id,
-            'fullName': chat.user_name,
+            'fullName': user_name,
             'role': chat.user_id,
             'avatar': '',
             'status': chat.status,
