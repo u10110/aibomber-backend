@@ -234,13 +234,6 @@ def chat_messages(request, chat_id):
             },
         })
 
-    last_messages = ChatMessages.objects.filter(chat_id=current_chat).values(
-        'message_type',
-        'user_name',
-        'user_message',
-        'created_at'
-    ).order_by('-created_at').first()
-
     last_messages = ChatMessages.objects.filter(chat_id=chat).values(
         'message_type',
         'user_name',
