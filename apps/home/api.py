@@ -293,21 +293,28 @@ def chats(request):
             'user_message',
             'created_at'
         ).order_by('-created_at').first()
+
+        last_message = {}
+        last_user_message = ''
+        if last_messages:
+            last_message = {
+                        'message': last_messages.get('user_message'),
+                        'time': last_messages.get('created_at').isoformat(),
+                        'feedback': {
+                            'isSent': True,
+                            'isDelivered': True,
+                            'isSeen': True
+                        },
+                    }
+            last_user_message = last_messages.get('user_message')
+
         chat_contacts.append({
             'id': chat.id,
-            'lastMessage': {
-                'message': last_messages.get('user_message'),
-                'time': last_messages.get('created_at').isoformat(),
-                'feedback': {
-                    'isSent': True,
-                    'isDelivered': True,
-                    'isSeen': True
-                },
-            },
+            'lastMessage': last_message,
             'fullName': chat.user_name,
             'role': chat.user_id,
             'avatar': '',
-            'about': last_messages.get('user_message'),
+            'about': last_user_message,
             'status': chat.status,
             'is_auto_active': chat.is_auto_active,
             'channel_id': chat.channel_id,
@@ -319,7 +326,7 @@ def chats(request):
             'role': chat.user_id,
             'avatar': '',
             'status': chat.status,
-            'about': last_messages.get('user_message'),
+            'about': last_user_message,
         })
 
     return JsonResponse({'chatsContacts': chat_contacts, 'contacts': contacts}, safe=False)
