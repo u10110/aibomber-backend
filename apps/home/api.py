@@ -317,9 +317,9 @@ def chats(request):
                     }
             last_user_message = last_messages.get('user_message')
 
-        user_name = current_chat.user_name
-        if len(current_chat.user_name) == 0:
-            user_name = current_chat.user_id
+        user_name = chat.user_name
+        if len(chat.user_name) == 0:
+            user_name = chat.user_id
 
         chat_contacts.append({
             'id': chat.id,
