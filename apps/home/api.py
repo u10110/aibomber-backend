@@ -266,7 +266,7 @@ def chat_messages(request, chat_id):
             'about': last_messages.get('user_message'),
             'avatar': '',
             'status': current_chat.status,
-            'id': current_chat.user_id,
+            'id': current_chat.id,
         }
     }, safe=False)
 
@@ -314,7 +314,7 @@ def chats(request):
             'project_id': chat.project_id
         })
         contacts.append({
-            'id': chat.user_id,
+            'id': chat.id,
             'fullName': chat.user_name,
             'role': chat.user_id,
             'avatar': '',
