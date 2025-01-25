@@ -19,6 +19,11 @@ services:
     restart: always
     env_file: .env
     command: python manage.py send_telegramm_messages
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000m"
+        max-file: "3"
 
   eliment-cli-kafka-message-reply:
     container_name: eliment-cli-kafka-message-reply
@@ -26,3 +31,9 @@ services:
     restart: always
     env_file: .env
     command: python manage.py reply_telegram_messages
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000m"
+        max-file: "3"
+
