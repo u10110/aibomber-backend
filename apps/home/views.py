@@ -1201,13 +1201,15 @@ def toggle_auto_active(request, chat_id):
 
 @csrf_exempt
 def change_status(request, chat_id):
+    client_id = request.user.id
     if request.method == 'POST':
         data = json.loads(request.body)
         new_status = data.get('status')
 
         chat = Chat.objects.get(id=chat_id)
-        chat.status = new_status
-        chat.save()
+        if chat and chat.project.client.id == client_id:
+            chat.status = new_status
+            chat.save()
 
         # tg_id = TgID.objects.get(tg_id=chat.user_id)
         # tg_id.status = new_status

@@ -9,6 +9,7 @@ from apps.telegram.views import UserAlertsView
 router = routers.DefaultRouter()
 router.register(r"user_alerts", UserAlertsView, basename="user-alerts")
 
+
 urlpatterns = [
     path("", include(router.urls)),
     re_path(r"get_statistic", views.GetStatisticView.as_view(), name="get-statistic"),

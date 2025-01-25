@@ -327,12 +327,12 @@ def chats(request):
 
 def project_delete(request, project_id):
     user = request.user
-    project_to_delete = Recipient.objects.filter(id=project_id, client=user).get()
-    if not project_to_delete:
-        return HttpResponse(status=404)
-    else:
+    try:
+        project_to_delete = Project.objects.filter(id=project_id, client=user).get()
         project_to_delete.delete()
         return HttpResponse(status=200)
+    except Project.DoesNotExist:
+        return HttpResponse(status=404)
 
 
 def projects(request):
