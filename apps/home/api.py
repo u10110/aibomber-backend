@@ -234,7 +234,7 @@ def chat_messages(request, chat_id):
             },
         })
 
-    last_messages = ChatMessages.objects.filter(chat_id=chat).values(
+    last_messages = ChatMessages.objects.filter(chat_id=current_chat).values(
         'message_type',
         'user_name',
         'user_message',
@@ -414,7 +414,7 @@ def project_get_or_save(request, project_id):
             new_channels = data.get('channels', [])
             if project_id is None:  # Если это редактирование существующего проекта
                 new_channels_set = set(Channel.objects.filter(id__in=[c for c in new_channels]))
-                Channel.objects.filter(id__in=[c for c in new_channels_set]).update(project_id=project_to_save.id)
+                Channel.objects.filter(id__in=[c.id for c in new_channels_set]).update(project_id=project_to_save.id)
             else:
                 new_channels_set = set(Channel.objects.filter(id__in=[c for c in new_channels]))
                 # Для нового проекта просто привязываем все выбранные каналы
