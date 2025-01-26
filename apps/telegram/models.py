@@ -8,7 +8,7 @@ class PeriodicAlerts(models.Model):
         verbose_name_plural = "Уведомления"
 
     clientsettings = models.ForeignKey(
-        ClientSettings, on_delete=models.CASCADE, related_name="PeriodicAlerts"
+        ClientSettings, on_delete=models.SET_DEFAULT, related_name="PeriodicAlerts", default=None
     )
     period_day = models.SmallIntegerField()
     send_date = models.DateTimeField(null=True)
