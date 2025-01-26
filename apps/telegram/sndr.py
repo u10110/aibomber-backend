@@ -14,6 +14,7 @@ from django.utils import timezone
 import time
 import traceback
 from apps.home.services.gpt_assistant import GPTAssistant
+from django.db.models import Q
 
 # Import models after Django configuration
 from .models import (
@@ -223,9 +224,9 @@ class ProjectProcessor:
 
         message_processor = MessageProcessor()
 
-        today_send_new_messages = ChatMessages.objects.filter(
-            chat_id__in=Chat.objects.filter(channel=channel),
-            created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(days=1))
+        today_send_new_messages = ChatMessages.objects.filter(Q(chat_id__in=Chat.objects.filter(channel=channel))
+                                                              and Q(chat_id__in=Chat.objects.filter(project=project)))\
+            .filter(created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(days=1))
         ).values('chat_id_id').annotate(min_created_at=Min('created_at')).count()
         logger.debug(today_send_new_messages)
         if today_send_new_messages >= channel.max_daily_messages:

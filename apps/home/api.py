@@ -675,6 +675,25 @@ def channels(request):
     return JsonResponse(data, safe=False)
 
 
+@csrf_exempt
+def telethon_sessions(request):
+
+    response = requests.get(
+        f"{TELETHON_HOST}/get-sessions",
+    )
+    return JsonResponse(response)
+
+
+@csrf_exempt
+def delete_telethon_session(request):
+
+    response = requests.get(
+        f"{TELETHON_HOST}/get-sessions",
+    )
+
+    return JsonResponse({'success': True})
+
+
 def is_ajax(request):
     return request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
 
