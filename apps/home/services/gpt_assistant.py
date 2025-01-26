@@ -43,7 +43,7 @@ class GPTAssistant:
         """
         Вычисляет стоимость запроса на основе использования токенов.
         """
-        cost_per_token = 0.00002  # Пример: $0.00002 за токен (замените на актуальное значение)
+        cost_per_token = 0.00003  # Пример: $0.00002 за токен (замените на актуальное значение)
         return token_usage * cost_per_token
 
 
@@ -225,8 +225,8 @@ class GPTAssistant:
             return answer
         except Exception as e:
             # Обработка ошибок
-            print(f"Ошибка API OpenAI: {type(e).__name__}: {e}")
-            return f"Ошибка OpenAI API: {str(e)}"
+            print(f"Ошибка: {type(e).__name__}: {e}")
+            return f"Ошибка: {str(e)}"
 
 
     
