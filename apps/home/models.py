@@ -2,13 +2,17 @@ from http import client
 
 from django.db import models
 from django_softdelete.models import SoftDeleteModel
-from django.db.models.signals import post_save, post_init
+from django.db.models.signals import post_save, post_init, post_delete
 from apps.authentication.models import User
 import datetime
 import requests
 import json
+from loguru import logger
+from decouple import config
 
 # from sqlalchemy import null
+
+TELETHON_HOST = config("TELETHON_HOST")
 
 
 class Proxy(models.Model):
@@ -244,9 +248,25 @@ class Channel(SoftDeleteModel):
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
+    @staticmethod
+    def post_delete(sender, instance, created, **kwargs):
+        try:
+            # Отправка запроса в FastAPI
+            requests.post(
+                f"{TELETHON_HOST}/log-out/",
+                params={"phone": instance.phone}
+            )
+        except Exception as e:
+            logger.error(e)
+
+
+
+
     def __str__(self):
         return f"{self.title} ({self.phone})"
 
+
+post_save.connect(Channel.post_delete, sender=Channel)
 
 class Chat(SoftDeleteModel):
     class Meta:

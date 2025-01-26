@@ -1239,7 +1239,7 @@ def send_code(request):
                 f"{TELETHON_HOST}/send-code/",
                 params={"phone": phone_number},
             )
-
+            logger.debug(response)
             if response.status_code == 200:
                 return JsonResponse(response.json())
             else:
