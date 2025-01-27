@@ -654,8 +654,10 @@ def channels(request):
     for channel in channel_list:
         project = Project.objects.filter(id=channel.project_id).first()
         project_title = ''
+        project_id = ''
         if project :
             project_title=project.title
+            project_id=project.id
 
         data.append({
             'title': channel.title,
@@ -666,7 +668,8 @@ def channels(request):
             'remaining_messages': channel.remaining_messages,
             'is_active': channel.is_active,
             'source': channel.source,
-            'project_title': project_title
+            'project_title': project_title,
+            'project_id': project_id
         })
 
     return JsonResponse(data, safe=False)
