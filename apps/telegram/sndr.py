@@ -94,6 +94,7 @@ class ClientManager:
         Returns:
             QuerySet: Active projects for the client
         """
+        logger.debug(current_time)
         return Project.objects.filter(
             client=client.client_id,
             is_active=True,
