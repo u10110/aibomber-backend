@@ -192,6 +192,7 @@ class Recipient(SoftDeleteModel):
 
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     project_id = models.IntegerField(null=True)
+    recipient_id = models.IntegerField(null=True)
     title = models.CharField(max_length=1000)
     status = models.CharField(max_length=55, default="new")
     work_option = models.IntegerField(choices=OPTIONS, default=1)

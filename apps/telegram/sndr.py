@@ -242,15 +242,15 @@ class ProjectProcessor:
 
 
             # Получаем TG ID, у которых нет сообщений
-            next_user_name = ProjectProcessor.get_next_new_recipient(project)
-            logger.info(next_user_name)
+            next_recipient = ProjectProcessor.get_next_new_recipient(project)
+            logger.info(next_recipient)
             # Обрабатываем существующий\
 
             if new_chat_in_120_sec > 0:
                 logger.info(f"ждем 2 минуты для нового сообщения {project.title}  {channel.phone}")
                 return
 
-            if not next_user_name:
+            if not next_recipient:
                 logger.info(f"Нет новых получателей  для проекта {project.title} ")
             else:
                 logger.info(f"создаем и отправляем первое сообщение")
@@ -258,7 +258,8 @@ class ProjectProcessor:
 
                 chat_for_current_channel_message = Chat(
                     project=project,
-                    user_id=next_user_name,
+                    user_id=next_recipient.get('user_name'),
+                    recipient_id=next_recipient.get('recipient_id'),
                     channel=channel
                 )
                 chat_for_current_channel_message.save()
@@ -336,21 +337,21 @@ class ProjectProcessor:
 
     @staticmethod
     def get_next_new_recipient(project: Project) -> str:
-        remote_chat_ids = []
         recipients = Recipient.objects.filter(project_id=project.id)
         for recipient in recipients:
-            [remote_chat_ids.append(recipient) for recipient in
-             recipient.remote_ids.replace('\n', ',').split(',')]
-
-        for remote_chat_id in remote_chat_ids:
-            try:
-                Chat.objects.filter(project=project,
-                                    user_id__endswith=remote_chat_id).first()
-            except Chat.DoesNotExist:
-                user_name = remote_chat_id
-                if remote_chat_id.startswith('@'):
-                    user_name = "@" + remote_chat_id
-                return user_name
+            for remote_id in recipient.remote_ids.replace('\n', ',').split(','):
+                    try:
+                        Chat.objects.filter(project=project,
+                                            recipient_id=recipients.id,
+                                            user_id__endswith=remote_id).first()
+                    except Chat.DoesNotExist:
+                        user_name = remote_id
+                        if remote_id.startswith('@'):
+                            user_name = "@" + recipient
+                        return {
+                            'user_name' : user_name,
+                            'recipient_id': recipient.id
+                        }
         return None
 
 
