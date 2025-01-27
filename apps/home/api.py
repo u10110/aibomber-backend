@@ -155,8 +155,8 @@ def send_chat_messages(request, chat_id):
                 user_message=message[:555],
                 message_type="outcoming"
             )
-            current_channel.remaining_messages = F('remaining_messages') - 1
-            current_channel.save()
+           # current_channel.remaining_messages = F('remaining_messages') - 1
+           # current_channel.save()
 
             return JsonResponse({
                 'msg':

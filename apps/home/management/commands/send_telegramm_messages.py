@@ -14,4 +14,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         while True:
             new_chat_messages()
+            time.sleep(10)
         logger.info('Launches  new_chat_messages')
