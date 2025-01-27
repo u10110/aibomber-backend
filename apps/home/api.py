@@ -399,8 +399,8 @@ def project_get_or_save(request, project_id):
             project_to_save.per_conversation_limit = data.get('limitForOneChat', 10)
             project_to_save.message_limit = data.get('limitForDay', 10)
 
-            project_to_save.time_end = data.get('timeStart')
-            project_to_save.time_start = data.get('timeEnd')
+            project_to_save.time_end = data.get('timeEnd')
+            project_to_save.time_start = data.get('timeStart')
             project_to_save.knowledge_base_text = data.get('knownBaseText')
 
             project_to_save.integrations = data.get('knownBaseText')
