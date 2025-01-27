@@ -342,7 +342,7 @@ class ProjectProcessor:
             for remote_id in recipient.remote_ids.replace('\n', ',').split(','):
                     try:
                         Chat.objects.filter(project=project,
-                                            recipient_id=recipients.id,
+                                            recipient_id=recipient.id,
                                             user_id__endswith=remote_id).first()
                     except Chat.DoesNotExist:
                         user_name = remote_id
