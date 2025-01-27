@@ -192,7 +192,6 @@ class Recipient(SoftDeleteModel):
 
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     project_id = models.IntegerField(null=True)
-    recipient_id = models.IntegerField(null=True)
     title = models.CharField(max_length=1000)
     status = models.CharField(max_length=55, default="new")
     work_option = models.IntegerField(choices=OPTIONS, default=1)
@@ -347,6 +346,7 @@ class Chat(SoftDeleteModel):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     user_id = models.CharField(max_length=1000)
+    recipient_id = models.IntegerField(null=True)
     user_name = models.CharField(max_length=1000, default='')
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, default=0)
     status = models.CharField(max_length=55, default="new")
