@@ -182,8 +182,7 @@ def process_project(project):
     channels = Channel.objects.filter(
         project_id=project.id,
         status="authorized",
-        remaining_messages__gt=0,
-        is_active=True,
+        remaining_messages__gt=0
     )
     if not channels.exists():
         print(f"Проект {project.id} не имеет активных каналов")

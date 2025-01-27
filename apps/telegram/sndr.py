@@ -207,7 +207,6 @@ class ProjectProcessor:
             client=project.client_id,
             project_id=project.id,
             remaining_messages__gt=0,
-            is_active=True
         )
 
         if not channels.exists():

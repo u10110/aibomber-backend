@@ -616,8 +616,7 @@ def channel_get_or_save(request, channel_id):
         try:
             if channel_id is None:
                 channel_to_save = Channel(
-                    client=user,
-                    is_active=False
+                    client=user
                 )
             else:
                 channel_to_save = Channel.objects.filter(id=channel_id, client=user).get()
@@ -688,7 +687,6 @@ def channels(request):
             'max_daily_messages': channel.max_daily_messages,
             'id': channel.id,
             'remaining_messages': channel.remaining_messages,
-            'is_active': channel.is_active,
             'source': channel.source,
             'project_title': project_title,
             'project_id': project_id
