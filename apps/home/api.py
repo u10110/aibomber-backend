@@ -591,11 +591,13 @@ def recipients(request):
             'title': recipient.title,
             'work_option': recipient.work_option,
             'id': recipient.id,
-            'project_title': project_title,
+            'project': project_title,
             'project_id': project_id,
             'chats': recipient.contact_count,
-            'sent': sent,
-            'remaining': recipient.contact_count - sent
+            'sent_messages': sent,
+            'start_date': recipient.start_date,
+            'remaining_messages': recipient.contact_count - sent,
+            'status': recipient.statuss
         })
 
     return JsonResponse(data, safe=False)
