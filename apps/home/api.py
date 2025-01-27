@@ -584,7 +584,7 @@ def recipients(request):
         if project :
             project_title=project.title
             project_id=project.id
-        created_chats_count = Chat.objects.filter(project_id=recipient.project_id).count() #TODO сделать каунт тока для чатов с первысм сообщение от бота
+        created_chats_count = Chat.objects.filter(project_id=recipient.project_id, recipient_id=recipient.id).count() #TODO сделать каунт тока для чатов с первысм сообщение от бота
 
         remote_ids_len = 0
         if recipient.remote_ids and len(recipient.remote_ids) > 0:
