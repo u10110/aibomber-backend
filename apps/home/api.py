@@ -572,9 +572,7 @@ def recipient_delete(request, recipient_id):
 def recipients(request):
 
 
-    recipient_list = Recipient.objects.filter(client=request.user).annotate(
-        contact_count=Count('remote_ids')
-    )
+    recipient_list = Recipient.objects.filter(client=request.user)
 
     data = []
     for recipient in recipient_list:
@@ -586,17 +584,22 @@ def recipients(request):
         if project :
             project_title=project.title
             project_id=project.id
-        sent = Chat.objects.filter(project_id=recipient.project_id).count()
+        created_chats_count = Chat.objects.filter(project_id=recipient.project_id).count() #TODO сделать каунт тока для чатов с первысм сообщение от бота
+
+        remote_ids_len = 0
+        if recipient.remote_ids and len(recipient.remote_ids) > 0:
+            remote_ids_len = len(recipient.remote_ids.replace('\n', ',').split(','))
+
         data.append({
             'title': recipient.title,
             'work_option': recipient.work_option,
             'id': recipient.id,
             'project': project_title,
             'project_id': project_id,
-            'chats': recipient.contact_count,
-            'sent_messages': sent,
+            'chats': remote_ids_len,
+            'sent_messages': created_chats_count,
             'start_date': recipient.start_date,
-            'remaining_messages': recipient.contact_count - sent,
+            'remaining_messages': remote_ids_len - created_chats_count,
             'status': recipient.status
         })
 
