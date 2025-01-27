@@ -340,13 +340,15 @@ class ProjectProcessor:
     def get_next_new_recipient(project: Project) -> str:
         recipients = Recipient.objects.filter(project_id=project.id)
         for recipient in recipients:
-            logger.debug(recipient)
+            logger.debug(recipient.id)
             for remote_id in recipient.remote_ids.replace('\n', ',').split(','):
+                    logger.debug(f"Поиск чата для {remote_id}")
                     try:
                         Chat.objects.filter(project=project,
                                             recipient_id=recipient.id,
                                             user_id__endswith=remote_id).first()
                     except Chat.DoesNotExist:
+                        logger.debug(f"Чат не найден для {remote_id}")
                         user_name = remote_id
                         if remote_id.startswith('@'):
                             user_name = "@" + recipient
