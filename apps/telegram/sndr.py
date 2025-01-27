@@ -340,6 +340,7 @@ class ProjectProcessor:
     def get_next_new_recipient(project: Project) -> str:
         recipients = Recipient.objects.filter(project_id=project.id)
         for recipient in recipients:
+            logger.debug(recipient)
             for remote_id in recipient.remote_ids.replace('\n', ',').split(','):
                     try:
                         Chat.objects.filter(project=project,
