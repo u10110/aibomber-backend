@@ -111,9 +111,6 @@ def send_to_gpt(request):
             # Передаём историю в GPTAssistant
             assistant.chat_history = formatted_history[:-1]
 
-            if not question:
-                return JsonResponse({"error": "Вопрос не предоставлен."}, status=400)
-            logger.debug(assistant.chat_history)
             logger.debug(question)
             # Получаем ответ от GPT
             response = assistant.ask_question(question, False)

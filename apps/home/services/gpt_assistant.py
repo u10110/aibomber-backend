@@ -193,8 +193,8 @@ class GPTAssistant:
                 self._save_to_db(answer)
                 return response.choices[0].message.content
             except Exception as e:
-                print(f"Ошибка API OpenAI: {type(e).__name__}: {e}")
-                return f"Ошибка OpenAI API: {str(e)}"
+                print(f"Ошибка : {type(e).__name__}: {e}")
+                return f"Ошибка : {str(e)}"
 
         messages = [{"role": "system", "content": full_context}] + self.chat_history + [
             {"role": "user", "content": question}
