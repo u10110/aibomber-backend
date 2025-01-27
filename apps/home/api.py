@@ -597,7 +597,7 @@ def recipients(request):
             'sent_messages': sent,
             'start_date': recipient.start_date,
             'remaining_messages': recipient.contact_count - sent,
-            'status': recipient.statuss
+            'status': recipient.status
         })
 
     return JsonResponse(data, safe=False)
