@@ -487,8 +487,8 @@ def project_get_or_save(request, project_id):
 
             project_data = {
                 'name': project.title,
-                'workOption': project.work_option,
-                'gptVersion': project.gpt_version,
+                'work_option': project.work_option,
+                'gpt_version': project.gpt_version,
                 'limitForOneChat': project.per_conversation_limit,
                 'limitForDay': project.message_limit,
                 'timeStart': project.time_start,
