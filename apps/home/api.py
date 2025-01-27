@@ -393,7 +393,7 @@ def project_get_or_save(request, project_id):
             project_to_save.work_option = data.get('work_option', 1)
             project_to_save.gpt_version = data.get('gpt_version', 1)
             project_to_save.prompt = data.get('promptText')
-            project_to_save.hello_text = data.get('hello_text')
+            project_to_save.hello_text = data.get('helloMessage')
 
             # project_to_save.outgoing_limit = request.POST.get('', 10)
             project_to_save.per_conversation_limit = data.get('limitForOneChat', 10)
@@ -570,14 +570,34 @@ def recipient_delete(request, recipient_id):
 
 
 def recipients(request):
-    recipient_list = Recipient.objects.filter(client=request.user).values(
-        'title',
-        'work_option',
-        'status',
-        'remote_ids',
-        'id')
 
-    data = list(recipient_list)
+
+    recipient_list = Recipient.objects.filter(client=request.user).annotate(
+        contact_count=Count('remote_ids')
+    )
+
+    data = []
+    for recipient in recipient_list:
+        # Аннотация для подсчета количества контактов, активных переписок, отправленных и оставшихся сообщений
+
+        project = Project.objects.filter(id=recipient.project_id).first()
+        project_title = ''
+        project_id = ''
+        if project :
+            project_title=project.title
+            project_id=project.id
+        sent = Chat.objects.filter(project_id=recipient.project_id).count()
+        data.append({
+            'title': recipient.title,
+            'work_option': recipient.work_option,
+            'id': recipient.id,
+            'project_title': project_title,
+            'project_id': project_id,
+            'chats': recipient.contact_count,
+            'sent': sent,
+            'remaining': recipient.contact_count - sent
+        })
+
     return JsonResponse(data, safe=False)
 
 
