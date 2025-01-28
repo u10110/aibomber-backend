@@ -14,7 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         while True:
             try:
-                new_chat_messages(69)
+                new_chat_messages()
                 time.sleep(10)
             except Exception as e:
                 logger.error(e)
