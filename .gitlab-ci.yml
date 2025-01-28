@@ -9,8 +9,6 @@ variables:
 
 before_script:
   - docker login -u $NEXUS_REGISTRY_USER -p $NEXUS_REGISTRY_PASSWD registry.mplab.io
-  - mkdir -p fastapi/sessions
-  - echo "Preserving sessions directory"
 
 cache:
   paths:
@@ -20,49 +18,47 @@ build:
   allow_failure: true
   stage: build
   image: docker
+  tags: [infra]
   only:
   - main
-  # when: manual
   variables:
-    CONTAINER_IMAGE: registry.mplab.io/eliment-web:${CI_COMMIT_SHORT_SHA}
-    CONTAINER_IMAGE_LATEST: registry.mplab.io/eliment-web:latest
+    CONTAINER_IMAGE: registry.mplab.io/neuro-backend:${CI_COMMIT_SHORT_SHA}
+    CONTAINER_IMAGE_LATEST: registry.mplab.io/neuro-backend:latest
   script:
   - docker build -t ${CONTAINER_IMAGE} .
   - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
   - docker push ${CONTAINER_IMAGE_LATEST}
   - docker system prune -f -a
 
-build:eliment-cli-kafka-message-reply:
-  #allow_failure: true
-  stage: build
-  image: docker
-  # when: manual
-  only:
-    - main
-  variables:
-    CONTAINER_IMAGE: registry.mplab.io/eliment-cli-kafka-message-reply:${CI_COMMIT_SHORT_SHA}
-    CONTAINER_IMAGE_LATEST: registry.mplab.io/eliment-cli-kafka-message-reply:latest
-  script:
-    - docker build -f Dockerfile -t ${CONTAINER_IMAGE} .
-    - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
-    - docker push ${CONTAINER_IMAGE_LATEST}
-    - docker system prune -f -a
+# build:eliment-cli-kafka-message-reply:
+#   stage: build
+#   image: docker
+#   tags: [infra]
+#   only:
+#     - main
+#   variables:
+#     CONTAINER_IMAGE: registry.mplab.io/eliment-cli-kafka-message-reply:${CI_COMMIT_SHORT_SHA}
+#     CONTAINER_IMAGE_LATEST: registry.mplab.io/eliment-cli-kafka-message-reply:latest
+#   script:
+#     - docker build -f Dockerfile -t ${CONTAINER_IMAGE} .
+#     - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
+#     - docker push ${CONTAINER_IMAGE_LATEST}
+#     - docker system prune -f -a
 
-build:eliment-cli-new-message-send:
-  #allow_failure: true
-  stage: build
-  image: docker
-  # when: manual
-  only:
-    - main
-  variables:
-    CONTAINER_IMAGE: registry.mplab.io/eliment-cli-new-message-send:${CI_COMMIT_SHORT_SHA}
-    CONTAINER_IMAGE_LATEST: registry.mplab.io/eliment-cli-new-message-send:latest
-  script:
-    - docker build -f Dockerfile -t ${CONTAINER_IMAGE} .
-    - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
-    - docker push ${CONTAINER_IMAGE_LATEST}
-    - docker system prune -f -a
+# build:eliment-cli-new-message-send:
+#   stage: build
+#   image: docker
+#   tags: [infra]
+#   only:
+#     - main
+#   variables:
+#     CONTAINER_IMAGE: registry.mplab.io/eliment-cli-new-message-send:${CI_COMMIT_SHORT_SHA}
+#     CONTAINER_IMAGE_LATEST: registry.mplab.io/eliment-cli-new-message-send:latest
+#   script:
+#     - docker build -f Dockerfile -t ${CONTAINER_IMAGE} .
+#     - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
+#     - docker push ${CONTAINER_IMAGE_LATEST}
+#     - docker system prune -f -a
 
 
 prod:eliment-cli-kafka-message-reply:
@@ -73,13 +69,10 @@ prod:eliment-cli-kafka-message-reply:
     name: docker/compose
     entrypoint: ["/bin/sh", "-c"]
   script:
-    - docker network create web_network || true
+    # - docker network create web_network || true
     - docker compose -f docker-compose.yml -p eliment-cli-kafka-message-reply down --timeout 10
     - docker compose -f docker-compose.yml  pull eliment-cli-kafka-message-reply
     - docker compose -f docker-compose.yml  up -d eliment-cli-kafka-message-reply
-    - docker image prune -a -f
-    - docker builder prune -f
-    - docker image prune -a -f
 
 
 prod:eliment-cli-new-message-send:
@@ -94,9 +87,6 @@ prod:eliment-cli-new-message-send:
     - docker compose -f docker-compose.yml -p eliment-cli-new-message-send down --timeout 10
     - docker compose -f docker-compose.yml  pull eliment-cli-new-message-send
     - docker compose -f docker-compose.yml  up -d eliment-cli-new-message-send
-    - docker image prune -a -f
-    - docker builder prune -f
-    - docker image prune -a -f
 
 prod:
   stage: prod
@@ -107,12 +97,9 @@ prod:
     entrypoint: ["/bin/sh", "-c"]
   script:
     - docker network create web_network || true
-    - docker compose -f docker-compose.yml -p eliment-web down --timeout 10
-    - docker compose -f docker-compose.yml  pull eliment-web
-    - docker compose -f docker-compose.yml  up -d eliment-web
-    - docker image prune -a -f
-    - docker builder prune -f
-    - docker image prune -a -f
+    - docker compose -f docker-compose.yml -p neuro-backend down --timeout 10
+    - docker compose -f docker-compose.yml  pull neuro-backend
+    - docker compose -f docker-compose.yml  up -d neuro-backend
 
 
 deploy_dev:
@@ -120,13 +107,10 @@ deploy_dev:
   tags: [eliment-dev]
   only:
     - main
-  # when: manual
   image:
     name: docker/compose
     entrypoint: ["/bin/sh", "-c"]
   script:
-    - IMAGE_TAG=latest docker compose -f docker-compose-dev.yml -p eliment-web down --timeout 10
-    - IMAGE_TAG=latest docker compose -f docker-compose-dev.yml  pull eliment-web
-    - IMAGE_TAG=latest docker compose -f docker-compose-dev.yml  up -d eliment-web 
-    - docker image prune -a -f
-    - docker builder prune -f
+    - IMAGE_TAG=latest docker compose -f docker-compose-dev.yml -p neuro-backend down --timeout 10
+    - IMAGE_TAG=latest docker compose -f docker-compose-dev.yml  pull neuro-backend
+    - IMAGE_TAG=latest docker compose -f docker-compose-dev.yml  up -d neuro-backend
