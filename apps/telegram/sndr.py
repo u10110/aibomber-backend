@@ -345,7 +345,7 @@ class ProjectProcessor:
                 chat = Chat.objects.filter(project=project,
                                     recipient_id=recipient.id,
                                     user_id__endswith=remote_id).first()
-                if chat:
+                if not chat:
                     user_name = remote_id
                     if remote_id.startswith('@'):
                         user_name = "@" + recipient
