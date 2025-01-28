@@ -119,7 +119,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
                 project=project,
                 user_id__iendswith=_USER_NAME,
                 channel=channel,
-            ).first()
+            ).order_by('-last_message_time').first()
             if not chat:
                 chat = Chat(
                     project=project,
