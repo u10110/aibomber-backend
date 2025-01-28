@@ -63,7 +63,7 @@ build:
 
 prod:eliment-cli-kafka-message-reply:
   stage: prod
-  tags: [app-ea]
+  tags: [neuro-app-02]
   when: manual
   image:
     name: docker/compose
@@ -77,7 +77,7 @@ prod:eliment-cli-kafka-message-reply:
 
 prod:eliment-cli-new-message-send:
   stage: prod
-  tags: [app-ea]
+  tags: [neuro-app-02]
   when: manual
   image:
     name: docker/compose
@@ -90,7 +90,7 @@ prod:eliment-cli-new-message-send:
 
 prod:
   stage: prod
-  tags: [app-ea]
+  tags: [neuro-app-02]
   when: manual
   image:
     name: docker/compose
