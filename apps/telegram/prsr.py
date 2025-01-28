@@ -114,13 +114,13 @@ def save_messages(user_id, messages, project, channel, user_view_name):
         # Определяем, кто отправил сообщение: GPT Assistant или другой пользователь
         logger.info(f"Сообщение получено {user_name}: {message_id}")
         if user_name:
-            try:
-                chat = Chat.objects.get(
-                    project=project,
-                    user_id__iendswith=_USER_NAME,
-                    channel=channel,
-                )
-            except Chat.DoesNotExist:
+
+            chat = Chat.objects.filter(
+                project=project,
+                user_id__iendswith=_USER_NAME,
+                channel=channel,
+            ).first()
+            if not chat:
                 chat = Chat(
                     project=project,
                     user_id=_USER_NAME,
