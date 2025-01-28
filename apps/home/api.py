@@ -280,15 +280,32 @@ def chat_messages(request, chat_id):
 def chats(request):
     statuses = request.GET.get("status", '')
     project = request.GET.get("project", '')
+    recipients = request.GET.get("recipients", '')
+    channels = request.GET.get("channels", '')
+
     projects_filter = Project.objects.filter(client=request.user)
+    recipients_filter = Recipient.objects.filter(client=request.user)
+    channels_filter = Channel.objects.filter(client=request.user)
 
     if len(project) > 0:
         projects_filter = projects_filter.filter(id__in=project.split(','))
+
+    if len(recipients) > 0:
+        recipients_filter = recipients_filter.filter(id__in=recipients.split(','))
+
+    if len(channels) > 0:
+        channels_filter = channels_filter.filter(id__in=channels.split(','))
 
     chats_list = Chat.objects.filter(
         project_id__in=projects_filter)
     if len(statuses) > 0:
         chats_list = chats_list.filter(status__in=statuses.split(','))
+
+    if len(recipients) > 0:
+        chats_list = chats_list.filter(recipient_id__in=recipients_filter)
+
+    if len(channels) > 0:
+        chats_list = chats_list.filter(channel__in=channels_filter)
 
     chat_contacts = []
     contacts = []
@@ -503,6 +520,22 @@ def project_get_or_save(request, project_id):
         else:
             return HttpResponse(status=404)
 
+def file_upload(request):
+    if request.method == "POST" and request.FILES.get("file"):
+        # upload = request.FILES['upload']
+        print(request.FILES.get("file"))
+        upload = request.FILES.get("file")
+        fss = FileSystemStorage()
+        file = fss.save(upload.name, upload)
+        file_url = fss.url(file)
+
+        return JsonResponse({
+            'file': file,
+            'file_url': file_url
+        }, safe=False)
+    else:
+        return HttpResponse(status=404)
+
 
 def recipient_create(request):
     return recipient_get_or_save(request, None)
@@ -589,6 +622,14 @@ def recipients(request):
         remote_ids_len = 0
         if recipient.remote_ids and len(recipient.remote_ids) > 0:
             remote_ids_len = len(recipient.remote_ids.replace('\n', ',').split(','))
+
+        if created_chats_count > 0 and recipient.status == 'new':
+            recipient.status = 'active'
+            recipient.save()
+
+        if remote_ids_len <= created_chats_count and recipient.status == 'active':
+            recipient.status = 'completed'
+            recipient.save()
 
         data.append({
             'title': recipient.title,

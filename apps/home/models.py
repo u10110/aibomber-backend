@@ -190,6 +190,12 @@ class Recipient(SoftDeleteModel):
         (2, 'Черный список'),
     ]
 
+    STATUS_CHOICES = [
+        ('new', 'Новый'),
+        ('active', 'В работе'),
+        ('completed', 'Завершен'),
+    ]
+
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     project_id = models.IntegerField(null=True)
     title = models.CharField(max_length=1000)

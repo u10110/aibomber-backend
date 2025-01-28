@@ -42,8 +42,8 @@ class Command(BaseCommand):
 
                 message = json.loads(msg.value().decode('utf-8'))
                 logger.info(f"new message from new-message-events {message.get('channel_phone')}")
-                channel = Channel.objects.get(phone='+' + message.get('channel_phone'))
-                project = Project.objects.filter(id=channel.project_id).get()
+                channel = Channel.objects.filter(phone='+' + message.get('channel_phone')).first()
+                project = Project.objects.filter(id=channel.project_id).first()
 
 
                 #users_response = get_users(message.get('channel_phone'))

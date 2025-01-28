@@ -185,5 +185,9 @@ urlpatterns = [
     path('api/recipient/<int:recipient_id>/', login_required(api.recipient_get_or_save), name='api-recipient-save'),
     path('api/recipient/<int:recipient_id>/delete', login_required(api.recipient_delete), name='api-recipient-delete'),
 
+
+    path('api/file-upload', login_required(api.file_upload), name='file-upload'),
+
+
 ]
 

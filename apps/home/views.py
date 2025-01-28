@@ -1208,8 +1208,12 @@ def change_status(request, chat_id):
 
         chat = Chat.objects.get(id=chat_id)
         if chat and chat.project.client.id == client_id:
-            chat.status = new_status
-            chat.save()
+            if new_status == 'deleted':
+                chat.status = new_status
+                chat.delete()
+            else:
+                chat.status = new_status
+                chat.save()
 
         # tg_id = TgID.objects.get(tg_id=chat.user_id)
         # tg_id.status = new_status
