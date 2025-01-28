@@ -43,18 +43,20 @@ class Command(BaseCommand):
                 message = json.loads(msg.value().decode('utf-8'))
                 logger.info(f"new message from new-message-events {message.get('channel_phone')}")
                 channel = Channel.objects.get(phone='+' + message.get('channel_phone'))
-
-                users_response = get_users(message.get('channel_phone'))
-                if not users_response.get("users"):
-                    logger.info(f"Нет пользователей для телефона {message.get('channel_phone')}")
-                    return
-                user_view_name = ''
-                # Шаг 3.2: Получаем сообщения для каждого пользователя
-                for user in users_response["users"]:
-                    if user["id"] == message.get('user_id'):
-                        user_view_name = user["name"]
-
                 project = Project.objects.filter(id=channel.project_id).get()
+
+
+                #users_response = get_users(message.get('channel_phone'))
+                #if not users_response.get("users"):
+                #    logger.info(f"Нет пользователей для телефона {message.get('channel_phone')}")
+                #    return
+                user_view_name = ''
+                ## Шаг 3.2: Получаем сообщения для каждого пользователя
+                #for user in users_response["users"]:
+                #    if user["id"] == message.get('user_id'):
+                #        user_view_name = user["name"]
+
+
 
                 logger.info(f"saving message {message.get('user_id')}")
                 chat = save_messages(message.get('user_id'), [message], project, channel, user_view_name)
