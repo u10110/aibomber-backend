@@ -145,7 +145,6 @@ class MessageProcessor:
 
         # Получение объекта проекта
         project = get_object_or_404(Project, id=project_id)
-        logger.info(project)
 
         # Создание экземпляра GPTAssistant
         assistant = GPTAssistant(project=project, chat_id=chat_id, channel_phone=channel_phone, user_id=user_id)
@@ -263,8 +262,8 @@ class ProjectProcessor:
                     recipient_id=next_recipient.get('recipient_id'),
                     channel=channel
                 )
-                chat_for_current_channel_message.save()
-                logger.info(f"Создан новый чат для {chat_for_current_channel_message.id} {next_user_name} ")
+
+                logger.info(f"Создан новый чат для {chat_for_current_channel_message.id} {next_recipient.get('user_name')}")
 
                 message = message_processor.send_to_gpt_assistant(
                     chat_id=chat_for_current_channel_message.id,
@@ -281,6 +280,7 @@ class ProjectProcessor:
                         message)
                     logger.info(sent)
                     if sent == 'SENT':
+                        chat_for_current_channel_message.save()
                         ChatMessages.objects.create(
                             chat_id=chat_for_current_channel_message,
                             user_name=channel.phone,
@@ -294,7 +294,7 @@ class ProjectProcessor:
                         chat_for_current_channel_message.last_message_time = datetime.datetime.now(tz=timezone.utc)
                         chat_for_current_channel_message.save()
                         logger.info(f"user_doesnt_exist {chat_for_current_channel_message.user_id} ")
-
+                        chat_for_current_channel_message.save()
                     if sent == 'SENT_ERROR':
                         logger.info(f"Ошибка отправки {chat_for_current_channel_message.user_id} ")
 
@@ -348,18 +348,18 @@ class ProjectProcessor:
                                         user_id__endswith=remote_id).first()
                     if not chat:
                         user_name = remote_id
-                        if remote_id.startswith('@'):
+                        if not remote_id.startswith('@'):
                             user_name = "@" + remote_id
                         return {
                             'user_name' : user_name,
                             'recipient_id': recipient.id
                         }
                     else:
-                        logger.debug(f"Чат не найден для {remote_id}")
+                        logger.debug(f"Чат найден для {remote_id}")
         return None
 
 
-def new_chat_messages():
+def new_chat_messages(project_id=None):
     """Главная функция выполнения задачи."""
     # if not ProcessLockManager.check_and_create_lock():
     #     sys.exit(1)
@@ -372,7 +372,11 @@ def new_chat_messages():
             logger.info(f"Обработка клиента {client.client_id}")
             if client.balance > 0:
                 logger.info(f"Баланс клиента {client.balance}")
-                projects = ClientManager.get_active_projects(client, current_time)
+                if not project_id:
+                    projects = ClientManager.get_active_projects(client, current_time)
+                else:
+                    projects = Project.objects.filter(id=project_id)
+
                 if projects.count() == 0:
                     logger.info(f"клиент {client.client_id} не имеет проектов для выполнения на данный момент")
                 project_processor = ProjectProcessor()
