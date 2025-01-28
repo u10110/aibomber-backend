@@ -520,7 +520,7 @@ def recipient_get_or_save(request, recipient_id):
                     client=user
                 )
             else:
-                recipient_to_save = Recipient.objects.filter(id=recipient_id, client=user).get()
+                recipient_to_save = Recipient.objects.filter(id=recipient_id, client=user).first()
 
             if not recipient_to_save:
                 return HttpResponse(status=404)
@@ -561,7 +561,7 @@ def recipient_get_or_save(request, recipient_id):
 
 def recipient_delete(request, recipient_id):
     user = request.user
-    recipient_to_delete = Recipient.objects.filter(id=recipient_id, client=user).get()
+    recipient_to_delete = Recipient.objects.filter(id=recipient_id, client=user).first()
     if not recipient_to_delete:
         return HttpResponse(status=404)
     else:
@@ -622,7 +622,7 @@ def channel_get_or_save(request, channel_id):
                     client=user
                 )
             else:
-                channel_to_save = Channel.objects.filter(id=channel_id, client=user).get()
+                channel_to_save = Channel.objects.filter(id=channel_id, client=user).first()
 
             if not channel_to_save:
                 return HttpResponse(status=404)
@@ -663,7 +663,7 @@ def channel_get_or_save(request, channel_id):
 
 def channel_delete(request, channel_id):
     user = request.user
-    channel_to_delete = Channel.objects.filter(id=channel_id, client=user).get()
+    channel_to_delete = Channel.objects.filter(id=channel_id, client=user).first()
     if not channel_to_delete:
         return HttpResponse(status=404)
     else:
