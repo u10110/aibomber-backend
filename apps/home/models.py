@@ -173,11 +173,12 @@ class Project(SoftDeleteModel):
 class ProjectFile(SoftDeleteModel):
     project = models.ForeignKey(Project, related_name="files", on_delete=models.CASCADE)
     file = models.CharField(max_length=1000)
+    file_url = models.CharField(max_length=1000, default='')
     #file = models.FileField(
     #    upload_to="uploads/files/",
     #    help_text="Допустимые форматы: PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM"
     #)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    #uploaded_at = models.DateTimeField(auto_now_add=True)
 
 
 class Recipient(SoftDeleteModel):

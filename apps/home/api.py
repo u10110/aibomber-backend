@@ -469,7 +469,10 @@ def project_get_or_save(request, project_id):
             for file in new_files:
                 project_file = ProjectFile.objects.filter(project=project_to_save, file=file.get('name')).first()
                 if not project_file:
-                    project_file = ProjectFile(project=project_to_save, file=file.get('name'))
+                    project_file = ProjectFile(project=project_to_save,
+                                               file=file.get('name'),
+                                               file_url=file.get('file_url')
+                                               )
                     project_file.save()
                 not_in_delete.append(project_file.id)
 
@@ -521,6 +524,7 @@ def project_get_or_save(request, project_id):
             return HttpResponse(status=404)
 
 def file_upload(request):
+    print(request.FILES)
     if request.method == "POST" and request.FILES.get("file"):
         # upload = request.FILES['upload']
         print(request.FILES.get("file"))
