@@ -342,19 +342,20 @@ class ProjectProcessor:
         for recipient in recipients:
             logger.debug(recipient.id)
             for remote_id in recipient.remote_ids.replace('\n', ',').split(','):
-                chat = Chat.objects.filter(project=project,
-                                    recipient_id=recipient.id,
-                                    user_id__endswith=remote_id).first()
-                if not chat:
-                    user_name = remote_id
-                    if remote_id.startswith('@'):
-                        user_name = "@" + recipient
-                    return {
-                        'user_name' : user_name,
-                        'recipient_id': recipient.id
-                    }
-                else:
-                    logger.debug(f"Чат не найден для {remote_id}")
+                if len(remote_id) > 0:
+                    chat = Chat.objects.filter(project=project,
+                                        recipient_id=recipient.id,
+                                        user_id__endswith=remote_id).first()
+                    if not chat:
+                        user_name = remote_id
+                        if remote_id.startswith('@'):
+                            user_name = "@" + remote_id
+                        return {
+                            'user_name' : user_name,
+                            'recipient_id': recipient.id
+                        }
+                    else:
+                        logger.debug(f"Чат не найден для {remote_id}")
         return None
 
 
