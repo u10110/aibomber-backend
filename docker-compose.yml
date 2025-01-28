@@ -1,13 +1,11 @@
 services:
-  eliment-web:
-    container_name: eliment_web
-    image: registry.mplab.io/eliment-web:latest
+  neuro-backend:
+    container_name: neuro-backend
+    image: registry.mplab.io/neuro-backend:latest
     restart: always
     env_file: .env
     volumes:
       - /mnt/media/images:/app/apps/media/images
-    # depends_on:
-    #   - fastapi-app
     ports:
       - "80:80"
     command: gunicorn --config gunicorn-cfg.py core.wsgi --workers 12 --threads 12 --timeout 300 --graceful-timeout 300 --max-requests 1000 --max-requests-jitter 50
@@ -15,7 +13,7 @@ services:
 
   eliment-cli-new-message-send:
     container_name: eliment-cli-new-message-send
-    image: registry.mplab.io/eliment-cli-new-message-send:latest
+    image: registry.mplab.io/neuro-backend:latest
     restart: always
     env_file: .env
     command: python manage.py send_telegramm_messages
@@ -27,7 +25,7 @@ services:
 
   eliment-cli-kafka-message-reply:
     container_name: eliment-cli-kafka-message-reply
-    image: registry.mplab.io/eliment-cli-kafka-message-reply:latest
+    image: registry.mplab.io/neuro-backend:latest
     restart: always
     env_file: .env
     command: python manage.py reply_telegram_messages
