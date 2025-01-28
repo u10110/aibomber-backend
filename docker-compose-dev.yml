@@ -1,7 +1,7 @@
 services:
-  eliment-web:
-    container_name: eliment_web
-    image: registry.mplab.io/eliment-web:${IMAGE_TAG}
+  neuro-backend:
+    container_name: neuro-backend
+    image: registry.mplab.io/neuro-backend:latest
     restart: always
     env_file: .env-dev
     volumes:
@@ -15,13 +15,13 @@ services:
 
   eliment-cli:
     container_name: eliment-cli
-    image: registry.mplab.io/eliment-cli:latest
+    image: registry.mplab.io/neuro-backend:latest
     restart: always
     env_file: .env-dev
 
   eliment-cli-kafka-message-reply:
     container_name: eliment-cli-kafka-message-reply
-    image: registry.mplab.io/eliment-cli-kafka-message-reply:latest
+    image: registry.mplab.io/neuro-backend:latest
     restart: always
     env_file: .env-dev
     command: python manage.py reply_telegram_messages
