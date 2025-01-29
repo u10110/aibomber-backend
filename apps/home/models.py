@@ -384,6 +384,7 @@ class Chat(SoftDeleteModel):
         ('interest_shown', 'Проявлен интерес'),
         ('closed', 'Закрыт'),
         ('user_doesnt_exist', 'Пользователь не найден'),
+        ('error', 'Ошибка отправки'),
     ]
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)

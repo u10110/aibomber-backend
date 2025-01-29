@@ -299,6 +299,9 @@ class ProjectProcessor:
                         chat_for_current_channel_message.save()
                     if sent == 'SENT_ERROR':
                         logger.info(f"Ошибка отправки {chat_for_current_channel_message.user_id} ")
+                        chat_for_current_channel_message.status = 'error'
+                        chat_for_current_channel_message.save()
+
 
         except Exception as e:
             logger.error(traceback.format_exc())
