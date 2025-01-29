@@ -807,5 +807,7 @@ def auth_login(request):
 
 def get_balance(request):
     client_settings = ClientSettings.objects.get(client=request.user)
-    current_balance = client_settings.balance
+    current_balance = 0
+    if client_settings:
+     current_balance = client_settings.balance
     return JsonResponse({"balance": current_balance}, status=200)
