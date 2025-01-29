@@ -149,9 +149,8 @@ class Project(SoftDeleteModel):
 
     outgoing_limit = models.IntegerField(
         default=30,  # Значение по умолчанию
-        verbose_name="Ограничение исходящих"
+        verbose_name="Ограничение исходящих в день"
     )
-    message_limit = models.IntegerField(default=30)
 
     integrations = models.CharField(
         max_length=50,
@@ -280,8 +279,6 @@ class Channel(SoftDeleteModel):
         choices=STATUS_CHOICES,
         default='unauthorized',
     )
-    max_daily_messages = models.IntegerField(default=50)  # Максимальное количество сообщений в день
-    remaining_messages = models.IntegerField(default=50)
     last_reset_date = models.DateField(default=datetime.date.today)
     phone = models.CharField(max_length=55,)
     user_id = models.CharField(max_length=55, null=True, blank=True)

@@ -85,7 +85,7 @@ def process_channel(channel , project):
                 print(f"Нет новых сообщений для пользователя {user_id}")
 
         # Уменьшаем оставшиеся сообщения в канале
-        channel.remaining_messages = F('remaining_messages') - 1
+
         channel.save()
     except Exception as e:
         print(e.format_exc())
@@ -181,8 +181,7 @@ def process_project(project):
     # Шаг 4: Получаем активные каналы проекта
     channels = Channel.objects.filter(
         project_id=project.id,
-        status="authorized",
-        remaining_messages__gt=0
+        status="authorized"
     )
     if not channels.exists():
         print(f"Проект {project.id} не имеет активных каналов")

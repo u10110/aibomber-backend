@@ -190,6 +190,10 @@ class MessageProcessor:
             logger.error(f"Telegram API error: {e}")
             return False
 
+    @staticmethod
+    def chat_messages_count(chat):
+        return ChatMessages.objects.filter(chat_id=chat).count()
+
 
 class ProjectProcessor:
     """Управляет обработкой проектов и их каналов."""
@@ -207,8 +211,7 @@ class ProjectProcessor:
         # Получаем активные каналы проекта
         channels = Channel.objects.filter(
             client=project.client_id,
-            project_id=project.id,
-            remaining_messages__gt=0,
+            project_id=project.id
         )
 
         if not channels.exists():
@@ -230,7 +233,7 @@ class ProjectProcessor:
             .filter(created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(days=1))
         ).values('chat_id_id').annotate(min_created_at=Min('created_at')).count()
         logger.debug(today_send_new_messages)
-        if today_send_new_messages >= channel.max_daily_messages:
+        if today_send_new_messages >= project.outgoing_limit:
             logger.info(f"У канала: {channel.id}, телефон: {channel.phone} достигнут дневной лимит новых сообщений")
 
         try:
@@ -274,7 +277,7 @@ class ProjectProcessor:
                     channel_phone=channel.phone,
                     user_id=chat_for_current_channel_message.user_id
                 )
-                logger.info(message)
+                logger.debug(message)
                 if message:
                     sent = message_processor.send_message_to_telegram(
                         channel.phone,
@@ -289,7 +292,6 @@ class ProjectProcessor:
                             user_message=message[:555],
                             message_type="outcoming"
                         )
-                        channel.remaining_messages = F('remaining_messages') - 1
                         channel.save()
                     if sent == 'USER_DOESNT_EXIST':
                         chat_for_current_channel_message.status = 'user_doesnt_exist'
@@ -339,7 +341,6 @@ class ProjectProcessor:
                     user_message=message[:555],
                     message_type="outcoming"
                 )
-            chat.channel.remaining_messages = F('remaining_messages') - 1
             chat.channel.save()
 
     @staticmethod
@@ -360,8 +361,8 @@ class ProjectProcessor:
                             'user_name' : user_name,
                             'recipient_id': recipient.id
                         }
-                    else:
-                        logger.debug(f"Чат найден для {remote_id}")
+                    #else:
+                    #    logger.debug(f"Чат найден для {remote_id}")
         return None
 
 

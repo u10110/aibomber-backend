@@ -63,9 +63,13 @@ class Command(BaseCommand):
                 chat = save_messages(message.get('user_id'), [message], project, channel, user_view_name)
                 if chat:
                     if chat.is_auto_active:
+
                         time.sleep(10)
                         message_processor = MessageProcessor()
-                        ProjectProcessor.process_chat(chat, message_processor)
+                        if Project.per_conversation_limit < message_processor.chat_messages_count(chat):
+                            ProjectProcessor.process_chat(chat, message_processor)
+                        else:
+                            logger.info(f"Достигнут лимит сообщений по чату {chat.user_id}")
                     else:
                         logger.info(f"Сообщение получено но не обработано, is_auto_active false")
                 else:

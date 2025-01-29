@@ -123,8 +123,7 @@ def send_chat_messages(request, chat_id):
                 user_message=message[:555],
                 message_type="outcoming"
             )
-           # current_channel.remaining_messages = F('remaining_messages') - 1
-           # current_channel.save()
+
 
             return JsonResponse({
                 'msg':
@@ -327,6 +326,28 @@ def chats(request):
     return JsonResponse({'chatsContacts': chat_contacts, 'contacts': contacts}, safe=False)
 
 
+def chats_export(request):
+
+    projects_filter = Project.objects.filter(client=request.user)
+
+    chats_list = Chat.objects.filter(
+        project_id__in=projects_filter)
+
+    chats = []
+    for chat in chats_list:
+        chats.append({
+            'id': chat.id,
+            'fullName': chat.user_name,
+            'user_id': chat.user_id,
+            'status': chat.status,
+            'is_auto_active': chat.is_auto_active,
+            'channel_id': chat.channel_id,
+            'project_id': chat.project_id
+        })
+
+    return JsonResponse({'chats': chats}, safe=False)
+
+
 def project_delete(request, project_id):
     user = request.user
     try:
@@ -382,7 +403,7 @@ def project_get_or_save(request, project_id):
 
             # project_to_save.outgoing_limit = request.POST.get('', 10)
             project_to_save.per_conversation_limit = data.get('limitForOneChat', 10)
-            project_to_save.message_limit = data.get('limitForDay', 10)
+            project_to_save.outgoing_limit = data.get('limitForDay', 10)
 
             project_to_save.time_end = data.get('timeEnd')
             project_to_save.time_start = data.get('timeStart')
@@ -492,7 +513,7 @@ def project_get_or_save(request, project_id):
                 'work_option': project.work_option,
                 'gpt_version': project.gpt_version,
                 'limitForOneChat': project.per_conversation_limit,
-                'limitForDay': project.message_limit,
+                'limitForDay': project.outgoing_limit,
                 'timeStart': project.time_start,
                 'timeEnd': project.time_end,
                 'helloMessage': project.hello_text,
@@ -716,9 +737,7 @@ def channels(request):
             'title': channel.title,
             'status': channel.status,
             'phone': channel.phone,
-            'max_daily_messages': channel.max_daily_messages,
             'id': channel.id,
-            'remaining_messages': channel.remaining_messages,
             'source': channel.source,
             'project_title': project_title,
             'project_id': project_id
