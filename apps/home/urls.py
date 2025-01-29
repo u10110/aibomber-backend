@@ -188,6 +188,8 @@ urlpatterns = [
 
     path('api/file-upload', login_required(api.file_upload), name='file-upload'),
 
+    path("api/balance", login_required(api.get_balance), name="balance"),
+
 
 ]
 

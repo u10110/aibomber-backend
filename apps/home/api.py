@@ -784,3 +784,9 @@ def auth_login(request):
             return JsonResponse({"error": msg}, status=400)
     else:
         return HttpResponse(status=404)
+
+
+def get_balance(request):
+    client_settings = ClientSettings.objects.get(client=request.user)
+    current_balance = client_settings.balance
+    return JsonResponse({"balance": current_balance}, status=200)
