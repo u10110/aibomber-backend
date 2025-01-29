@@ -335,14 +335,23 @@ def chats_export(request):
 
     chats = []
     for chat in chats_list:
+        project = Project.objects.filter(id=chat.project_id).first()
+        project_title = ''
+
+        if project :
+            project_title=project.title
+
         chats.append({
             'id': chat.id,
             'fullName': chat.user_name,
             'user_id': chat.user_id,
             'status': chat.status,
             'is_auto_active': chat.is_auto_active,
+            'phone': chat.phone,
             'channel_id': chat.channel_id,
-            'project_id': chat.project_id
+            'project_id': chat.project_id,
+            'last_message_time': chat.last_message_time,
+            'project_title': project_title
         })
 
     return JsonResponse({'chats': chats}, safe=False)
