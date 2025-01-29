@@ -8,7 +8,7 @@ from loguru import logger
 import re
 import urllib
 import os
-import gdown
+
 import uuid
 from .forms import *
 from .helper import Helper
@@ -441,10 +441,10 @@ def project_get_or_save(request, project_id):
                         file_url = file.get('file_url')
                         info = urllib.parse.urlparse(file_url)
                         domain = info.netloc
-                        if domain and len(domain) > 0:
-                            new_file_name = 'files/' + str(uuid.uuid4()) + '.doc'
-                            gdown.download(file_url, new_file_name , quiet=False)
-                            file_url = new_file_name
+                        #if domain and len(domain) > 0:
+                        #    new_file_name = 'files/' + str(uuid.uuid4()) + '.doc'
+                        #    gdown.download(file_url, new_file_name , quiet=False)
+                        #    file_url = new_file_name
 
                         project_file = ProjectFile(project=project_to_save,
                                                        file=file.get('name'),
