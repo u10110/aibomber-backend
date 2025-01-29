@@ -66,7 +66,7 @@ class Command(BaseCommand):
 
                         time.sleep(10)
                         message_processor = MessageProcessor()
-                        if Project.per_conversation_limit < message_processor.chat_messages_count(chat):
+                        if int(Project.per_conversation_limit) < int(message_processor.chat_messages_count(chat)):
                             ProjectProcessor.process_chat(chat, message_processor)
                         else:
                             logger.info(f"Достигнут лимит сообщений по чату {chat.user_id}")
