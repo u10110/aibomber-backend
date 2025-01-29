@@ -15,6 +15,8 @@ import time
 import traceback
 from apps.home.services.gpt_assistant import GPTAssistant
 from django.db.models import Q
+from PyPDF2 import PdfReader
+from docx import Document
 
 # Import models after Django configuration
 from .models import (
@@ -327,6 +329,7 @@ class ProjectProcessor:
                     chat.user_id,
                     message
             ):
+                logger.info(f"message sended {message} ")
                 ChatMessages.objects.create(
                     chat_id=chat,
                     user_name=chat.channel.phone,

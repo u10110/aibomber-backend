@@ -9,7 +9,9 @@ import requests
 import json
 from loguru import logger
 from decouple import config
-
+import os
+from PyPDF2 import PdfReader
+from docx import Document
 # from sqlalchemy import null
 
 TELETHON_HOST = config("TELETHON_HOST")
@@ -174,11 +176,44 @@ class ProjectFile(SoftDeleteModel):
     project = models.ForeignKey(Project, related_name="files", on_delete=models.CASCADE)
     file = models.CharField(max_length=1000)
     file_url = models.CharField(max_length=1000, default='')
+    file_text = models.TextField(default='')
     #file = models.FileField(
     #    upload_to="uploads/files/",
     #    help_text="Допустимые форматы: PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM"
     #)
     #uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    @staticmethod
+    def extract_text_from_file(sender, instance, created, **kwargs):
+        if len(instance.file_text) > 0:
+            return
+
+        try:
+
+            ext = os.path.splitext(instance.file_url)[1].lower()
+            logger.debug(ext)
+            if ext == ".txt":
+                with open(instance.file_url, "r", encoding="utf-8") as f:
+                    instance.file_text = f.read()
+            elif ext == ".pdf":
+                reader = PdfReader(instance.file_url)
+                for page in reader.pages:
+                    instance.file_text += page.extract_text()
+            elif ext in ".docx":
+                with open(instance.file_url, "rb", encoding="utf-8") as f:
+                    doc = Document(f)
+                    for p in doc.paragraphs:
+                        instance.file_text += p.text
+            else:
+                raise ValueError(f"Unsupported file format: {ext}")
+            logger.debug(instance.file_text)
+            instance.save()
+        except Exception as e:
+            logger.error(f"Error extracting text from file {instance.file_url}: {e}")
+            return []
+
+
+post_save.connect(ProjectFile.extract_text_from_file, sender=ProjectFile)
 
 
 class Recipient(SoftDeleteModel):

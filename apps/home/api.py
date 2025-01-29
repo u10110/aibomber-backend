@@ -1,31 +1,15 @@
 import string
 from decouple import config
-from sqlite3 import IntegrityError
-
-from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.core.files.storage import FileSystemStorage
-from django.db.utils import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import redirect, render
-from django.template import loader
-from django.urls import path, reverse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import DeleteView
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from loguru import logger
-from lxml import html
-from sentry_sdk import last_event_id
+
 import re
-
-from apps.alert.views import billing_check
-from apps.authentication.models import UserInfo
-from apps.billing.helper import Helper as BHelper
-from apps.billing.models import Limits, Order, Paid, UnicTariff
-from apps.users_control.models import ReferalCounter, UsersAgreement
-from core.settings import MEDIA_ROOT
-
-from apps.telegram.sndr import ProjectProcessor
-from apps.telegram.prsr import process_project
-
+import urllib
+import os
+import gdown
+import uuid
 from .forms import *
 from .helper import Helper
 from .models import (
@@ -39,31 +23,15 @@ from .models import (
     ChatMessages,
     User
 )
-from .module import *
-from .services.services import MinioService
-from django.shortcuts import get_object_or_404
-from django.db.models import Max, OuterRef, Subquery, Count, Q, F
-from telethon.sync import TelegramClient
-from telethon.errors import SessionPasswordNeededError
-
-from django.shortcuts import render
-from django.http import JsonResponse
-from telethon import TelegramClient
-from telethon.errors import SessionPasswordNeededError
-from django.core import serializers
 from .models import Project
 from .services.gpt_assistant import GPTAssistant
-from django.db.models import Count, Max, Subquery, OuterRef, IntegerField, Case, When
-import random
+
 from django.contrib.auth import authenticate, get_user_model, login
 from django.http import JsonResponse
 from apps.telegram.sndr import MessageProcessor
 import traceback
 
 TELETHON_HOST = config("TELETHON_HOST")
-
-from django.utils.decorators import method_decorator
-from django_telegram_login.authentication import verify_telegram_authentication
 from django.middleware.csrf import get_token
 
 
@@ -469,11 +437,25 @@ def project_get_or_save(request, project_id):
             for file in new_files:
                 project_file = ProjectFile.objects.filter(project=project_to_save, file=file.get('name')).first()
                 if not project_file:
-                    project_file = ProjectFile(project=project_to_save,
-                                               file=file.get('name'),
-                                               file_url=file.get('file_url')
-                                               )
-                    project_file.save()
+                    try:
+                        file_url = file.get('file_url')
+                        info = urllib.parse.urlparse(file_url)
+                        domain = info.netloc
+                        if domain and len(domain) > 0:
+                            new_file_name = 'files/' + str(uuid.uuid4()) + '.doc'
+                            gdown.download(file_url, new_file_name , quiet=False)
+                            file_url = new_file_name
+
+                        project_file = ProjectFile(project=project_to_save,
+                                                       file=file.get('name'),
+                                                       file_url=file_url
+                                                       )
+                        project_file.save()
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error("project file save error")
+                        return HttpResponse(status=500)
+
                 not_in_delete.append(project_file.id)
 
             ProjectFile.objects.filter(project=project_to_save).exclude(id__in=not_in_delete).delete()
@@ -524,19 +506,21 @@ def project_get_or_save(request, project_id):
             return HttpResponse(status=404)
 
 def file_upload(request):
-    print(request.FILES)
     if request.method == "POST" and request.FILES.get("file"):
-        # upload = request.FILES['upload']
-        print(request.FILES.get("file"))
-        upload = request.FILES.get("file")
-        fss = FileSystemStorage()
-        file = fss.save(upload.name, upload)
-        file_url = fss.url(file)
+        try:
+            # upload = request.FILES['upload']
+            upload = request.FILES.get("file")
+            fss = FileSystemStorage(location='files/')
+            file = fss.save(upload.name, upload)
+            file_url = fss.path(file)
 
-        return JsonResponse({
-            'file': file,
-            'file_url': file_url
-        }, safe=False)
+            return JsonResponse({
+                'file': file,
+                'file_url': file_url
+            }, safe=False)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            return HttpResponse(status=500)
     else:
         return HttpResponse(status=404)
 
