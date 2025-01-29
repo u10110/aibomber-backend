@@ -192,7 +192,7 @@ class MessageProcessor:
 
     @staticmethod
     def chat_messages_count(chat):
-        return ChatMessages.objects.filter(chat_id=chat, messager_type='outcoming').count()
+        return ChatMessages.objects.filter(chat_id=chat, message_type='outcoming').count()
 
 
 class ProjectProcessor:
