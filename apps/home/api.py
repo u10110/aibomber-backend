@@ -570,8 +570,14 @@ def recipient_get_or_save(request, recipient_id):
 
             recipient_to_save.title = data.get('name')
             recipient_to_save.project_id = data.get('project')
-
-            recipient_to_save.remote_ids = data.get('mailingData')
+            remote_ids = []
+            remote_ids_string = data.get('mailingData')
+            if remote_ids_string and len(remote_ids_string) > 0:
+                for remote_id  in remote_ids_string.replace('\n', ',').split(','):
+                    if len(remote_id) > 0:
+                        remote_ids.append(remote_id)
+            delimiter = '\n'
+            recipient_to_save.remote_ids = delimiter.join(remote_ids)
             recipient_to_save.start_date = data.get('date')
 
             recipient_to_save.save()
