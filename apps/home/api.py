@@ -526,6 +526,7 @@ def project_get_or_save(request, project_id):
         else:
             return HttpResponse(status=404)
 
+
 def file_upload(request):
     if request.method == "POST" and request.FILES.get("file"):
         try:
@@ -806,8 +807,10 @@ def auth_login(request):
 
 
 def get_balance(request):
-    client_settings = ClientSettings.objects.get(client=request.user)
+    client_settings = ClientSettings.objects.filter(client=request.user).first()
+
     current_balance = 0
     if client_settings:
      current_balance = client_settings.balance
+
     return JsonResponse({"balance": current_balance}, status=200)
