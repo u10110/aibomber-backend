@@ -418,7 +418,7 @@ def project_get_or_save(request, project_id):
             project_to_save.time_start = data.get('timeStart')
             project_to_save.knowledge_base_text = data.get('knownBaseText')
 
-            project_to_save.integrations = data.get('knownBaseText')
+            project_to_save.integrations = data.get('integrations', None)
 
             project_to_save.save()
 
@@ -697,7 +697,7 @@ def channel_get_or_save(request, channel_id):
             if not phone_number.startswith('+'):
                 phone_number = '+' + phone_number
 
-            channel_to_save.title = data.get('name')
+            channel_to_save.title = data.get('phone')
             channel_to_save.source = data.get('source')
             channel_to_save.phone = phone_number
 
@@ -705,7 +705,7 @@ def channel_get_or_save(request, channel_id):
             return JsonResponse({'success': True, 'created': True}, safe=False)
         except Exception as e:
             logger.error(traceback.format_exc())
-            logger.error("recipient save error")
+            logger.error("channel save error")
             return HttpResponse(status=500)
     else:
         if channel_id:
