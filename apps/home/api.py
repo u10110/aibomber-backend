@@ -425,7 +425,7 @@ def project_get_or_save(request, project_id):
             project_to_save.time_start = data.get('timeStart')
             project_to_save.knowledge_base_text = data.get('knownBaseText')
 
-            project_to_save.integrations = data.get('integrations', None)
+            project_to_save.integrations = data.get('integrations', '')
 
             project_to_save.save()
 
