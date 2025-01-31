@@ -161,7 +161,7 @@ class MessageProcessor:
             return None
 
     @staticmethod
-    def send_message_to_telegram(phone: str, user_id: str, message: str) -> str:
+    def send_message_to_telegram(phone: str, user_id: str, message: str):
         """Send message via Telegram API."""
 
         if not user_id.startswith('@'): user_id = '@' + user_id
@@ -178,13 +178,7 @@ class MessageProcessor:
                 json=payload,
                 headers={"Content-Type": "application/json"}
             )
-            logger.debug(response)
-            if response.status_code == 200:
-                return 'SENT'
-            if response.status_code == 404:
-                return 'USER_DOESNT_EXIST'
-            if response.status_code == 500:
-                return 'SENT_ERROR'
+            return response
 
         except Exception as e:
             logger.error(f"Telegram API error: {e}")
@@ -279,12 +273,12 @@ class ProjectProcessor:
                 )
                 logger.debug(message)
                 if message:
-                    sent = message_processor.send_message_to_telegram(
+                    response = message_processor.send_message_to_telegram(
                         channel.phone,
                         chat_for_current_channel_message.user_id,
                         message)
-                    logger.info(sent)
-                    if sent == 'SENT':
+                    logger.info(response)
+                    if response.status_code == 200:
                         chat_for_current_channel_message.save()
                         ChatMessages.objects.create(
                             chat_id=chat_for_current_channel_message,
@@ -293,13 +287,13 @@ class ProjectProcessor:
                             message_type="outcoming"
                         )
                         channel.save()
-                    if sent == 'USER_DOESNT_EXIST':
+                    if response.status_code == 404:
                         chat_for_current_channel_message.status = 'user_doesnt_exist'
                         chat_for_current_channel_message.last_message_time = datetime.datetime.now(tz=timezone.utc)
                         chat_for_current_channel_message.save()
                         logger.info(f"user_doesnt_exist {chat_for_current_channel_message.user_id} ")
                         chat_for_current_channel_message.save()
-                    if sent == 'SENT_ERROR':
+                    if response.status_code == 500:
                         logger.info(f"Ошибка отправки {chat_for_current_channel_message.user_id} ")
                         chat_for_current_channel_message.status = 'error'
                         chat_for_current_channel_message.save()
@@ -329,14 +323,16 @@ class ProjectProcessor:
         )
 
         if message:
-            if message_processor.send_message_to_telegram(
-                    chat.channel.phone,
-                    chat.user_id,
-                    message
-            ):
+            result = message_processor.send_message_to_telegram(
+                chat.channel.phone,
+                chat.user_id,
+                message)
+            logger.debug(result)
+            if result.status_code == 200:
                 logger.info(f"message sended {message} ")
                 ChatMessages.objects.create(
                     chat_id=chat,
+
                     user_name=chat.channel.phone,
                     user_message=message[:555],
                     message_type="outcoming"

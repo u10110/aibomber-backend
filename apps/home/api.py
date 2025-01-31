@@ -111,12 +111,12 @@ def send_chat_messages(request, chat_id):
 
         message_processor = MessageProcessor()
 
-        sent = message_processor.send_message_to_telegram(
+        responce = message_processor.send_message_to_telegram(
             current_channel.phone,
             current_chat.user_id,
             message)
-        logger.info(sent)
-        if sent == 'SENT':
+        logger.info(responce)
+        if responce.status_code == 200:
             new_message = ChatMessages.objects.create(
                 chat_id=current_chat,
                 user_name=current_channel.phone,
@@ -155,14 +155,14 @@ def send_chat_messages(request, chat_id):
                 }
             }, safe=False)
 
-        if sent == 'USER_DOESNT_EXIST':
+        if responce.status_code == 404:
             current_chat.status = 'user_doesnt_exist'
             current_chat.last_message_time = datetime.datetime.now(tz=timezone.utc)
             current_chat.save()
             logger.info(f"user_doesnt_exist {current_chat.user_id} ")
             return JsonResponse({'success': False, 'error': 'Пользователь не найден '}, safe=False)
 
-        if sent == 'SENT_ERROR':
+        if responce.status_code == 500:
             logger.info(f"Ошибка отправки {current_chat.user_id} ")
             return JsonResponse({'success': False, 'error': 'Ошибка отправки '}, safe=False)
 
