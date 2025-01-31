@@ -161,7 +161,7 @@ class MessageProcessor:
             return None
 
     @staticmethod
-    def send_message_to_telegram(phone: str, user_id: str, message: str):
+    def send_message_to_telegram(phone: str, user_id: str, message: str) -> requests:
         """Send message via Telegram API."""
 
         if not user_id.startswith('@'): user_id = '@' + user_id
@@ -178,9 +178,11 @@ class MessageProcessor:
                 json=payload,
                 headers={"Content-Type": "application/json"}
             )
+
             return response
 
         except Exception as e:
+            logger.error(traceback.format_exc())
             logger.error(f"Telegram API error: {e}")
             return False
 
@@ -328,11 +330,10 @@ class ProjectProcessor:
                 chat.user_id,
                 message)
             logger.debug(result)
-            if result.status_code == 200:
+            if result and result.status_code == 200:
                 logger.info(f"message sended {message} ")
                 ChatMessages.objects.create(
                     chat_id=chat,
-
                     user_name=chat.channel.phone,
                     user_message=message[:555],
                     message_type="outcoming"

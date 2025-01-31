@@ -98,73 +98,78 @@ def send_chat_messages(request, chat_id):
     if not chat_id:
         return HttpResponse(status=404)
     if request.method == 'POST':
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            message = data.get('message')
+            logger.debug(message)
+            current_chat = Chat.objects.filter(
+                id=chat_id,
+                project__in=Project.objects.filter(client_id=request.user.id)
+            ).first()
 
-        data = json.loads(request.body.decode("utf-8"))
-        message = data.get('message')
-        logger.debug(message)
-        current_chat = Chat.objects.filter(
-            id=chat_id,
-            project__in=Project.objects.filter(client_id=request.user.id)
-        ).first()
+            current_channel = Channel.objects.filter(id=current_chat.channel_id).first()
 
-        current_channel = Channel.objects.filter(id=current_chat.channel_id).first()
+            message_processor = MessageProcessor()
 
-        message_processor = MessageProcessor()
+            response = message_processor.send_message_to_telegram(
+                current_channel.phone,
+                current_chat.user_id,
+                message)
 
-        responce = message_processor.send_message_to_telegram(
-            current_channel.phone,
-            current_chat.user_id,
-            message)
-        logger.info(responce)
-        if responce.status_code == 200:
-            new_message = ChatMessages.objects.create(
-                chat_id=current_chat,
-                user_name=current_channel.phone,
-                user_message=message[:555],
-                message_type="outcoming"
-            )
+            if response and response.status_code == 200:
+                new_message = ChatMessages.objects.create(
+                    chat_id=current_chat,
+                    user_name=current_channel.phone,
+                    user_message=message[:555],
+                    message_type="outcoming"
+                )
 
-
-            return JsonResponse({
-                'msg':
-                    {
-                        'message': new_message.user_message,
-                        'time': new_message.created_at.isoformat(),
-                        'senderId': current_chat.user_id,
-                        'user_name': new_message.user_name,
-                        'message_type': new_message.message_type,
-                        'feedback': {
-                            'isSent': True,
-                            'isDelivered': True,
-                            'isSeen': True
+                return JsonResponse({
+                    'msg':
+                        {
+                            'message': new_message.user_message,
+                            'time': new_message.created_at.isoformat(),
+                            'senderId': current_chat.user_id,
+                            'user_name': new_message.user_name,
+                            'message_type': new_message.message_type,
+                            'feedback': {
+                                'isSent': True,
+                                'isDelivered': True,
+                                'isSeen': True
+                            },
+                        }, 'chat': {
+                        'id': current_chat.id,
+                        'lastMessage': {
+                            'message': new_message.user_message,
+                            'time': new_message.created_at.isoformat(),
+                            'feedback': {
+                                'isSent': True,
+                                'isDelivered': True,
+                                'isSeen': True
+                            },
                         },
-                    }, 'chat': {
-                    'id': current_chat.id,
-                    'lastMessage': {
-                        'message': new_message.user_message,
-                        'time': new_message.created_at.isoformat(),
-                        'feedback': {
-                            'isSent': True,
-                            'isDelivered': True,
-                            'isSeen': True
-                        },
-                    },
-                    'status': current_chat.status,
-                    'is_auto_active': current_chat.is_auto_active,
-                    'channel_id': current_chat.channel_id,
-                }
-            }, safe=False)
+                        'status': current_chat.status,
+                        'is_auto_active': current_chat.is_auto_active,
+                        'channel_id': current_chat.channel_id,
+                    }
+                }, safe=False)
 
-        if responce.status_code == 404:
-            current_chat.status = 'user_doesnt_exist'
-            current_chat.last_message_time = datetime.datetime.now(tz=timezone.utc)
-            current_chat.save()
-            logger.info(f"user_doesnt_exist {current_chat.user_id} ")
-            return JsonResponse({'success': False, 'error': 'Пользователь не найден '}, safe=False)
+            if response and response.status_code == 404:
+                current_chat.status = 'user_doesnt_exist'
+                current_chat.last_message_time = datetime.datetime.now(tz=timezone.utc)
+                current_chat.save()
+                logger.info(f"user_doesnt_exist {current_chat.user_id} ")
+                return JsonResponse({'success': False, 'error': 'Пользователь не найден '}, safe=False)
 
-        if responce.status_code == 500:
-            logger.info(f"Ошибка отправки {current_chat.user_id} ")
-            return JsonResponse({'success': False, 'error': 'Ошибка отправки '}, safe=False)
+            if response and response.status_code == 500:
+                logger.info(f"Ошибка отправки {current_chat.user_id} ")
+                return JsonResponse({'success': False, 'error': 'Ошибка отправки '}, safe=False)
+
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'error': 'Ошибка отправки '}, safe=False)
 
 
 def chat_messages(request, chat_id):
@@ -646,7 +651,7 @@ def recipients(request):
 
         remote_ids_len = 0
         if recipient.remote_ids and len(recipient.remote_ids) > 0:
-            remote_ids_len = len(recipient.remote_idsreplace('\r\n', ',').replace('\n', ',').split(','))
+            remote_ids_len = len(recipient.remote_ids.replace('\r\n', ',').replace('\n', ',').split(','))
 
         if created_chats_count > 0 and recipient.status == 'new':
             recipient.status = 'active'
