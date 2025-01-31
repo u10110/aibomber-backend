@@ -118,7 +118,7 @@ def send_chat_messages(request, chat_id):
                     current_channel.phone,
                     current_chat.user_id,
                     message)
-
+                logger.debug(response)
                 if response and response.status_code == 200:
                     new_message = ChatMessages.objects.create(
                         chat_id=current_chat,
