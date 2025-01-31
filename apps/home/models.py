@@ -289,14 +289,15 @@ class Channel(SoftDeleteModel):
 
     @staticmethod
     def post_delete(sender, instance, created, **kwargs):
-        try:
-            # Отправка запроса в FastAPI
-            requests.post(
-                f"{TELETHON_HOST}/log-out/",
-                params={"phone": instance.phone}
-            )
-        except Exception as e:
-            logger.error(e)
+        logger.debug(instance.phone)
+        #try:
+        #     # Отправка запроса в FastAPI
+        #     requests.post(
+        ##         f"{TELETHON_HOST}/log-out/",
+        #         params={"phone": instance.phone}
+        #     )
+        # except Exception as e:
+        #     logger.error(e)
 
 
 

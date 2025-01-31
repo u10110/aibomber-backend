@@ -2,7 +2,7 @@
 import string
 from decouple import config
 from sqlite3 import IntegrityError
-
+import traceback
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.core.files.storage import FileSystemStorage
 from django.db.utils import IntegrityError
@@ -1249,6 +1249,7 @@ def send_code(request):
             else:
                 return JsonResponse({"message": response.text, "success": False}, status=response.status_code)
         except Exception as e:
+            logger.error(traceback.format_exc())
             return JsonResponse({"message": str(e), "success": False})
 
     return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
@@ -1283,6 +1284,7 @@ def verify_code(request):
             else:
                 return JsonResponse({"message": response.text, "success": False}, status=response.status_code)
         except Exception as e:
+            logger.error(traceback.format_exc())
             return JsonResponse({"message": str(e), "success": False})
 
     return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
