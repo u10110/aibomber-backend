@@ -54,8 +54,8 @@ def send_to_gpt(request):
                 hello_text=data.get("hello_text"),
                 prompt=data.get("prompt"),
             )
-            #files=data.get("knownBaseFiles")
-            #f files:
+            # files=data.get("knownBaseFiles")
+            # f files:
             #    for project_file in files:
             #        project.knowledge_base_text+= '\r' + project_file.get('name')
 
@@ -69,7 +69,7 @@ def send_to_gpt(request):
                     formatted_history.append({"role": "assistant", "content": item.get('message')})
                 else:
                     formatted_history.append({"role": "user", "content": item.get('message')})
-                    question=item.get('message')
+                    question = item.get('message')
 
             # Ограничиваем длину истории (например, 10 пар сообщений)
             formatted_history = formatted_history[-20:]  # 10 вопросов и 10 ответов
@@ -104,66 +104,69 @@ def send_chat_messages(request, chat_id):
             logger.debug(message)
             current_chat = Chat.objects.filter(
                 id=chat_id,
-                project__in=Project.objects.filter(client_id=request.user.id)
+                project__in=Project.objects.filter(client_id=request.user.id),
+                is_auto_active=False
             ).first()
 
-            current_channel = Channel.objects.filter(id=current_chat.channel_id).first()
+            if current_chat:
 
-            message_processor = MessageProcessor()
+                current_channel = Channel.objects.filter(id=current_chat.channel_id).first()
 
-            response = message_processor.send_message_to_telegram(
-                current_channel.phone,
-                current_chat.user_id,
-                message)
+                message_processor = MessageProcessor()
 
-            if response and response.status_code == 200:
-                new_message = ChatMessages.objects.create(
-                    chat_id=current_chat,
-                    user_name=current_channel.phone,
-                    user_message=message[:555],
-                    message_type="outcoming"
-                )
+                response = message_processor.send_message_to_telegram(
+                    current_channel.phone,
+                    current_chat.user_id,
+                    message)
 
-                return JsonResponse({
-                    'msg':
-                        {
-                            'message': new_message.user_message,
-                            'time': new_message.created_at.isoformat(),
-                            'senderId': current_chat.user_id,
-                            'user_name': new_message.user_name,
-                            'message_type': new_message.message_type,
-                            'feedback': {
-                                'isSent': True,
-                                'isDelivered': True,
-                                'isSeen': True
+                if response and response.status_code == 200:
+                    new_message = ChatMessages.objects.create(
+                        chat_id=current_chat,
+                        user_name=current_channel.phone,
+                        user_message=message[:555],
+                        message_type="outcoming"
+                    )
+
+                    return JsonResponse({
+                        'msg':
+                            {
+                                'message': new_message.user_message,
+                                'time': new_message.created_at.isoformat(),
+                                'senderId': current_chat.user_id,
+                                'user_name': new_message.user_name,
+                                'message_type': new_message.message_type,
+                                'feedback': {
+                                    'isSent': True,
+                                    'isDelivered': True,
+                                    'isSeen': True
+                                },
+                            }, 'chat': {
+                            'id': current_chat.id,
+                            'lastMessage': {
+                                'message': new_message.user_message,
+                                'time': new_message.created_at.isoformat(),
+                                'feedback': {
+                                    'isSent': True,
+                                    'isDelivered': True,
+                                    'isSeen': True
+                                },
                             },
-                        }, 'chat': {
-                        'id': current_chat.id,
-                        'lastMessage': {
-                            'message': new_message.user_message,
-                            'time': new_message.created_at.isoformat(),
-                            'feedback': {
-                                'isSent': True,
-                                'isDelivered': True,
-                                'isSeen': True
-                            },
-                        },
-                        'status': current_chat.status,
-                        'is_auto_active': current_chat.is_auto_active,
-                        'channel_id': current_chat.channel_id,
-                    }
-                }, safe=False)
+                            'status': current_chat.status,
+                            'is_auto_active': current_chat.is_auto_active,
+                            'channel_id': current_chat.channel_id,
+                        }
+                    }, safe=False)
 
-            if response and response.status_code == 404:
-                current_chat.status = 'user_doesnt_exist'
-                current_chat.last_message_time = datetime.datetime.now(tz=timezone.utc)
-                current_chat.save()
-                logger.info(f"user_doesnt_exist {current_chat.user_id} ")
-                return JsonResponse({'success': False, 'error': 'Пользователь не найден '}, safe=False)
+                if response and response.status_code == 404:
+                    current_chat.status = 'user_doesnt_exist'
+                    current_chat.last_message_time = datetime.datetime.now(tz=timezone.utc)
+                    current_chat.save()
+                    logger.info(f"user_doesnt_exist {current_chat.user_id} ")
+                    return JsonResponse({'success': False, 'error': 'Пользователь не найден '}, safe=False)
 
-            if response and response.status_code == 500:
-                logger.info(f"Ошибка отправки {current_chat.user_id} ")
-                return JsonResponse({'success': False, 'error': 'Ошибка отправки '}, safe=False)
+                if response and response.status_code == 500:
+                    logger.info(f"Ошибка отправки {current_chat.user_id} ")
+                    return JsonResponse({'success': False, 'error': 'Ошибка отправки '}, safe=False)
 
         except Exception as e:
             logger.error(traceback.format_exc())
@@ -226,7 +229,7 @@ def chat_messages(request, chat_id):
 
     chat_data = {
         'id': current_chat.id,
-        'lastMessage':last_message,
+        'lastMessage': last_message,
         'status': current_chat.status,
         'is_auto_active': current_chat.is_auto_active,
         'channel_id': current_chat.channel_id,
@@ -293,14 +296,14 @@ def chats(request):
         last_user_message = ''
         if last_messages:
             last_message = {
-                        'message': last_messages.get('user_message'),
-                        'time': last_messages.get('created_at').isoformat(),
-                        'feedback': {
-                            'isSent': True,
-                            'isDelivered': True,
-                            'isSeen': True
-                        },
-                    }
+                'message': last_messages.get('user_message'),
+                'time': last_messages.get('created_at').isoformat(),
+                'feedback': {
+                    'isSent': True,
+                    'isDelivered': True,
+                    'isSeen': True
+                },
+            }
             last_user_message = last_messages.get('user_message')
 
         user_name = chat.user_name
@@ -332,7 +335,6 @@ def chats(request):
 
 
 def chats_export(request):
-
     projects_filter = Project.objects.filter(client=request.user)
 
     chats_list = Chat.objects.filter(
@@ -343,8 +345,8 @@ def chats_export(request):
         project = Project.objects.filter(id=chat.project_id).first()
         project_title = ''
 
-        if project :
-            project_title=project.title
+        if project:
+            project_title = project.title
 
         chats.append({
             'id': chat.id,
@@ -476,15 +478,15 @@ def project_get_or_save(request, project_id):
                         file_url = file.get('file_url')
                         info = urllib.parse.urlparse(file_url)
                         domain = info.netloc
-                        #if domain and len(domain) > 0:
+                        # if domain and len(domain) > 0:
                         #    new_file_name = 'files/' + str(uuid.uuid4()) + '.doc'
                         #    gdown.download(file_url, new_file_name , quiet=False)
                         #    file_url = new_file_name
 
                         project_file = ProjectFile(project=project_to_save,
-                                                       file=file.get('name'),
-                                                       file_url=file_url
-                                                       )
+                                                   file=file.get('name'),
+                                                   file_url=file_url
+                                                   )
                         project_file.save()
                     except Exception as e:
                         logger.error(traceback.format_exc())
@@ -587,7 +589,7 @@ def recipient_get_or_save(request, recipient_id):
             remote_ids = []
             remote_ids_string = data.get('mailingData')
             if remote_ids_string and len(remote_ids_string) > 0:
-                for remote_id  in remote_ids_string.replace('\r\n', ',').replace('\n', ',').split(','):
+                for remote_id in remote_ids_string.replace('\r\n', ',').replace('\n', ',').split(','):
                     if len(remote_id) > 0:
                         remote_ids.append(remote_id)
             delimiter = '\n'
@@ -633,8 +635,6 @@ def recipient_delete(request, recipient_id):
 
 
 def recipients(request):
-
-
     recipient_list = Recipient.objects.filter(client=request.user)
 
     data = []
@@ -644,10 +644,11 @@ def recipients(request):
         project = Project.objects.filter(id=recipient.project_id).first()
         project_title = ''
         project_id = ''
-        if project :
-            project_title=project.title
-            project_id=project.id
-        created_chats_count = Chat.objects.filter(project_id=recipient.project_id, recipient_id=recipient.id).count() #TODO сделать каунт тока для чатов с первысм сообщение от бота
+        if project:
+            project_title = project.title
+            project_id = project.id
+        created_chats_count = Chat.objects.filter(project_id=recipient.project_id,
+                                                  recipient_id=recipient.id).count()  # TODO сделать каунт тока для чатов с первысм сообщение от бота
 
         remote_ids_len = 0
         if recipient.remote_ids and len(recipient.remote_ids) > 0:
@@ -750,9 +751,9 @@ def channels(request):
         project = Project.objects.filter(id=channel.project_id).first()
         project_title = ''
         project_id = ''
-        if project :
-            project_title=project.title
-            project_id=project.id
+        if project:
+            project_title = project.title
+            project_id = project.id
 
         data.append({
             'title': channel.title,
@@ -769,7 +770,6 @@ def channels(request):
 
 @csrf_exempt
 def telethon_sessions(request):
-
     response = requests.get(
         f"{TELETHON_HOST}/get-sessions",
     )
@@ -778,7 +778,6 @@ def telethon_sessions(request):
 
 @csrf_exempt
 def delete_telethon_session(request):
-
     response = requests.get(
         f"{TELETHON_HOST}/get-sessions",
     )
@@ -831,6 +830,6 @@ def get_balance(request):
 
     current_balance = 0
     if client_settings:
-     current_balance = client_settings.balance
+        current_balance = client_settings.balance
 
     return JsonResponse({"balance": current_balance}, status=200)
