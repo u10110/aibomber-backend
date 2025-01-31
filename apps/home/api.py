@@ -582,7 +582,7 @@ def recipient_get_or_save(request, recipient_id):
             remote_ids = []
             remote_ids_string = data.get('mailingData')
             if remote_ids_string and len(remote_ids_string) > 0:
-                for remote_id  in remote_ids_string.replace('\n', ',').split(','):
+                for remote_id  in remote_ids_string.replace('\r\n', ',').replace('\n', ',').split(','):
                     if len(remote_id) > 0:
                         remote_ids.append(remote_id)
             delimiter = '\n'
@@ -646,7 +646,7 @@ def recipients(request):
 
         remote_ids_len = 0
         if recipient.remote_ids and len(recipient.remote_ids) > 0:
-            remote_ids_len = len(recipient.remote_ids.replace('\n', ',').split(','))
+            remote_ids_len = len(recipient.remote_idsreplace('\r\n', ',').replace('\n', ',').split(','))
 
         if created_chats_count > 0 and recipient.status == 'new':
             recipient.status = 'active'

@@ -307,6 +307,7 @@ class Channel(SoftDeleteModel):
 
 post_save.connect(Channel.post_delete, sender=Channel)
 
+
 class Chat(SoftDeleteModel):
     class Meta:
         verbose_name = "Чаты"
