@@ -118,7 +118,7 @@ def send_chat_messages(request, chat_id):
                     current_channel.phone,
                     current_chat.user_id,
                     message)
-                logger.debug(response)
+                print(response.content)
                 if response and response.status_code == 200:
                     new_message = ChatMessages.objects.create(
                         chat_id=current_chat,
@@ -449,51 +449,51 @@ def project_get_or_save(request, project_id):
                 channels_to_assign = new_channels_set - current_channels
                 Channel.objects.filter(id__in=[c.id for c in channels_to_assign]).update(project_id=project_to_save.id)
 
-            # Обработка пайплайнов
-            # pipelines = data.get('pipelines', [])
+            #Обработка пайплайнов
+            pipelines = data.get('pipelines', [])
 
-            # CrmPipelines.objects.filter(project_id=project_to_save.id).delete()
-            # crm_pipelines = [
-            #    CrmPipelines(
-            #        project_id=project_to_save.id,
-            ##        remote_name=pipeline['remote_name'],
-            #        remote_step_id=pipeline['remote_step_id'],
-            #        remote_pipeline_id=pipeline['remote_pipeline_id'],
-            #        trigger=pipeline['trigger']
-            #    ) for pipeline in pipelines
-            # ]
-            # CrmPipelines.objects.bulk_create(crm_pipelines)
+            CrmPipelines.objects.filter(project_id=project_to_save.id).delete()
+            crm_pipelines = [
+                CrmPipelines(
+                    project_id=project_to_save.id,
+                    remote_name=pipeline['remote_name'],
+                    remote_step_id=pipeline['remote_step_id'],
+                    remote_pipeline_id=pipeline['remote_pipeline_id'],
+                    trigger=pipeline['trigger']
+                ) for pipeline in pipelines
+            ]
+            CrmPipelines.objects.bulk_create(crm_pipelines)
 
-            # Обновляем project_id для связанных каналов
-            # channels = data.get('channel', [])
-            # for channel in channels:
-            #    channel.project_id = project_to_save.id
-            #    channel.save()
+            #Обновляем project_id для связанных каналов
+            channels = data.get('channel', [])
+            for channel in channels:
+                channel.project_id = project_to_save.id
+                channel.save()
             new_files = data.get('knownBaseFiles', [])
             not_in_delete = []
             for file in new_files:
                 project_file = ProjectFile.objects.filter(project=project_to_save, file=file.get('name')).first()
-                if not project_file:
-                    try:
-                        file_url = file.get('file_url')
-                        info = urllib.parse.urlparse(file_url)
-                        domain = info.netloc
-                        # if domain and len(domain) > 0:
-                        #    new_file_name = 'files/' + str(uuid.uuid4()) + '.doc'
-                        #    gdown.download(file_url, new_file_name , quiet=False)
-                        #    file_url = new_file_name
+            if not project_file:
+                try:
+                    file_url = file.get('file_url')
+                    info = urllib.parse.urlparse(file_url)
+                    domain = info.netloc
+                    # if domain and len(domain) > 0:
+                    #    new_file_name = 'files/' + str(uuid.uuid4()) + '.doc'
+                    #    gdown.download(file_url, new_file_name , quiet=False)
+                    #    file_url = new_file_name
 
-                        project_file = ProjectFile(project=project_to_save,
-                                                   file=file.get('name'),
-                                                   file_url=file_url
-                                                   )
-                        project_file.save()
-                    except Exception as e:
-                        logger.error(traceback.format_exc())
-                        logger.error("project file save error")
-                        return HttpResponse(status=500)
+                    project_file = ProjectFile(project=project_to_save,
+                                               file=file.get('name'),
+                                               file_url=file_url
+                                               )
+                    project_file.save()
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error("project file save error")
+                    return HttpResponse(status=500)
 
-                not_in_delete.append(project_file.id)
+            not_in_delete.append(project_file.id)
 
             ProjectFile.objects.filter(project=project_to_save).exclude(id__in=not_in_delete).delete()
 
