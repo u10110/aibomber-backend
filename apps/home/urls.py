@@ -173,7 +173,8 @@ urlpatterns = [
     path('api/channel/<int:channel_id>/', login_required(api.channel_get_or_save), name='api-channel-save'),
     path('api/channel/<int:channel_id>/delete', login_required(api.channel_delete), name='api-channel-delete'),
     path('api/channel/send-code/', login_required(views.send_code), name='api-channel-send-code'),
-    path('api/channel/verify-code/', login_required(views.verify_code), name='api-channel-verify-code'),
+    path('api/channel/verify-code/', login_required(api.verify_code), name='api-channel-verify-code'),
+    path('api/channel/send-password/', login_required(api.send_password), name='api-channel-send-password'),
 
     path("api/projects/", login_required(api.projects), name="api_projects"),
     path('api/projects/toggle-active/', views.toggle_project_active, name='api-toggle-project-active'),

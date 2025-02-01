@@ -833,3 +833,85 @@ def get_balance(request):
         current_balance = client_settings.balance
 
     return JsonResponse({"balance": current_balance}, status=200)
+
+
+
+# Шаг 2: Подтверждаем код авторизации
+@csrf_exempt
+def verify_code(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            phone_number = data.get('phone')
+            code = data.get('code')
+
+            if not phone_number or not code:
+                return JsonResponse({"message": "Номер телефона или код не предоставлены", "success": False})
+
+            # Отправка запроса в FastAPI
+            print({"phone": phone_number, "code": code})
+            response = requests.post(
+                f"{TELETHON_HOST}/verify-code/",
+                json={"phone": phone_number, "code": code},
+            )
+            answer = json.loads(response.data)
+            if response.status_code == 200:
+                # Если успех, обновляем статус в базе данных
+                if answer.get('success') == True:
+
+                    channel, created = Channel.objects.get_or_create(phone=phone_number, client=request.user)
+                    channel.status = 'authorized'
+                    channel.remote_id = answer.content.account.id
+                    channel.remote_entity = answer.content.account
+                    #channel.remote_status =
+                    channel.save()
+
+                    return JsonResponse(response.json())
+                if not answer.get('success'):
+                    if answer.get('require_password'):
+                        return JsonResponse({"message": answer.get('message'),
+                                             "success": False,
+                                             "require_password": True},
+                                            status=response.status_code)
+            else:
+                return JsonResponse({"message": response.text, "success": False}, status=response.status_code)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            return JsonResponse({"message": str(e), "success": False})
+
+    return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
+
+
+def send_password(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            phone_number = data.get('phone')
+            password = data.get('password')
+
+            if not phone_number or not password:
+                return JsonResponse({"message": "Номер телефона или код не предоставлены", "success": False})
+
+            # Отправка запроса в FastAPI
+            print({"phone": phone_number, "password": password})
+            response = requests.post(
+                f"{TELETHON_HOST}/input-password/",
+                json={"phone": phone_number, "password": password},
+            )
+            answer = json.loads(response.data)
+            if response.status_code == 200:
+                # Если успех, обновляем статус в базе данных
+                channel, created = Channel.objects.get_or_create(phone=phone_number, client=request.user)
+                channel.status = 'authorized'
+                channel.remote_id = answer.get('account').id
+                channel.remote_entity = answer.get('account')
+                channel.save()
+
+                return JsonResponse(response.json())
+            else:
+                return JsonResponse({"message": response.text, "success": False}, status=response.status_code)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            return JsonResponse({"message": str(e), "success": False})
+
+    return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})

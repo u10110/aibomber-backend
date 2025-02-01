@@ -13,6 +13,7 @@ import os
 from PyPDF2 import PdfReader
 from docx import Document
 # from sqlalchemy import null
+from django.contrib.postgres.fields import JSONField
 
 TELETHON_HOST = config("TELETHON_HOST")
 
@@ -284,6 +285,9 @@ class Channel(SoftDeleteModel):
     user_id = models.CharField(max_length=55, null=True, blank=True)
     app_hash = models.CharField(max_length=55, null=True, blank=True)
     qr = models.TextField(null=True)
+    remote_id = models.IntegerField(null=True)
+    remote_entity = models.JSONField(default={})
+    remote_status = models.CharField(max_length=1000, default='unknown')
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
@@ -312,6 +316,7 @@ post_save.connect(Channel.post_delete, sender=Channel)
 class Chat(SoftDeleteModel):
     class Meta:
         verbose_name = "Чаты"
+
         verbose_name_plural = "Чаты"
 
     previous_status = None
@@ -394,6 +399,9 @@ class Chat(SoftDeleteModel):
     status = models.CharField(max_length=55, default="new")
     sex = models.IntegerField(null=True)
     remote_lead_id = models.IntegerField(null=True)
+    remote_chat_id = models.IntegerField(null=True)
+    remote_chat_entity = models.JSONField(default={})
+    remote_chat_entity_status = models.CharField(max_length=1000, default='unknown')
     phone = models.CharField(max_length=55, null=True)
     is_auto_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
@@ -423,13 +431,14 @@ class ChatMessages(SoftDeleteModel):
         chat.save()
 
     chat_id = models.ForeignKey(Chat, on_delete=models.CASCADE)
-    messageId = models.CharField(null=True, max_length=1000)
+    remote_id = models.CharField(null=True, max_length=1000)
+    remote_message = models.JSONField(default={})
+    remote_status = models.CharField(max_length=1000, default='unknown')
     message_type = models.CharField(
         max_length=20,
         choices=MESSAGE_TYPE,
         default=None,
     )
-    user_name = models.CharField(max_length=55, )
     user_message = models.CharField(max_length=555, )
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
