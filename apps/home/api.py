@@ -854,7 +854,7 @@ def verify_code(request):
                 f"{TELETHON_HOST}/verify-code/",
                 json={"phone": phone_number, "code": code},
             )
-            answer = json.loads(response.data)
+            answer = json.loads(response.content)
             if response.status_code == 200:
                 # Если успех, обновляем статус в базе данных
                 if answer.get('success') == True:
@@ -898,7 +898,7 @@ def send_password(request):
                 f"{TELETHON_HOST}/input-password/",
                 json={"phone": phone_number, "password": password},
             )
-            answer = json.loads(response.data)
+            answer = json.loads(response.content)
             if response.status_code == 200:
                 # Если успех, обновляем статус в базе данных
                 channel, created = Channel.objects.get_or_create(phone=phone_number, client=request.user)
