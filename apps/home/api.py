@@ -900,14 +900,15 @@ def send_password(request):
             )
             answer = json.loads(response.content)
             if response.status_code == 200:
+                account = json.loads(answer.get('account'))
                 # Если успех, обновляем статус в базе данных
                 channel, created = Channel.objects.get_or_create(phone=phone_number, client=request.user)
                 channel.status = 'authorized'
-                channel.remote_id = answer.get('account').id
-                channel.remote_entity = answer.get('account')
+                channel.remote_id = account.get('id')
+                channel.remote_entity = account
                 channel.save()
 
-                return JsonResponse(response.json())
+                return JsonResponse({"message": "Авторизация завершена ", "success": True})
             else:
                 return JsonResponse({"message": response.text, "success": False}, status=response.status_code)
         except Exception as e:
