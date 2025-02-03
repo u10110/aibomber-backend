@@ -855,6 +855,7 @@ def verify_code(request):
                 json={"phone": phone_number, "code": code},
             )
             answer = json.loads(response.content)
+            print(answer)
             if response.status_code == 200:
                 # Если успех, обновляем статус в базе данных
                 if answer.get('success') == True:
