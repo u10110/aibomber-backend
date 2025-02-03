@@ -130,6 +130,7 @@ def send_chat_messages(request, chat_id):
                     new_message.remote_status = 'deliver'
                     new_message.save()
                     return JsonResponse({
+                        'success': True,
                         'msg':
                             {
                                 'message': new_message.user_message,
