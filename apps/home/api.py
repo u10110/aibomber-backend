@@ -643,7 +643,7 @@ def recipients(request):
 
         remote_ids_len = 0
         if recipient.remote_ids and len(recipient.remote_ids) > 0:
-            remote_ids_len = len(recipient.remote_ids.replace('\r\n', ',').replace('\n', ',').split(','))
+            remote_ids_len = len(recipient.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','))
 
         if created_chats_count > 0 and recipient.status == 'new':
             recipient.status = 'active'
