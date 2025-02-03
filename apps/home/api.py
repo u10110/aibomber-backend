@@ -868,7 +868,7 @@ def verify_code(request):
                                              "require_password": True},
                                             status=response.status_code)
             else:
-                return JsonResponse({"message": response.text, "success": False}, status=response.status_code)
+                return JsonResponse({"message": response.text, "success": False})
         except Exception as e:
             logger.error(traceback.format_exc())
             return JsonResponse({"message": str(e), "success": False})
@@ -904,7 +904,7 @@ def send_password(request):
 
                 return JsonResponse({"message": "Авторизация завершена ", "success": True})
             else:
-                return JsonResponse({"message": response.text, "success": False}, status=response.status_code)
+                return JsonResponse({"message": response.text, "success": False})
         except Exception as e:
             logger.error(traceback.format_exc())
             return JsonResponse({"message": str(e), "success": False})
