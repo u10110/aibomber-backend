@@ -600,13 +600,29 @@ def recipient_get_or_save(request, recipient_id):
                 client_id=request.user.id
             ).first()
 
+            created_chats_count = Chat.objects.filter(project_id=recipient.project_id,
+                                                      recipient_id=recipient.id).count()  # TODO сделать каунт тока для чатов с первысм сообщение от бота
+
             if recipient:
+
+                remote_ids_len = 0
+                if recipient.remote_ids and len(recipient.remote_ids) > 0:
+                    remote_ids_len = len(recipient.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','))
+
+                if created_chats_count > 0 and recipient.status == 'new':
+                    recipient.status = 'active'
+                recipient.save()
+
+                if remote_ids_len <= created_chats_count and recipient.status == 'active':
+                    recipient.status = 'completed'
+                    recipient.save()
 
                 recipient_data = {
                     'name': recipient.title,
                     'project': recipient.project_id,
                     'mailingData': recipient.remote_ids,
                     'date': recipient.start_date,
+                    'status': recipient.status,
                     'isDate': recipient.start_date is not None,
                 }
 
