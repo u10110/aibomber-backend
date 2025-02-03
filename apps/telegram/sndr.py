@@ -231,6 +231,7 @@ class ProjectProcessor:
         logger.debug(today_send_new_messages)
         if today_send_new_messages >= project.outgoing_limit:
             logger.info(f"У канала: {channel.id}, телефон: {channel.phone} достигнут дневной лимит новых сообщений")
+            return
 
         try:
 
