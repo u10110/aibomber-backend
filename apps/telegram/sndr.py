@@ -224,10 +224,10 @@ class ProjectProcessor:
 
         message_processor = MessageProcessor()
 
-        today_send_new_messages = ChatMessages.objects.filter(Q(chat_id__in=Chat.objects.filter(channel=channel))
-                                                              and Q(chat_id__in=Chat.objects.filter(project=project)))\
-            .filter(created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(days=1))
-        ).values('chat_id_id').annotate(min_created_at=Min('created_at')).count()
+        today_send_new_messages = ChatMessages.objects \
+            .filter(chat_id__in=(Chat.objects.filter(channel=channel, project=project)) \
+                    .filter(created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(days=1)))
+                    ).values('chat_id_id').annotate(min_created_at=Min('created_at')).count()
         logger.debug(today_send_new_messages)
         if today_send_new_messages >= project.outgoing_limit:
             logger.info(f"У канала: {channel.id}, телефон: {channel.phone} достигнут дневной лимит новых сообщений")
@@ -239,8 +239,6 @@ class ProjectProcessor:
                 channel=channel,
                 created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(seconds=120))
             ).annotate(max_created_at=Max('created_at')).count()
-
-
 
             # Получаем TG ID, у которых нет сообщений
             next_recipient = ProjectProcessor.get_next_new_recipient(project)
@@ -264,7 +262,8 @@ class ProjectProcessor:
                     channel=channel
                 )
 
-                logger.info(f"Создан новый чат для {chat_for_current_channel_message.id} {next_recipient.get('user_name')}")
+                logger.info(
+                    f"Создан новый чат для {chat_for_current_channel_message.id} {next_recipient.get('user_name')}")
 
                 message = message_processor.send_to_gpt_assistant(
                     chat_id=chat_for_current_channel_message.id,
@@ -344,21 +343,22 @@ class ProjectProcessor:
     def get_next_new_recipient(project: Project) -> str:
         recipients = Recipient.objects.filter(project_id=project.id)
         for recipient in recipients:
-            logger.debug(recipient.id)
             for remote_id in recipient.remote_ids.replace('\n', ',').split(','):
                 if len(remote_id) > 0:
                     chat = Chat.objects.filter(project=project,
-                                        recipient_id=recipient.id,
-                                        user_id__endswith=remote_id).first()
+                                               recipient_id=recipient.id,
+                                               user_id__endswith=remote_id).first()
                     if not chat:
                         user_name = remote_id
                         if not remote_id.startswith('@'):
                             user_name = "@" + remote_id
+
+                        logger.debug(f"Новый получаетль {user_name} проект {project.id}")
                         return {
-                            'user_name' : user_name,
+                            'user_name': user_name,
                             'recipient_id': recipient.id
                         }
-                    #else:
+                    # else:
                     #    logger.debug(f"Чат найден для {remote_id}")
         return None
 
