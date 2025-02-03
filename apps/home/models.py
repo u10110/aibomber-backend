@@ -285,7 +285,7 @@ class Channel(SoftDeleteModel):
     user_id = models.CharField(max_length=55, null=True, blank=True)
     app_hash = models.CharField(max_length=55, null=True, blank=True)
     qr = models.TextField(null=True)
-    remote_id = models.IntegerField(null=True)
+    remote_id = models.CharField(max_length=1000, null=True)
     remote_entity = models.JSONField(default={})
     remote_status = models.CharField(max_length=1000, default='unknown')
     updated_at = models.DateTimeField(auto_now=True, null=True)
@@ -399,7 +399,7 @@ class Chat(SoftDeleteModel):
     status = models.CharField(max_length=55, default="new")
     sex = models.IntegerField(null=True)
     remote_lead_id = models.IntegerField(null=True)
-    remote_chat_id = models.IntegerField(null=True)
+    remote_chat_id = models.CharField(max_length=1000, null=True)
     remote_chat_entity = models.JSONField(default={})
     remote_chat_entity_status = models.CharField(max_length=1000, default='unknown')
     phone = models.CharField(max_length=55, null=True)
@@ -463,7 +463,7 @@ class CrmPipelines(SoftDeleteModel):
         on_delete=models.CASCADE
     )
     remote_name = models.CharField(max_length=1000)
-    remote_step_id = models.CharField(max_length=1000, default='')
+    remote_step_id = models.CharField(max_length=1000, null=True)
     remote_pipeline_id = models.IntegerField(null=True)
     trigger = models.CharField(
         max_length=40,
