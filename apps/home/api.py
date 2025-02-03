@@ -850,11 +850,11 @@ def verify_code(request):
             if response.status_code == 200:
                 # Если успех, обновляем статус в базе данных
                 if answer.get('success') == True:
-
+                    account = answer.get('account')
                     channel, created = Channel.objects.get_or_create(phone=phone_number, client=request.user)
                     channel.status = 'authorized'
-                    channel.remote_id = answer.content.account.id
-                    channel.remote_entity = answer.content.account
+                    channel.remote_id = account.id
+                    channel.remote_entity = account
                     #channel.remote_status =
                     channel.save()
 
