@@ -283,7 +283,6 @@ class ProjectProcessor:
                         chat_for_current_channel_message.save()
                         ChatMessages.objects.create(
                             chat_id=chat_for_current_channel_message,
-                            user_name=channel.phone,
                             user_message=message[:555],
                             message_type="outcoming"
                         )
@@ -333,7 +332,6 @@ class ProjectProcessor:
                 logger.info(f"message sended {message} ")
                 ChatMessages.objects.create(
                     chat_id=chat,
-                    user_name=chat.channel.phone,
                     user_message=message[:555],
                     message_type="outcoming"
                 )

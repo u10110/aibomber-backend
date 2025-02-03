@@ -122,7 +122,6 @@ def send_chat_messages(request, chat_id):
                 if response and response.status_code == 200:
                     new_message = ChatMessages.objects.create(
                         chat_id=current_chat,
-                        user_name=current_channel.phone,
                         user_message=message[:555],
                         message_type="outcoming"
                     )
@@ -133,7 +132,7 @@ def send_chat_messages(request, chat_id):
                                 'message': new_message.user_message,
                                 'time': new_message.created_at.isoformat(),
                                 'senderId': current_chat.user_id,
-                                'user_name': new_message.user_name,
+                                'user_name': current_chat.user_name,
                                 'message_type': new_message.message_type,
                                 'feedback': {
                                     'isSent': True,
@@ -197,7 +196,7 @@ def chat_messages(request, chat_id):
             'message': message.user_message,
             'time': message.created_at.isoformat(),
             'senderId': current_chat.user_id,
-            'user_name': message.user_name,
+            'user_name': current_chat.user_name,
             'message_type': message.message_type,
             'feedback': {
                 'isSent': True,
@@ -208,7 +207,6 @@ def chat_messages(request, chat_id):
 
     last_messages = ChatMessages.objects.filter(chat_id=current_chat).values(
         'message_type',
-        'user_name',
         'user_message',
         'created_at'
     ).order_by('-created_at').first()
