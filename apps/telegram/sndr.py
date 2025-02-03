@@ -274,6 +274,11 @@ class ProjectProcessor:
                 )
                 logger.debug(message)
                 if message:
+                    ChatMessages.objects.create(
+                        chat_id=chat_for_current_channel_message,
+                        user_message=message[:555],
+                        message_type="outcoming"
+                    )
                     response = message_processor.send_message_to_telegram(
                         channel.phone,
                         chat_for_current_channel_message.user_id,
@@ -281,11 +286,7 @@ class ProjectProcessor:
                     logger.info(response)
                     if response.status_code == 200:
                         chat_for_current_channel_message.save()
-                        ChatMessages.objects.create(
-                            chat_id=chat_for_current_channel_message,
-                            user_message=message[:555],
-                            message_type="outcoming"
-                        )
+
                         channel.save()
                     if response.status_code == 404:
                         chat_for_current_channel_message.status = 'user_doesnt_exist'
