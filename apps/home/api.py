@@ -112,6 +112,13 @@ def send_chat_messages(request, chat_id):
 
                 current_channel = Channel.objects.filter(id=current_chat.channel_id).first()
 
+                new_message = ChatMessages.objects.create(
+                    chat_id=current_chat,
+                    user_message=message[:555],
+                    message_type="outcoming",
+                    remote_status="sent"
+                )
+
                 message_processor = MessageProcessor()
 
                 response = message_processor.send_message_to_telegram(
@@ -120,12 +127,8 @@ def send_chat_messages(request, chat_id):
                     message)
 
                 if response and response.status_code == 200:
-                    new_message = ChatMessages.objects.create(
-                        chat_id=current_chat,
-                        user_message=message[:555],
-                        message_type="outcoming"
-                    )
-
+                    new_message.remote_status = 'deliver'
+                    new_message.save()
                     return JsonResponse({
                         'msg':
                             {
@@ -139,31 +142,21 @@ def send_chat_messages(request, chat_id):
                                     'isDelivered': True,
                                     'isSeen': True
                                 },
-                            }, 'chat': {
-                            'id': current_chat.id,
-                            'lastMessage': {
-                                'message': new_message.user_message,
-                                'time': new_message.created_at.isoformat(),
-                                'feedback': {
-                                    'isSent': True,
-                                    'isDelivered': True,
-                                    'isSeen': True
-                                },
-                            },
-                            'status': current_chat.status,
-                            'is_auto_active': current_chat.is_auto_active,
-                            'channel_id': current_chat.channel_id,
-                        }
+                            }
                     }, safe=False)
 
                 if response and response.status_code == 404:
+                    new_message.remote_status = 'user_doesnt_exist'
+                    new_message.save()
                     current_chat.status = 'user_doesnt_exist'
-                    current_chat.last_message_time = datetime.datetime.now(tz=timezone.utc)
+                    current_chat.last_message_time = datetime.datetime.now(tz=datetime.timezone.utc)
                     current_chat.save()
                     logger.info(f"user_doesnt_exist {current_chat.user_id} ")
                     return JsonResponse({'success': False, 'error': 'Пользователь не найден '}, safe=False)
 
                 if response and response.status_code == 500:
+                    new_message.remote_status = 'error'
+                    new_message.save()
                     logger.info(f"Ошибка отправки {current_chat.user_id} ")
                     return JsonResponse({'success': False, 'error': 'Ошибка отправки '}, safe=False)
 
