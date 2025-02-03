@@ -261,7 +261,7 @@ class ProjectProcessor:
                     recipient_id=next_recipient.get('recipient_id'),
                     channel=channel
                 )
-
+                chat_for_current_channel_message.save()
                 logger.info(
                     f"Создан новый чат для {chat_for_current_channel_message.id} {next_recipient.get('user_name')}")
 
@@ -342,7 +342,7 @@ class ProjectProcessor:
     def get_next_new_recipient(project: Project) -> str:
         recipients = Recipient.objects.filter(project_id=project.id)
         for recipient in recipients:
-            for remote_id in recipient.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','):
+            for remote_id in recipient.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','):
                 if len(remote_id) > 0:
                     chat = Chat.objects.filter(project=project,
                                                recipient_id=recipient.id,
