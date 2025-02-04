@@ -769,7 +769,14 @@ def channels(request):
             'id': channel.id,
             'source': channel.source,
             'project_title': project_title,
-            'project_id': project_id
+            'project_id': project_id,
+            'user': {
+                'name': channel.remote_entity.get('first_name'),
+                'surname': channel.remote_entity.get('last_name'),
+                'avatar': None,
+                'description': None,
+                'username':  channel.user_id,
+            },
         })
 
     return JsonResponse(data, safe=False)
