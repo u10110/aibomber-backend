@@ -772,8 +772,8 @@ def channels(request):
     data = []
     for channel in channel_list:
         project = Project.objects.filter(id=channel.project_id).first()
-        project_title = '--'
-        project_id = '--'
+        project_title = ''
+        project_id = ''
         if project:
             project_title = project.title
             project_id = project.id
