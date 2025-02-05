@@ -265,6 +265,7 @@ class ProjectProcessor:
                     channel=channel
                 )
                 chat_for_current_channel_message.save()
+
                 logger.info(
                     f"Создан новый чат для {chat_for_current_channel_message.id} {next_recipient.get('user_name')}")
 
@@ -284,6 +285,25 @@ class ProjectProcessor:
                         remote_status="send"
 
                     )
+
+                    created_chats_count_for_recipient = Chat.objects.filter(project_id=project.project_id,
+                                                                            recipient_id=next_recipient.get(
+                                                                                'recipient_id')).count()
+                    recipient_for_update_status = Recipient.objects.filter(id=next_recipient.get('recipient_id'))
+                    remote_ids_len = 0
+                    if recipient_for_update_status.remote_ids and len(recipient_for_update_status.remote_ids) > 0:
+                        remote_ids_len = len(
+                            recipient_for_update_status.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','))
+
+                    if created_chats_count_for_recipient > 0 and recipient_for_update_status.status == 'new':
+                        recipient_for_update_status.status = 'active'
+                        recipient_for_update_status.save()
+
+                    if remote_ids_len <= created_chats_count_for_recipient \
+                            and recipient_for_update_status.status == 'active':
+                        recipient_for_update_status.status = 'completed'
+                        recipient_for_update_status.save()
+
                     response = message_processor.send_message_to_telegram(
                         channel.phone,
                         chat_for_current_channel_message.user_id,
@@ -300,7 +320,6 @@ class ProjectProcessor:
                         new_message.save()
 
                     if response.status_code == 404:
-
                         chat_for_current_channel_message.status = 'user_doesnt_exist'
                         chat_for_current_channel_message.last_message_time = datetime.datetime.now(tz=timezone.utc)
                         chat_for_current_channel_message.save()
@@ -317,7 +336,6 @@ class ProjectProcessor:
                         chat_for_current_channel_message.save()
                         new_message.remote_status = response_body.get('detail')
                         new_message.save()
-
 
         except Exception as e:
             logger.error(traceback.format_exc())
@@ -358,8 +376,8 @@ class ProjectProcessor:
             chat.channel.save()
 
     @staticmethod
-    def get_next_new_recipient(project: Project) -> str:
-        recipients = Recipient.objects.filter(project_id=project.id)
+    def get_next_new_recipient(project: Project):
+        recipients = Recipient.objects.filter(project_id=project.id, status='new')
         for recipient in recipients:
             for remote_id in recipient.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','):
                 if len(remote_id) > 0:
