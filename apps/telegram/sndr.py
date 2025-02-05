@@ -382,7 +382,7 @@ class ProjectProcessor:
         recipients = Recipient.objects.filter(project_id=project.id, status='new')
         for recipient in recipients:
 
-            if recipient.start_date >= datetime.datetime.now(tz=timezone.utc):
+            if recipient.start_date and recipient.start_date >= datetime.datetime.now(tz=timezone.utc):
                 logger.debug(f"Расслка  {recipient.title} отложена по дате {recipient.start_date}")
                 continue
 
