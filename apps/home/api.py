@@ -110,70 +110,72 @@ def send_chat_messages(request, chat_id):
 
             if current_chat:
 
-                current_channel = Channel.objects.filter(id=current_chat.channel_id).first()
+                current_channel = Channel.objects.filter(id=current_chat.channel_id, status='authorized').first()
 
-                new_message = ChatMessages.objects.create(
-                    chat_id=current_chat,
-                    user_message=message[:555],
-                    message_type="outcoming",
-                    remote_status="sent"
-                )
+                if current_channel:
 
-                message_processor = MessageProcessor()
+                    new_message = ChatMessages.objects.create(
+                        chat_id=current_chat,
+                        user_message=message[:555],
+                        message_type="outcoming",
+                        remote_status="sent"
+                    )
 
-                response = message_processor.send_message_to_telegram(
-                    current_channel.phone,
-                    current_chat.user_id,
-                    message)
-                response_body = json.loads(response.content)
-                if response and response.status_code == 200:
+                    message_processor = MessageProcessor()
 
-                    remote_message_entity = response_body.get('result')
+                    response = message_processor.send_message_to_telegram(
+                        current_channel.phone,
+                        current_chat.user_id,
+                        message)
+                    response_body = json.loads(response.content)
+                    if response and response.status_code == 200:
 
-                    remote_message_entity = response_body.get('result')
-                    if not current_chat.remote_chat_id:
-                        current_chat.remote_chat_id = remote_message_entity.get('sender_id')
+                        remote_message_entity = response_body.get('result')
+                        if not current_chat.remote_chat_id:
+                            current_chat.remote_chat_id = remote_message_entity.get('sender_id')
+                            current_chat.save()
+
+                        new_message.remote_status = 'deliver'
+                        new_message.remote_id = remote_message_entity.get('id')
+                        new_message.remote_message = remote_message_entity
+                        new_message.save()
+
+                        return JsonResponse({
+                            'success': True,
+                            'msg':
+                                {
+                                    'message': new_message.user_message,
+                                    'time': new_message.created_at.isoformat(),
+                                    'senderId': current_chat.user_id,
+                                    'user_name': current_chat.user_name,
+                                    'message_type': new_message.message_type,
+                                    'feedback': {
+                                        'isSent': True,
+                                        'isDelivered': True,
+                                        'isSeen': True
+                                    },
+                                }
+                        }, safe=False)
+
+                    if response and response.status_code == 404:
+                        new_message.remote_status = 'user_doesnt_exist'
+                        new_message.save()
+                        current_chat.status = 'user_doesnt_exist'
+                        current_chat.last_message_time = datetime.datetime.now(tz=datetime.timezone.utc)
                         current_chat.save()
+                        logger.info(f"user_doesnt_exist {current_chat.user_id} ")
+                        return JsonResponse({'success': False, 'error': 'Пользователь не найден '}, safe=False)
 
-                    new_message.remote_status = 'deliver'
-                    new_message.remote_id = remote_message_entity.get('id')
-                    new_message.remote_message = remote_message_entity
-                    new_message.save()
+                    if response and response.status_code == 500:
+                        logger.debug(response_body)
+                        logger.info(f"Ошибка отправки {current_chat.user_id} ")
+                        current_chat.status = response_body.get('detail')
+                        current_chat.save()
+                        new_message.remote_status = response_body.get('detail')
+                        new_message.save()
+                        return JsonResponse({'success': False, 'error': response_body.get('detail')}, safe=False)
 
-                    return JsonResponse({
-                        'success': True,
-                        'msg':
-                            {
-                                'message': new_message.user_message,
-                                'time': new_message.created_at.isoformat(),
-                                'senderId': current_chat.user_id,
-                                'user_name': current_chat.user_name,
-                                'message_type': new_message.message_type,
-                                'feedback': {
-                                    'isSent': True,
-                                    'isDelivered': True,
-                                    'isSeen': True
-                                },
-                            }
-                    }, safe=False)
-
-                if response and response.status_code == 404:
-                    new_message.remote_status = 'user_doesnt_exist'
-                    new_message.save()
-                    current_chat.status = 'user_doesnt_exist'
-                    current_chat.last_message_time = datetime.datetime.now(tz=datetime.timezone.utc)
-                    current_chat.save()
-                    logger.info(f"user_doesnt_exist {current_chat.user_id} ")
-                    return JsonResponse({'success': False, 'error': 'Пользователь не найден '}, safe=False)
-
-                if response and response.status_code == 500:
-                    logger.debug(response_body)
-                    logger.info(f"Ошибка отправки {current_chat.user_id} ")
-                    current_chat.status = response_body.get('detail')
-                    current_chat.save()
-                    new_message.remote_status = response_body.get('detail')
-                    new_message.save()
-                    return JsonResponse({'success': False, 'error': response_body.get('detail')}, safe=False)
+                return JsonResponse({'success': False, 'error': 'Канал для отправки не авторизован '}, safe=False)
 
         except Exception as e:
             logger.error(traceback.format_exc())

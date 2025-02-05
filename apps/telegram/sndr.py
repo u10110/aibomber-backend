@@ -208,7 +208,8 @@ class ProjectProcessor:
         # Получаем активные каналы проекта
         channels = Channel.objects.filter(
             client=project.client_id,
-            project_id=project.id
+            project_id=project.id,
+            status='authorized'
         )
 
         if not channels.exists():
@@ -329,7 +330,7 @@ class ProjectProcessor:
     ) -> None:
 
         combined_message = message_processor.get_combined_messages(chat)
-        logger.debug(combined_message)
+
         if not combined_message:
             return
 
