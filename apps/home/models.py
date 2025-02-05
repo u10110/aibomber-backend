@@ -292,7 +292,7 @@ class Channel(SoftDeleteModel):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     @staticmethod
-    def pre_delete(sender, instance, created, **kwargs):
+    def pre_delete(sender, instance, **kwargs):
         logger.debug(instance.phone)
         try:
             requests.get(f"{TELETHON_HOST}/log-out/", params={"phone": instance.phone})
