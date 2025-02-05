@@ -286,7 +286,7 @@ class ProjectProcessor:
 
                     )
 
-                    created_chats_count_for_recipient = Chat.objects.filter(project_id=project.project_id,
+                    created_chats_count_for_recipient = Chat.objects.filter(project_id=project.id,
                                                                             recipient_id=next_recipient.get(
                                                                                 'recipient_id')).count()
                     recipient_for_update_status = Recipient.objects.filter(id=next_recipient.get('recipient_id'))
