@@ -312,7 +312,7 @@ class ProjectProcessor:
                         message)
                     response_body = json.loads(response.content)
                     if response.status_code == 200:
-                        remote_message_entity = response_body.get('result')
+                        remote_message_entity = json.loads(response_body.get('result'))
                         chat_for_current_channel_message.remote_chat_id = remote_message_entity.get('sender_id')
                         chat_for_current_channel_message.save()
 
