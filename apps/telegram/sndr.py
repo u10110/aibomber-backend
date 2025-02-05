@@ -296,6 +296,7 @@ class ProjectProcessor:
                             recipient_for_update_status.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','))
 
                     if created_chats_count_for_recipient > 0 and recipient_for_update_status.status == 'new':
+                        recipient_for_update_status.start_date = datetime.datetime.now(tz=timezone.utc)
                         recipient_for_update_status.status = 'active'
                         recipient_for_update_status.save()
 
