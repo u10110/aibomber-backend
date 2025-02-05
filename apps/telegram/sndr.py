@@ -296,7 +296,8 @@ class ProjectProcessor:
                             recipient_for_update_status.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','))
 
                     if created_chats_count_for_recipient > 0 and recipient_for_update_status.status == 'new':
-                        recipient_for_update_status.start_date = datetime.datetime.now(tz=timezone.utc)
+                        if not recipient_for_update_status.start_date:
+                            recipient_for_update_status.start_date = datetime.datetime.now(tz=timezone.utc)
                         recipient_for_update_status.status = 'active'
                         recipient_for_update_status.save()
 
@@ -380,6 +381,11 @@ class ProjectProcessor:
     def get_next_new_recipient(project: Project):
         recipients = Recipient.objects.filter(project_id=project.id, status='new')
         for recipient in recipients:
+
+            if recipient.start_date >= datetime.datetime.now(tz=timezone.utc):
+                logger.debug(f"Расслка  {recipient.title} отложена по дате {recipient.start_date}")
+                continue
+
             for remote_id in recipient.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','):
                 if len(remote_id) > 0:
                     chat = Chat.objects.filter(project=project,
