@@ -670,6 +670,12 @@ def recipients(request):
         if project:
             project_title = project.title
             project_id = project.id
+        created_chats_count = Chat.objects.filter(project_id=recipient.project_id,
+                                                  recipient_id=recipient.id).count() 
+
+        remote_ids_len = 0
+        if recipient.remote_ids and len(recipient.remote_ids) > 0:
+            remote_ids_len = len(recipient.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','))
 
         data.append({
             'title': recipient.title,
