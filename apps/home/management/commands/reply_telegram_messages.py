@@ -43,7 +43,15 @@ class Command(BaseCommand):
 
                 message = json.loads(msg.value().decode('utf-8'))
                 logger.info(f"new message from new-message-events {message.get('channel_phone')}")
-                channel = Channel.objects.filter(phone='+' + message.get('channel_phone')).first()
+
+                chat = Chat.objects.filter(remote_chat_id=message.get('to_id')).first()
+                channel = Channel.objects.filter(phone='+' + message.get('channel_phone'))
+
+                if chat:
+                    channel = channel.filter(id=chat.channel_id)
+
+                channel = channel.first()
+
                 project = Project.objects.filter(id=channel.project_id).first()
 
 

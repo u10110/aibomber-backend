@@ -117,15 +117,16 @@ def save_messages(user_id, messages, project, channel, user_view_name):
 
             chat = Chat.objects.filter(
                 project=project,
-                user_id__iendswith=_USER_NAME,
                 channel=channel,
+                remote_id=to_id
             ).order_by('-last_message_time').first()
             if not chat:
                 chat = Chat(
                     project=project,
                     user_id=_USER_NAME,
                     channel=channel,
-                    user_name=user_view_name
+                    user_name=user_view_name,
+                    remote_id=to_id
                 )
                 chat.save()
 
@@ -134,7 +135,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
             # Проверяем, существует ли сообщение в базе
             existing_message = ChatMessages.objects.filter(
                 chat_id=chat,
-                remote_id=message_id,  # Проверка по ID сообщения
+                remote_id=message_id  # Проверка по ID сообщения
             ).exists()
 
             if not existing_message:
@@ -146,6 +147,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
                     user_message=message_text[:555],
                     remote_id=message_id,  # Сохраняем ID сообщения
                     created_at=message_date,
+                    remote_entity=message
                 )
 
                 logger.info(f"Сообщение сохранено для пользователя {user_name}: {message_id}")

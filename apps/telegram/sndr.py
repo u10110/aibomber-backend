@@ -13,6 +13,7 @@ from django.db.models.aggregates import Min, Max
 from django.utils import timezone
 import time
 import traceback
+import json
 from apps.home.services.gpt_assistant import GPTAssistant
 from django.db.models import Q
 from PyPDF2 import PdfReader
@@ -275,30 +276,46 @@ class ProjectProcessor:
                 )
                 logger.debug(message)
                 if message:
-                    ChatMessages.objects.create(
+                    new_message = ChatMessages.objects.create(
                         chat_id=chat_for_current_channel_message,
                         user_message=message[:555],
-                        message_type="outcoming"
+                        message_type="outcoming",
+                        remote_status="send"
+
                     )
                     response = message_processor.send_message_to_telegram(
                         channel.phone,
                         chat_for_current_channel_message.user_id,
                         message)
-                    logger.info(response)
+                    response_body = json.loads(response.content)
                     if response.status_code == 200:
+                        remote_message_entity = response_body.get('result')
+                        chat_for_current_channel_message.remote_chat_id = remote_message_entity.get('sender_id')
                         chat_for_current_channel_message.save()
 
-                        channel.save()
+                        new_message.remote_id = remote_message_entity.get('id')
+                        new_message.remote_message = remote_message_entity
+                        new_message.remote_status = 'deliver'
+                        new_message.save()
+
                     if response.status_code == 404:
+
                         chat_for_current_channel_message.status = 'user_doesnt_exist'
                         chat_for_current_channel_message.last_message_time = datetime.datetime.now(tz=timezone.utc)
                         chat_for_current_channel_message.save()
+
+                        logger.debug(response_body)
                         logger.info(f"user_doesnt_exist {chat_for_current_channel_message.user_id} ")
+
                         chat_for_current_channel_message.save()
+
                     if response.status_code == 500:
+                        logger.debug(response_body)
                         logger.info(f"Ошибка отправки {chat_for_current_channel_message.user_id} ")
-                        chat_for_current_channel_message.status = 'error'
+                        chat_for_current_channel_message.status = response_body.get('detail')
                         chat_for_current_channel_message.save()
+                        new_message.remote_status = response_body.get('detail')
+                        new_message.save()
 
 
         except Exception as e:

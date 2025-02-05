@@ -125,10 +125,21 @@ def send_chat_messages(request, chat_id):
                     current_channel.phone,
                     current_chat.user_id,
                     message)
-
+                response_body = json.loads(response.content)
                 if response and response.status_code == 200:
+
+                    remote_message_entity = response_body.get('result')
+
+                    remote_message_entity = response_body.get('result')
+                    if not current_chat.remote_chat_id:
+                        current_chat.remote_chat_id = remote_message_entity.get('sender_id')
+                        current_chat.save()
+
                     new_message.remote_status = 'deliver'
+                    new_message.remote_id = remote_message_entity.get('id')
+                    new_message.remote_message = remote_message_entity
                     new_message.save()
+
                     return JsonResponse({
                         'success': True,
                         'msg':
@@ -156,10 +167,13 @@ def send_chat_messages(request, chat_id):
                     return JsonResponse({'success': False, 'error': 'Пользователь не найден '}, safe=False)
 
                 if response and response.status_code == 500:
-                    new_message.remote_status = 'error'
-                    new_message.save()
+                    logger.debug(response_body)
                     logger.info(f"Ошибка отправки {current_chat.user_id} ")
-                    return JsonResponse({'success': False, 'error': 'Ошибка отправки '}, safe=False)
+                    current_chat.status = response_body.get('detail')
+                    current_chat.save()
+                    new_message.remote_status = response_body.get('detail')
+                    new_message.save()
+                    return JsonResponse({'success': False, 'error': response_body.get('detail')}, safe=False)
 
         except Exception as e:
             logger.error(traceback.format_exc())
