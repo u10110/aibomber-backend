@@ -2,7 +2,7 @@ from http import client
 
 from django.db import models
 from django_softdelete.models import SoftDeleteModel
-from django.db.models.signals import post_save, post_init, post_delete
+from django.db.models.signals import post_save, post_init, post_delete, pre_delete
 from apps.authentication.models import User
 import datetime
 import requests
@@ -292,25 +292,18 @@ class Channel(SoftDeleteModel):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     @staticmethod
-    def post_delete(sender, instance, created, **kwargs):
+    def pre_delete(sender, instance, created, **kwargs):
         logger.debug(instance.phone)
-        #try:
-        #     # Отправка запроса в FastAPI
-        #     requests.post(
-        ##         f"{TELETHON_HOST}/log-out/",
-        #         params={"phone": instance.phone}
-        #     )
-        # except Exception as e:
-        #     logger.error(e)
-
-
-
+        try:
+            requests.get(f"{TELETHON_HOST}/log-out/", params={"phone": instance.phone})
+        except Exception as e:
+            logger.error(e)
 
     def __str__(self):
         return f"{self.title} ({self.phone})"
 
 
-post_save.connect(Channel.post_delete, sender=Channel)
+pre_delete.connect(Channel.pre_delete, sender=Channel)
 
 
 class Chat(SoftDeleteModel):

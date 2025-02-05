@@ -1247,7 +1247,7 @@ def send_code(request):
             if response.status_code == 200:
                 return JsonResponse(response.json())
             else:
-                return JsonResponse({"message": response.text, "success": False}, status=response.status_code)
+                return JsonResponse({"message": response.text, "success": False})
         except Exception as e:
             logger.error(traceback.format_exc())
             return JsonResponse({"message": str(e), "success": False})
