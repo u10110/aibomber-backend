@@ -289,7 +289,7 @@ class ProjectProcessor:
                     created_chats_count_for_recipient = Chat.objects.filter(project_id=project.id,
                                                                             recipient_id=next_recipient.get(
                                                                                 'recipient_id')).count()
-                    recipient_for_update_status = Recipient.objects.filter(id=next_recipient.get('recipient_id'))
+                    recipient_for_update_status = Recipient.objects.filter(id=next_recipient.get('recipient_id')).first()
                     remote_ids_len = 0
                     if recipient_for_update_status.remote_ids and len(recipient_for_update_status.remote_ids) > 0:
                         remote_ids_len = len(
