@@ -77,6 +77,7 @@ class Command(BaseCommand):
                         logger.debug(project.per_conversation_limit)
                         logger.debug(message_processor.chat_messages_count(chat))
                         if project.per_conversation_limit > message_processor.chat_messages_count(chat):
+                            logger.info(f"Отправка ответа {chat.user_id}")
                             ProjectProcessor.process_chat(chat, message_processor)
                         else:
                             logger.info(f"Достигнут лимит сообщений по чату {chat.user_id}")
