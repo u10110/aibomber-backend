@@ -118,7 +118,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
             chat = Chat.objects.filter(
                 project=project,
                 channel=channel,
-                remote_id=to_id
+                remote_chat_id=to_id
             ).order_by('-last_message_time').first()
             if not chat:
                 chat = Chat(
@@ -126,7 +126,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
                     user_id=_USER_NAME,
                     channel=channel,
                     user_name=user_view_name,
-                    remote_id=to_id
+                    remote_chat_id=to_id
                 )
                 chat.save()
 
