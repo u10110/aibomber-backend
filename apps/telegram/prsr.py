@@ -143,7 +143,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
                 # Создаём новое сообщение в базе
                 ChatMessages.objects.create(
                     chat_id=chat,
-                    message_type="incoming" if to_id is None else "outcoming",
+                    message_type="incoming",
                     user_message=message_text[:555],
                     remote_id=message_id,  # Сохраняем ID сообщения
                     created_at=message_date,
