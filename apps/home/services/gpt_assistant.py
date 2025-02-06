@@ -5,11 +5,14 @@ import re
 import random
 from django.shortcuts import get_object_or_404
 from decouple import config
+from loguru import logger
 
 OPENAI_API_KEY = config("OPENAI_API_KEY")
 client = OpenAI(
     api_key=OPENAI_API_KEY  # Рекомендуется использовать переменные окружения
 )
+
+
 class GPTAssistant:
     def __init__(self, project, chat_id=None, channel_phone=None, user_id=None,):
         """
@@ -20,10 +23,10 @@ class GPTAssistant:
         self.chat_id = chat_id
         self.is_auto_active = True
         self.client_id = None
-        print(f"projectisis {self.project}")
+        logger.info(f"projectisis {self.project}")
         if self.project.id:
             self.client_id = self.project.client_id
-        print(f"client_id {self.client_id}")
+        logger.info(f"client_id {self.client_id}")
         
         self.channel_phone=channel_phone
         self.user_id=user_id
@@ -68,7 +71,7 @@ class GPTAssistant:
         """
         Загружает историю чата из базы данных на основе user_id.
         """
-        print(self.chat_id)
+        logger.debug(self.chat_id)
         chat = Chat.objects.filter(id=self.chat_id).first()
 
         if chat:
@@ -154,7 +157,7 @@ class GPTAssistant:
                 self._save_to_db(answer)
                 return response.choices[0].message.content
             except Exception as e:
-                print(f"Ошибка : {type(e).__name__}: {e}")
+                logger.error(f"Ошибка : {type(e).__name__}: {e}")
                 return f"Ошибка : {str(e)}"
 
         messages = [{"role": "system", "content": full_context}] + self.chat_history + [
@@ -186,7 +189,7 @@ class GPTAssistant:
             return answer
         except Exception as e:
             # Обработка ошибок
-            print(f"Ошибка: {type(e).__name__}: {e}")
+            logger.error(f"Ошибка: {type(e).__name__}: {e}")
             return f"Ошибка: {str(e)}"
 
 
@@ -252,7 +255,7 @@ class GPTAssistant:
             answer = response.choices[0].message.content.replace('(', '').replace(')', '')
         except Exception as e:
             # Обработка ошибок
-            print(f"Ошибка API OpenAI: {type(e).__name__}: {e}")
+            logger.error(f"Ошибка API OpenAI: {type(e).__name__}: {e}")
             return f"Ошибка OpenAI API: {str(e)}"
 
         return answer
