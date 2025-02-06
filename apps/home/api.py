@@ -456,7 +456,7 @@ def project_get_or_save(request, project_id):
                 channels_to_assign = new_channels_set - current_channels
                 Channel.objects.filter(id__in=[c.id for c in channels_to_assign]).update(project_id=project_to_save.id)
 
-            #Обработка пайплайнов
+            # Обработка пайплайнов
             pipelines = data.get('pipelines', [])
 
             CrmPipelines.objects.filter(project_id=project_to_save.id).delete()
@@ -471,7 +471,7 @@ def project_get_or_save(request, project_id):
             ]
             CrmPipelines.objects.bulk_create(crm_pipelines)
 
-            #Обновляем project_id для связанных каналов
+            # Обновляем project_id для связанных каналов
             channels = data.get('channel', [])
             for channel in channels:
                 channel.project_id = project_to_save.id
@@ -623,7 +623,8 @@ def recipient_get_or_save(request, recipient_id):
 
                 remote_ids_len = 0
                 if recipient.remote_ids and len(recipient.remote_ids) > 0:
-                    remote_ids_len = len(recipient.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','))
+                    remote_ids_len = len(
+                        recipient.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','))
 
                 if created_chats_count > 0 and recipient.status == 'new':
                     recipient.status = 'active'
@@ -675,7 +676,8 @@ def recipients(request):
 
         remote_ids_len = 0
         if recipient.remote_ids and len(recipient.remote_ids) > 0:
-            remote_ids_len = len(recipient.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','))
+            remote_ids_len = len(
+                recipient.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','))
 
         data.append({
             'title': recipient.title,
@@ -694,58 +696,55 @@ def recipients(request):
 
 
 def channel_create(request):
-    return channel_get_or_save(request, None)
-
-
-def channel_get_or_save(request, channel_id):
     user = request.user
 
     if request.method == 'POST':
         data = json.loads(request.body.decode("utf-8"))
 
         try:
-            if channel_id is None:
+            for phone in data.get('phones'):
                 channel_to_save = Channel(
-                    client=user
+                    client=user,
+                    phone=phone,
+
                 )
-            else:
-                channel_to_save = Channel.objects.filter(id=channel_id, client=user).first()
 
-            if not channel_to_save:
-                return HttpResponse(status=404)
+                if not channel_to_save:
+                    return HttpResponse(status=404)
 
-            phone_number = re.sub(r'[^\d+]', '', data.get('phone').strip())
-            if not phone_number.startswith('+'):
-                phone_number = '+' + phone_number
+                phone_number = re.sub(r'[^\d+]', '', phone.strip())
+                if not phone_number.startswith('+'):
+                    phone_number = '+' + phone_number
 
-            channel_to_save.title = data.get('phone')
-            channel_to_save.source = data.get('source')
-            channel_to_save.phone = phone_number
+                channel_to_save.source = data.get('source')
+                channel_to_save.phone = phone_number
 
-            channel_to_save.save()
+                channel_to_save.save()
             return JsonResponse({'success': True, 'created': True}, safe=False)
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error("channel save error")
             return HttpResponse(status=500)
+
+
+def channel_get(channel_id):
+    if channel_id:
+        channel = Channel.objects.filter(
+            id=channel_id,
+            client_id=request.user.id
+        ).first()
+
+    if channel:
+
+        channel_data = {
+            'name': channel.title,
+            'source': channel.source,
+            'phone': channel.phone
+        }
+
+        return JsonResponse(channel_data, safe=False)
     else:
-        if channel_id:
-            channel = Channel.objects.filter(
-                id=channel_id,
-                client_id=request.user.id
-            ).first()
-
-            if channel:
-
-                channel_data = {
-                    'name': channel.title,
-                    'source': channel.source,
-                    'phone': channel.phone
-                }
-
-                return JsonResponse(channel_data, safe=False)
-            else:
-                return HttpResponse(status=404)
+        return HttpResponse(status=404)
 
 
 def channel_delete(request, channel_id):
@@ -785,7 +784,7 @@ def channels(request):
                 'surname': channel.remote_entity.get('last_name'),
                 'avatar': None,
                 'description': None,
-                'username':  channel.user_id,
+                'username': channel.user_id,
             },
         })
 
@@ -859,7 +858,6 @@ def get_balance(request):
     return JsonResponse({"balance": current_balance}, status=200)
 
 
-
 # Шаг 2: Подтверждаем код авторизации
 @csrf_exempt
 def verify_code(request):
@@ -890,7 +888,7 @@ def verify_code(request):
                     channel.status = 'authorized'
                     channel.remote_id = account.get('id')
                     channel.remote_entity = account
-                    #channel.remote_status =
+                    # channel.remote_status =
                     channel.save()
 
                     return JsonResponse(response.json())
