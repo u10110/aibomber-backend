@@ -379,7 +379,7 @@ class ProjectProcessor:
 
     @staticmethod
     def get_next_new_recipient(project: Project):
-        recipients = Recipient.objects.filter(project_id=project.id, status='new')
+        recipients = Recipient.objects.filter(project_id=project.id, status__in=['new', 'active'])
         for recipient in recipients:
 
             if recipient.start_date and recipient.start_date >= datetime.datetime.now(tz=timezone.utc):
