@@ -20,7 +20,7 @@ build:
   image: docker
   tags: [infra]
   only:
-  - main
+  - development
   variables:
     CONTAINER_IMAGE: registry.mplab.io/neuro-backend:${CI_COMMIT_SHORT_SHA}
     CONTAINER_IMAGE_LATEST: registry.mplab.io/neuro-backend:latest
@@ -29,6 +29,24 @@ build:
   - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
   - docker push ${CONTAINER_IMAGE_LATEST}
   - docker system prune -f -a
+
+
+build:prod:
+  allow_failure: true
+  stage: build
+  image: docker
+  tags: [infra]
+  when: manual
+  only:
+    - main
+  variables:
+    CONTAINER_IMAGE: registry.mplab.io/neuro-backend:${CI_COMMIT_SHORT_SHA}
+    CONTAINER_IMAGE_LATEST: registry.mplab.io/neuro-backend:latest
+  script:
+    - docker build -t ${CONTAINER_IMAGE} .
+    - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
+    - docker push ${CONTAINER_IMAGE_LATEST}
+    - docker system prune -f -a
 
 # build:eliment-cli-kafka-message-reply:
 #   stage: build
@@ -106,7 +124,7 @@ deploy_dev:
   stage: deploy
   tags: [eliment-dev]
   only:
-    - main
+    - development
   image:
     name: docker/compose
     entrypoint: ["/bin/sh", "-c"]
