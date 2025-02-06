@@ -2,7 +2,7 @@ from http import client
 
 from django.db import models
 from django_softdelete.models import SoftDeleteModel
-from django.db.models.signals import post_save, post_init, post_delete, pre_delete
+from django.db.models.signals import post_save, post_init, post_delete, pre_delete, pre_save
 from apps.authentication.models import User
 import datetime
 import requests
@@ -302,9 +302,20 @@ class Channel(SoftDeleteModel):
     def __str__(self):
         return f"{self.title} ({self.phone})"
 
+    @staticmethod
+    def pre_save(sender, instance, **kwargs):
+        try:
+            if instance.status == 'unauthorized' and instance.projet_id > 0:
+                instance.projet_id = None
+        except Exception as e:
+            logger.error(e)
+
+    def __str__(self):
+        return f"{self.title} ({self.phone})"
+
 
 pre_delete.connect(Channel.pre_delete, sender=Channel)
-
+pre_save.connect(Channel.pre_save, sender=Channel)
 
 class Chat(SoftDeleteModel):
     class Meta:
