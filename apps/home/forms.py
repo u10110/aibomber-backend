@@ -285,7 +285,6 @@ class ProjectForm(forms.ModelForm):
 
         self.fields['integrations'].required = False
 
-        print(self.agent_type)
         if self.agent_type:
             self.fields['agent_type'].initial = self.agent_type
 

@@ -7,7 +7,7 @@ class ReferalCounter(models.Model):
         verbose_name = "Реферальный бонус"
         verbose_name_plural = "Реферальные бонусы"
 
-    client = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
+    client = models.OneToOneField(User, on_delete=models.CASCADE)
     bonus = models.PositiveIntegerField(default=10)
     privileged = models.BooleanField(default=False)
     sub_bonus = models.PositiveIntegerField(default=3)
@@ -19,6 +19,6 @@ class UsersAgreement(models.Model):
         verbose_name = "Соглашение на рассылку"
         verbose_name_plural = "Соглашение на рассылку"
 
-    client = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
+    client = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_agree = models.BooleanField(default=True)
     mail_agree = models.BooleanField(default=True)

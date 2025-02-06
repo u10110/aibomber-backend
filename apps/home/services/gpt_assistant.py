@@ -1,15 +1,12 @@
 import os
 from openai import OpenAI
-from datetime import datetime
 from apps.home.models import Chat, Project, ProjectFile, ClientSettings, ChatMessages
-from PyPDF2 import PdfReader
-from docx import Document
 import re
 import random
 from django.shortcuts import get_object_or_404
+from decouple import config
 
-
-OPENAI_API_KEY="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"
+OPENAI_API_KEY = config("OPENAI_API_KEY")
 client = OpenAI(
     api_key=OPENAI_API_KEY  # Рекомендуется использовать переменные окружения
 )
@@ -42,7 +39,7 @@ class GPTAssistant:
         """
         Вычисляет стоимость запроса на основе использования токенов.
         """
-        cost_per_token = 0.00002  # Пример: $0.00002 за токен (замените на актуальное значение)
+        cost_per_token = 0.00003  # Пример: $0.00002 за токен (замените на актуальное значение)
         return token_usage * cost_per_token
 
 
@@ -55,7 +52,7 @@ class GPTAssistant:
             client_settings = ClientSettings.objects.get(client_id=self.client_id)
             # Проверка на достаточность баланса
             if client_settings.balance < cost:
-                raise ValueError("Недостаточно средств на балансе.")
+                raise ValueError(f"Недостаточно средств на балансе клиента {client_settings.client.phone}.")
             
             # Уменьшение баланса
             client_settings.balance -= cost
@@ -100,34 +97,8 @@ class GPTAssistant:
 
         project_files = ProjectFile.objects.filter(project=self.project)
         for project_file in project_files:
-            file_path = project_file.file.path
-            ext = os.path.splitext(file_path)[1].lower()
-
             # Выполняем обработку файла в зависимости от его расширения
-            self.knowledge_texts += self._extract_text_from_file(file_path, ext)
-        #print(self.knowledge_texts)
-
-
-    @staticmethod
-    def _extract_text_from_file(file_path, ext):
-        """
-        Извлекает текст из файлов различных форматов.
-        """
-        try:
-            if ext == ".txt":
-                with open(file_path, "r", encoding="utf-8") as f:
-                    return [f.read()]
-            elif ext == ".pdf":
-                reader = PdfReader(file_path)
-                return [page.extract_text() for page in reader.pages]
-            elif ext == ".docx":
-                doc = Document(file_path)
-                return [p.text for p in doc.paragraphs]
-            else:
-                raise ValueError(f"Unsupported file format: {ext}")
-        except Exception as e:
-            print(f"Error extracting text from file {file_path}: {e}")
-            return []
+            self.knowledge_texts += project_file.file_text
 
     def _process_spintax(self, text):
         """
@@ -159,7 +130,6 @@ class GPTAssistant:
 
         full_context = f"{self.project.prompt}\n\n" + "\n".join(self.knowledge_texts)
 
-
         if not question:
             try:
                 messages = [
@@ -184,8 +154,8 @@ class GPTAssistant:
                 self._save_to_db(answer)
                 return response.choices[0].message.content
             except Exception as e:
-                print(f"Ошибка API OpenAI: {type(e).__name__}: {e}")
-                return f"Ошибка OpenAI API: {str(e)}"
+                print(f"Ошибка : {type(e).__name__}: {e}")
+                return f"Ошибка : {str(e)}"
 
         messages = [{"role": "system", "content": full_context}] + self.chat_history + [
             {"role": "user", "content": question}
@@ -216,8 +186,8 @@ class GPTAssistant:
             return answer
         except Exception as e:
             # Обработка ошибок
-            print(f"Ошибка API OpenAI: {type(e).__name__}: {e}")
-            return f"Ошибка OpenAI API: {str(e)}"
+            print(f"Ошибка: {type(e).__name__}: {e}")
+            return f"Ошибка: {str(e)}"
 
 
     
@@ -264,8 +234,8 @@ class GPTAssistant:
 
     def ask_chat_status(self):
 
-        question = "Выбери статус нашего общения Успешные диалоги success,Контакт получен (contact_received), " \
-                   "Проявлен интерес (interest_shown), Неудача (closed). Ответь кодом в скобках. "
+        question = "На каком их этапе из нижеперечисленных находится наше общение? С тобой ведетя упещный диалог (success); Тобою получен номер телефона или другой личный контакт для связи (contact_received); " \
+                   "Проявлен интерес к твоему предлоржению (interest_shown), Твое предложение проигнорировали (closed). Ответь только соответствующим кодом из скобок. "
 
         full_context = f"{self.project.prompt}\n\n" + "\n".join(self.knowledge_texts)
         messages = [{"role": "system", "content": full_context}] + self.chat_history + [

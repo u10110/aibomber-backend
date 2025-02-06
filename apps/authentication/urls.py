@@ -6,6 +6,7 @@ from django.urls import path, re_path
 
 from . import views
 from .views import *
+from apps.home.api import auth_login
 
 
 from django.urls import path
@@ -16,7 +17,10 @@ from .views import LoginCallbackView
 
 
 urlpatterns = [
+    path("api/login/", auth_login, name="auth_login"),
     path("login/", login_view, name="login"),
+
+
     re_path(r"^signup/?$", register_user, name="register"),
     path("api/v1/signup_tg/", register_tg_user, name="register_tg"),
     path("api/v1/reset_tg_password/", reset_tg_password, name="reset_tg_password"),

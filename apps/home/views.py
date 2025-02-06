@@ -1,7 +1,8 @@
+
 import string
 from decouple import config
 from sqlite3 import IntegrityError
-from apps.telegram.prsr import save_message, get_users
+import traceback
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.core.files.storage import FileSystemStorage
 from django.db.utils import IntegrityError
@@ -23,13 +24,9 @@ from apps.billing.models import Limits, Order, Paid, UnicTariff
 from apps.users_control.models import ReferalCounter, UsersAgreement
 from core.settings import MEDIA_ROOT
 
-from kafka import KafkaProducer
-from kafka.errors import KafkaError
 
 from apps.telegram.sndr import ProjectProcessor
 from apps.telegram.prsr import process_project
-
-import json
 
 from .forms import *
 from .helper import Helper
@@ -60,9 +57,8 @@ from .services.gpt_assistant import GPTAssistant
 from django.db.models import Count, Max, Subquery, OuterRef, IntegerField, Case, When
 import random
 
-KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
-TELETHON_HOST = config("TELETHON_HOST")
 
+TELETHON_HOST = config("TELETHON_HOST")
 
 def error(request):
     return render(request, "errors/technical_break.html")
@@ -699,23 +695,12 @@ def project_create(request):
                 channel.save()
 
             # Обновляем project_id для связанных получателей
+            # Обновляем project_id для связанных получателей
             recipients = form.cleaned_data.get('recipients', [])
+
             for recipient in recipients:
                 recipient.project_id = project.id
                 recipient.save()
-
-            remote_chat_ids = [recipient.remote_ids.replace('\n', ',').split(',').strip() for recipient in recipients if
-                               recipient.remote_ids.replace('\n', ',').split(',').strip()]
-
-            for remote_chat_id in remote_chat_ids:
-                try:
-                    Chat.objects.get(project=project,
-                                     user_id=remote_chat_id)
-                except Chat.DoesNotExist:
-                    ch = Chat(project=project,
-                              user_id=remote_chat_id,
-                              channel=random.choice(channels))
-                    ch.save()
 
             for file_form in file_formset:
                 if file_form.cleaned_data.get('file'):
@@ -744,7 +729,8 @@ def project_edit(request, project_id):
 
     if request.method == "POST":
         form = ProjectForm(request.POST, request.FILES, instance=project)
-        if form.is_valid():
+        file_formset = ProjectFileFormSet(request.POST, request.FILES, queryset=ProjectFile.objects.none())
+        if form.is_valid() :
             form.save()
 
             # Обновляем project_id для связанных каналов
@@ -755,23 +741,16 @@ def project_edit(request, project_id):
 
             # Обновляем project_id для связанных получателей
             recipients = form.cleaned_data.get('recipients', [])
-            remote_chat_ids = []
             for recipient in recipients:
                 recipient.project_id = project.id
                 recipient.save()
-                [remote_chat_ids.append(recipient) for recipient in
-                 recipient.remote_ids.replace('\n', ',').split(',')]
 
-            for remote_chat_id in remote_chat_ids:
-                try:
-                    ch = Chat.objects.get(project=project,
-                                          user_id=remote_chat_id
-                                          )
-                except Chat.DoesNotExist:
-                    ch = Chat(project=project,
-                              user_id=remote_chat_id,
-                              channel=random.choice(channels))
-                    ch.save()
+            if file_formset.is_valid():
+                for file_form in file_formset:
+                    if file_form.cleaned_data.get('file'):
+                        project_file = file_form.save(commit=False)
+                        project_file.project = project
+                        project_file.save()
 
             return redirect("projects")  # После успешного сохранения возвращаемся к списку проектов
     else:
@@ -797,9 +776,17 @@ def toggle_project_active(request):
 
             project = Project.objects.get(id=project_id, client=request.user)
             project.is_active = is_active
+            if is_active:
+                project.status = 'active'
+            else:
+                project.status = 'paused'
             project.save()
 
-            return JsonResponse({'success': True, 'message': 'Состояние обновлено', 'is_active': project.is_active})
+            return JsonResponse({'success': True,
+                                 'message': 'Состояние обновлено',
+                                 'is_active': project.is_active,
+                                 'status': project.status})
+
         except Project.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Проект не найден'}, status=404)
         except Exception as e:
@@ -810,13 +797,15 @@ def toggle_project_active(request):
 def project_start(request, pk):
     project = get_object_or_404(Project, pk=pk, client=request.user)
     project.status = "active"  # Укажите соответствующее значение
+    project.is_active = True
     project.save()
     return redirect('projects')
 
 
 def project_stop(request, pk):
     project = get_object_or_404(Project, pk=pk, client=request.user)
-    project.status = "stopped"  # Укажите соответствующее значение
+    project.status = "paused"  # Укажите соответствующее значение
+    project.is_active = False
     project.save()
     return redirect('projects')
 
@@ -1027,9 +1016,13 @@ def chat_messages(request):
         if user_message:
 
             if current_chat:
+                user_id = current_chat.user_id
+                if not current_chat.user_id.startsWith('@'):
+                    user_id = '@' + user_id
+
                 payload = json.dumps({
                     "phone": current_chat.channel.phone,
-                    "username": current_chat.user_id,
+                    "username": user_id,
                     "message": user_message
                 })
                 headers = {
@@ -1179,6 +1172,7 @@ def create_app(request):
         return JsonResponse({'success': False, 'error': ''})
 
 
+
 @csrf_exempt
 def toggle_auto_active(request, chat_id):
     if request.method == 'POST':
@@ -1207,13 +1201,19 @@ def toggle_auto_active(request, chat_id):
 
 @csrf_exempt
 def change_status(request, chat_id):
+    client_id = request.user.id
     if request.method == 'POST':
         data = json.loads(request.body)
         new_status = data.get('status')
 
         chat = Chat.objects.get(id=chat_id)
-        chat.status = new_status
-        chat.save()
+        if chat and chat.project.client.id == client_id:
+            if new_status == 'deleted':
+                chat.status = new_status
+                chat.delete()
+            else:
+                chat.status = new_status
+                chat.save()
 
         # tg_id = TgID.objects.get(tg_id=chat.user_id)
         # tg_id.status = new_status
@@ -1237,20 +1237,19 @@ def send_code(request):
             if not phone_number.startswith('+'):
                 phone_number = '+' + phone_number  # Добавляем '+' в начало, если его нет
 
-            # producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS], value_serializer=lambda m: json.dumps(m).encode('ascii'))
-
             print(phone_number)
             # Отправка запроса в FastAPI
             response = requests.post(
                 f"{TELETHON_HOST}/send-code/",
                 params={"phone": phone_number},
             )
-
+            logger.debug(response)
             if response.status_code == 200:
                 return JsonResponse(response.json())
             else:
-                return JsonResponse({"message": response.text, "success": False}, status=response.status_code)
+                return JsonResponse({"message": response.text, "success": False})
         except Exception as e:
+            logger.error(traceback.format_exc())
             return JsonResponse({"message": str(e), "success": False})
 
     return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
@@ -1277,7 +1276,7 @@ def verify_code(request):
 
             if response.status_code == 200:
                 # Если успех, обновляем статус в базе данных
-                channel, created = Channel.objects.get_or_create(phone=phone_number)
+                channel, created = Channel.objects.get_or_create(phone=phone_number, client=request.user)
                 channel.status = 'authorized'
                 channel.save()
 
@@ -1285,6 +1284,7 @@ def verify_code(request):
             else:
                 return JsonResponse({"message": response.text, "success": False}, status=response.status_code)
         except Exception as e:
+            logger.error(traceback.format_exc())
             return JsonResponse({"message": str(e), "success": False})
 
     return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
@@ -1331,11 +1331,11 @@ def create_project_chat(request):
             assistant.chat_history = formatted_history
 
             # Получаем вопрос
-            print(assistant.chat_history)
+            logger.debug(assistant.chat_history)
             question = data.get("question")
             if not question:
                 return JsonResponse({"error": "Вопрос не предоставлен."}, status=400)
-            print(question)
+            logger.debug(question)
             # Получаем ответ от GPT
             response = assistant.ask_question(question, False)
 
@@ -1434,6 +1434,7 @@ def save_google_link(request):
 
 @csrf_exempt
 def send_tg_messages(request):
+
     active_projects = Project.objects.filter(is_active=True)
     for project in active_projects:
         ProjectProcessor.process_project(project)
@@ -1443,48 +1444,9 @@ def send_tg_messages(request):
 
 @csrf_exempt
 def get_tg_messages(request):
+
     active_projects = Project.objects.filter(is_active=True)
     for project in active_projects:
         process_project(project)
 
     return JsonResponse({'success': True})
-
-
-@csrf_exempt
-def new_message_event(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        try:
-            print(data)
-            # logger.info(KAFKA_BOOTSTRAP_SERVERS)
-            # producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS])
-
-            # future = producer.send('new-message-events', json.dumps(data).encode('utf-8'))
-
-            # Block for 'synchronous' sends
-            # try:
-            #    record_metadata = future.get(timeout=10)
-            # except KafkaError as e:
-            #    # Decide what to do if produce request failed...
-            #    logger.error(e)
-            #    pass#
-            phone = "+" + data.get('channel_phone')
-            logger.info(phone)
-            channel = Channel.objects.get(phone=phone)
-
-            users_response = get_users(phone)
-            if not users_response.get("users"):
-                logger.info(f"Нет пользователей для телефона {data.get('channel_phone')}")
-                return
-            user_view_name = ''
-            # Шаг 3.2: Получаем сообщения для каждого пользователя
-            for user in users_response["users"]:
-                if user["id"] == data.get('user_id'):
-                    user_view_name = user["name"]
-
-            save_message(data, data.get('user_id'), channel, user_view_name)
-        except Exception as e:
-            logger.error(e)
-            return JsonResponse({"error": f"Failed to process the request: {str(e)}"}, status=500)
-        return JsonResponse({"message": "Ok"}, status=200)
-    return JsonResponse({"info": "!"}, status=200)

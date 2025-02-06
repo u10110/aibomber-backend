@@ -120,16 +120,6 @@
                         {{ form.remote_ids }}
                         <small class="text-danger">{{ form.remote_ids.errors }}</small>
                     </div>
-                    <div class="mb-3">
-                        <label for="project" class="form-label">Выберите проект:</label>
-                            <select id="project" class="form-select" aria-label="Project">
-                                <!-- <option value="all">Все проекты</option> -->
-                                {% for project in projects %}
-                                <option value="{{ project.id }}">{{ project.title }}</option>
-                                {% endfor %}
-                            </select>
-                        <small class="text-danger">{{ form.projects.errors }}</small>
-                    </div>
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn bg-gradient-primary">Добавить список</button>
                     </div>

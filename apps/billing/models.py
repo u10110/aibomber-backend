@@ -132,7 +132,7 @@ class Bank(models.Model):
         verbose_name_plural = "Банки"
 
     clientsettings = models.ManyToManyField(
-        ClientSettings, related_name="Bank", null=True
+        ClientSettings, related_name="Bank"
     )
     name = models.CharField(null=True, max_length=55)
     name_rus = models.CharField(null=True, max_length=55)

@@ -6,6 +6,7 @@ from django.db.models import F
 from decouple import config
 from apps.home.services.gpt_assistant import GPTAssistant
 # Import models after Django configuration
+from loguru import logger
 from apps.home.models import (
     Project,
     Channel,
@@ -67,7 +68,14 @@ def process_channel(channel , project):
             print(user)
             print(f"Получение сообщений для пользователя {user_id}")
 
-            messages_response = get_messages(phone, user_id)
+            last_message = ChatMessages.objects.filter(
+                chat_id__in=Chat.objects.filter(user_id=user_id, channel=channel),
+            ).order_by('-created_at').first()
+            offset_date = datetime.datetime.now() - datetime.timedelta(days=1)
+            if last_message is not None:
+                offset_date = last_message.created_at
+
+            messages_response = get_messages(phone, user_id, offset_date)
             messages = messages_response.get("messages", [])  # Ожидаем массив сообщений
 
             if messages:
@@ -77,89 +85,92 @@ def process_channel(channel , project):
                 print(f"Нет новых сообщений для пользователя {user_id}")
 
         # Уменьшаем оставшиеся сообщения в канале
-        channel.remaining_messages = F('remaining_messages') - 1
+
         channel.save()
     except Exception as e:
         print(e.format_exc())
         print(f"Ошибка обработки канала {channel.title}: {e}")
 
 
-def save_messages(user_id, messages, channel, user_view_name):
+def save_messages(user_id, messages, project, channel, user_view_name):
     """
     Сохраняет каждое сообщение из списка в базу данных, проверяя уникальность.
     """
+
+    _USER_NAME = next((message.get("username") for message in messages if message.get("username")), None)
+    chat = None
+
     for message in messages:
-        save_messages(message, user_id, channel, user_view_name)
+        message_text = message.get("text", "")
+        message_id = message.get("id", None)  # ID сообщения
+        sender_id = message.get("sender_id", None)  # ID отправителя
+        message_date = message.get("date", None)  # Дата сообщения от Telethon
+        user_name = message.get('username', None)
+        from_id = message.get("from_id", None)
+        to_id = message.get("to_id", None)
 
+        if not message_text or not message_id or not sender_id or not message_date or sender_id == 777000:
+            continue  # Пропускаем сообщения с отсутствующими полями
+        # Определяем, кто отправил сообщение: GPT Assistant или другой пользователь
+        logger.info(f"Сообщение получено {user_name}: {message_id}")
+        if user_name:
 
-def save_message(message, user_id, channel, user_view_name):
-    message_text = message.get("text", "")
-    message_id = message.get("id", None)  # ID сообщения
-    sender_id = message.get("user_id", None)  # ID отправителя
-    message_date = message.get("date", None)  # Дата сообщения от Telethon
-    user_name = message.get('username', None)
-    from_id = message.get("from_id", None)
-    to_id = message.get("to_id", None)
-
-    if not message_text or not message_id or not sender_id or not message_date or sender_id == 777000:
-        return
-    # print(message)
-    print(user_id,sender_id, user_name, to_id, from_id)
-    # Определяем, кто отправил сообщение: GPT Assistant или другой пользователь
-    if sender_id != user_id and user_name is None:
-        user_name = "Assistant"
-
-    if user_name:
-        try:
-            chat = Chat.objects.get(
-                project=channel.project,
-                user_id=user_name,
+            chat = Chat.objects.filter(
+                project=project,
                 channel=channel,
-            )
-        except Chat.DoesNotExist:
-            chat = Chat(
-                project=channel.project,
-                user_id=user_name,
-                channel=channel,
-                user_name=user_view_name
-            )
-            chat.save()
+                remote_chat_id=to_id
+            ).order_by('-last_message_time').first()
+            if not chat:
+                chat = Chat(
+                    project=project,
+                    user_id=_USER_NAME,
+                    channel=channel,
+                    user_name=user_view_name,
+                    remote_chat_id=to_id
+                )
+                chat.save()
 
+
+
+            # Проверяем, существует ли сообщение в базе
+            existing_message = ChatMessages.objects.filter(
+                chat_id=chat,
+                remote_id=message_id  # Проверка по ID сообщения
+            ).exists()
+
+            if not existing_message:
+
+                # Создаём новое сообщение в базе
+                ChatMessages.objects.create(
+                    chat_id=chat,
+                    message_type="incoming" if to_id is None else "outcoming",
+                    user_message=message_text[:555],
+                    remote_id=message_id,  # Сохраняем ID сообщения
+                    created_at=message_date,
+                    remote_message=message
+                )
+
+                logger.info(f"Сообщение сохранено для пользователя {user_name}: {message_id}")
+            else:
+                logger.info(f"Сообщение уже существует для пользователя {user_id}: {message_id}")
+
+    if chat:
         # Создание экземпляра GPTAssistant
-        assistant = GPTAssistant(project=channel.project, chat_id=chat.id, channel_phone=channel.phone, user_id=user_id)
-        print(f"Получение статуса общения {user_id}")
+        assistant = GPTAssistant(project=project, chat_id=chat.id, channel_phone=channel.phone, user_id=user_id)
+        logger.info(f"Получение статуса общения {user_id}")
         # Получение ответа от GPT
         try:
             text_status = assistant.ask_chat_status()
-            print(f"Chat status is  {text_status}")
+            logger.info(f"Chat status is  {text_status}")
             statuses = dict(Chat.CHAT_STATUS)
             if statuses[text_status] is not None:
                 chat.status = text_status
                 chat.save()
         except Exception as e:
-            print(f"text_status get error : {text_status}")
-            return None
+            logger.info(f"text_status get error : {text_status}")
 
-        # Проверяем, существует ли сообщение в базе
-        existing_message = ChatMessages.objects.filter(
-            messageId=message_id,  # Проверка по ID сообщения
-        ).exists()
+    return chat
 
-        if not existing_message:
-
-            # Создаём новое сообщение в базе
-            ChatMessages.objects.create(
-                chat_id=chat,
-                message_type="incoming" if to_id is None else "outcoming",
-                user_name=sender_id,
-                user_message=message_text,
-                messageId=message_id,  # Сохраняем ID сообщения
-                created_at=message_date,
-            )
-
-            print(f"Сообщение сохранено для пользователя {user_name}: {message_id}")
-        else:
-            print(f"Сообщение уже существует для пользователя {user_id}: {message_id}")
 
 def process_project(project):
     """
@@ -171,9 +182,7 @@ def process_project(project):
     # Шаг 4: Получаем активные каналы проекта
     channels = Channel.objects.filter(
         project_id=project.id,
-        status="authorized",
-        remaining_messages__gt=0,
-        is_active=True,
+        status="authorized"
     )
     if not channels.exists():
         print(f"Проект {project.id} не имеет активных каналов")
@@ -214,7 +223,7 @@ def get_users(phone):
         return {}
 
 
-def get_messages(phone, user_id):
+def get_messages(phone, user_id, offset_id, offset_date):
     """
     Отправляет запрос для получения сообщений от пользователя.
     """
@@ -222,7 +231,9 @@ def get_messages(phone, user_id):
     payload = {
         "phone": phone,
         "user_id": user_id,
-        "limit": 50,
+        "offset_date": offset_date.isoformat(),
+        "offset_id": offset_id,
+        'limit': 10
     }
     print(payload)
     try:
@@ -235,4 +246,5 @@ def get_messages(phone, user_id):
     except Exception as e:
         print(f"Ошибка соединения с get-messages: {e}")
         return {}
+
 

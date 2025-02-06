@@ -1,13 +1,21 @@
 from http import client
 
 from django.db import models
-from django.db.models.signals import post_save, post_init
+from django_softdelete.models import SoftDeleteModel
+from django.db.models.signals import post_save, post_init, post_delete, pre_delete, pre_save
 from apps.authentication.models import User
 import datetime
 import requests
 import json
-
+from loguru import logger
+from decouple import config
+import os
+from PyPDF2 import PdfReader
+from docx import Document
 # from sqlalchemy import null
+from django.contrib.postgres.fields import JSONField
+
+TELETHON_HOST = config("TELETHON_HOST")
 
 
 class Proxy(models.Model):
@@ -30,7 +38,7 @@ class ClientSettings(models.Model):
     )
     tg_chat_id = models.TextField(null=True, blank=True)
     tg_token = models.TextField(null=True, blank=True)
-    balance = models.IntegerField(max_length=55, default=0)
+    balance = models.IntegerField(default=0)
     # wb_token = models.TextField(null=True, blank=True)
     updated_at = models.DateTimeField(null=True, auto_now_add=True)
     # tochka_number = models.ForeignKey(
@@ -74,7 +82,7 @@ class AmoCrm(models.Model):
     tg = models.JSONField()
 
 
-class Project(models.Model):
+class Project(SoftDeleteModel):
     class Meta:
         verbose_name = "Проект"
         verbose_name_plural = "Проекты"
@@ -104,6 +112,7 @@ class Project(models.Model):
     ]
 
     STATUS_CHOICES = [
+        ('new', 'Новый'),
         ('active', 'В работе'),
         ('completed', 'Завершен'),
         ('paused', 'Пауза')
@@ -141,9 +150,8 @@ class Project(models.Model):
 
     outgoing_limit = models.IntegerField(
         default=30,  # Значение по умолчанию
-        verbose_name="Ограничение исходящих"
+        verbose_name="Ограничение исходящих в день"
     )
-    message_limit = models.IntegerField(default=30)
 
     integrations = models.CharField(
         max_length=50,
@@ -164,16 +172,51 @@ class Project(models.Model):
         return dict(self.AGENT_TYPES).get(self.agent_type, self.agent_type)
 
 
-class ProjectFile(models.Model):
+class ProjectFile(SoftDeleteModel):
     project = models.ForeignKey(Project, related_name="files", on_delete=models.CASCADE)
-    file = models.FileField(
-        upload_to="uploads/files/",
-        help_text="Допустимые форматы: PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM"
-    )
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    file = models.CharField(max_length=1000)
+    file_url = models.CharField(max_length=1000, default='')
+    file_text = models.TextField(default='')
+    #file = models.FileField(
+    #    upload_to="uploads/files/",
+    #    help_text="Допустимые форматы: PDF, TXT, DOC, DOCX, XLSX, CSV, XSLM"
+    #)
+    #uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    @staticmethod
+    def extract_text_from_file(sender, instance, created, **kwargs):
+        if len(instance.file_text) > 0:
+            return
+
+        try:
+
+            ext = os.path.splitext(instance.file_url)[1].lower()
+            logger.debug(ext)
+            if ext == ".txt":
+                with open(instance.file_url, "r", encoding="utf-8") as f:
+                    instance.file_text = f.read()
+            elif ext == ".pdf":
+                reader = PdfReader(instance.file_url)
+                for page in reader.pages:
+                    instance.file_text += page.extract_text()
+            elif ext in ".docx":
+                with open(instance.file_url, "rb", encoding="utf-8") as f:
+                    doc = Document(f)
+                    for p in doc.paragraphs:
+                        instance.file_text += p.text
+            else:
+                raise ValueError(f"Unsupported file format: {ext}")
+            logger.debug(instance.file_text)
+            instance.save()
+        except Exception as e:
+            logger.error(f"Error extracting text from file {instance.file_url}: {e}")
+            return []
 
 
-class Recipient(models.Model):
+post_save.connect(ProjectFile.extract_text_from_file, sender=ProjectFile)
+
+
+class Recipient(SoftDeleteModel):
     class Meta:
         verbose_name = "Получатели"
         verbose_name_plural = "Получатели"
@@ -183,12 +226,19 @@ class Recipient(models.Model):
         (2, 'Черный список'),
     ]
 
+    STATUS_CHOICES = [
+        ('new', 'Новый'),
+        ('active', 'В работе'),
+        ('completed', 'Завершен'),
+    ]
+
     client = models.ForeignKey(User, on_delete=models.CASCADE)
     project_id = models.IntegerField(null=True)
     title = models.CharField(max_length=1000)
-    status = models.CharField(max_length=55, default="active")
+    status = models.CharField(max_length=55, default="new")
     work_option = models.IntegerField(choices=OPTIONS, default=1)
     remote_ids = models.TextField(default='')
+    start_date = models.DateTimeField(null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
@@ -196,7 +246,7 @@ class Recipient(models.Model):
         return self.title
 
 
-class Channel(models.Model):
+class Channel(SoftDeleteModel):
     class Meta:
         verbose_name = "Канал"
         verbose_name_plural = "Каналы"
@@ -230,23 +280,47 @@ class Channel(models.Model):
         choices=STATUS_CHOICES,
         default='unauthorized',
     )
-    max_daily_messages = models.IntegerField(default=50)  # Максимальное количество сообщений в день
-    remaining_messages = models.IntegerField(default=50)
     last_reset_date = models.DateField(default=datetime.date.today)
     phone = models.CharField(max_length=55,)
     user_id = models.CharField(max_length=55, null=True, blank=True)
     app_hash = models.CharField(max_length=55, null=True, blank=True)
     qr = models.TextField(null=True)
+    remote_id = models.CharField(max_length=1000, null=True)
+    remote_entity = models.JSONField(default={})
+    remote_status = models.CharField(max_length=1000, default='unknown')
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    @staticmethod
+    def pre_delete(sender, instance, **kwargs):
+        logger.debug(instance.phone)
+        try:
+            requests.get(f"{TELETHON_HOST}/log-out/", params={"phone": instance.phone})
+        except Exception as e:
+            logger.error(e)
+
+    def __str__(self):
+        return f"{self.title} ({self.phone})"
+
+    @staticmethod
+    def pre_save(sender, instance, **kwargs):
+        try:
+            if instance.status == 'unauthorized' and instance.projet_id > 0:
+                instance.projet_id = None
+        except Exception as e:
+            logger.error(e)
 
     def __str__(self):
         return f"{self.title} ({self.phone})"
 
 
-class Chat(models.Model):
+pre_delete.connect(Channel.pre_delete, sender=Channel)
+pre_save.connect(Channel.pre_save, sender=Channel)
+
+class Chat(SoftDeleteModel):
     class Meta:
         verbose_name = "Чаты"
+
         verbose_name_plural = "Чаты"
 
     previous_status = None
@@ -274,18 +348,18 @@ class Chat(models.Model):
             pipeline = CrmPipelines.objects.filter(
                 project_id=instance.project_id,
                 trigger=instance.status
-            )
+            ).first()
 
-            if pipeline:
+            if pipeline is not None and pipeline.project is not None:
                 integration_name = pipeline.project.integrations
                 if integration_name == 'amo_crm':
                     r = requests.get(url="https://integration.eliment.ai/amo/lead", params={
                         'pipeline_id': pipeline.remote_pipeline_id,
                         'remote_step_id': pipeline.remote_step_id,
                         'remote_lead_id': instance.remote_lead_id,
-                        'user_name': instance.tg_id,
+                        'user_name': instance.user_name,
                         'phone':  instance.phone,
-                    })
+                    }, verify=False)
                     if r.status_code == 200 and instance.remote_lead_id is None:
                         lead_action_response=json.loads(r.content)
                         instance.remote_lead_id = lead_action_response.lead_id
@@ -297,9 +371,9 @@ class Chat(models.Model):
                         'pipeline_id': pipeline.remote_pipeline_id,
                         'remote_step_id': pipeline.remote_step_id,
                         'remote_lead_id': instance.remote_lead_id,
-                        'user_name': instance.tg_id,
+                        'user_name': instance.user_name,
                         'phone':  instance.phone,
-                    })
+                    }, verify=False)
                     if r.status_code == 200 and instance.remote_lead_id is None:
                         lead_action_response=json.loads(r.content)
                         instance.remote_lead_id = lead_action_response.lead_id
@@ -309,7 +383,7 @@ class Chat(models.Model):
 
     @staticmethod
     def remember_state(sender, instance, **kwargs):
-        instance.previous_state = instance
+        instance.previous_status = instance.status
 
     CHAT_STATUS = [
         ('new', 'Новый'),
@@ -317,15 +391,21 @@ class Chat(models.Model):
         ('contact_received', 'Контакт получен'),
         ('interest_shown', 'Проявлен интерес'),
         ('closed', 'Закрыт'),
+        ('user_doesnt_exist', 'Пользователь не найден'),
+        ('error', 'Ошибка отправки'),
     ]
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     user_id = models.CharField(max_length=1000)
+    recipient_id = models.IntegerField(null=True)
     user_name = models.CharField(max_length=1000, default='')
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, default=0)
     status = models.CharField(max_length=55, default="new")
     sex = models.IntegerField(null=True)
     remote_lead_id = models.IntegerField(null=True)
+    remote_chat_id = models.CharField(max_length=1000, null=True)
+    remote_chat_entity = models.JSONField(default={})
+    remote_chat_entity_status = models.CharField(max_length=1000, default='unknown')
     phone = models.CharField(max_length=55, null=True)
     is_auto_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
@@ -336,7 +416,7 @@ post_save.connect(Chat.post_save, sender=Chat)
 post_init.connect(Chat.remember_state, sender=Chat)
 
 
-class ChatMessages(models.Model):
+class ChatMessages(SoftDeleteModel):
     class Meta:
         verbose_name = "Чаты"
         verbose_name_plural = "Чаты"
@@ -355,21 +435,22 @@ class ChatMessages(models.Model):
         chat.save()
 
     chat_id = models.ForeignKey(Chat, on_delete=models.CASCADE)
-    messageId = models.CharField(null=True, max_length=1000)
+    remote_id = models.CharField(null=True, max_length=1000)
+    remote_message = models.JSONField(default={})
+    remote_status = models.CharField(max_length=1000, default='unknown')
     message_type = models.CharField(
         max_length=20,
         choices=MESSAGE_TYPE,
         default=None,
     )
-    user_name = models.CharField(max_length=55, )
-    user_message = models.CharField(max_length=55555, )
+    user_message = models.CharField(max_length=555, )
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 
 post_save.connect(ChatMessages.post_save, sender=ChatMessages)
 
 
-class CrmPipelines(models.Model):
+class CrmPipelines(SoftDeleteModel):
     class Meta:
         verbose_name = "Воронки проектов в CRМ"
         verbose_name_plural = "Воронки"
@@ -386,7 +467,7 @@ class CrmPipelines(models.Model):
         on_delete=models.CASCADE
     )
     remote_name = models.CharField(max_length=1000)
-    remote_step_id = models.CharField(max_length=1000, default='')
+    remote_step_id = models.CharField(max_length=1000, null=True)
     remote_pipeline_id = models.IntegerField(null=True)
     trigger = models.CharField(
         max_length=40,
