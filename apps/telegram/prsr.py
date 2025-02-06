@@ -147,7 +147,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
                     user_message=message_text[:555],
                     remote_id=message_id,  # Сохраняем ID сообщения
                     created_at=message_date,
-                    remote_entity=message
+                    remote_message=message
                 )
 
                 logger.info(f"Сообщение сохранено для пользователя {user_name}: {message_id}")
