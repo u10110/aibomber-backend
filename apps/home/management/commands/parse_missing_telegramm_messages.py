@@ -31,20 +31,22 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         try:
-            active_projects = Project.objects.filter(is_active=True)
+            active_projects = Project.objects.filter(is_active=True, id=69)
             message_processor = MessageProcessor()
             for project in active_projects:
                 last_message_time_lte = datetime.date.today() + datetime.timedelta(minutes=20)
-                chats = Chat.objects.filter(project=project, last_message_time__lte=last_message_time_lte,
-                                            status__in=['new', 'success', 'interest_shown'])
+                chats = Chat.objects.filter(project=project)
+                logger.debug(chats.count())
                 for chat in chats:
                     if chat:
                         if chat.is_auto_active \
                                 and project.per_conversation_limit > message_processor.chat_messages_count(chat):
 
                             channel = Channel.objects.filter(id=chat.channel_id,
-                                                             is_active=True, status='authorized').first()
+                                                             status='authorized').first()
                             last_message = ChatMessages.objects.filter(chat_id=chat).order_by('-created_at').first()
+                            logger.debug( chat)
+                            print(last_message.remote_id,channel)
                             if last_message and channel:
                                 if not chat.user_id.startswith('@'):
                                     chat.user_id = "@" + chat.user_id
@@ -52,7 +54,7 @@ class Command(BaseCommand):
                                                                  last_message.remote_id or 0,
                                                                  last_message.created_at)
                                 messages = messages_response.get("messages", [])  # Ожидаем массив сообщений
-
+                                logger.info(messages)
                                 if len(messages) == 0:
                                     continue
 
