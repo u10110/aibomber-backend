@@ -42,7 +42,7 @@ class Command(BaseCommand):
                     continue
 
                 message = json.loads(msg.value().decode('utf-8'))
-                logger.info(f"new message from new-message-events {message.get('channel_phone')}")
+                logger.info(f"new message from new-message-events {message.get('channel_phone')} to {message.get('to_id')}")
 
                 chat = Chat.objects.filter(remote_chat_id=message.get('to_id')).first()
                 channel = Channel.objects.filter(phone='+' + message.get('channel_phone'))
@@ -77,6 +77,7 @@ class Command(BaseCommand):
                         logger.debug(project.per_conversation_limit)
                         logger.debug(message_processor.chat_messages_count(chat))
                         if project.per_conversation_limit > message_processor.chat_messages_count(chat):
+                            logger.info(f"Отправка ответа {chat.user_id}")
                             ProjectProcessor.process_chat(chat, message_processor)
                         else:
                             logger.info(f"Достигнут лимит сообщений по чату {chat.user_id}")

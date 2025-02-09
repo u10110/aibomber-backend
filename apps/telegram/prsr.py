@@ -118,7 +118,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
             chat = Chat.objects.filter(
                 project=project,
                 channel=channel,
-                remote_chat_id=to_id
+                remote_chat_id=from_id
             ).order_by('-last_message_time').first()
             if not chat:
                 chat = Chat(
@@ -126,7 +126,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
                     user_id=_USER_NAME,
                     channel=channel,
                     user_name=user_view_name,
-                    remote_chat_id=to_id
+                    remote_chat_id=from_id
                 )
                 chat.save()
 
@@ -143,7 +143,7 @@ def save_messages(user_id, messages, project, channel, user_view_name):
                 # Создаём новое сообщение в базе
                 ChatMessages.objects.create(
                     chat_id=chat,
-                    message_type="incoming" if to_id is None else "outcoming",
+                    message_type="incoming",
                     user_message=message_text[:555],
                     remote_id=message_id,  # Сохраняем ID сообщения
                     created_at=message_date,

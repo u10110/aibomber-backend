@@ -179,7 +179,7 @@ class MessageProcessor:
                 json=payload,
                 headers={"Content-Type": "application/json"}
             )
-
+            logger.debug(f"Ответ сервера телетон:{response.status_code}")
             return response
 
         except Exception as e:
@@ -361,7 +361,7 @@ class ProjectProcessor:
             channel_phone=chat.channel,
             user_id=chat.user_id
         )
-
+        logger.debug("GPT подготовил ответ")
         if message:
             result = message_processor.send_message_to_telegram(
                 chat.channel.phone,

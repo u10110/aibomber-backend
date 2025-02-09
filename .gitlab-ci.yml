@@ -1,7 +1,6 @@
 stages:
     - build
     - deploy
-    - prod
 
 variables:
   COMPOSE_DOCKER_CLI_BUILD: 1
@@ -20,7 +19,8 @@ build:
   image: docker
   tags: [infra]
   only:
-  - development
+    - main
+    - development
   variables:
     CONTAINER_IMAGE: registry.mplab.io/neuro-backend:${CI_COMMIT_SHORT_SHA}
     CONTAINER_IMAGE_LATEST: registry.mplab.io/neuro-backend:latest
@@ -29,24 +29,6 @@ build:
   - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
   - docker push ${CONTAINER_IMAGE_LATEST}
   - docker system prune -f -a
-
-
-build:prod:
-  allow_failure: true
-  stage: build
-  image: docker
-  tags: [infra]
-  when: manual
-  only:
-    - main
-  variables:
-    CONTAINER_IMAGE: registry.mplab.io/neuro-backend:${CI_COMMIT_SHORT_SHA}
-    CONTAINER_IMAGE_LATEST: registry.mplab.io/neuro-backend:latest
-  script:
-    - docker build -t ${CONTAINER_IMAGE} .
-    - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE_LATEST}
-    - docker push ${CONTAINER_IMAGE_LATEST}
-    - docker system prune -f -a
 
 # build:eliment-cli-kafka-message-reply:
 #   stage: build
@@ -83,6 +65,8 @@ prod:eliment-cli-kafka-message-reply:
   stage: prod
   tags: [neuro-app-02]
   when: manual
+  only:
+    - main
   image:
     name: docker/compose
     entrypoint: ["/bin/sh", "-c"]
@@ -97,6 +81,8 @@ prod:eliment-cli-new-message-send:
   stage: prod
   tags: [neuro-app-02]
   when: manual
+  only:
+    - main
   image:
     name: docker/compose
     entrypoint: ["/bin/sh", "-c"]
@@ -110,6 +96,8 @@ prod:
   stage: prod
   tags: [neuro-app-02]
   when: manual
+  only:
+    - main
   image:
     name: docker/compose
     entrypoint: ["/bin/sh", "-c"]
@@ -120,7 +108,7 @@ prod:
     - docker compose -f docker-compose.yml  up -d neuro-backend
 
 
-deploy_dev:
+deploy:development:
   stage: deploy
   tags: [eliment-dev]
   only:
@@ -132,3 +120,35 @@ deploy_dev:
     - IMAGE_TAG=latest docker compose -f docker-compose-dev.yml -p neuro-backend down --timeout 10
     - IMAGE_TAG=latest docker compose -f docker-compose-dev.yml  pull neuro-backend
     - IMAGE_TAG=latest docker compose -f docker-compose-dev.yml  up -d neuro-backend
+
+
+deploy:eliment-cli-kafka-message-reply:
+  stage: prod
+  tags: [eliment-dev]
+  only:
+    - main
+    - development
+  image:
+    name: docker/compose
+    entrypoint: ["/bin/sh", "-c"]
+  script:
+    # - docker network create web_network || true
+    - docker compose -f docker-compose.yml -p eliment-cli-kafka-message-reply down --timeout 10
+    - docker compose -f docker-compose.yml  pull eliment-cli-kafka-message-reply
+    - docker compose -f docker-compose.yml  up -d eliment-cli-kafka-message-reply
+
+
+deploy:eliment-cli-new-message-send:
+  stage: prod
+  tags: [eliment-dev]
+  only:
+    - main
+    - development
+  image:
+    name: docker/compose
+    entrypoint: ["/bin/sh", "-c"]
+  script:
+    - docker network create web_network || true
+    - docker compose -f docker-compose.yml -p eliment-cli-new-message-send down --timeout 10
+    - docker compose -f docker-compose.yml  pull eliment-cli-new-message-send
+    - docker compose -f docker-compose.yml  up -d eliment-cli-new-message-send
