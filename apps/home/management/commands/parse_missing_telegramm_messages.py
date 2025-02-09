@@ -23,6 +23,7 @@ load_dotenv()
 
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
 producer = Producer({'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS})
+KAFKA_MESSAGES_TOPIC = os.getenv("KAFKA_MESSAGES_TOPIC", 'new-message-events')
 
 
 class Command(BaseCommand):
@@ -86,7 +87,7 @@ class Command(BaseCommand):
                                                 "user_id": last_remote_message.from_id.user_id,
                                                 "channel_phone": channel.phone
                                             }
-                                            producer.produce('new-message-events', value=json.dumps(payload))
+                                            producer.produce(KAFKA_MESSAGES_TOPIC, value=json.dumps(payload))
                                             producer.flush()
                                     else:
                                         save_messages(last_remote_message.get('user_id'), [last_remote_message], project,

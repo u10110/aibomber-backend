@@ -20,6 +20,7 @@ from apps.home.models import (
 load_dotenv()
 
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
+KAFKA_MESSAGES_TOPIC = os.getenv("KAFKA_MESSAGES_TOPIC", 'new-message-events')
 
 
 class Command(BaseCommand):
@@ -30,7 +31,7 @@ class Command(BaseCommand):
                              'group.id': 'group-1',
                              'auto.offset.reset': 'earliest'})
         try:
-            consumer.subscribe(['new-message-events'])
+            consumer.subscribe([KAFKA_MESSAGES_TOPIC])
             logger.info("subscribed  to new-message-events")
             while True:
                 msg = consumer.poll(1.0)  # Wait for 1 second
