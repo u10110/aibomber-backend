@@ -123,7 +123,7 @@ deploy:development:
 
 
 deploy:eliment-cli-kafka-message-reply:
-  stage: prod
+  stage: deploy
   tags: [eliment-dev]
   only:
     - main
@@ -139,7 +139,7 @@ deploy:eliment-cli-kafka-message-reply:
 
 
 deploy:eliment-cli-new-message-send:
-  stage: prod
+  stage: deploy
   tags: [eliment-dev]
   only:
     - main
