@@ -61,8 +61,8 @@ build:
 #     - docker system prune -f -a
 
 
-prod:eliment-cli-kafka-message-reply:
-  stage: prod
+deploy:eliment-cli-kafka-message-reply:
+  stage: deploy
   tags: [neuro-app-02]
   when: manual
   only:
@@ -77,8 +77,8 @@ prod:eliment-cli-kafka-message-reply:
     - docker compose -f docker-compose.yml  up -d eliment-cli-kafka-message-reply
 
 
-prod:eliment-cli-new-message-send:
-  stage: prod
+deploy:eliment-cli-new-message-send:
+  stage: deploy
   tags: [neuro-app-02]
   when: manual
   only:
@@ -92,8 +92,8 @@ prod:eliment-cli-new-message-send:
     - docker compose -f docker-compose.yml  pull eliment-cli-new-message-send
     - docker compose -f docker-compose.yml  up -d eliment-cli-new-message-send
 
-prod:
-  stage: prod
+deploy:
+  stage: deploy
   tags: [neuro-app-02]
   when: manual
   only:
@@ -122,7 +122,7 @@ deploy:development:
     - IMAGE_TAG=latest docker compose -f docker-compose-dev.yml  up -d neuro-backend
 
 
-deploy:eliment-cli-kafka-message-reply:
+deploy:development:eliment-cli-kafka-message-reply:
   stage: deploy
   tags: [eliment-dev]
   only:
@@ -137,7 +137,7 @@ deploy:eliment-cli-kafka-message-reply:
     - docker compose -f docker-compose.yml  up -d eliment-cli-kafka-message-reply
 
 
-deploy:eliment-cli-new-message-send:
+deploy:development:eliment-cli-new-message-send:
   stage: deploy
   tags: [eliment-dev]
   only:
