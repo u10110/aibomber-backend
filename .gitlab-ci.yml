@@ -126,7 +126,6 @@ deploy:eliment-cli-kafka-message-reply:
   stage: deploy
   tags: [eliment-dev]
   only:
-    - main
     - development
   image:
     name: docker/compose
@@ -142,7 +141,6 @@ deploy:eliment-cli-new-message-send:
   stage: deploy
   tags: [eliment-dev]
   only:
-    - main
     - development
   image:
     name: docker/compose
