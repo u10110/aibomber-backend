@@ -49,7 +49,7 @@ class Command(BaseCommand):
                 channel = Channel.objects.filter(phone='+' + message.get('channel_phone'))
 
                 if chat:
-                    channel = channel.filter(id=chat.channel_id)
+                    channel = channel.filter(id=chat.channel_id, project_id=chat.project_id)
 
                 channel = channel.first()
 
