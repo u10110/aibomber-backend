@@ -266,7 +266,7 @@ class Channel(SoftDeleteModel):
     ]
 
     client = models.ForeignKey(User, on_delete=models.CASCADE)
-    project = models.ForeignKey(Project, null=True)
+    project = models.ForeignKey(Project, null=True, on_delete=models.SET_NULL)
     title = models.CharField(max_length=1000)
     is_active = models.BooleanField(default=False)
     source = models.CharField(
