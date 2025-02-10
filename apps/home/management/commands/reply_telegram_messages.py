@@ -53,41 +53,47 @@ class Command(BaseCommand):
 
                 channel = channel.first()
 
-                project = Project.objects.filter(id=channel.project_id).first()
+                if channel:
+
+                    project = Project.objects.filter(id=channel.project_id).first()
 
 
-                #users_response = get_users(message.get('channel_phone'))
-                #if not users_response.get("users"):
-                #    logger.info(f"Нет пользователей для телефона {message.get('channel_phone')}")
-                #    return
-                user_view_name = ''
-                ## Шаг 3.2: Получаем сообщения для каждого пользователя
-                #for user in users_response["users"]:
-                #    if user["id"] == message.get('user_id'):
-                #        user_view_name = user["name"]
+                    #users_response = get_users(message.get('channel_phone'))
+                    #if not users_response.get("users"):
+                    #    logger.info(f"Нет пользователей для телефона {message.get('channel_phone')}")
+                    #    return
+                    user_view_name = ''
+                    ## Шаг 3.2: Получаем сообщения для каждого пользователя
+                    #for user in users_response["users"]:
+                    #    if user["id"] == message.get('user_id'):
+                    #        user_view_name = user["name"]
 
 
 
-                logger.info(f"saving message {message.get('user_id')}")
-                chat = save_messages(message.get('user_id'), [message], project, channel, user_view_name)
-                if chat:
-                    if chat.is_auto_active:
+                    logger.info(f"saving message {message.get('user_id')}")
+                    chat = save_messages(message.get('user_id'), [message], project, channel, user_view_name)
+                    if chat:
+                        if chat.is_auto_active:
 
-                        #time.sleep(10)
-                        message_processor = MessageProcessor()
-                        logger.debug(project.per_conversation_limit)
-                        logger.debug(message_processor.chat_messages_count(chat))
-                        if project.per_conversation_limit > message_processor.chat_messages_count(chat):
-                            logger.info(f"Отправка ответа {chat.user_id}")
-                            ProjectProcessor.process_chat(chat, message_processor)
+                            #time.sleep(10)
+                            message_processor = MessageProcessor()
+                            logger.debug(project.per_conversation_limit)
+                            logger.debug(message_processor.chat_messages_count(chat))
+                            if project.per_conversation_limit > message_processor.chat_messages_count(chat):
+                                logger.info(f"Отправка ответа {chat.user_id}")
+                                ProjectProcessor.process_chat(chat, message_processor)
+                            else:
+                                logger.info(f"Достигнут лимит сообщений по чату {chat.user_id}")
                         else:
-                            logger.info(f"Достигнут лимит сообщений по чату {chat.user_id}")
+                            logger.info(f"Сообщение получено но не обработано, is_auto_active false")
                     else:
-                        logger.info(f"Сообщение получено но не обработано, is_auto_active false")
+                        logger.error(f"Сообщение получено но не обработано, нехватает "
+                              f"данных или недопустмый сообщение: {message.get('text', '')} {message.get('channel_phone', '')}")
+                    logger.debug(message)
+
                 else:
-                    logger.error(f"Сообщение получено но не обработано, нехватает "
-                          f"данных или недопустмый сообщение: {message.get('text', '')} {message.get('channel_phone', '')}")
-                logger.debug(message)
+                    logger.error(f"Сообщение получено но не обработано, не найден канал {message.get('channel_phone', '')}")
+
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error(e)
