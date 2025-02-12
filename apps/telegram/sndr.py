@@ -335,6 +335,9 @@ class ProjectProcessor:
                     if response.status_code == 500:
                         logger.debug(response_body)
                         logger.info(f"Ошибка отправки {chat_for_current_channel_message.user_id} ")
+                        if  response_body.get('detail') == 'banned':
+                            channel.status = 'banned'
+                            channel.save()
                         chat_for_current_channel_message.status = response_body.get('detail')
                         chat_for_current_channel_message.save()
                         new_message.remote_status = response_body.get('detail')
