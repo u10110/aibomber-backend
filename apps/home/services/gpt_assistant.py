@@ -8,8 +8,13 @@ from decouple import config
 from loguru import logger
 
 OPENAI_API_KEY = config("OPENAI_API_KEY")
+#client = OpenAI(
+#    api_key=OPENAI_API_KEY  # Рекомендуется использовать переменные окружения
+#)
+
 client = OpenAI(
-    api_key=OPENAI_API_KEY  # Рекомендуется использовать переменные окружения
+    base_url='http://localhost:11434/v1/',
+    api_key='ollama',  # required but ignored
 )
 
 
@@ -228,6 +233,7 @@ class GPTAssistant:
         """
         Возвращает версию GPT для использования.
         """
+        return 'gemma3:4b'
         if self.project.gpt_version == 1:
             return "gpt-4o"
         elif self.project.gpt_version == 2:

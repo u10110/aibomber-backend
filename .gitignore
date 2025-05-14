@@ -53,3 +53,4 @@ fastapi/sessions/
 /.env.local
 /.env.local
 /.venv/
+/files/

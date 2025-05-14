@@ -400,7 +400,7 @@ class Chat(SoftDeleteModel):
     recipient_id = models.IntegerField(null=True)
     user_name = models.CharField(max_length=1000, default='')
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, default=0)
-    status = models.CharField(max_length=55, default="new")
+    status = models.CharField(max_length=550, default="new")
     sex = models.IntegerField(null=True)
     remote_lead_id = models.IntegerField(null=True)
     remote_chat_id = models.CharField(max_length=1000, null=True)

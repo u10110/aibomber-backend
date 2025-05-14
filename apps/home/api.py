@@ -758,7 +758,7 @@ def channel_delete(request, channel_id):
 
 
 def channels(request):
-    channel_list = Channel.objects.filter(client=request.user)
+    channel_list = Channel.objects.filter(client=request.user).order_by('id')
 
     data = []
     for channel in channel_list:

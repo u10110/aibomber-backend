@@ -7,7 +7,6 @@ from selenium.webdriver.common.by import By
 
 from . import driver_settings, minio
 
-minio_service = minio.MinioService()
 
 
 def create_ui_instance(phone):

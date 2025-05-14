@@ -237,10 +237,14 @@ class ProjectProcessor:
 
         try:
 
-            new_chat_in_120_sec = Chat.objects.filter(
-                project=project,
+            new_chat_in_2400_sec = Chat.objects.filter(
                 channel=channel,
-                created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(seconds=120))
+                created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(seconds=2400))
+            ).annotate(max_created_at=Max('created_at')).count()
+
+            new_chat_in_day_fr_channel = Chat.objects.filter(
+                channel=channel,
+                created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(seconds=86400))
             ).annotate(max_created_at=Max('created_at')).count()
 
             # Получаем TG ID, у которых нет сообщений
@@ -248,8 +252,12 @@ class ProjectProcessor:
             logger.info(next_recipient)
             # Обрабатываем существующий\
 
-            if new_chat_in_120_sec > 0:
-                logger.info(f"ждем 2 минуты для нового сообщения {project.title}  {channel.phone}")
+            if new_chat_in_2400_sec > 0:
+                logger.info(f"ждем 40 минут для нового сообщения {project.title}  {channel.phone}")
+                return
+
+            if new_chat_in_day_fr_channel > 4:
+                logger.info(f"Для канала  {channel.phone} достигнут лимит новых  чатов в день")
                 return
 
             if not next_recipient:
@@ -323,7 +331,7 @@ class ProjectProcessor:
                         new_message.save()
 
                     if response.status_code == 404:
-                        chat_for_current_channel_message.status = 'user_doesnt_exist'
+                        chat_for_current_channel_message.status = response_body.get('detail')
                         chat_for_current_channel_message.last_message_time = datetime.datetime.now(tz=timezone.utc)
                         chat_for_current_channel_message.save()
 
@@ -418,7 +426,8 @@ def new_chat_messages(project_id=None):
     try:
         current_time = datetime.datetime.now().time()
         clients = ClientManager.get_active_clients()
-
+        logger.info(current_time)
+        logger.debug(clients)
         for client in clients:
             logger.info(f"Обработка клиента {client.client_id}")
             if client.balance > 0:

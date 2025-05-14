@@ -1,4 +1,4 @@
-[tool.poetry]
+/[tool.poetry]
 name = "django-soft-ui-dashboard"
 version = "0.1.0"
 description = ""
