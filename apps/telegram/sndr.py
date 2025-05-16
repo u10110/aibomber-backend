@@ -143,6 +143,7 @@ class MessageProcessor:
             project_id: int,
             question: str,
             channel_phone: str,
+            photo: str,
             user_id: str
     ) -> Optional[str]:
 
@@ -154,7 +155,7 @@ class MessageProcessor:
 
         # Получение ответа от GPT
         try:
-            answer = assistant.ask_question(question)
+            answer = assistant.ask_question(question, photo)
             return answer
         except Exception as e:
 
@@ -278,6 +279,7 @@ class ProjectProcessor:
                     project=project,
                     user_id=next_recipient.get('user_name'),
                     recipient_id=next_recipient.get('recipient_id'),
+                    photo=f"{TELETHON_HOST}get-user-photo?photo={info_response.get('photo')}",
                     user_name=recipient_info.get('first_name') + ' ' + recipient_info.get('last_name'),
                     channel=channel
                 )
@@ -292,6 +294,7 @@ class ProjectProcessor:
                     question="Сгенерируй приветственное сообщение для " + recipient_info.get('first_name') + ' '
                              + recipient_info.get('last_name') + " на основе шаблона '" + project.hello_text + "'",  # Пустой вопрос для нового пользователя
                     channel_phone=channel.phone,
+                    photo=chat_for_current_channel_message.photo,
                     user_id=chat_for_current_channel_message.user_id
                 )
                 logger.debug(message)
@@ -381,6 +384,7 @@ class ProjectProcessor:
             project_id=chat.channel.project_id,
             question=combined_message,
             channel_phone=chat.channel,
+            photo=chat.photo,
             user_id=chat.user_id
         )
         logger.debug("GPT подготовил ответ")

@@ -399,6 +399,7 @@ class Chat(SoftDeleteModel):
     user_id = models.CharField(max_length=1000)
     recipient_id = models.IntegerField(null=True)
     user_name = models.CharField(max_length=1000, default='')
+    photo = models.CharField(max_length=555, null=True)
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, default=0)
     status = models.CharField(max_length=550, default="new")
     sex = models.IntegerField(null=True)

@@ -1,21 +1,15 @@
 import os
-from openai import OpenAI
+from ollama import Client
 from apps.home.models import Chat, Project, ProjectFile, ClientSettings, ChatMessages
 import re
 import random
 from django.shortcuts import get_object_or_404
 from decouple import config
 from loguru import logger
+from urllib.request import urlopen
+import pybase64
 
 OPENAI_API_KEY = config("OPENAI_API_KEY")
-#client = OpenAI(
-#    api_key=OPENAI_API_KEY  # Рекомендуется использовать переменные окружения
-#)
-
-client = OpenAI(
-    base_url='http://localhost:11434/v1/',
-    api_key='ollama',  # required but ignored
-)
 
 
 class GPTAssistant:
@@ -24,6 +18,11 @@ class GPTAssistant:
         Инициализация ассистента на основе данных проекта.
         :param project: Экземпляр модели Project.
         """
+
+        self.client = Client(
+            host='http://localhost:11434/'
+        )
+
         self.project = project
         self.chat_id = chat_id
         self.is_auto_active = True
@@ -120,7 +119,7 @@ class GPTAssistant:
             )
         return text
 
-    def ask_question(self, question=None, save_to_db=True):
+    def ask_question(self, question=None, photo=None, save_to_db=True):
         """
         Задает вопрос ассистенту, используя OpenAI API.
         """
@@ -138,55 +137,34 @@ class GPTAssistant:
 
         full_context = f"{self.project.prompt}\n\n" + "\n".join(self.knowledge_texts)
 
-        if not question:
-            try:
-                messages = [
-                    {"role": "system", "content": full_context},  # Приветственное сообщение на основе промпта
-                    {"role": "user", "content": "Привет, расскажи о себе."},  # Типичный запрос для генерации приветствия
-                ]
-
-                response = client.chat.completions.create(
-                    model=self._get_gpt_version(),  # Версия GPT: "gpt-4o" или "gpt-3.5-turbo"
-                    messages=messages,
-                    temperature=0.7  # Регулирует креативность ответов
-                )
-                answer = response.choices[0].message.content
-                
-                token_usage = response.usage.total_tokens
-                # Вычисляем стоимость
-                cost = self._calculate_cost(token_usage)
-                # Обновляем баланс пользователя
-                if self.client_id:
-                    self._update_user_balance(cost)
-            
-                self._save_to_db(answer)
-                return response.choices[0].message.content
-            except Exception as e:
-                logger.error(f"Ошибка : {type(e).__name__}: {e}")
-                return f"Ошибка : {str(e)}"
+        photo_base64 = None
+        if photo:
+            photo_base64 = urlopen(photo).read()
+            full_context += '\r\nПерсонализированными сообшения  под характер человека на фото, если он там есть.' \
+                            'Не учитывай обстановку и окружение на фото, в ответах используй только характеристики личности.\r\n'
 
         messages = [{"role": "system", "content": full_context}] + self.chat_history + [
-            {"role": "user", "content": question}
+            {"role": "user", "content": question,  "images": [photo_base64]}
         ]
         #print(f"messages {messages}")
 
         # Отправляем запрос в OpenAI API
         try:
-            response = client.chat.completions.create(
-                model=self._get_gpt_version(),  # Версия GPT: "gpt-4o" или "gpt-3.5-turbo"
-                messages=messages,
-                temperature=0.7  # Регулирует креативность ответов
+
+            response = self.client.chat(
+                model='gemma3:4b',
+                messages=messages
             )
-            answer = response.choices[0].message.content
+            answer = response.message.content
             
             self._update_chat_history(question, answer)
             
-            token_usage = response.usage.total_tokens
+            #token_usage = response.usage.total_tokens
             # Вычисляем стоимость
-            cost = self._calculate_cost(token_usage)
+            #cost = self._calculate_cost(token_usage)
             # Обновляем баланс пользователя
-            if self.client_id:
-                self._update_user_balance(cost)
+            #if self.client_id:
+            #    self._update_user_balance(cost)
 
             if save_to_db:
                 self._save_to_db(answer, question)
