@@ -252,12 +252,15 @@ class ProjectProcessor:
             logger.info(next_recipient)
             # Обрабатываем существующий\
 
+            if new_chat_in_day_fr_channel > 4:
+                logger.info(f"Для канала {channel.id}  {channel.phone} достигнут лимит новых  чатов в день")
+                return
+            else:
+                logger.info(f"Для канала {channel.id}  {channel.phone}  осталось {new_chat_in_day_fr_channel} за сегодня")
+
+
             if new_chat_in_2400_sec > 0:
                 logger.info(f"ждем 40 минут для нового сообщения {project.title}  {channel.phone}")
-                return
-
-            if new_chat_in_day_fr_channel > 4:
-                logger.info(f"Для канала  {channel.phone} достигнут лимит новых  чатов в день")
                 return
 
             if not next_recipient:
@@ -266,10 +269,16 @@ class ProjectProcessor:
                 logger.info(f"создаем и отправляем первое сообщение")
                 # Обрабатываем новых пользователе
 
+                info_response = requests.get(f"{TELETHON_HOST}get-user-info/",
+                                             params={"phone": channel.phone, "username": next_recipient.get('user_name')
+                                                     })
+                recipient_info = json.loads(info_response.content)
+
                 chat_for_current_channel_message = Chat(
                     project=project,
                     user_id=next_recipient.get('user_name'),
                     recipient_id=next_recipient.get('recipient_id'),
+                    user_name=recipient_info.get('first_name') + ' ' + recipient_info.get('last_name'),
                     channel=channel
                 )
                 chat_for_current_channel_message.save()
@@ -280,7 +289,8 @@ class ProjectProcessor:
                 message = message_processor.send_to_gpt_assistant(
                     chat_id=chat_for_current_channel_message.id,
                     project_id=project.id,
-                    question="",  # Пустой вопрос для нового пользователя
+                    question="Сгенерируй приветственное сообщение для " + recipient_info.get('first_name') + ' '
+                             + recipient_info.get('last_name') + " на основе шаблона '" + project.hello_text + "'",  # Пустой вопрос для нового пользователя
                     channel_phone=channel.phone,
                     user_id=chat_for_current_channel_message.user_id
                 )

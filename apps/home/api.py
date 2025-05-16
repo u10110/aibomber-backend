@@ -62,7 +62,7 @@ def send_to_gpt(request):
             # Форматируем историю чата
             chat = data.get("chat_history", [])
             formatted_history = []
-            question = ''
+            question = data.get("question", '')
             # Форматируем историю чата
             for item in chat:
                 if item.get('bot'):
