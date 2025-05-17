@@ -11,6 +11,10 @@ import pybase64
 
 OPENAI_API_KEY = config("OPENAI_API_KEY")
 
+client = Client(
+    host='http://localhost:11434/'
+)
+
 
 class GPTAssistant:
     def __init__(self, project, chat_id=None, channel_phone=None, user_id=None,):
@@ -19,9 +23,7 @@ class GPTAssistant:
         :param project: Экземпляр модели Project.
         """
 
-        self.client = Client(
-            host='http://localhost:11434/'
-        )
+
 
         self.project = project
         self.chat_id = chat_id
@@ -34,10 +36,10 @@ class GPTAssistant:
         
         self.channel_phone=channel_phone
         self.user_id=user_id
-        
+
         self.chat_history = []  # Здесь хранится история в формате [{"role": "user", ...}, {"role": "assistant", ...}]
         self.knowledge_texts = []  # Здесь хранится база знаний
-        
+
         if chat_id:
             self._load_chat_history()
         self._load_knowledge_base()
@@ -70,7 +72,6 @@ class GPTAssistant:
             raise ValueError(f"ClientSettings with client_id {self.client_id} does not exist.")
 
 
-
     def _load_chat_history(self):
         """
         Загружает историю чата из базы данных на основе user_id.
@@ -86,10 +87,11 @@ class GPTAssistant:
 
         if chat_records:
             self.chat_history = [
-                {"role": "user", "content": record.user_message} if record.message_type == "message" else 
+                {"role": "user", "content": record.user_message} if record.message_type == "incoming" else
                 {"role": "assistant", "content": record.user_message}
                 for record in chat_records
             ]
+            self.chat_history.pop()
         else:
             self.chat_history = []
 
@@ -137,28 +139,33 @@ class GPTAssistant:
 
         full_context = f"{self.project.prompt}\n\n" + "\n".join(self.knowledge_texts)
 
-        photo_base64 = None
-        if photo:
+
+        if photo is not None:
             photo_base64 = urlopen(photo).read()
             full_context += '\r\nПерсонализированными сообшения  под характер человека на фото, если он там есть.' \
-                            'Не учитывай обстановку и окружение на фото, в ответах используй только характеристики личности.\r\n'
+                            'Не учитывай обстановку и окружение на фото, в ответах используй только характеристики личности, используй их не напрямую. \r\n'
 
-        messages = [{"role": "system", "content": full_context}] + self.chat_history + [
-            {"role": "user", "content": question,  "images": [photo_base64]}
-        ]
+            messages = [{"role": "system", "content": full_context}] + self.chat_history + [
+                {"role": "user", "content": question,  "images": [photo_base64]}
+            ]
+        else:
+            messages = [{"role": "system", "content": full_context}] + self.chat_history + [
+                {"role": "user", "content": question}
+            ]
+
         #print(f"messages {messages}")
 
         # Отправляем запрос в OpenAI API
         try:
 
-            response = self.client.chat(
+            response = client.chat(
                 model='gemma3:4b',
                 messages=messages
             )
             answer = response.message.content
-            
-            self._update_chat_history(question, answer)
-            
+
+           # self._update_chat_history(question, answer)
+
             #token_usage = response.usage.total_tokens
             # Вычисляем стоимость
             #cost = self._calculate_cost(token_usage)
@@ -243,6 +250,18 @@ class GPTAssistant:
             return f"Ошибка OpenAI API: {str(e)}"
 
         return answer
+
+    def lead_reaady(self):
+        """
+        Собеседник готов к покупке и
+
+        Args:
+        a: The first integer number
+        b: The second integer number
+
+        Returns:
+        int: The sum of the two numbers
+        """
 
 
 

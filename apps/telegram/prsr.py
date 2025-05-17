@@ -154,21 +154,6 @@ def save_messages(user_id, messages, project, channel, user_view_name):
             else:
                 logger.info(f"Сообщение уже существует для пользователя {user_id}: {message_id}")
 
-    if chat:
-        # Создание экземпляра GPTAssistant
-        assistant = GPTAssistant(project=project, chat_id=chat.id, channel_phone=channel.phone, user_id=user_id)
-        logger.info(f"Получение статуса общения {user_id}")
-        # Получение ответа от GPT
-        try:
-            text_status = assistant.ask_chat_status()
-            logger.info(f"Chat status is  {text_status}")
-            statuses = dict(Chat.CHAT_STATUS)
-            if statuses[text_status] is not None:
-                chat.status = text_status
-                chat.save()
-        except Exception as e:
-            logger.info(f"text_status get error : {text_status}")
-
     return chat
 
 

@@ -131,7 +131,7 @@ def send_chat_messages(request, chat_id):
                     response_body = json.loads(response.content)
                     if response and response.status_code == 200:
 
-                        remote_message_entity = response_body.get('result')
+                        remote_message_entity = json.loads(response_body.get('result'))
                         if not current_chat.remote_chat_id:
                             current_chat.remote_chat_id = remote_message_entity.get('sender_id')
                             current_chat.save()

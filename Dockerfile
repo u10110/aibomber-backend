@@ -40,6 +40,6 @@ RUN apt-get update \
 # Install additional Python dependencies
 RUN pip3 install python-dateutil
 
-
+EXPOSE 5444
 # Collect static files
 RUN python3.9 manage.py collectstatic --noinput

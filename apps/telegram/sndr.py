@@ -270,17 +270,29 @@ class ProjectProcessor:
                 logger.info(f"создаем и отправляем первое сообщение")
                 # Обрабатываем новых пользователе
 
-                info_response = requests.get(f"{TELETHON_HOST}get-user-info/",
+                info_response = requests.get(f"{TELETHON_HOST}/get-user-info/",
                                              params={"phone": channel.phone, "username": next_recipient.get('user_name')
                                                      })
+
                 recipient_info = json.loads(info_response.content)
+
+                photo_url = ''
+                if recipient_info.get('photo', None) is not None:
+                    photo_url = f"{TELETHON_HOST}/get-user-photo?photo={recipient_info.get('photo')}"
+
+                user_name = ''
+                if  recipient_info.get('first_name') is not None:
+                    user_name=recipient_info.get('first_name')
+
+                if  recipient_info.get('last_name') is not None:
+                    user_name+=recipient_info.get('last_name')
 
                 chat_for_current_channel_message = Chat(
                     project=project,
                     user_id=next_recipient.get('user_name'),
                     recipient_id=next_recipient.get('recipient_id'),
-                    photo=f"{TELETHON_HOST}get-user-photo?photo={info_response.get('photo')}",
-                    user_name=recipient_info.get('first_name') + ' ' + recipient_info.get('last_name'),
+                    photo=photo_url,
+                    user_name=user_name,
                     channel=channel
                 )
                 chat_for_current_channel_message.save()
@@ -291,8 +303,7 @@ class ProjectProcessor:
                 message = message_processor.send_to_gpt_assistant(
                     chat_id=chat_for_current_channel_message.id,
                     project_id=project.id,
-                    question="Сгенерируй приветственное сообщение для " + recipient_info.get('first_name') + ' '
-                             + recipient_info.get('last_name') + " на основе шаблона '" + project.hello_text + "'",  # Пустой вопрос для нового пользователя
+                    question="Сгенерируй приветственное сообщение для " + user_name + " на основе шаблона '" + project.hello_text + "'",  # Пустой вопрос для нового пользователя
                     channel_phone=channel.phone,
                     photo=chat_for_current_channel_message.photo,
                     user_id=chat_for_current_channel_message.user_id

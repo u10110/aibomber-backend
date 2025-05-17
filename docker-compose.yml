@@ -1,17 +1,25 @@
 services:
-  neuro-backend:
-    container_name: neuro-backend
-    image: registry.mplab.io/neuro-backend:latest
+  bomber-web:
+    container_name: bomber-web
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
     restart: always
     env_file: .env
     ports:
       - "80:80"
-    command: gunicorn --config gunicorn-cfg.py core.wsgi --workers 12 --threads 12 --timeout 300 --graceful-timeout 300 --max-requests 1000 --max-requests-jitter 50
+    networks:
+      - default
+    external_links:
+      - neuro_db:neuro_db
+    command: gunicorn --config gunicorn-cfg.py core.wsgi --workers 1 --threads 1 --timeout 300 --graceful-timeout 300 --max-requests 1000 --max-requests-jitter 50
 
 
   eliment-cli-new-message-send:
     container_name: eliment-cli-new-message-send
-    image: registry.mplab.io/neuro-backend:latest
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
     restart: always
     env_file: .env
     command: python manage.py send_telegramm_messages
@@ -20,10 +28,16 @@ services:
       options:
         max-size: "1000m"
         max-file: "3"
+    networks:
+      - default
+    external_links:
+      - neuro_db:neuro_db
 
   eliment-cli-kafka-message-reply:
     container_name: eliment-cli-kafka-message-reply
-    image: registry.mplab.io/neuro-backend:latest
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
     restart: always
     env_file: .env
     command: python manage.py reply_telegram_messages
@@ -32,4 +46,14 @@ services:
       options:
         max-size: "1000m"
         max-file: "3"
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
+  database:
+    external:
+      name: scoring_default
+
 
