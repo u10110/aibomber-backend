@@ -728,7 +728,63 @@ def channel_create(request):
             return HttpResponse(status=500)
 
 
-def channel_get(channel_id):
+def channel_update(request, channel_id):
+    user = request.user
+
+    if request.method == 'POST':
+        data = json.loads(request.body.decode("utf-8"))
+
+        first_name = data.get('first_name', '')
+        last_name = data.get('last_name', '')
+        about = data.get('about', '')
+        username = data.get('username', '')
+
+        try:
+            if channel_id:
+                channel_to_save = Channel.objects.filter(
+                    id=channel_id,
+                    client_id=user.id
+                ).first()
+
+                if channel_to_save:
+
+                    response = requests.post(
+                        f"{TELETHON_HOST}/update-account/",
+                        json={
+                            "phone": channel_to_save.phone,
+                            "first_name": first_name,
+                            "last_name": last_name,
+                            "username": username,
+                            "about": about,
+                        },
+                    )
+                    logger.debug(response)
+                    if response.status_code == 200:
+                        new_remote_entity = channel_to_save.remote_entity
+
+                        new_remote_entity.update({
+                            "first_name": first_name,
+                            "last_name": last_name,
+                            "about": about,
+                            "username": username
+                        })
+
+                        channel_to_save.remote_entity = new_remote_entity
+                        channel_to_save.save()
+
+                        return JsonResponse({'success': True, 'updated': True}, safe=False)
+                    else:
+                        logger.error(traceback.format_exc())
+                        logger.error("channel save error")
+                        return HttpResponse(status=500)
+            else:
+                return HttpResponse(status=404)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            return HttpResponse(status=500)
+
+
+def channel_get(request, channel_id):
     if channel_id:
         channel = Channel.objects.filter(
             id=channel_id,

@@ -29,7 +29,7 @@ urlpatterns = [
         "add-to-waiting/", login_required(views.add_to_waiting), name="add-to-waiting"
     ),
     path("add-sms-cloud/", login_required(views.add_sms_cloud), name="add-sms-cloud"),
-    path("get-tochka-phone/", views.get_tochka_phone, name="get-tochka-phone"),
+    #path("get-tochka-phone/", views.get_tochka_phone, name="get-tochka-phone"),
     path(
         "add-card/<int:pk>/delete/",
         login_required(views.card_delete),
@@ -119,13 +119,13 @@ urlpatterns = [
     path('save-recipients/', views.save_recipients, name='save_recipients'),
     path('list-recipient-edit/<int:id>/', views.list_recipient_edit, name='list-recipient-edit'),
 
-    path("channels/", views.channels, name="channels"),
+    #path("channels/", views.channels, name="channels"),
 
 
 
-    path('channel-start/<int:pk>/', views.channel_start, name='channel-start'),
-    path('channel-stop/<int:pk>/', views.channel_stop, name='channel-stop'),
-    path('channel-delete/<int:pk>/', views.channel_delete, name='channel-delete'),
+    #path('channel-start/<int:pk>/', views.channel_start, name='channel-start'),
+    #path('channel-stop/<int:pk>/', views.channel_stop, name='channel-stop'),
+    #path('channel-delete/<int:pk>/', views.channel_delete, name='channel-delete'),
     # path('channel-edit/<int:id>/', views.channel_edit, name='channel-edit'),
 
     
@@ -170,7 +170,8 @@ urlpatterns = [
 
     path("api/channels/", login_required(api.channels), name="api-channels"),
     path('api/channel/', login_required(api.channel_create), name='api-channel-create'),
-    path('api/channel/<int:channel_id>/', login_required(api.channel_get), name='api-channel-save'),
+    path('api/channel/<int:channel_id>/', login_required(api.channel_get), name='api-channel-get'),
+    path('api/channel/<int:channel_id>/update/', login_required(api.channel_update), name='api-channel-update'),
     path('api/channel/<int:channel_id>/delete', login_required(api.channel_delete), name='api-channel-delete'),
     path('api/channel/send-code/', login_required(views.send_code), name='api-channel-send-code'),
     path('api/channel/verify-code/', login_required(api.verify_code), name='api-channel-verify-code'),

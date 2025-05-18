@@ -142,7 +142,7 @@ class MessageProcessor:
             chat_id: int,
             project_id: int,
             question: str,
-            channel_phone: str,
+            channel: str,
             photo: str,
             user_id: str
     ) -> Optional[str]:
@@ -151,11 +151,16 @@ class MessageProcessor:
         project = get_object_or_404(Project, id=project_id)
 
         # Создание экземпляра GPTAssistant
-        assistant = GPTAssistant(project=project, chat_id=chat_id, channel_phone=channel_phone, user_id=user_id)
+        assistant = GPTAssistant(project=project, chat_id=chat_id, channel_phone=channel, user_id=user_id)
 
         # Получение ответа от GPT
         try:
             answer = assistant.ask_question(question, photo)
+            chat_status = assistant.ask_chat_status()
+            logger.debug(chat_status)
+            if chat_status == 'interest_shown' or chat_status == 'contact_received':
+                MessageProcessor.send_message_to_telegram(channel.phone, '@ai_bomber',  user_id + ' status ' + chat_status )
+
             return answer
         except Exception as e:
 
@@ -276,8 +281,8 @@ class ProjectProcessor:
 
                 recipient_info = json.loads(info_response.content)
 
-                photo_url = ''
-                if recipient_info.get('photo', None) is not None:
+                photo_url = None
+                if recipient_info.get('photo', None) is not None and recipient_info.get('photo', None) != '':
                     photo_url = f"{TELETHON_HOST}/get-user-photo?photo={recipient_info.get('photo')}"
 
                 user_name = ''
@@ -303,8 +308,8 @@ class ProjectProcessor:
                 message = message_processor.send_to_gpt_assistant(
                     chat_id=chat_for_current_channel_message.id,
                     project_id=project.id,
-                    question="Сгенерируй приветственное сообщение для " + user_name + " на основе шаблона '" + project.hello_text + "'",  # Пустой вопрос для нового пользователя
-                    channel_phone=channel.phone,
+                    question="Сгенерируй приветственное сообщение для '" + user_name + "' на основе шаблона '" + project.hello_text + "'.  ",  # Пустой вопрос для нового пользователя
+                    channel=channel,
                     photo=chat_for_current_channel_message.photo,
                     user_id=chat_for_current_channel_message.user_id
                 )
@@ -394,8 +399,8 @@ class ProjectProcessor:
             chat_id=chat.id,
             project_id=chat.channel.project_id,
             question=combined_message,
-            channel_phone=chat.channel,
-            photo=chat.photo,
+            channel=chat.channel,
+            photo=None,
             user_id=chat.user_id
         )
         logger.debug("GPT подготовил ответ")

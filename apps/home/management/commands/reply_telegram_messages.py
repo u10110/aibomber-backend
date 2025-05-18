@@ -36,7 +36,7 @@ class Command(BaseCommand):
             while True:
                 msg = consumer.poll(1.0)  # Wait for 1 second
                 if msg is None:
-                    logger.info('no msg')
+                    #logger.info('no msg')
                     continue
                 if msg.error():
                     logger.info("Consumer error: {}".format(msg.error()))

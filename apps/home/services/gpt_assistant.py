@@ -142,8 +142,10 @@ class GPTAssistant:
 
         if photo is not None:
             photo_base64 = urlopen(photo).read()
-            full_context += '\r\nПерсонализированными сообшения  под характер человека на фото, если он там есть.' \
-                            'Не учитывай обстановку и окружение на фото, в ответах используй только характеристики личности, используй их не напрямую. \r\n'
+
+            full_context = 'Персонализируй  сообшение  под характер человека на фото, если он там есть.' \
+                            'Не учитывай обстановку и окружение на фото.\n ' \
+                            'Используй характеристики личности для привелечения к покупке продукта.\n' + full_context
 
             messages = [{"role": "system", "content": full_context}] + self.chat_history + [
                 {"role": "user", "content": question,  "images": [photo_base64]}
@@ -153,7 +155,7 @@ class GPTAssistant:
                 {"role": "user", "content": question}
             ]
 
-        #print(f"messages {messages}")
+        print(f"messages {messages}")
 
         # Отправляем запрос в OpenAI API
         try:
@@ -164,7 +166,6 @@ class GPTAssistant:
             )
             answer = response.message.content
 
-           # self._update_chat_history(question, answer)
 
             #token_usage = response.usage.total_tokens
             # Вычисляем стоимость
@@ -228,8 +229,8 @@ class GPTAssistant:
 
     def ask_chat_status(self):
 
-        question = "На каком их этапе из нижеперечисленных находится наше общение? С тобой ведетя упещный диалог (success); Тобою получен номер телефона или другой личный контакт для связи (contact_received); " \
-                   "Проявлен интерес к твоему предлоржению (interest_shown), Твое предложение проигнорировали (closed). Ответь только соответствующим кодом из скобок. "
+        question = "На каком их этапе из нижеперечисленных находится общение в  предыдущих сообщениях? Ведетя упещный диалог (success); Получен номер телефона или другой личный контакт для связи (contact_received); " \
+                   "Проявлен интерес к  продукту (interest_shown), Предложение проигнорировали (closed). Ответь только соответствующим кодом из скобок. "
 
         full_context = f"{self.project.prompt}\n\n" + "\n".join(self.knowledge_texts)
         messages = [{"role": "system", "content": full_context}] + self.chat_history + [
@@ -238,30 +239,16 @@ class GPTAssistant:
 
         # Отправляем запрос в OpenAI API
         try:
-            response = client.chat.completions.create(
-                model=self._get_gpt_version(),  # Версия GPT: "gpt-4o" или "gpt-3.5-turbo"
-                messages=messages,
-                temperature=0.7  # Регулирует креативность ответов
+            response = client.chat(
+                model='gemma3:4b',
+                messages=messages
             )
-            answer = response.choices[0].message.content.replace('(', '').replace(')', '')
+            answer = response.message.content.replace('(', '').replace(')', '')
         except Exception as e:
             # Обработка ошибок
             logger.error(f"Ошибка API OpenAI: {type(e).__name__}: {e}")
             return f"Ошибка OpenAI API: {str(e)}"
 
         return answer
-
-    def lead_reaady(self):
-        """
-        Собеседник готов к покупке и
-
-        Args:
-        a: The first integer number
-        b: The second integer number
-
-        Returns:
-        int: The sum of the two numbers
-        """
-
 
 
