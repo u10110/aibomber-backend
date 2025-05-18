@@ -143,9 +143,9 @@ class GPTAssistant:
         if photo is not None:
             photo_base64 = urlopen(photo).read()
 
-            full_context = 'Персонализируй  сообшение  под характер человека на фото, если он там есть.' \
-                            'Не учитывай обстановку и окружение на фото.\n ' \
-                            'Используй характеристики личности для привелечения к покупке продукта.\n' + full_context
+            full_context += '\r\nПерсонализированными сообшения  под характер человека на фото, если он там есть.' \
+                            'Не учитывай обстановку и окружение на фото, в ответах используй только характеристики ' \
+                            'личности.\r\n '
 
             messages = [{"role": "system", "content": full_context}] + self.chat_history + [
                 {"role": "user", "content": question,  "images": [photo_base64]}
@@ -232,8 +232,7 @@ class GPTAssistant:
         question = "На каком их этапе из нижеперечисленных находится общение в  предыдущих сообщениях? Ведетя упещный диалог (success); Получен номер телефона или другой личный контакт для связи (contact_received); " \
                    "Проявлен интерес к  продукту (interest_shown), Предложение проигнорировали (closed). Ответь только соответствующим кодом из скобок. "
 
-        full_context = f"{self.project.prompt}\n\n" + "\n".join(self.knowledge_texts)
-        messages = [{"role": "system", "content": full_context}] + self.chat_history + [
+        messages = self.chat_history + [
             {"role": "user", "content": question}
         ]
 
