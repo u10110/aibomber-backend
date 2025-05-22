@@ -12,6 +12,7 @@ from decouple import config
 import os
 from PyPDF2 import PdfReader
 from docx import Document
+from pgvector.django import VectorField
 # from sqlalchemy import null
 from django.contrib.postgres.fields import JSONField
 
@@ -400,6 +401,7 @@ class Chat(SoftDeleteModel):
     recipient_id = models.IntegerField(null=True)
     user_name = models.CharField(max_length=1000, default='')
     photo = models.CharField(max_length=555, null=True)
+    recipient_char_embedding = VectorField(default=None, null=True)
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, default=0)
     status = models.CharField(max_length=550, default="new")
     sex = models.IntegerField(null=True)
@@ -438,6 +440,7 @@ class ChatMessages(SoftDeleteModel):
     chat_id = models.ForeignKey(Chat, on_delete=models.CASCADE)
     remote_id = models.CharField(null=True, max_length=1000)
     remote_message = models.JSONField(default={})
+    message_embedding = VectorField(default=None, null=True)
     remote_status = models.CharField(max_length=1000, default='unknown')
     message_type = models.CharField(
         max_length=20,

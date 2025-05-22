@@ -105,3 +105,5 @@ confluent_kafka==2.8.0
 django-soft-delete==1.0.16
 pybase64
 ollama
+python-dateutil
+pgvector

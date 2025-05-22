@@ -43,9 +43,9 @@ class Command(BaseCommand):
                     continue
 
                 message = json.loads(msg.value().decode('utf-8'))
-                logger.info(f"new message from new-message-events {message.get('channel_phone')} to {message.get('to_id')}")
+                logger.info(f"new message from new-message-events {message.get('channel_phone')} to {message.get('to_id')}  chat {message.get('sender_id')}")
 
-                chat = Chat.objects.filter(remote_chat_id=message.get('to_id')).first()
+                chat = Chat.objects.filter(remote_chat_id=message.get('sender_id')).first()
                 channel = Channel.objects.filter(phone='+' + message.get('channel_phone'))
 
                 if chat:

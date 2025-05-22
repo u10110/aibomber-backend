@@ -15,6 +15,8 @@ import time
 import traceback
 import json
 from apps.home.services.gpt_assistant import GPTAssistant
+from apps.home.services.gpt_assistant import create_message_embedding
+from apps.home.services.gpt_assistant import just_ask_question
 from django.db.models import Q
 from PyPDF2 import PdfReader
 from docx import Document
@@ -292,11 +294,15 @@ class ProjectProcessor:
                 if  recipient_info.get('last_name') is not None:
                     user_name+=recipient_info.get('last_name')
 
+                recipient_char = just_ask_question("Опиши человека на фото, если он там есть.", photo_url)
+                recipient_char_embedding = create_message_embedding(recipient_char)
+
                 chat_for_current_channel_message = Chat(
                     project=project,
                     user_id=next_recipient.get('user_name'),
                     recipient_id=next_recipient.get('recipient_id'),
                     photo=photo_url,
+                    recipient_char_embedding=recipient_char_embedding,
                     user_name=user_name,
                     channel=channel
                 )
@@ -313,14 +319,17 @@ class ProjectProcessor:
                     photo=chat_for_current_channel_message.photo,
                     user_id=chat_for_current_channel_message.user_id
                 )
+
+                embedding = create_message_embedding(message)
+
                 logger.debug(message)
                 if message:
                     new_message = ChatMessages.objects.create(
                         chat_id=chat_for_current_channel_message,
                         user_message=message[:555],
                         message_type="outcoming",
-                        remote_status="send"
-
+                        remote_status="send",
+                        message_embedding=embedding
                     )
 
                     created_chats_count_for_recipient = Chat.objects.filter(project_id=project.id,
@@ -410,12 +419,14 @@ class ProjectProcessor:
                 chat.user_id,
                 message)
             logger.debug(result)
+            embedding = create_message_embedding(message)
             if result and result.status_code == 200:
                 logger.info(f"message sended {message} ")
                 ChatMessages.objects.create(
                     chat_id=chat,
                     user_message=message[:555],
-                    message_type="outcoming"
+                    message_type="outcoming",
+                    embedding = embedding
                 )
             chat.channel.save()
 

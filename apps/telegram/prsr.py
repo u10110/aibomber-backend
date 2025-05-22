@@ -218,7 +218,7 @@ def get_messages(phone, user_id, offset_id, offset_date):
         "user_id": user_id,
         "offset_date": offset_date.isoformat(),
         "offset_id": offset_id,
-        'limit': 10
+        'limit': 10000
     }
     print(payload)
     try:

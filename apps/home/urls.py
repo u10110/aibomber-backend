@@ -162,6 +162,7 @@ urlpatterns = [
     path("api/chats/export", login_required(api.chats_export), name="chats-list"),
     path('api/chat/<int:chat_id>/', login_required(api.chat_messages), name='chat-messages'),
     path('api/chat/<int:chat_id>/message/', login_required(api.send_chat_messages), name='send-chat-messages'),
+    path('api/chat/<int:chat_id>/photo/', login_required(api.chat_photo), name='chat-photo'),
     path('api/send-to-gpt/', csrf_exempt(api.send_to_gpt), name='send-to-gpt'),
     path('api/telethon-sessions/', login_required(api.telethon_sessions), name='telethon-sessions'),
     path('api/delete-telethon-session/', login_required(api.delete_telethon_session), name='delete-telethon-sessions'),

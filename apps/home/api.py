@@ -4,6 +4,7 @@ from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from loguru import logger
+from django.http import FileResponse
 
 import re
 import urllib
@@ -254,7 +255,7 @@ def chat_messages(request, chat_id):
             'fullName': user_name,
             'role': current_chat.user_id,
             'about': last_user_message,
-            'avatar': '',
+            'avatar': '/api/chat/' + str(current_chat.id) + '/photo/' if current_chat.photo else '',
             'status': current_chat.status,
             'id': current_chat.id,
         }
@@ -323,7 +324,7 @@ def chats(request):
             'lastMessage': last_message,
             'fullName': user_name,
             'role': chat.user_id,
-            'avatar': '',
+            'avatar':  '/api/chat/' + str(chat.id) + '/photo/' if chat.photo else '',
             'about': last_user_message,
             'status': chat.status,
             'is_auto_active': chat.is_auto_active,
@@ -334,12 +335,29 @@ def chats(request):
             'id': chat.id,
             'fullName': user_name,
             'role': chat.user_id,
-            'avatar': '',
+            'avatar': '/api/chat/' + str(chat.id) + '/photo/' if chat.photo else '',
             'status': chat.status,
             'about': last_user_message,
         })
 
     return JsonResponse({'chatsContacts': chat_contacts, 'contacts': contacts}, safe=False)
+
+
+def chat_photo(request, chat_id):
+
+    projects_filter = Project.objects.filter(client=request.user)
+    if chat_id:
+        chat = Chat.objects.filter(
+            id=chat_id,
+            project_id__in=projects_filter
+        ).first()
+        if chat and chat.photo:
+            response = requests.get(chat.photo)
+            return FileResponse(response, content_type='image/jpeg')
+        else:
+            return HttpResponse(status=404)
+    else:
+        return HttpResponse(status=404)
 
 
 def chats_export(request):

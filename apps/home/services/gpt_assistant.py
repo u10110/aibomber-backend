@@ -1,4 +1,5 @@
 import os
+import ollama
 from ollama import Client
 from apps.home.models import Chat, Project, ProjectFile, ClientSettings, ChatMessages
 import re
@@ -14,6 +15,33 @@ OPENAI_API_KEY = config("OPENAI_API_KEY")
 client = Client(
     host='http://localhost:11434/'
 )
+
+
+def create_message_embedding(message_text):
+    return ollama.embeddings(model='nomic-embed-text', prompt=message_text).embedding
+
+
+def just_ask_question(question=None, photo=None):
+
+    if photo is not None:
+        photo_base64 = urlopen(photo).read()
+        print(photo)
+        messages = [
+            {"role": "user", "content": question,  "images": [photo_base64]}
+        ]
+    else:
+        messages =[
+            {"role": "user", "content": question}
+        ]
+
+    response = client.chat(
+        model='gemma3:4b',
+        messages=messages,
+        options={"temperature": 0.9}
+    )
+
+    answer = response.message.content
+    return answer
 
 
 class GPTAssistant:
@@ -162,7 +190,8 @@ class GPTAssistant:
 
             response = client.chat(
                 model='gemma3:4b',
-                messages=messages
+                messages=messages,
+                options={"temperature": 0.5}
             )
             answer = response.message.content
 
@@ -182,9 +211,6 @@ class GPTAssistant:
             # Обработка ошибок
             logger.error(f"Ошибка: {type(e).__name__}: {e}")
             return f"Ошибка: {str(e)}"
-
-
-    
        
 
     def _update_chat_history(self, question, response):
@@ -249,5 +275,6 @@ class GPTAssistant:
             return f"Ошибка OpenAI API: {str(e)}"
 
         return answer
+
 
 
