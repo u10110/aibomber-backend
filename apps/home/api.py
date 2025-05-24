@@ -33,6 +33,7 @@ from apps.telegram.sndr import MessageProcessor
 import traceback
 
 TELETHON_HOST = config("TELETHON_HOST")
+WHATSAPPJS_HOST = config("WHATSAPPJS_HOST")
 from django.middleware.csrf import get_token
 
 
@@ -765,17 +766,27 @@ def channel_update(request, channel_id):
                 ).first()
 
                 if channel_to_save:
-
-                    response = requests.post(
-                        f"{TELETHON_HOST}/update-account/",
-                        json={
-                            "phone": channel_to_save.phone,
-                            "first_name": first_name,
-                            "last_name": last_name,
-                            "username": username,
-                            "about": about,
-                        },
-                    )
+                    if channel_to_save.source == 'telegram':
+                        response = requests.post(
+                            f"{TELETHON_HOST}/update-account/",
+                            json={
+                                "phone": channel_to_save.phone,
+                                "first_name": first_name,
+                                "last_name": last_name,
+                                "username": username,
+                                "about": about,
+                            },
+                        )
+                    if channel_to_save.source == 'whatsapp':
+                        response = requests.post(
+                            f"{WHATSAPPJS_HOST}/update-account/",
+                            json={
+                                "phone": channel_to_save.phone,
+                                "first_name": first_name,
+                                "last_name": last_name,
+                                "about": about,
+                            },
+                        )
                     logger.debug(response)
                     if response.status_code == 200:
                         new_remote_entity = channel_to_save.remote_entity
