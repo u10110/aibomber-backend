@@ -59,6 +59,7 @@ import random
 
 
 TELETHON_HOST = config("TELETHON_HOST")
+WHATSAPPJS_HOST = config('WHATSAPPJS_HOST')
 
 def error(request):
     return render(request, "errors/technical_break.html")
@@ -1236,18 +1237,30 @@ def send_code(request):
             phone_number = re.sub(r'[^\d+]', '', phone_number.strip())
             if not phone_number.startswith('+'):
                 phone_number = '+' + phone_number  # Добавляем '+' в начало, если его нет
+            channel, created = Channel.objects.get_or_create(phone=phone_number, client=request.user)
 
-            print(phone_number)
-            # Отправка запроса в FastAPI
-            response = requests.post(
-                f"{TELETHON_HOST}/send-code/",
-                params={"phone": phone_number},
-            )
-            logger.debug(response)
-            if response.status_code == 200:
-                return JsonResponse(response.json())
-            else:
-                return JsonResponse({"message": response.text, "success": False})
+            if channel.source == 'telegram':
+                response = requests.post(
+                    f"{TELETHON_HOST}/send-code/",
+                    params={"phone": phone_number},
+                )
+                logger.debug(response)
+                if response.status_code == 200:
+                    return JsonResponse(response.json())
+                else:
+                    return JsonResponse({"message": response.text, "success": False})
+
+            if channel.source == 'whatsapp':
+                response = requests.post(
+                    f"{WHATSAPPJS_HOST}/send-code/",
+                    params={"phone": phone_number},
+                )
+                logger.debug(response.content)
+                if response.status_code == 200:
+                    return JsonResponse(response.json())
+                else:
+                    return JsonResponse({"message": response.text, "success": False})
+
         except Exception as e:
             logger.error(traceback.format_exc())
             return JsonResponse({"message": str(e), "success": False})

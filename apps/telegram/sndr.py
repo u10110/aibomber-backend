@@ -39,6 +39,7 @@ from decouple import config
 # Constants
 PID_FILE = "sndr.lock"
 TELETHON_HOST = config("TELETHON_HOST")
+WHATSAPPJS_HOST = config("WHATSAPPJS_HOST")
 
 MESSAGE_SENT_STATUSES = [
     'SENT',
@@ -196,6 +197,31 @@ class MessageProcessor:
             return False
 
     @staticmethod
+    def send_message_to_whatsapp(phone: str, user_phone: str, message: str) -> requests:
+
+        phone = phone.strip().replace("+", "")
+        user_phone = user_phone.strip().replace("+", "")
+
+        payload = {
+            "phone": phone,
+            "user_phone": user_phone,
+            "message": message
+        }
+
+        try:
+            response = requests.post(
+                f"{WHATSAPPJS_HOST}/send-message/",
+                json=payload
+            )
+            logger.debug(f"Ответ сервера watsajs:{response.status_code}")
+            return response
+
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error(f"Telegram API error: {e}")
+            return False
+
+    @staticmethod
     def chat_messages_count(chat):
         return ChatMessages.objects.filter(chat_id=chat, message_type='outcoming').count()
 
@@ -277,21 +303,33 @@ class ProjectProcessor:
                 logger.info(f"создаем и отправляем первое сообщение")
                 # Обрабатываем новых пользователе
 
-                info_response = requests.get(f"{TELETHON_HOST}/get-user-info/",
-                                             params={"phone": channel.phone, "username": next_recipient.get('user_name')
-                                                     })
+                if channel.source == 'telegram':
+                    info_response = requests.get(f"{TELETHON_HOST}/get-user-info/",
+                                                 params={"phone": channel.phone, "username": next_recipient.get('user_name')
+                                                         })
+                    recipient_info = json.loads(info_response.content)
 
-                recipient_info = json.loads(info_response.content)
+                if channel.source == 'whatsapp':
+                    info_response = requests.get(f"{WHATSAPPJS_HOST}/get-user-info/",
+                                                    params={"phone": channel.phone, "user_phone": next_recipient.get('user_name')
+                                                         })
+
+                    recipient_info = json.loads(info_response.content)
+
+
 
                 photo_url = None
                 if recipient_info.get('photo', None) is not None and recipient_info.get('photo', None) != '':
-                    photo_url = f"{TELETHON_HOST}/get-user-photo?photo={recipient_info.get('photo')}"
+                    if channel.source == 'telegram':
+                        photo_url = f"{TELETHON_HOST}/get-user-photo?photo={recipient_info.get('photo')}"
+                    if channel.source == 'whatsapp':
+                        photo_url = f"{WHATSAPPJS_HOST}/get-user-photo?photo={recipient_info.get('photo')}"
 
                 user_name = ''
-                if  recipient_info.get('first_name') is not None:
+                if recipient_info.get('first_name') is not None:
                     user_name=recipient_info.get('first_name')
 
-                if  recipient_info.get('last_name') is not None:
+                if recipient_info.get('last_name') is not None:
                     user_name+=recipient_info.get('last_name')
 
                 recipient_char = just_ask_question("Опиши человека на фото, если он там есть.", photo_url)
@@ -352,10 +390,22 @@ class ProjectProcessor:
                         recipient_for_update_status.status = 'completed'
                         recipient_for_update_status.save()
 
-                    response = message_processor.send_message_to_telegram(
-                        channel.phone,
-                        chat_for_current_channel_message.user_id,
-                        message)
+                    if channel.source == 'telegram':
+                        response = message_processor.send_message_to_telegram(
+                            channel.phone,
+                            chat_for_current_channel_message.user_id,
+                            message)
+
+                    if channel.source == 'whatsapp':
+                        response = message_processor.send_message_to_whatsapp(
+                            channel.phone,
+                            chat_for_current_channel_message.user_id,
+                            message)
+
+                    if response is None:
+                        logger.debug('Channel source is unknown ')
+                        return False
+
                     response_body = json.loads(response.content)
                     if response.status_code == 200:
                         remote_message_entity = json.loads(response_body.get('result'))
@@ -414,19 +464,32 @@ class ProjectProcessor:
         )
         logger.debug("GPT подготовил ответ")
         if message:
-            result = message_processor.send_message_to_telegram(
-                chat.channel.phone,
-                chat.user_id,
-                message)
-            logger.debug(result)
+
+            if chat.channel.source == 'telegram':
+                response = message_processor.send_message_to_telegram(
+                    chat.channel.phone,
+                    chat.user_id,
+                    message)
+
+            if chat.channel.source == 'whatsapp':
+                response = message_processor.send_message_to_whatsapp(
+                    chat.channel.phone,
+                    chat.user_id,
+                    message)
+
+            if response is None:
+                logger.debug('Channel source is unknown ')
+                return False
+
+            logger.debug(response)
             embedding = create_message_embedding(message)
-            if result and result.status_code == 200:
+            if response and response.status_code == 200:
                 logger.info(f"message sended {message} ")
                 ChatMessages.objects.create(
                     chat_id=chat,
                     user_message=message[:555],
                     message_type="outcoming",
-                    embedding = embedding
+                    message_embedding=embedding
                 )
             chat.channel.save()
 
@@ -434,20 +497,19 @@ class ProjectProcessor:
     def get_next_new_recipient(project: Project):
         recipients = Recipient.objects.filter(project_id=project.id, status__in=['new', 'active'])
         for recipient in recipients:
-
+            logger.debug(recipient)
             if recipient.start_date and recipient.start_date >= datetime.datetime.now(tz=timezone.utc):
                 logger.debug(f"Расслка  {recipient.title} отложена по дате {recipient.start_date}")
                 continue
 
             for remote_id in recipient.remote_ids.replace(' ', ',').replace('\r\n', ',').replace('\n', ',').split(','):
+                logger.debug(remote_id)
                 if len(remote_id) > 0:
                     chat = Chat.objects.filter(project=project,
                                                recipient_id=recipient.id,
                                                user_id__endswith=remote_id).first()
                     if not chat:
                         user_name = remote_id
-                        if not remote_id.startswith('@'):
-                            user_name = "@" + remote_id
 
                         logger.debug(f"Новый получаетль {user_name} проект {project.id}")
                         return {
