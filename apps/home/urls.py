@@ -175,6 +175,7 @@ urlpatterns = [
     path('api/channel/<int:channel_id>/update/', login_required(api.channel_update), name='api-channel-update'),
     path('api/channel/<int:channel_id>/delete', login_required(api.channel_delete), name='api-channel-delete'),
     path('api/channel/send-code/', login_required(views.send_code), name='api-channel-send-code'),
+    path('api/channel/is-auth/', login_required(views.is_auth), name='api-channel-is-auth'),
     path('api/channel/verify-code/', login_required(api.verify_code), name='api-channel-verify-code'),
     path('api/channel/send-password/', login_required(api.send_password), name='api-channel-send-password'),
 

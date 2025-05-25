@@ -1268,6 +1268,35 @@ def send_code(request):
     return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
 
 
+@csrf_exempt
+def is_auth(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            phone_number = data.get('phone')
+
+            if not phone_number:
+                return JsonResponse({"message": "Номер телефона не указан", "success": False})
+
+            phone_number = re.sub(r'[^\d+]', '', phone_number.strip())
+            channel = Channel.objects.get(phone=phone_number, client=request.user)
+            if channel.source == 'whatsapp':
+                response = requests.get(
+                    f"{WHATSAPPJS_HOST}/is-auth/",
+                    params={"phone": phone_number},
+                )
+                logger.debug(response.content)
+                if response.status_code == 200:
+                    return JsonResponse(response.json())
+                else:
+                    return JsonResponse({"message": response.text, "success": False})
+
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            return JsonResponse({"message": str(e), "success": False})
+
+    return JsonResponse({"message": "Метод запроса должен быть POST", "success": False})
+
 # Шаг 2: Подтверждаем код авторизации
 @csrf_exempt
 def verify_code(request):
