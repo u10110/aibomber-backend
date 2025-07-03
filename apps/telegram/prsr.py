@@ -7,6 +7,8 @@ from decouple import config
 from apps.home.services.gpt_assistant import GPTAssistant
 # Import models after Django configuration
 from loguru import logger
+import ollama
+from ollama import Client
 from apps.home.models import (
     Project,
     Channel,
@@ -24,6 +26,8 @@ import sys
 
 TELETHON_HOST = config("TELETHON_HOST")
 
+def create_message_embedding(message_text):
+    return ollama.embeddings(model='nomic-embed-text', prompt=message_text).embedding
 
 def get_active_clients():
     """
@@ -114,12 +118,20 @@ def save_messages(user_id, messages, project, channel, user_view_name):
         # Определяем, кто отправил сообщение: GPT Assistant или другой пользователь
         logger.info(f"Сообщение получено {user_name}: {message_id}")
         if user_name:
-
+            print([
+                 project,
+                 channel,
+                 from_id,
+                 _USER_NAME
+             ])
             chat = Chat.objects.filter(
                 project=project,
                 channel=channel,
-                remote_chat_id=from_id
+                remote_chat_id=from_id,
+                user_id=_USER_NAME
             ).order_by('-last_message_time').first()
+            #print(chat)
+           # input("Press Enter to process sending...")
             if not chat:
                 chat = Chat(
                     project=project,
@@ -140,6 +152,8 @@ def save_messages(user_id, messages, project, channel, user_view_name):
 
             if not existing_message:
 
+                embedding = create_message_embedding(message_text)
+
                 # Создаём новое сообщение в базе
                 ChatMessages.objects.create(
                     chat_id=chat,
@@ -147,7 +161,8 @@ def save_messages(user_id, messages, project, channel, user_view_name):
                     user_message=message_text[:555],
                     remote_id=message_id,  # Сохраняем ID сообщения
                     created_at=message_date,
-                    remote_message=message
+                    remote_message=message,
+                    message_embedding=embedding
                 )
 
                 logger.info(f"Сообщение сохранено для пользователя {user_name}: {message_id}")

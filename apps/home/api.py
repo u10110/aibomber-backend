@@ -82,9 +82,9 @@ def send_to_gpt(request):
             assistant.chat_history = formatted_history[:-1]
 
             logger.debug(question)
-            photo = f"{TELETHON_HOST}/get-user-photo?photo=./photos/photo_2025-05-16_05-15-19.jpg"
+            #photo = f"{TELETHON_HOST}/get-user-photo?photo=./photos/photo_2025-05-16_05-15-19.jpg"
             # Получаем ответ от GPT
-            response = assistant.ask_question(question, photo, False)
+            response = assistant.ask_question(question, None, False)
 
             return JsonResponse({
                 "question": question,

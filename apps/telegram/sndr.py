@@ -159,10 +159,10 @@ class MessageProcessor:
         # Получение ответа от GPT
         try:
             answer = assistant.ask_question(question, photo)
-            chat_status = assistant.ask_chat_status()
-            logger.debug(chat_status)
-            if chat_status == 'interest_shown' or chat_status == 'contact_received':
-                MessageProcessor.send_message_to_telegram(channel.phone, '@ai_bomber',  user_id + ' status ' + chat_status )
+            #chat_status = assistant.ask_chat_status()
+            #logger.debug(chat_status)
+            #if chat_status == 'interest_shown' or chat_status == 'contact_received':
+            #    MessageProcessor.send_message_to_telegram(channel.phone, '@ai_bomber',  user_id + ' status ' + chat_status )
 
             return answer
         except Exception as e:
@@ -273,24 +273,27 @@ class ProjectProcessor:
 
             new_chat_in_2400_sec = Chat.objects.filter(
                 channel=channel,
-                created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(seconds=2400))
+                created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(seconds=2400)),
+                status='new'
             ).annotate(max_created_at=Max('created_at')).count()
 
             new_chat_in_day_fr_channel = Chat.objects.filter(
                 channel=channel,
-                created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(seconds=86400))
+                created_at__gte=(datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(seconds=86400)),
+                status='new'
             ).annotate(max_created_at=Max('created_at')).count()
 
-            # Получаем TG ID, у которых нет сообщений
+
             next_recipient = ProjectProcessor.get_next_new_recipient(project)
             logger.info(next_recipient)
-            # Обрабатываем существующий\
 
-            if new_chat_in_day_fr_channel > 4:
+            count_new_chats_in_day = 10
+
+            if new_chat_in_day_fr_channel > count_new_chats_in_day:
                 logger.info(f"Для канала {channel.id}  {channel.phone} достигнут лимит новых  чатов в день")
                 return
             else:
-                logger.info(f"Для канала {channel.id}  {channel.phone}  осталось {new_chat_in_day_fr_channel} за сегодня")
+                logger.info(f"Для канала {channel.id}  {channel.phone}  осталось {count_new_chats_in_day - new_chat_in_day_fr_channel} за сегодня")
 
 
             if new_chat_in_2400_sec > 0:
@@ -316,14 +319,33 @@ class ProjectProcessor:
 
                     recipient_info = json.loads(info_response.content)
 
-
+                if recipient_info.get('registered', None) is not None and recipient_info.get('registered', None) == False:
+                    chat_for_current_channel_message = Chat(
+                        project=project,
+                        user_id=next_recipient.get('user_name'),
+                        recipient_id=next_recipient.get('recipient_id'),
+                        photo=None,
+                        recipient_char_embedding=None,
+                        user_name= next_recipient.get('user_name'),
+                        status="not_found",
+                        channel=channel
+                    )
+                    chat_for_current_channel_message.save()
+                    return False
 
                 photo_url = None
+                recipient_char_embedding = None
                 if recipient_info.get('photo', None) is not None and recipient_info.get('photo', None) != '':
                     if channel.source == 'telegram':
                         photo_url = f"{TELETHON_HOST}/get-user-photo?photo={recipient_info.get('photo')}"
                     if channel.source == 'whatsapp':
                         photo_url = f"{WHATSAPPJS_HOST}/get-user-photo?photo={recipient_info.get('photo')}"
+
+
+                    logger.info(f"Отправляем запрос за анализ фото")
+
+                    recipient_char = just_ask_question("Опиши человека на фото, если он там есть.", photo_url)
+                    recipient_char_embedding = create_message_embedding(recipient_char)
 
                 user_name = ''
                 if recipient_info.get('first_name') is not None:
@@ -331,9 +353,6 @@ class ProjectProcessor:
 
                 if recipient_info.get('last_name') is not None:
                     user_name+=recipient_info.get('last_name')
-
-                recipient_char = just_ask_question("Опиши человека на фото, если он там есть.", photo_url)
-                recipient_char_embedding = create_message_embedding(recipient_char)
 
                 chat_for_current_channel_message = Chat(
                     project=project,
@@ -344,19 +363,23 @@ class ProjectProcessor:
                     user_name=user_name,
                     channel=channel
                 )
-                chat_for_current_channel_message.save()
-
-                logger.info(
-                    f"Создан новый чат для {chat_for_current_channel_message.id} {next_recipient.get('user_name')}")
 
                 message = message_processor.send_to_gpt_assistant(
-                    chat_id=chat_for_current_channel_message.id,
+                    chat_id=None,
                     project_id=project.id,
-                    question="Сгенерируй приветственное сообщение для '" + user_name + "' на основе шаблона '" + project.hello_text + "'.  ",  # Пустой вопрос для нового пользователя
+                    question="Сгенерируй приветственное сообщение для '" + user_name + "' на основе шаблона '" + project.hello_text + "'. Без комментариев, только сообщение. ",
                     channel=channel,
                     photo=chat_for_current_channel_message.photo,
                     user_id=chat_for_current_channel_message.user_id
                 )
+                #print(chat_for_current_channel_message.user_id, channel)
+                print(message)
+                input("Press Enter to process sending...")
+
+                chat_for_current_channel_message.save()
+                logger.info(f"Создан новый чат для {chat_for_current_channel_message.id} {next_recipient.get('user_name')}"
+                            f" {next_recipient.get('user_id')}")
+
 
                 embedding = create_message_embedding(message)
 

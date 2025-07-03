@@ -10,6 +10,11 @@ from loguru import logger
 from urllib.request import urlopen
 import pybase64
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import PCA
+import pandas as pd
+import numpy as np
+
 OPENAI_API_KEY = config("OPENAI_API_KEY")
 
 client = Client(
@@ -19,6 +24,27 @@ client = Client(
 
 def create_message_embedding(message_text):
     return ollama.embeddings(model='nomic-embed-text', prompt=message_text).embedding
+
+def create_message_pca_embedding(messages):
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(messages)
+
+    n_samples, n_features = X.shape
+    n_components = min(n_samples, n_features)
+    print(n_samples, n_features )
+    # Применение PCA
+    pca = PCA(n_components=5)  # Например, 2 главных компоненты
+    pca.fit(X)
+    ret =  pca.transform(X)
+    feature_names = vectorizer.get_feature_names_out()
+
+    for i in range(ret.shape[1]):
+        print(f"Главная компонента {i+1}:")
+        for word in feature_names:
+            index = np.where(feature_names == word)
+
+            print(f"  {word}: {ret[0, i] * vectorizer.idf_[index]}")
+    return ret
 
 
 def just_ask_question(question=None, photo=None):
@@ -183,7 +209,7 @@ class GPTAssistant:
                 {"role": "user", "content": question}
             ]
 
-        print(f"messages {messages}")
+        #print(f"messages {messages}")
 
         # Отправляем запрос в OpenAI API
         try:

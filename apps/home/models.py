@@ -441,6 +441,7 @@ class ChatMessages(SoftDeleteModel):
     remote_id = models.CharField(null=True, max_length=1000)
     remote_message = models.JSONField(default={})
     message_embedding = VectorField(default=None, null=True)
+    message_embedding_pca_reduced = VectorField(default=None, null=True)
     remote_status = models.CharField(max_length=1000, default='unknown')
     message_type = models.CharField(
         max_length=20,
