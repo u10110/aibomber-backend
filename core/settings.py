@@ -34,19 +34,9 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
 # prod
-CSRF_TRUSTED_ORIGINS = ["https://app.eliment.ai", "https://eliment.ai", "https://dev.eliment.ai"]
 # load production server from .env
 ALLOWED_HOSTS = [
-    'eliment.ai',
-    '.eliment.ai',
-    "49.13.104.130",
-    "dc1-ea-app-01.app.eliment.ai",
-    "127.0.0.1",
-    "localhost",
-    "192.168.122.200",
-    "192.168.122.26",
-    config("SERVER", default="192.168.122.200"),
-    "localhost.localdomain",
+   'client.aibomber.crazedns.ru'
     'localhost:5173'
 ]
 
@@ -70,12 +60,10 @@ INSTALLED_APPS = [
     # 'debug_panel',
     "apps.home",
     "apps.authentication",
-    "apps.billing",
-    "apps.alert",
-    "apps.telegram",
-    "apps.users_control",
+
+
     "import_export",
-    "apps.amocrm",
+
     "django_user_agents",
     "widget_tweaks",
     "apps.templatetags",
@@ -104,9 +92,7 @@ MIDDLEWARE = [
 #     'debug_panel.middleware.DebugPanelMiddleware',
 # )
 
-TELEGRAM_BOT_NAME = 'eliment_ai_bot'
-TELEGRAM_BOT_TOKEN = '7872283718:AAFlOtPiB1hnMVFlAiq4-nGzpqpuDb80lFQ'
-TELEGRAM_LOGIN_REDIRECT_URL = 'https://127.0.0.1:8000'
+
 
 
 ROOT_URLCONF = "core.urls"
@@ -114,14 +100,6 @@ LOGIN_URL = "login"  # Route defined in home/urls.py
 LOGIN_REDIRECT_URL = "login"  # Route defined in home/urls.py
 LOGOUT_REDIRECT_URL = "home"  # Route defined in home/urls.py
 TEMPLATE_DIR = os.path.join(CORE_DIR, "apps/templates")  # ROOT dir for templates
-
-CSP_FRAME_ANCESTORS = ["'self'", "http://127.0.0.1", "https://telegram.org"]
-CSP_DEFAULT_SRC = ["'self'", "https://telegram.org", "https://oauth.telegram.org"]
-CSP_SCRIPT_SRC = ["'self'", "https://telegram.org", "https://oauth.telegram.org"]
-CSP_STYLE_SRC = ["'self'", "https://telegram.org", "'unsafe-inline'"]
-CSP_CONNECT_SRC = ["'self'", "https://telegram.org", "https://oauth.telegram.org"]
-CSP_INCLUDE_NONCE_IN = ['script-src']
-
 
 
 TEMPLATES = [
