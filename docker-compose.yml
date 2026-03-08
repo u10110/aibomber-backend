@@ -7,11 +7,11 @@ services:
     restart: always
     env_file: .env
     ports:
-      - "80:80"
+      - "8383:80"
     networks:
       - default
-    external_links:
-      - neuro_db:neuro_db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command: gunicorn --config gunicorn-cfg.py core.wsgi --workers 1 --threads 1 --timeout 300 --graceful-timeout 300 --max-requests 1000 --max-requests-jitter 50
 
 
@@ -22,7 +22,7 @@ services:
       context: ./
     restart: always
     env_file: .env
-    command: python manage.py send_telegramm_messages
+    command: python manage.py send_messages
     logging:
       driver: "json-file"
       options:
@@ -30,8 +30,8 @@ services:
         max-file: "3"
     networks:
       - default
-    external_links:
-      - neuro_db:neuro_db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   eliment-cli-kafka-message-reply:
     container_name: eliment-cli-kafka-message-reply
@@ -40,12 +40,14 @@ services:
       context: ./
     restart: always
     env_file: .env
-    command: python manage.py reply_telegram_messages
+    command: python manage.py reply_messages
     logging:
       driver: "json-file"
       options:
         max-size: "1000m"
         max-file: "3"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 networks:
   default:
