@@ -17,9 +17,9 @@ def trigger_error(request):
 urlpatterns = [
     path("sentry-debug/", trigger_error),
     path("__debug__/", include("debug_toolbar.urls")),
-    path("dev-admin8/", admin.site.urls),  # Django admin route
+ 
     # path("dashboard/", include("apps.home.urls")),             # UI Kits Html files
-    path("api/", include("apps.alert.urls")),  # UI Kits Html files
+   
     path("i18n/", include("django.conf.urls.i18n")),
     path("", include("apps.authentication.urls")),  # Auth routes - login / register
     path("", include("apps.home.urls")),  # UI Kits Html files

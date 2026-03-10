@@ -17,18 +17,17 @@ from lxml import html
 from sentry_sdk import last_event_id
 import re
 
-from apps.alert.views import billing_check
+
 from apps.authentication.models import UserInfo
-from apps.billing.helper import Helper as BHelper
-from apps.billing.models import Limits, Order, Paid, UnicTariff
-from apps.users_control.models import ReferalCounter, UsersAgreement
+
+
 from core.settings import MEDIA_ROOT
 
 
 from apps.telegram.sndr import ProjectProcessor
 from apps.telegram.prsr import process_project
 
-from .forms import *
+
 from .helper import Helper
 from .models import (
     ReferralClickCounter,
@@ -40,7 +39,7 @@ from .models import (
     Phone,
     ChatMessages
 )
-from .module import *
+
 from .services.services import MinioService
 from django.shortcuts import get_object_or_404
 from django.db.models import Max, OuterRef, Subquery, Count, Q, F
@@ -86,159 +85,6 @@ def password_update(request):
             return JsonResponse({"resp": "bad password"}, status=200)
 
 
-def general_information_update(request):
-    if request.method == "POST":
-        data = request.POST
-        print(data)
-        mail_agree = True if "mailingOnPhoneNumber" in data else False
-        phone_agree = True if "mailingOnMail" in data else False
-        UsersAgreement.objects.filter(client=request.user).update(
-            mail_agree=mail_agree, phone_agree=phone_agree
-        )
-        user = User.objects.get(id=request.user.id)
-        user.first_name = data["name"]
-        user.last_name = data["surname"]
-        user.email = data["email"]
-        user.save()
-        user_info = UserInfo.objects.get(user=request.user)
-        if data["sex"] == "Мужчина":
-            user_info.sex = 1
-        elif data["sex"] == "Женщина":
-            user_info.sex = 0
-        if "year" in data:
-            if int(data["year"]) < 2010:
-                user_info.date_birthday = datetime.date(
-                    year=int(data["year"]),
-                    month=int(data["month"]) + 1,
-                    day=int(data["day"]),
-                )
-
-        user_info.save()
-        r = requests.post(
-            "https://eliment.ai/amotest/",
-            json={"client_id": request.user, "type_deal": "user_d_add"},
-            timeout=10,
-        )
-        if r.status_code == 200:
-            print(f"amo {r.text}")
-
-        return JsonResponse({"resp": "ok"}, status=200)
-
-
-def personal_room(request):
-    context = {}
-    user_info = {}
-    user = request.user
-    if UserInfo.objects.filter(user=user).exists():
-        info_user = UserInfo.objects.get(user=user)
-    else:
-        info_user = UserInfo.objects.create(user=user)
-    if UsersAgreement.objects.filter(client=user):
-        info_agreement = UsersAgreement.objects.get(client=user)
-    else:
-        info_agreement = UsersAgreement.objects.create(client=user)
-    user_info["name"] = user.first_name
-    user_info["surname"] = user.last_name
-    user_info["email"] = user.email
-    user_info["phone"] = user.phone
-    user_info["sex"] = info_user.sex
-    user_info["phone_agree"] = info_agreement.phone_agree
-    user_info["mail_agree"] = info_agreement.mail_agree
-    if info_user.date_birthday:
-        user_info["year"] = info_user.date_birthday.year
-        user_info["month"] = info_user.date_birthday.month
-        user_info["day"] = info_user.date_birthday.day
-    user_info["tg_token"] = ClientSettings.objects.get(client=user).tg_token
-    api_tokens = Client_Supplier_Access.objects.filter(
-        client_settings=ClientSettings.objects.get(client=request.user)
-    )
-    context["user_info"] = user_info
-
-    date_now = datetime.datetime.now(timezone.utc)
-    if Limits.objects.filter(
-            client=user, start_date__lte=date_now, end_date__gte=date_now
-    ).exists():
-        user_limits = {}
-        limits = Limits.objects.filter(
-            client=user, start_date__lte=date_now, end_date__gte=date_now
-        )[0]
-        order = limits.paid_info.order
-
-        if order.is_calculated == True:
-            tariff_info = order.calculated_tariff
-        else:
-            tariff_info = UnicTariff.objects.get(title=order.tariff)
-
-        if order.is_calculated == True:
-            user_limits["tariff"] = "Собственный"
-        else:
-            if tariff_info.title == "showroom":
-                user_limits["tariff"] = "Шоурум"
-            elif tariff_info.title == "market":
-                user_limits["tariff"] = "Магазин"
-            elif tariff_info.title == "hypermarket":
-                user_limits["tariff"] = "Гипермаркет"
-            elif tariff_info.title == "magigrand":
-                user_limits["tariff"] = "Магигранд"
-            else:
-                user_limits["tariff"] = tariff_info.title
-        for_max_limits = BHelper(user.id)
-        user_limits["course_autobuy"] = for_max_limits.get_max_limit("course_autobuy")
-        user_limits["monitor"] = for_max_limits.get_max_limit("monitor")
-        user_limits["buyout_limit"] = limits.buyout_limit
-        user_limits["buyout_limit_max"] = for_max_limits.get_max_limit("buyout_limit")
-        user_limits["review_limit"] = limits.review_limit
-        user_limits["review_limit_max"] = for_max_limits.get_max_limit("review_limit")
-        user_limits["like_limit"] = limits.like_limit
-        user_limits["like_limit_max"] = for_max_limits.get_max_limit("like_limit")
-        user_limits["like_review_limit"] = limits.like_review_limit
-        user_limits["like_review_max"] = for_max_limits.get_max_limit(
-            "like_review_limit"
-        )
-        user_limits["question_limit"] = limits.question_limit
-        user_limits["question_limit_max"] = for_max_limits.get_max_limit(
-            "question_limit"
-        )
-        user_limits["positions_limit"] = get_count_search_promotion_limits(
-            user.id, is_search_promotion=False
-        )
-        user_limits["positions_limit_max"] = get_search_promotion_limits(
-            user.id, is_search_promotion=False
-        )
-        user_limits["search_promotion_limit"] = get_count_search_promotion_limits(
-            user.id, is_search_promotion=True
-        )
-        user_limits["search_promotion_limit_max"] = get_search_promotion_limits(
-            user.id, is_search_promotion=True
-        )
-        user_limits["course_autobuy"] = for_max_limits.get_max_limit("course_autobuy")
-        user_limits["monitoring_rate"] = for_max_limits.get_max_limit("monitoring_rate")
-        user_limits["tariff_date_end"] = limits.paid_info.end_date
-        context["limits"] = user_limits
-
-        tokens = Client_tokens.objects.filter(client=request.user).order_by(
-            "created_at"
-        )
-        context["tokens"] = tokens
-
-        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-        if x_forwarded_for:
-            ip = x_forwarded_for.split(",")[0]
-        else:
-            ip = request.META.get("REMOTE_ADDR")
-        context["user_ip"] = ip
-
-    else:
-        pass
-    print(api_tokens)
-    if api_tokens:
-        context["api_tokens"] = {
-            "api_token_64": api_tokens[0].api_token_64,
-            "api_token_new": api_tokens[0].api_token_new,
-            "supplier_id": api_tokens[0].supplier_id,
-        }
-    print(context)
-    return render(request, "apps/personal_room.html", context)
 
 
 def set_bad_payed(request):
@@ -257,62 +103,6 @@ def set_bad_payed(request):
     return JsonResponse({"resp": True})
 
 
-def referral(request):
-    context = {}
-    if not ReferralLinks.objects.filter(referrer=request.user).exists():
-        while True:
-            code = "".join(random.choice(string.ascii_letters) for x in range(10))
-            if not ReferralLinks.objects.filter(code=code).exists():
-                ReferralLinks.objects.create(code=code, referrer=request.user)
-                break
-    referral_object = ReferralLinks.objects.get(referrer=request.user)
-    code = referral_object.code
-    referral_link = f'{request.META["HTTP_HOST"]}/signup' + "?referrer=" + code
-    count_click = len(ReferralClickCounter.objects.filter(source=referral_object))
-    users_signup = ReferralUsers.objects.filter(source=referral_object)
-    count_signup = len(users_signup)
-    conter_paid = 0
-    earned = 0
-    objects = []
-    if not ReferalCounter.objects.filter(client=request.user):
-        ReferalCounter(client=request.user, balance=0).save()
-    refferal_owner = ReferalCounter.objects.get(client=request.user)
-    for user in users_signup:
-        if Order.objects.filter(client=user.user, paid_status=True).exists():
-            conter_paid += 1
-        if not referal_live(refferal_owner.privileged, user.user.date_joined):
-            continue
-        orders = Order.objects.filter(client=user.user, paid_status=True, refered=False)
-        earned += get_earned_referal(objects, refferal_owner.bonus, orders)
-        if not refferal_owner.privileged or not orders:
-            continue
-        referral_object = ReferralLinks.objects.filter(referrer=user.user)
-        if not referral_object:
-            continue
-        users_signup_sub = ReferralUsers.objects.filter(source=referral_object[0])
-        for user_sub in users_signup_sub:
-            if Order.objects.filter(client=user_sub.user, paid_status=True).exists():
-                conter_paid += 1
-            if not referal_live(refferal_owner.privileged, user_sub.user.date_joined):
-                continue
-            orders = Order.objects.filter(
-                client=user_sub.user, paid_status=True, refered=False
-            )
-            earned += get_earned_referal(objects, refferal_owner.sub_bonus, orders)
-
-    ReferalCounter.objects.filter(client=request.user).update(balance=earned)
-    if refferal_owner.privileged:
-        context["bonus_2level"] = refferal_owner.sub_bonus
-    context["bonus"] = refferal_owner.bonus
-    context["link"] = referral_link
-    context["code"] = code
-    context["count_click"] = count_click
-    context["count_signup"] = count_signup
-    context["conter_paid"] = conter_paid
-    context["earned"] = int(earned)
-    context["objects"] = objects
-
-    return render(request, "apps/referral.html", context)
 
 
 def set_sms_type(request):
@@ -331,121 +121,12 @@ def set_sms_type(request):
     return JsonResponse({"resp": "ok"}, status="200")
 
 
-def faq(request):
-    return render(request, "apps/faq.html")
-
-
-def lessons(request):
-    class Object(object):
-        pass
-
-    if not request.user.id or not BHelper(request.user.id).get_max_limit(
-            "course_autobuy"
-    ):
-        return HttpResponseRedirect("/")
-    request2 = Object()
-    request2.method = "POST"
-    request2.body = str({"id": request.user.id}).replace("'", '"')
-    response = billing_check(request2)
-    response = json.loads(response._container[0])
-    is_tariff = response["result"]
-    return render(request, "apps/lessons.html", {"is_tariff": json.dumps(is_tariff)})
-
-
-def pricing(request):
-    context = {}
-    date_now = datetime.datetime.now(datetime.timezone.utc)
-    if Paid.objects.filter(client=request.user).exists():
-        if (
-                Paid.objects.filter(client=request.user).latest("end_date").end_date
-                >= date_now.date()
-        ):
-            context["have_subscribe"] = True
-    if "have_subscribe" not in context:
-        context["have_subscribe"] = False
-    return render(request, "apps/pricing.html", context)
-
-
-def account_billing(request):
-    return render(request, "apps/account-billing.html")
 
 
 def review_rating(request):
     pass
 
 
-def account(request):
-    user = get_user_model().objects.get(id=request.user.id)
-    context = {}
-    if request.method == "POST":
-        form = Account(request.POST)
-        if form.is_valid():
-            try:
-                data = {
-                    "first_name": form.cleaned_data.get("first_name"),
-                    "last_name": form.cleaned_data.get("last_name"),
-                    "phone": request.user.phone,
-                    "email": form.cleaned_data.get("email"),
-                    "password1": form.cleaned_data.get("password1"),
-                }
-                if data["first_name"]:
-                    user.first_name = data["first_name"]
-                if data["last_name"]:
-                    user.last_name = data["last_name"]
-                    user.phone = data["phone"]
-                if data["email"]:
-                    user.email = data["email"]
-                if data["password1"]:
-                    user.set_password(data["password1"])
-                user.save()
-                context["error"] = "False"
-            except IntegrityError as e:
-                context["error"] = True
-                context[
-                    "error_message"
-                ] = "Пользователь с данным номером телефона уже зарегистрирован"
-
-            # user.first_name = data['first_name']
-            # user.last_name = data['last_name']
-            # user.phone = data['phone']
-            # user.email = data['email']
-            # user.set_password(data['password1'])
-            # user.save()
-        else:
-            # print(form.errors['phone'])
-            print(list(dict(form.errors).keys())[0])
-            error = list(dict(form.errors).keys())[0]
-            context["error"] = True
-            if error == "phone":
-                context["error_message"] = "Неверный формат телефона"
-            elif error == "password2":
-                context["error_message"] = "Пароли не совпадают"
-
-    else:
-        form = Account(
-            {
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "phone": user.phone,
-                "email": user.email,
-            }
-        )
-        tg_user_row = ClientSettings.objects.get(client=request.user.id)
-        context["tg_token"] = tg_user_row.tg_token
-    context["form"] = form
-    return render(request, "apps/account.html", context=context)
-
-
-def upload(request):
-    if request.method == "POST" and request.FILES.get("file"):
-        # upload = request.FILES['upload']
-        print(request.FILES.get("file"))
-        upload = request.FILES.get("file")
-        fss = FileSystemStorage()
-        file = fss.save(upload.name, upload)
-        file_url = fss.url(file)
-        return render(request, "main/upload.html", {"file_url": file_url})
-    return render(request, "main/upload.html")
 
 
 def auto_pay_stop(request, group):
@@ -454,18 +135,6 @@ def auto_pay_stop(request, group):
         num_group=group
     ).update(pay_type="no")
     return HttpResponseRedirect(f"/buyout?status=active&group={group}")
-
-
-def add_question(request):
-    return render(request, "apps/add-question.html")
-
-
-def add_to_cart(request):
-    return render(request, "apps/add-to-cart.html")
-
-
-def add_to_waiting(request):
-    return render(request, "apps/add-to-waiting.html")
 
 
 def index(request):
@@ -516,17 +185,6 @@ def card_delete(request, pk):
     return HttpResponseRedirect("/add-card/")
 
 
-def error_404(request, exception):
-    return render(request, "apps/page-404.html")
-
-
-def error_500(request, *args, **argv):
-    return render(
-        request,
-        "apps/page-500.html",
-        {"sentry_event_id": last_event_id(), "email": "anonymous@gmail.ru"},
-        status=500,
-    )
 
 
 def get_segment(request):
@@ -565,206 +223,7 @@ def get_segment(request):
         return "index", "dashboard"
 
 
-def services(request):
-    return render(request, "apps/services.html")
 
-
-def tariffs(request):
-    tariffs = [
-        {
-            "name": "Тариф Базовый",
-            "price_month": "8 333 ₽/мес.",
-            "price_year": "100 000 ₽ в год",
-            "users": "1 цифровой сотрудник",
-            "storage": "Одна роль - лидоруб, работает через Telegram.",
-            "duration": "1 год",
-            "cost_per_employee": "8 333 ₽",
-            "extra_employee_cost": "невозможно",
-            "upgrade_option": "Возможно"
-        },
-        {
-            "name": "Тариф Микробизнес",
-            "price_month": "5 556 ₽/мес.",
-            "price_year": "200 000 ₽ в год",
-            "users": "3 цифровых сотрудника",
-            "storage": """- 2 сотрудника: роль - лидоруб, работает через Telegram и WhatsApp.<br>
-                          - 1 сотрудник: роль - обработка входящего трафика на Avito.""",
-            "duration": "1 год",
-            "cost_per_employee": "5 556 ₽",
-            "extra_employee_cost": "8 500 ₽ (в месяц)",
-            "upgrade_option": "Возможно в течение 3 месяцев после начала действия текущего тарифа"
-        },
-        {
-            "name": "Тариф Компания",
-            "price_month": "3 333 ₽/мес.",
-            "price_year": "400 000 ₽ в год",
-            "users": "10 цифровых сотрудников",
-            "storage": """Первый продукт (5 сотрудников):<br>
-                          - 3 сотрудника: роль - лидоруб, работает через Telegram, WhatsApp и VK.<br>
-                          - 1 сотрудник: роль - обработка входящего трафика на Avito.<br>
-                          - 1 сотрудник: роль - поддержка клиентов через Telegram.<br><br>
-                          Второй продукт (5 сотрудников): аналогично.""",
-            "duration": "1 год",
-            "cost_per_employee": "3 333 ₽",
-            "extra_employee_cost": "5 000 ₽ (в месяц)",
-            "upgrade_option": "Возможно в течение 3 месяцев после начала действия текущего тарифа"
-        },
-        # {
-        #     "name": "Тариф Индивидуальный",
-        #     "price_month": "По согласованию",
-        #     "price_year": "По согласованию",
-        #     "users": "Индивидуальное количество сотрудников",
-        #     "storage": "Возможность реализации на серверах клиента.",
-        #     "duration": "от 1 года",
-        #     "cost_per_employee": "-",
-        #     "extra_employee_cost": "Индивидуально",
-        #     "upgrade_option": "-"
-        # }
-    ]
-    return render(request, 'apps/tariffs.html', {"tariffs": tariffs})
-
-
-@csrf_exempt
-def contact_request(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        phone_number = data.get("phone_number")
-        Phone.objects.create(phone=phone_number)
-        # Здесь можно сохранить номер в базу данных или отправить уведомление
-        return JsonResponse({"message": "Спасибо за вашу заявку! Мы свяжемся с вами."})
-    return JsonResponse({"error": "Некорректный запрос"}, status=400)
-
-
-def projects(request):
-    if request.method == 'POST':
-        form = ProjectForm(request.POST, request.FILES, user=request.user)  # Передаём user для фильтрации
-        if form.is_valid():
-            project = form.save(commit=False)
-            project.client = request.user  # Привязываем проект к текущему пользователю
-            project.save()
-
-            # Обновляем project_id для связанных каналов
-            channels = form.cleaned_data.get('channel', [])
-            for channel in channels:
-                channel.project_id = project.id
-                channel.save()
-
-            # Обновляем project_id для связанных получателей
-            recipients = form.cleaned_data.get('recipients', [])
-            for recipient in recipients:
-                recipient.project_id = project.id
-                recipient.save()
-
-            return redirect('/projects/')
-    else:
-        form = ProjectForm(user=request.user)  # Передаём user для фильтрации
-
-    projects = Project.objects.filter(client=request.user)
-
-    # Получаем все проекты из модели, принадлежащие текущему пользователю
-    client_settings = ClientSettings.objects.get(client=request.user)
-    current_balance = client_settings.balance
-    # Передаем данные в шаблон
-    context = {
-        'form': form,
-        'projects': projects,
-        'current_balance': current_balance,
-    }
-    return render(request, 'apps/projects.html', context)
-
-
-def project_create(request):
-    agent_type = request.GET.get('type', None)
-    max_files = 6
-    uploaded_files = 0  # Если редактируется проект, здесь можно подсчитать уже загруженные файлы
-
-    if request.method == 'POST':
-        form = ProjectForm(request.POST, request.FILES, user=request.user,
-                           agent_type=agent_type)  # Передаём user для фильтрации
-        file_formset = ProjectFileFormSet(request.POST, request.FILES, queryset=ProjectFile.objects.none())
-
-        if form.is_valid() and file_formset.is_valid():
-            project = form.save(commit=False)
-            project.client = request.user  # Привязываем проект к текущему пользователю
-            # project.agent_type = agent_type
-            project.save()
-
-            # Обновляем project_id для связанных каналов
-            channels = form.cleaned_data.get('channel', [])
-            for channel in channels:
-                channel.project_id = project.id
-                channel.save()
-
-            # Обновляем project_id для связанных получателей
-            # Обновляем project_id для связанных получателей
-            recipients = form.cleaned_data.get('recipients', [])
-
-            for recipient in recipients:
-                recipient.project_id = project.id
-                recipient.save()
-
-            for file_form in file_formset:
-                if file_form.cleaned_data.get('file'):
-                    project_file = file_form.save(commit=False)
-                    project_file.project = project
-                    project_file.save()
-
-            return redirect('/projects/')
-        else:
-            print("Форма не прошла валидацию")
-            print(form.errors)  # Печатает ошибки полей
-            print(form.non_field_errors())  # Печатает общие ошибки
-    else:
-
-        form = ProjectForm(user=request.user)
-        file_formset = ProjectFileFormSet(queryset=ProjectFile.objects.none())
-
-    return render(request, 'apps/project_create.html',
-                  {'form': form, 'agent_type': agent_type, 'file_formset': file_formset, 'max_files': max_files,
-                   'uploaded_files': uploaded_files, })
-
-
-def project_edit(request, project_id):
-    project = get_object_or_404(Project, id=project_id,
-                                client=request.user)
-
-    if request.method == "POST":
-        form = ProjectForm(request.POST, request.FILES, instance=project)
-        file_formset = ProjectFileFormSet(request.POST, request.FILES, queryset=ProjectFile.objects.none())
-        if form.is_valid() :
-            form.save()
-
-            # Обновляем project_id для связанных каналов
-            channels = form.cleaned_data.get('channel', [])
-            for channel in channels:
-                channel.project_id = project.id
-                channel.save()
-
-            # Обновляем project_id для связанных получателей
-            recipients = form.cleaned_data.get('recipients', [])
-            for recipient in recipients:
-                recipient.project_id = project.id
-                recipient.save()
-
-            if file_formset.is_valid():
-                for file_form in file_formset:
-                    if file_form.cleaned_data.get('file'):
-                        project_file = file_form.save(commit=False)
-                        project_file.project = project
-                        project_file.save()
-
-            return redirect("projects")  # После успешного сохранения возвращаемся к списку проектов
-    else:
-        form = ProjectForm(instance=project)  # Предзаполняем форму данными проекта
-    max_files = 6
-    uploaded_files = 0  # Если редактируется проект, здесь можно 
-    context = {
-        "form": form,
-        "project": project,
-        "max_files": 6,
-        "uploaded_files": 0
-    }
-    return render(request, "apps/project_create.html", context)
 
 
 @csrf_exempt
@@ -857,72 +316,6 @@ def toggle_channel_active(request):
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 
-def list_recipient(request):
-    if request.method == 'POST':
-        form = RecipientForm(request.POST, request.FILES)
-        if form.is_valid():
-            recipient = form.save(commit=False)
-            recipient.client = request.user
-            recipient.save()
-
-            return redirect('/list-recipient/')
-    else:
-        form = RecipientForm()
-
-    # Получаем словарь project_id -> название проекта
-    # project_titles = {project.id: project.title for project in Project.objects.filter(client=request.user)}
-
-    # Аннотация для подсчета количества контактов
-    recipients = Recipient.objects.filter(client=request.user).annotate(
-        contact_count=Count('remote_ids')
-    )
-
-    # Аннотация для подсчета количества контактов, активных переписок, отправленных и оставшихся сообщений
-    """
-        
-    projects = Chat.objects.filter(project=project).annotate(
-        # Общее количество TG ID, связанных с получателем
-        contact_count=Count('user_id', distinct=True),
-        
-        # Количество активных переписок
-        active_conversations=Count(
-            'chat_id',
-            filter=Q(
-                tg_id_set__tg_id__in=Subquery(
-                    Chat.objects.filter(
-                        client=request.user, 
-                        message_type='message', 
-                        user_id=OuterRef('tg_id_set__tg_id')
-                    ).values('user_id')
-                )
-            ),
-            distinct=True
-        ),
-
-        # Отправлено: количество TG ID в TgID таблице
-        sent=Count('user_id', filter=Q(tg_id_set__is_auto_active=True), distinct=True),
-
-        # Осталось: общее количество минус отправленные
-        remaining=F('contact_count') - Count('chat_id', filter=Q(chat_id__is_auto_active=True), distinct=True),
-    )
-     """
-
-    # Добавляем поле project_title в каждый объект
-    """
-    for project in projects:
-        project.project_title = project_titles.get(project.project_id, "Не привязан")
-        
-        # Получаем список всех TG IDs, связанных с этим списком
-        chat_ids = project.chat.values_list('chat_id', flat=True)  # Получаем только tg_id
-        project.tg_ids = list(chat_ids)  # Преобразуем в список для передачи в шаблон
-    """
-    context = {
-        'form': form,
-        'lists': recipients,
-    }
-    return render(request, "apps/list_recipient.html", context)
-
-
 def list_recipient_edit(request, id):
     recipient = get_object_or_404(Recipient, id=id, client=request.user)
 
@@ -937,23 +330,6 @@ def list_recipient_edit(request, id):
     else:
         return JsonResponse({'success': False, 'message': 'Неверный метод запроса'})
 
-
-def save_recipients(request):
-    if request.method == 'POST':
-        form = RecipientForm(request.POST)
-        if form.is_valid():
-            tg_ids = form.cleaned_data['tg_ids']
-            print(f"tg_ids {tg_ids}")
-            recipients = [
-                Recipient(client=request.user, tg_id=tg_id) for tg_id in tg_ids
-            ]
-            Recipient.objects.bulk_create(recipients)  # Эффективно сохраняем список
-            return redirect('/list-recipient/')
-    else:
-        form = RecipientForm()
-    print(1)
-    # return render(request, 'save_recipients.html', {'form': form})
-    return render(request, 'apps\list_recipient.html', {'form': form})
 
 
 def list_recipient_delete(request, pk):

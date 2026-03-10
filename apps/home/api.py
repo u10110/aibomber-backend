@@ -11,7 +11,7 @@ import urllib
 import os
 
 import uuid
-from .forms import *
+
 from .helper import Helper
 from .models import (
     ReferralClickCounter,

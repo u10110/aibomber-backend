@@ -18,7 +18,7 @@ import numpy as np
 OPENAI_API_KEY = config("OPENAI_API_KEY")
 
 client = Client(
-    host='http://ollama:11434/'
+    host='http://host.docker.internal:11434/'
 )
 
 

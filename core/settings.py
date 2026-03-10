@@ -60,8 +60,8 @@ INSTALLED_APPS = [
     # 'debug_panel',
     "apps.home",
     "apps.authentication",
-
-
+     "apps.alert",
+     "apps.telegram",
     "import_export",
 
     "django_user_agents",

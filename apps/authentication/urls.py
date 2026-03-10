@@ -18,7 +18,7 @@ from .views import LoginCallbackView
 
 urlpatterns = [
     path("api/login/", auth_login, name="auth_login"),
-    path("login/", login_view, name="login"),
+   
 
 
     re_path(r"^signup/?$", register_user, name="register"),

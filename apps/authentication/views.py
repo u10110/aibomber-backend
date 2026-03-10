@@ -42,7 +42,7 @@ from django.utils.encoding import force_str as force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.decorators.csrf import csrf_exempt
 
-from apps.billing.models import Limits, Order, Paid, UnicTariff
+
 from apps.home.helper import Helper
 from apps.home.models import (
     ClientSettings,
