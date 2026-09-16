@@ -7,16 +7,19 @@ services:
     restart: always
     env_file: .env
     ports:
-      - "8191:80"
+      - "8383:80"
     networks:
       - default
+    volumes:
+      - ./:/app/
+      - /tmp/:/tmp/
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: gunicorn --config gunicorn-cfg.py core.wsgi --workers 1 --threads 1 --timeout 300 --graceful-timeout 300 --max-requests 1000 --max-requests-jitter 50
 
 
-  eliment-cli-new-message-send:
-    container_name: eliment-cli-new-message-send
+  cli-new-message-send:
+    container_name: cli-new-message-send
     build:
       dockerfile: ./Dockerfile
       context: ./
@@ -30,11 +33,14 @@ services:
         max-file: "3"
     networks:
       - default
+    volumes:
+      - ./:/app/
+      - /tmp/:/tmp/
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  eliment-cli-kafka-message-reply:
-    container_name: eliment-cli-kafka-message-reply
+  cli-kafka-message-reply:
+    container_name: cli-kafka-message-reply
     build:
       dockerfile: ./Dockerfile
       context: ./
@@ -48,6 +54,9 @@ services:
         max-file: "3"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      - ./:/app/
+      - /tmp/:/tmp/
 
 networks:
   default:
@@ -57,5 +66,8 @@ networks:
   database:
     external:
       name: scoring_default
-
+  kafka:
+    external:
+      name: broker
+ 
 

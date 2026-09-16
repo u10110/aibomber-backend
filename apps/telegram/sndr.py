@@ -374,7 +374,7 @@ class ProjectProcessor:
                 )
                 #print(chat_for_current_channel_message.user_id, channel)
                 print(message)
-                input("Press Enter to process sending...")
+                #input("Press Enter to process sending...")
 
                 chat_for_current_channel_message.save()
                 logger.info(f"Создан новый чат для {chat_for_current_channel_message.id} {next_recipient.get('user_name')}"

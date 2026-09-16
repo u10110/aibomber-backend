@@ -18,12 +18,12 @@ import numpy as np
 OPENAI_API_KEY = config("OPENAI_API_KEY")
 
 client = Client(
-    host='http://localhost:11434/'
+    host='http://host.docker.internal:11434/'
 )
 
 
 def create_message_embedding(message_text):
-    return ollama.embeddings(model='nomic-embed-text', prompt=message_text).embedding
+    return client.embeddings(model='nomic-embed-text', prompt=message_text).embedding
 
 def create_message_pca_embedding(messages):
     vectorizer = TfidfVectorizer()

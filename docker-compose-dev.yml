@@ -1,7 +1,9 @@
 services:
   neuro-backend:
     container_name: neuro-backend
-    image: registry.mplab.io/neuro-backend:latest
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
     restart: always
     env_file: .env-dev
     volumes:
@@ -15,7 +17,9 @@ services:
 
   eliment-cli:
     container_name: eliment-cli
-    image: registry.mplab.io/neuro-backend:latest
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
     restart: always
     env_file: .env-dev
 

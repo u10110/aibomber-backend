@@ -1,4 +1,4 @@
-# eliment-web
+# ai-bomber-web
 
 python3.10 manage.py runserver
 
